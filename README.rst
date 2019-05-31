@@ -18,7 +18,7 @@ MolSystem
      :alt: Updates
 
 
-Molsystem provide a general System class for handling molecular and periodic systems
+Molsystem provides a general class for handling molecular and periodic systems
 
 
 * Free software: GNU Lesser General Public License v3+
