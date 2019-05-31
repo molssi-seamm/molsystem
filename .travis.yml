@@ -29,3 +29,16 @@ python:
 - 3.6
 - 3.5
 script: tox
+
+# Install the codecov pip dependency
+install:
+  - pip install codecov
+
+# Run the unit test
+script:
+  - coverage run tests.py
+
+# Push the results back to codecov
+after_success:
+  - codecov
+  
