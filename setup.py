@@ -26,7 +26,7 @@ test_requirements = [
 
 setup(
     name='molsystem',
-    version='0.1.0',
+    version='0.1.1',
     description=("Molsystem provides a general class for handling "
                  "molecular and periodic systems"),
     long_description=readme + '\n\n' + history,
