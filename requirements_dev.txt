@@ -1,5 +1,5 @@
 pip==19.1.1
-bump2version
+bump2version==0.5.10
 wheel
 watchdog
 flake8
