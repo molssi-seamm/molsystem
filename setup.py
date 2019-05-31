@@ -27,7 +27,7 @@ test_requirements = [
 setup(
     name='molsystem',
     version='0.1.0',
-    description=("Molsystem provides a general System class for handling "
+    description=("Molsystem provides a general class for handling "
                  "molecular and periodic systems"),
     long_description=readme + '\n\n' + history,
     author="Paul Saxe",
@@ -41,15 +41,11 @@ setup(
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
         'Topic :: Scientific/Engineering :: Chemistry',
         'Topic :: Scientific/Engineering :: Physics',
-        'Topic :: Scientific/Engineering :: Materials Science',
-        'Topic :: Scientific/Engineering :: Computational Materials Science',
-        'Topic :: Scientific/Engineering :: Computational Molecular Science',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3  :: Only',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Molsystem'
+project = u'MolSystem'
 copyright = u"2019, Paul Saxe"
 
 # The version info for the project you're documenting, acts as replacement
