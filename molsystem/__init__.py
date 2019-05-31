@@ -4,7 +4,7 @@
 
 __author__ = """Paul Saxe"""
 __email__ = 'psaxe@vt.edu'
-__version__ = '__version__ = '0.1.1''
+__version__ = '0.1.1'
 
 # Bring up the classes so that they appear to be directly in
 # the molsystem package.
