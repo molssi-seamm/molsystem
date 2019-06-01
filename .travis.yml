@@ -19,13 +19,15 @@ deploy:
       UU42Nmd4TjFaaWtxUGZzN29Db0c0eVVlNzlTRFl1bW1uSXlXbTlLV1REeUxESFlCZlNDMHl4dk09
   true:
     python: 2.7
-    repo: paulsaxe/molssi_system
+    repo: paulsaxe/molsystem
     tags: true
+
 install:
   - pip install -U tox-travis
-  - pip install codecov
+  - pip install --user codecov
 
 dist: xenial
+
 language: python
 
 python:
