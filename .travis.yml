@@ -24,7 +24,7 @@ deploy:
 
 install:
   - pip install -U tox-travis
-  - pip install --user codecov
+  - pip install -U codecov
 
 dist: xenial
 
