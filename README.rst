@@ -17,6 +17,8 @@ MolSystem
      :target: https://pyup.io/repos/github/paulsaxe/molsystem/
      :alt: Updates
 
+.. image:: https://codecov.io/gh/paulsaxe/molsystem/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/paulsaxe/molsystem
 
 Molsystem provides a general class for handling molecular and periodic systems
 
