@@ -6,7 +6,10 @@ flake8
 tox
 coverage
 Sphinx
+sphinxcontrib-napoleon
 cryptography
 PyYAML
 pytest
 pytest-runner
+pytype
+yapf
