@@ -30,7 +30,11 @@ Molsystem provides a general class for handling molecular and periodic systems
 Features
 --------
 
-* TODO
+* Complete the initial version!
+
+  * Remove the coordinates from the Atoms class and allow for multiple
+    sets of coordinates -- conformers, trajectories, etc.
+  * Provide a concept of the 'current' system
 
 Credits
 ---------
