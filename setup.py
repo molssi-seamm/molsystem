@@ -41,7 +41,8 @@ setup(
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+        'License :: OSI Approved :: GNU Lesser General Public License v3 or '
+        'later (LGPLv3+)',
         'Topic :: Scientific/Engineering :: Chemistry',
         'Topic :: Scientific/Engineering :: Physics',
         'Natural Language :: English',
@@ -52,5 +53,6 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
+    extras_require={'testing': test_requirements},
     setup_requires=setup_requirements,
 )

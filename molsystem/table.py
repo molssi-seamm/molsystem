@@ -48,8 +48,8 @@ class Table(collections.abc.MutableMapping):
             self._private = copy.deepcopy(other._private)
         else:
             self._public = pd.DataFrame(
-                index=pd.
-                RangeIndex(start=0, stop=Table.allocate_min, name='uid')
+                index=pd
+                .RangeIndex(start=0, stop=Table.allocate_min, name='uid')
             )
             self._private = {
                 'version': 0,
@@ -323,9 +323,10 @@ class Table(collections.abc.MutableMapping):
                     n_rows = length
                 else:
                     raise IndexError(
-                        'key "{}" has the wrong number of values, '.format(key)
-                        + '{}. Should be 1 or the number of {} ({}).'.
-                        format(length, self._word, n_rows)
+                        'key "{}" has the wrong number of values, '
+                        .format(key) +
+                        '{}. Should be 1 or the number of {} ({}).'
+                        .format(length, self._word, n_rows)
                     )
 
         # Check that any missing attributes have defaults

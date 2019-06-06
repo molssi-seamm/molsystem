@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """Tests for `molsystem` package."""
 
 import copy
@@ -65,8 +64,7 @@ def test_append_several_scalar():
     with atoms as tmp:
         tmp.append(x=x, y=y, z=0.0, atno=6)
     assert (
-        np.array_equal(atoms['x'], x) and
-        np.array_equal(atoms['y'], y) and
+        np.array_equal(atoms['x'], x) and np.array_equal(atoms['y'], y) and
         np.array_equal(atoms['z'], [0.0, 0.0, 0.0]) and
         np.array_equal(atoms['atno'], [6, 6, 6])
     )
@@ -91,10 +89,7 @@ def test_append_ndarrays_using_default():
     with atoms as tmp:
         tmp.append(x=xa, y=ya, z=za)
 
-    assert (
-        atoms.n_atoms == 3 and
-        np.array_equal(atoms['atno'], [-1, -1, -1])
-    )
+    assert (atoms.n_atoms == 3 and np.array_equal(atoms['atno'], [-1, -1, -1]))
 
 
 def test_append_ndarrays_3x100():
@@ -140,9 +135,10 @@ def test_trim():
         free_space = tmp.free
         tmp.trim()
 
-    assert (len(atoms) == 3
-            and atoms.free == 0
-            and free_space == (molsystem.Atoms.allocate_min - 3))
+    assert (
+        len(atoms) == 3 and atoms.free == 0 and
+        free_space == (molsystem.Atoms.allocate_min - 3)
+    )
 
 
 def test_append_error():
@@ -197,9 +193,7 @@ def test_define_duplicate_attribute():
             tmp.define_attribute('name', coltype=np.object, default='')
     except RuntimeError as e:
         err = str(e)
-    assert (
-        err == "Atoms attribute 'name' is already defined!"
-    )
+    assert (err == "Atoms attribute 'name' is already defined!")
 
 
 def test_add_attribute_with_different_type():
@@ -212,8 +206,10 @@ def test_add_attribute_with_different_type():
     except ValueError as e:
         err = str(e)
     assert (
-        err == ("Column type should be '<class 'object'>', "
-                "not '<class 'numpy.float64'>'")
+        err == (
+            "Column type should be '<class 'object'>', "
+            "not '<class 'numpy.float64'>'"
+        )
     )
 
 
@@ -226,9 +222,7 @@ def test_add_attribute_with_different_default():
             tmp.add_attribute('name', default='unknown')
     except ValueError as e:
         err = str(e)
-    assert (
-        err == "Default should be '', not 'unknown'"
-    )
+    assert (err == "Default should be '', not 'unknown'")
 
 
 def test_add_attribute_with_values():
@@ -268,15 +262,17 @@ def test_add_attribute_with_wrong_number_of_values():
     try:
         with atoms as tmp:
             tmp.append(x=xa, y=ya, z=za, atno=atnoa)
-            tmp.add_attribute('spin', coltype=np.int8, default=0,
-                              values=[1, 2])
+            tmp.add_attribute(
+                'spin', coltype=np.int8, default=0, values=[1, 2]
+            )
     except IndexError as e:
         err = str(e)
 
     assert (
-        atoms.n_atoms == 0 and
-        err == ("The number of values given, "
-                "2, must be either 1, or the number of atoms: 3")
+        atoms.n_atoms == 0 and err == (
+            "The number of values given, "
+            "2, must be either 1, or the number of atoms: 3"
+        )
     )
 
 
@@ -351,8 +347,7 @@ def test_set_column():
         tmp['atno'] = 10
 
     assert (
-        atoms.n_atoms == 3 and
-        atoms.version == 2 and
+        atoms.n_atoms == 3 and atoms.version == 2 and
         np.array_equal(atoms['atno'], [10, 10, 10])
     )
 
@@ -371,8 +366,7 @@ def test_set_column_with_array():
         tmp['x'] = values
 
     assert (
-        atoms.n_atoms == 3 and
-        atoms.version == 2 and
+        atoms.n_atoms == 3 and atoms.version == 2 and
         np.array_equal(atoms['x'], values)
     )
 
@@ -388,10 +382,7 @@ def test_append_error_no_coordinates():
     except KeyError as e:
         err = str(e)
 
-    assert (
-        atoms.n_atoms == 0 and
-        err == "'The coordinates are required!'"
-    )
+    assert (atoms.n_atoms == 0 and err == "'The coordinates are required!'")
 
 
 def test_append_error_invalid_column():
@@ -423,9 +414,10 @@ def test_append_error_invalid_length():
         err = str(e)
 
     assert (
-        atoms.n_atoms == 0 and
-        err == ('key "atno" has the wrong number of values, '
-                '2. Should be 1 or the number of atoms (3).')
+        atoms.n_atoms == 0 and err == (
+            'key "atno" has the wrong number of values, '
+            '2. Should be 1 or the number of atoms (3).'
+        )
     )
 
 
@@ -437,10 +429,7 @@ def test_add_attribute_with_no_default():
         tmp.add_attribute('new', coltype=np.float64)
         tmp.append(x=xa, y=ya, z=za, atno=atnoa, new=[-1, -2, -3])
 
-    assert (
-        atoms.n_atoms == 3 and
-        np.array_equal(atoms['new'], [-1, -2, -3])
-    )
+    assert (atoms.n_atoms == 3 and np.array_equal(atoms['new'], [-1, -2, -3]))
 
 
 def test_add_attribute_with_no_default_error():
@@ -454,9 +443,10 @@ def test_add_attribute_with_no_default_error():
     except KeyError as e:
         err = str(e)
     assert (
-        atoms.n_atoms == 0 and
-        err == ('"There is no default for attribute '
-                "'new'. You must supply a value\"")
+        atoms.n_atoms == 0 and err == (
+            '"There is no default for attribute '
+            "'new'. You must supply a value\""
+        )
     )
 
 
@@ -469,9 +459,7 @@ def test_set_free():
         tmp.append(x=xa, y=ya, z=za, atno=atnoa)
         tmp.free = 1000
 
-    assert (atoms.n_atoms == 3 and
-            atoms.free == 1000 and
-            len(atoms) == 1003)
+    assert (atoms.n_atoms == 3 and atoms.free == 1000 and len(atoms) == 1003)
 
 
 def test_equality():

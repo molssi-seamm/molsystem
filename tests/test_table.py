@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """Tests for `molsystem` package."""
 
 import copy
@@ -86,8 +85,7 @@ def test_append_several_scalar():
     with table as tmp:
         tmp.append(x=x, y=y, z=0.0, atno=6)
     assert (
-        np.array_equal(table['x'], x) and
-        np.array_equal(table['y'], y) and
+        np.array_equal(table['x'], x) and np.array_equal(table['y'], y) and
         np.array_equal(table['z'], [0.0, 0.0, 0.0]) and
         np.array_equal(table['atno'], [6, 6, 6])
     )
@@ -99,8 +97,7 @@ def test_append_several_scalar_first():
     with table as tmp:
         tmp.append(atno=6, x=x, y=y, z=0.0)
     assert (
-        np.array_equal(table['x'], x) and
-        np.array_equal(table['y'], y) and
+        np.array_equal(table['x'], x) and np.array_equal(table['y'], y) and
         np.array_equal(table['z'], [0.0, 0.0, 0.0]) and
         np.array_equal(table['atno'], [6, 6, 6])
     )
@@ -123,10 +120,7 @@ def test_append_ndarrays_using_default():
     with table as tmp:
         tmp.append(x=xa, y=ya, z=za)
 
-    assert (
-        table.n_rows == 3 and
-        np.array_equal(table['atno'], [-1, -1, -1])
-    )
+    assert (table.n_rows == 3 and np.array_equal(table['atno'], [-1, -1, -1]))
 
 
 def test_append_ndarrays_3x100():
@@ -169,9 +163,10 @@ def test_trim():
         free_space = tmp.free
         tmp.trim()
 
-    assert (len(table) == 3
-            and table.free == 0
-            and free_space == (molsystem.Table.allocate_min - 3))
+    assert (
+        len(table) == 3 and table.free == 0 and
+        free_space == (molsystem.Table.allocate_min - 3)
+    )
 
 
 def test_append_error():
@@ -222,9 +217,7 @@ def test_define_duplicate_attribute():
             tmp.define_attribute('name', coltype=np.object, default='')
     except RuntimeError as e:
         err = str(e)
-    assert (
-        err == "Table attribute 'name' is already defined!"
-    )
+    assert (err == "Table attribute 'name' is already defined!")
 
 
 def test_add_attribute_with_different_type():
@@ -236,8 +229,10 @@ def test_add_attribute_with_different_type():
     except ValueError as e:
         err = str(e)
     assert (
-        err == ("Column type should be '<class 'object'>', "
-                "not '<class 'numpy.float64'>'")
+        err == (
+            "Column type should be '<class 'object'>', "
+            "not '<class 'numpy.float64'>'"
+        )
     )
 
 
@@ -249,9 +244,7 @@ def test_add_attribute_with_different_default():
             tmp.add_attribute('name', default='unknown')
     except ValueError as e:
         err = str(e)
-    assert (
-        err == "Default should be '', not 'unknown'"
-    )
+    assert (err == "Default should be '', not 'unknown'")
 
 
 def test_add_attribute_with_values():
@@ -287,15 +280,17 @@ def test_add_attribute_with_wrong_number_of_values():
     try:
         with table as tmp:
             tmp.append(x=xa, y=ya, z=za, atno=atnoa)
-            tmp.add_attribute('spin', coltype=np.int8, default=0,
-                              values=[1, 2])
+            tmp.add_attribute(
+                'spin', coltype=np.int8, default=0, values=[1, 2]
+            )
     except IndexError as e:
         err = str(e)
 
     assert (
-        table.n_rows == 0 and
-        err == ("The number of values given, "
-                "2, must be either 1, or the number of rows: 3")
+        table.n_rows == 0 and err == (
+            "The number of values given, "
+            "2, must be either 1, or the number of rows: 3"
+        )
     )
 
 
@@ -362,8 +357,7 @@ def test_set_column():
         tmp['atno'] = 10
 
     assert (
-        table.n_rows == 3 and
-        table.version == 2 and
+        table.n_rows == 3 and table.version == 2 and
         np.array_equal(table['atno'], [10, 10, 10])
     )
 
@@ -381,8 +375,7 @@ def test_set_column_with_array():
         tmp['x'] = values
 
     assert (
-        table.n_rows == 3 and
-        table.version == 2 and
+        table.n_rows == 3 and table.version == 2 and
         np.array_equal(table['x'], values)
     )
 
@@ -414,9 +407,10 @@ def test_append_error_invalid_length():
         err = str(e)
 
     assert (
-        table.n_rows == 0 and
-        err == ('key "atno" has the wrong number of values, '
-                '2. Should be 1 or the number of rows (3).')
+        table.n_rows == 0 and err == (
+            'key "atno" has the wrong number of values, '
+            '2. Should be 1 or the number of rows (3).'
+        )
     )
 
 
@@ -427,10 +421,7 @@ def test_add_attribute_with_no_default():
         tmp.add_attribute('new', coltype=np.float64)
         tmp.append(x=xa, y=ya, z=za, atno=atnoa, new=[-1, -2, -3])
 
-    assert (
-        table.n_rows == 3 and
-        np.array_equal(table['new'], [-1, -2, -3])
-    )
+    assert (table.n_rows == 3 and np.array_equal(table['new'], [-1, -2, -3]))
 
 
 def test_add_attribute_with_no_default_error():
@@ -444,9 +435,10 @@ def test_add_attribute_with_no_default_error():
     except KeyError as e:
         err = str(e)
     assert (
-        table.n_rows == 0 and
-        err == ('"There is no default for attribute '
-                "'new'. You must supply a value\"")
+        table.n_rows == 0 and err == (
+            '"There is no default for attribute '
+            "'new'. You must supply a value\""
+        )
     )
 
 
@@ -458,9 +450,7 @@ def test_set_free():
         tmp.append(x=xa, y=ya, z=za, atno=atnoa)
         tmp.free = 1000
 
-    assert (table.n_rows == 3 and
-            table.free == 1000 and
-            len(table) == 1003)
+    assert (table.n_rows == 3 and table.free == 1000 and len(table) == 1003)
 
 
 def test_equality():

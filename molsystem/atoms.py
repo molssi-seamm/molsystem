@@ -3,8 +3,6 @@
 import logging
 import molsystem
 import numpy as np
-
-
 """A dictionary-like object for holding atoms
 
 For efficiency the atom-data is stored as arrays -- numpy if possible, python
@@ -95,10 +93,10 @@ if __name__ == '__main__':  # pragma: no cover
         x = nprand.uniform(low=0, high=100, size=nper)
         y = nprand.uniform(low=0, high=100, size=nper)
         z = nprand.uniform(low=0, high=100, size=nper)
-        atno = np.array(nper*[6])
+        atno = np.array(nper * [6])
         with atoms as tmp:
             if preallocate:
-                tmp.allocate(nper*nrepeat)
+                tmp.allocate(nper * nrepeat)
             for i in range(0, nrepeat):
                 tmp.append(x=x, y=y, z=z, atno=atno)
                 x += 10.0
@@ -107,8 +105,11 @@ if __name__ == '__main__':  # pragma: no cover
 
     nrepeat = 1000
     nper = 100
-    t = timeit.timeit("run(nper={}, nrepeat={})".format(nper, nrepeat),
-                      setup="from __main__ import run",
-                      timer=time.time, number=1)
+    t = timeit.timeit(
+        "run(nper={}, nrepeat={})".format(nper, nrepeat),
+        setup="from __main__ import run",
+        timer=time.time,
+        number=1
+    )
 
-    print("Creating {} atoms took {:.3f} s".format(nper*nrepeat, t))
+    print("Creating {} atoms took {:.3f} s".format(nper * nrepeat, t))

@@ -6,7 +6,6 @@ import logging
 import numpy as np
 import pandas as pd
 import pprint
-
 """A dictionary-like object for holding a system
 """
 
@@ -14,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class System(collections.abc.MutableMapping):
+
     def __init__(self, **kwargs):
         self._checkpoints = []
         self._version = 0
