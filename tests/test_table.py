@@ -3,8 +3,10 @@
 """Tests for `molsystem` package."""
 
 import copy
+
 import numpy as np
 import pytest  # noqa: F401
+
 import molsystem  # noqa: F401
 
 x = [1.0, 2.0, 3.0]

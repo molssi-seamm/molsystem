@@ -3,9 +3,11 @@
 import collections.abc
 import copy
 import logging
+import pprint
+
 import numpy as np
 import pandas as pd
-import pprint
+
 """A dictionary-like object for holding a system
 """
 

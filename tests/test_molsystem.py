@@ -3,6 +3,7 @@
 """Tests for `molsystem` package."""
 
 import pytest  # noqa: F401
+
 import molsystem
 
 

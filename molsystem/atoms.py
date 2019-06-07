@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import molsystem
+
 import numpy as np
+
+import molsystem
+
 """A dictionary-like object for holding atoms
 
 For efficiency the atom-data is stored as arrays -- numpy if possible, python

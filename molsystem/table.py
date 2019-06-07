@@ -3,12 +3,13 @@
 import collections.abc
 import copy
 import logging
-import numpy as np
-import pandas as pd
 import pprint  # noqa F401
-from typing import Any, Dict, List
 from typing import MutableMapping  # noqa F401
 from typing import Optional  # noqa F401
+from typing import Any, Dict, List
+
+import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
