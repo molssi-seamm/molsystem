@@ -7,7 +7,6 @@ import pprint
 
 import numpy as np
 import pandas as pd
-
 """A dictionary-like object for holding a system
 """
 

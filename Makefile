@@ -52,8 +52,9 @@ lint: ## check style with flake8
 	flake8 molsystem tests
 	yapf -r -d  molsystem tests
 
-yapf: ## reformat with with yapf
-	yapf -r -i  molsystem tests
+format: ## reformat with with yapf and isort
+	isort -rc .
+	yapf -r -i  setup.py molsystem tests
 
 test: ## run tests quickly with the default Python
 	pytest

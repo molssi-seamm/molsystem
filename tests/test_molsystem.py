@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """Tests for `molsystem` package."""
 
 import pytest  # noqa: F401
