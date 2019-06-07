@@ -49,13 +49,13 @@ clean-test: ## remove test and coverage artifacts
 	find . -name '.pytype' -exec rm -fr {} +
 
 lint: ## check style with isort, yapf and flake8
-	isort -rc setup.py molsystem tests
-	yapf -r -d  setup.py molsystem tests
+	isort --check-only --diff --recursive setup.py molsystem tests
+	yapf --diff --recursive  setup.py molsystem tests
 	flake8 setup.py molsystem tests
 
 format: ## reformat with with yapf and isort
-	isort -rc --atomic setup.py molsystem tests
-	yapf -r -i setup.py molsystem tests
+	isort --recursive --atomic setup.py molsystem tests
+	yapf --recursive --in-place setup.py molsystem tests
 
 test: ## run tests quickly with the default Python
 	pytest
