@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `molsystem` package."""
-
 import copy
 
 import numpy as np
 import pytest  # noqa: F401
 
 import molsystem  # noqa: F401
+"""Tests for `molsystem` package."""
 
 x = [1.0, 2.0, 3.0]
 y = [4.0, 5.0, 6.0]

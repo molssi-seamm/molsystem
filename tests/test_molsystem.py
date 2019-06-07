@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `molsystem` package."""
-
 import pytest  # noqa: F401
 
 import molsystem
+"""Tests for the system class."""
 
 
 def test_construction():

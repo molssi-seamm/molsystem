@@ -48,13 +48,14 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	find . -name '.pytype' -exec rm -fr {} +
 
-lint: ## check style with flake8
-	flake8 molsystem tests
-	yapf -r -d  molsystem tests
+lint: ## check style with isort, yapf and flake8
+	isort -rc setup.py molsystem tests
+	yapf -r -d  setup.py molsystem tests
+	flake8 setup.py molsystem tests
 
 format: ## reformat with with yapf and isort
-	isort -rc .
-	yapf -r -i  setup.py molsystem tests
+	isort -rc --atomic setup.py molsystem tests
+	yapf -r -i setup.py molsystem tests
 
 test: ## run tests quickly with the default Python
 	pytest
