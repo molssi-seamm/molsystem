@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """The setup script."""
 
 from setuptools import setup, find_packages
@@ -27,8 +26,10 @@ test_requirements = [
 setup(
     name='molsystem',
     version='0.1.1',
-    description=("Molsystem provides a general class for handling "
-                 "molecular and periodic systems"),
+    description=(
+        "Molsystem provides a general class for handling "
+        "molecular and periodic systems."
+    ),
     long_description=readme + '\n\n' + history,
     author="Paul Saxe",
     author_email='psaxe@vt.edu',
