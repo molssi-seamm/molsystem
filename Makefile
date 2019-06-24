@@ -57,6 +57,10 @@ format: ## reformat with with yapf and isort
 	isort --recursive --atomic setup.py molsystem tests
 	yapf --recursive --in-place setup.py molsystem tests
 
+typing: ## check typing
+	pytype molsystem
+#	mypy -p molsystem
+
 test: ## run tests quickly with the default Python
 	pytest
 

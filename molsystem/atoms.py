@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from typing import Any, Dict, TypeVar
 
 import numpy as np
 
@@ -13,6 +14,8 @@ lists otherwise, along with metadata to define the attributes ("columns").
 In some ways this a bit like pandas; however, we also need more control than a
 simple pandas dataframe provides....
 """
+
+System_tp = TypeVar("System_tp", "System", "Atoms", None)
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +54,7 @@ class Atoms(molsystem.Table):
     Atoms can be added ('append') or removed ('delete').
     """
 
-    def __init__(self, system=None):
+    def __init__(self, system: System_tp = None) -> None:
 
         super().__init__(system)
 
@@ -64,11 +67,11 @@ class Atoms(molsystem.Table):
                 self.add_attribute(key)
 
     @property
-    def n_atoms(self):
+    def n_atoms(self) -> int:
         """The number of atoms"""
         return self._private['n_rows']
 
-    def append(self, **kwargs):
+    def append(self, **kwargs: Dict[str, Any]) -> None:
         """Append one or more atoms
 
         The keys give the field for the data. If an existing field is not
@@ -89,7 +92,7 @@ if __name__ == '__main__':  # pragma: no cover
     import timeit
     import time
 
-    def run(nper=1000, nrepeat=100, preallocate=False):
+    def run(nper=1000, nrepeat=100, preallocate=False) -> None:
         system = None
         atoms = Atoms(system)
         x = nprand.uniform(low=0, high=100, size=nper)
