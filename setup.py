@@ -33,7 +33,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Paul Saxe",
     author_email='psaxe@vt.edu',
-    url='https://github.com/paulsaxe/molsystem',
+    url='https://github.com/molssi-seamm/molsystem',
     packages=find_packages(include=['molsystem']),
     include_package_data=True,
     install_requires=requirements,
