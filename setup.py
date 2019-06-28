@@ -25,7 +25,7 @@ test_requirements = [
 
 setup(
     name='molsystem',
-    version='0.1.1',
+    version='0.1.2',
     description=(
         "Molsystem provides a general class for handling "
         "molecular and periodic systems."
