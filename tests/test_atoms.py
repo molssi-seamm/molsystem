@@ -328,15 +328,6 @@ def test_deleting_column():
     assert sorted([*atoms.keys()]) == ['x', 'y', 'z']
 
 
-def test_no_change():
-    """Test deleting a column"""
-    system = None
-    atoms = molsystem.Atoms(system)
-    with atoms as tmp:
-        ver = tmp.version
-    assert ver == 0 and atoms.version == 0
-
-
 def test_set_column():
     """Test setting a column using a scalar"""
     system = None
@@ -639,3 +630,35 @@ def test_deep_copy_with_change():
     atoms2['atno'][0] = 22
 
     assert atoms1 != atoms2
+
+
+def test_coordinate_type():
+    atoms = molsystem.Atoms()
+
+    with atoms as tmp:
+        tmp.coordinate_type = 'f'
+    assert atoms.coordinate_type == 'fractional'
+
+    with atoms as tmp:
+        tmp.coordinate_type = 'cart'
+    assert atoms.coordinate_type == 'Cartesian'
+
+
+def test_invalid_coordinate_value():
+    atoms = molsystem.Atoms()
+
+    with pytest.raises(
+        ValueError,
+        match=("The coordinate_type must be 'Cartesian' or 'fractional', .*")
+    ):
+        atoms.coordinate_type = 'bad!'
+
+
+def test_invalid_coordinate_type():
+    atoms = molsystem.Atoms()
+
+    with pytest.raises(
+        ValueError,
+        match=("The coordinate_type must be 'Cartesian' or 'fractional', .*")
+    ):
+        atoms.coordinate_type = 1

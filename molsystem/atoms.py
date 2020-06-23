@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
-from typing import Any, Dict, TypeVar
-
-import numpy as np
-
-import molsystem
 """A dictionary-like object for holding atoms
 
 For efficiency the atom-data is stored as arrays -- numpy if possible, python
@@ -15,7 +9,16 @@ In some ways this a bit like pandas; however, we also need more control than a
 simple pandas dataframe provides....
 """
 
+import copy
+import logging
+from typing import Any, Dict, TypeVar
+
+import numpy as np
+
+import molsystem
+
 System_tp = TypeVar("System_tp", "System", "Atoms", None)
+Atoms_tp = TypeVar("Atoms_tp", "Atoms", None)
 
 logger = logging.getLogger(__name__)
 
@@ -54,22 +57,92 @@ class Atoms(molsystem.Table):
     Atoms can be added ('append') or removed ('delete').
     """
 
-    def __init__(self, system: System_tp = None) -> None:
+    def __init__(self, other: System_tp = None) -> None:
 
-        super().__init__(system)
+        super().__init__()
 
         self._word = 'atoms'
 
-        if not isinstance(system, molsystem.Atoms):
-            self._private['system'] = system
+        # copy constructor
+        if isinstance(other, Atoms):
+            self._coordinate_type = other._coordinate_type
+            self._public = copy.deepcopy(other._public)
+            self._private = copy.deepcopy(other._private)
+        else:
+            self._coordinate_type = 'Cartesian'
+            self._private['system'] = other
             self._private['attributes'] = attributes
             for key in ('x', 'y', 'z', 'atno'):
                 self.add_attribute(key)
+
+    def __exit__(self, etype, value, traceback) -> None:
+        if etype is None:
+            # No exception occurred, so replace ourselves with the tmp copy
+            tmp = self._checkpoints.pop()
+            self._coordinate_type, tmp._coordinate_type = (
+                tmp._coordinate_type, self._coordinate_type
+            )
+            self._public, tmp._public = tmp._public, self._public
+            self._private, tmp._private = tmp._private, self._private
+
+            # and log the changes
+            self._log_changes(tmp)
+
+            # and delete the copy
+            del tmp
 
     @property
     def n_atoms(self) -> int:
         """The number of atoms"""
         return self._private['n_rows']
+
+    @property
+    def coordinate_type(self):
+        """The type of coordinates: 'fractional' or 'Cartesian'"""
+        return self._coordinate_type
+
+    @coordinate_type.setter
+    def coordinate_type(self, value):
+        try:
+            if 'fractional'.startswith(value.lower()):
+                self._coordinate_type = 'fractional'
+            elif 'cartesian'.startswith(value.lower()):
+                self._coordinate_type = 'Cartesian'
+            else:
+                raise ValueError(
+                    "The coordinate_type must be 'Cartesian' or 'fractional', "
+                    "not '{}'".format(value)
+                )
+        except Exception:
+            raise ValueError(
+                "The coordinate_type must be 'Cartesian' or 'fractional', "
+                "not '{}'".format(value)
+            )
+
+    def _log_changes(self, previous: Atoms_tp) -> bool:
+        """Track changes to the table"""
+        changed = False
+        self._private['version'] += 1
+        for key in self:
+            if key not in previous:
+                print("attribute '{}' added".format(key))
+                changed = True
+            elif not np.array_equal(self[key], previous[key]):
+                print("'{}' changed.".format(key))
+                changed = True
+        for key in previous:
+            if key not in self:
+                print("attribute '{}' deleted".format(key))
+                changed = True
+        if self._coordinate_type != previous._coordinate_type:
+            changed = True
+            print('type of coordinates changed')
+
+        if not changed:
+            self._private['version'] -= 1
+            print('The Atoms object not changed')
+
+        return changed
 
     def append(self, **kwargs: Dict[str, Any]) -> None:
         """Append one or more atoms
