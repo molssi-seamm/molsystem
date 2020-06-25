@@ -48,13 +48,11 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	find . -name '.pytype' -exec rm -fr {} +
 
-lint: ## check style with isort, yapf and flake8
-	isort --check-only --diff --recursive setup.py molsystem tests
+lint: ## check style with yapf and flake8
 	yapf --diff --recursive  setup.py molsystem tests
 	flake8 setup.py molsystem tests
 
-format: ## reformat with with yapf and isort
-	isort --recursive --atomic setup.py molsystem tests
+format: ## reformat with with yapf
 	yapf --recursive --in-place setup.py molsystem tests
 
 typing: ## check typing

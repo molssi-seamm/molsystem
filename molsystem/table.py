@@ -3,9 +3,6 @@
 import collections.abc
 import copy
 import logging
-import pprint  # noqa F401
-from typing import MutableMapping  # noqa F401
-from typing import Optional  # noqa F401
 from typing import Any, Dict, List
 
 import numpy as np
@@ -71,9 +68,6 @@ class Table(collections.abc.MutableMapping):
 
             # and log the changes
             self._log_changes(tmp)
-
-            # and delete the copy
-            del tmp
 
     def __getitem__(self, key) -> Any:
         """Allow [] access to the dictionary!"""
@@ -150,7 +144,7 @@ class Table(collections.abc.MutableMapping):
         """The index of the underlying pandas table."""
         return self._public.index
 
-    def _log_changes(self, previous: pd.DataFrame) -> None:
+    def _log_changes(self, previous: pd.DataFrame) -> bool:
         """Track changes to the table"""
         changed = False
         self._private['version'] += 1
@@ -169,6 +163,8 @@ class Table(collections.abc.MutableMapping):
         if not changed:
             self._private['version'] -= 1
             print('The table was not changed')
+
+        return changed
 
     def add_attribute(
         self,
@@ -253,7 +249,10 @@ class Table(collections.abc.MutableMapping):
         self._public = self._public.join(added)
 
     def define_attribute(
-        self, name: str, coltype: Any = None, default: Any = None
+        self,
+        name: str,
+        coltype: Any = None,
+        default: Any = None
     ) -> Dict[str, Any]:
         """Defines a new attribute
 

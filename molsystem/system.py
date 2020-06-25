@@ -4,9 +4,9 @@ import collections.abc
 import copy
 import logging
 import pprint
+from typing import Any
 
-import numpy as np
-import pandas as pd
+import molsystem
 """A dictionary-like object for holding a system
 """
 
@@ -15,152 +15,155 @@ logger = logging.getLogger(__name__)
 
 class System(collections.abc.MutableMapping):
 
-    def __init__(self, **kwargs):
+    def __init__(self, other=None, **kwargs):
+        # this is the only thing not copied
         self._checkpoints = []
-        self._version = 0
 
-        self._data = dict()
+        # copy constructor
+        if other and isinstance(other, System):
+            self._public = copy.deepcopy(other._public)
+            self._private = copy.deepcopy(other._private)
+        else:
+            self._public = {}
+            self._public['atoms'] = molsystem.Atoms()
+            self._public['bonds'] = molsystem.Bonds()
+            self._public['cell'] = molsystem.Cell()
 
-        self['atoms'] = pd.DataFrame(
-            {
-                'x': np.zeros((0,)),
-                'y': np.zeros((0,)),
-                'z': np.zeros((0,)),
-                'atno': np.zeros((0,), dtype=np.int8)
+            self._private = {
+                'version': 0,
             }
-        )
-        self['periodicity'] = 0
-        self['coordinates'] = 'Cartesian'
+        self._public.update(**kwargs)
 
-        self._data.update(**kwargs)
-
-    def __enter__(self):
+    def __enter__(self) -> Any:
         tmp = copy.deepcopy(self)
         self._checkpoints.append(tmp)
         return tmp
 
-    def __exit__(self, etype, value, traceback):
+    def __exit__(self, etype, value, traceback) -> None:
         if etype is None:
-            # No exception occurred, so log changes
+            # No exception occurred, so replace ourselves with the tmp copy
             tmp = self._checkpoints.pop()
+            self._public, tmp._public = tmp._public, self._public
+            self._private, tmp._private = tmp._private, self._private
+
+            # and log the changes
             self._log_changes(tmp)
+
+            # and delete the copy
+            del tmp
 
     def __getitem__(self, key):
         """Allow [] access to the dictionary!"""
-        return self._data[key]
+        return self._public[key]
 
     def __setitem__(self, key, value):
         """Allow x[key] access to the data"""
-        self._data[key] = value
+        self._public[key] = value
 
     def __delitem__(self, key):
         """Allow deletion of keys"""
-        del self._data[key]
+        del self._public[key]
 
     def __iter__(self):
         """Allow iteration over the object"""
-        return iter(self._data)
+        return iter(self._public)
 
     def __len__(self):
         """The len() command"""
-        return len(self._data)
+        return len(self._public)
 
     def __repr__(self):
         """The string representation of this object"""
-        return repr(self._data)
+        return repr(self._public)
 
     def __str__(self):
         """The pretty string representation of this object"""
-        return pprint.pformat(self._data)
+        return pprint.pformat(self._public)
 
     def __contains__(self, item):
         """Return a boolean indicating if a key exists."""
-        if item in self._data:
-            return True
-        return False
+        return item in self._public
 
     def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
-        return self._data == other._data
-
-    def copy(self):
-        """Return a shallow copy of the dictionary"""
-        return self._data.copy()
+        return self._public == other._public
 
     @property
     def version(self):
         """The version of the system, which increments monotonically"""
-        return self._version
+        return self._private['version']
+
+    @property
+    def n_atoms(self):
+        """The number of atoms in the system."""
+        return self.atoms.n_atoms
 
     @property
     def atoms(self):
         """The atoms, which are held as a dictionary of arrays"""
-        return self._data['atoms']
+        return self._public['atoms']
 
-    @atoms.setter
-    def atoms(self, atoms):
-        self._data['atoms'] = atoms
+    @property
+    def n_bonds(self):
+        """The number of bonds in the system."""
+        return self.bonds.n_bonds
+
+    @property
+    def bonds(self):
+        """The bonds, which are held as a dictionary of arrays"""
+        return self._public['bonds']
+
+    @property
+    def cell(self):
+        """The periodic cell."""
+        return self._public['cell']
 
     @property
     def periodicity(self):
         """The periodicity of the system, 0, 1, 2 or 3"""
-        return self._data['periodicity']
+        return self['cell'].periodicity
 
     @periodicity.setter
     def periodicity(self, value):
-        try:
-            if value < 0 or value > 3:
-                raise ValueError(
-                    "The periodicity must be 0, 1, 2 or 3, not '{}'"
-                    .format(value)
-                )
-        except TypeError:
-            raise ValueError(
-                "The periodicity must be an integer 0, 1, 2 or 3, not '{}'"
-                .format(value)
-            )
-        self._data['periodicity'] = value
+        self['cell'].periodicity = value
 
     @property
-    def coordinates(self):
+    def coordinate_type(self):
         """The coordinates of the system, 'fractional' or 'Cartesian'"""
-        return self._data['coordinates']
+        return self.atoms.coordinate_type
 
-    @coordinates.setter
-    def coordinates(self, value):
-        try:
-            if 'fractional'.startswith(value.lower()):
-                self._data['coordinates'] = 'fractional'
-            elif 'cartesian'.startswith(value.lower()):
-                self._data['coordinates'] = 'Cartesian'
-            else:
-                raise ValueError(
-                    "The coordinates must be 'Cartesian' or 'fractional', "
-                    "not '{}'".format(value)
-                )
-        except TypeError:
-            raise ValueError(
-                "The coordinates must be 'Cartesian' or 'fractional', "
-                "not '{}'".format(value)
-            )
+    @coordinate_type.setter
+    def coordinate_type(self, value):
+        self.atoms.coordinate_type = value
 
-    def _log_changes(self, other):
+    def _log_changes(self, previous):
         """Track changes to the system"""
         changed = False
-        self._version += 1
+        self._private['version'] += 1
         for key in self:
-            if key == 'atoms':
-                pass
-            elif self[key] != other[key]:
-                print("'{}' changed.".format(key))
+            if key in ('atoms', 'bonds', 'cell'):
+                if self[key]._log_changes(previous[key]):
+                    changed = True
+            elif key not in previous:
+                print(f"'{key}' added")
                 changed = True
+            elif self[key] != previous[key]:
+                print(f"'{key}' changed.")
+                changed = True
+        for key in previous:
+            if key not in self:
+                print(f"'{key}' removed")
+                changed = True
+
         if not changed:
-            self._version -= 1
+            self._private['version'] -= 1
             print('The system was not changed')
 
+        return changed
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  # pragma: no cover
     system = System()
     with system as s:
         s.periodicity = 3
-        s.coordinates = 'f'
+        s.coordinate_type = 'f'

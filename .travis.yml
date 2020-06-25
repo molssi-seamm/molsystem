@@ -1,33 +1,80 @@
 language: python
-dist: xenial
-python:
-- 3.7
-- 3.6
-- 3.5
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  on:
-    python: 3.6
-    repo: molssi-seamm/molsystem
-    tags: true
-  user: seamm
-  password:
-    secure: gDCZf0a8kTt3sJlJNEPJ+DCmaAfiLsQporEadU8H1gNE3PZy96anT2xgxspf6vGrlLB+LkbMatAWBbO2kKCMSpVJ6jJadXwUKy8+S03Ny02q4knDllBTpUjVLDnM/c2tq6ll0uaR2fiOTIzxi5dC7yXrIpJ3BmqM655OvkUz+5rjzV1ALwx+GdfXO3x+mYbDnS094rAkRqBe1wHoiPXtnQnc6czx0cRyUcCmbRolOyOJGOkLNyS5ZRm1CB4syhfuQv/hz87rj0s+/yuYt7LUeeAbFNBi+XGD2bqU4SLtgFbl02lbOnJRuzoNprEPbf3yBX8Xdb+UtzVy2j+XMvc5HAmy83m1/vwy3nlLtT0gedRRacnXL4ZmJ1mUkMG41PwFTL5afiDwKCqzvl7HmTaDer72a4+91UDsCajX3rFUnu7JpKiYvfOFM8kJmTG71rEXmC3ookN4JjRCTVqQK6xMvAOeVSSJ3MIp7lpQvrBigMHzNvfp4iR8DJ89J4qqDBd649mxnltWcKL37qh6L+VgnAE5IiE/ML9sg0gkZQZyl4/L4noqJAeZ0tqaai5vOQ60uz4JPbBxtb7PKH6BCfMkkLFot6IZ85ycrKJPZV9q26TBX5AgkIzoP0Y5YF9JfiEuQXW4X73IfCeY0/lT+y9+BQuK3hQ1giH/hrjxMzWZZ3k=
-matrix:
-  fast_finish: true
+script: pytest
+os: linux
+before_install:
+- uname -a
+- df -h
+- ulimit -a
+- source devtools/travis-ci/before_install.sh
+- python -V
+install:
+- python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
+- conda activate test
+- pip install -e .
+- conda list
+- pip freeze
+notifications:
+  email: false
 stages:
 - lint
-- check
 - test
-install:
-- pip install -U tox-travis
-- pip install -U codecov
+- deploy
 jobs:
+  fast_finish: true
   include:
   - stage: lint
-    script: tox -e lint
-    python: '3.6'
-script: tox -e coverage
-after_success:
-- codecov -e TOX_ENV
+    name: Check formatting of code for PEP-8
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.7
+    script:
+    - flake8 molsystem tests
+    - yapf --diff --recursive  molsystem tests
+  - stage: test
+    name: Tests on MacOS Python 3.6
+    script:
+    - pytest -v tests/
+    os: osx
+    language: generic
+    env: PYTHON_VER=3.6
+  - stage: test
+    name: Tests on MacOS Python 3.7
+    script:
+    - pytest -v tests/
+    os: osx
+    language: generic
+    env: PYTHON_VER=3.7
+  - stage: test
+    name: Tests on Linux Python 3.6
+    script:
+    - pytest -v tests/
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.6
+  - stage: test
+    name: Tests and coverage on Linux Python 3.7
+    script:
+    - pytest -v --cov=molsystem tests/
+    after_success:
+    - codecov
+    os: linux
+    language: generic
+    env: PYTHON_VER=3.7
+  - stage: deploy
+    name: Deploy to PyPi
+    if: tag IS present
+    os: linux
+    dist: xenial
+    python: 3.7
+    script: skip
+    deploy:
+      provider: pypi
+      distributions: sdist bdist_wheel
+      skip_existing: true
+      on:
+        condition: "$TRAVIS_OS_NAME = linux"
+        repo: molssi-seamm/molsystem
+        tags: true
+      username: seamm
+      password:
+        secure: gDCZf0a8kTt3sJlJNEPJ+DCmaAfiLsQporEadU8H1gNE3PZy96anT2xgxspf6vGrlLB+LkbMatAWBbO2kKCMSpVJ6jJadXwUKy8+S03Ny02q4knDllBTpUjVLDnM/c2tq6ll0uaR2fiOTIzxi5dC7yXrIpJ3BmqM655OvkUz+5rjzV1ALwx+GdfXO3x+mYbDnS094rAkRqBe1wHoiPXtnQnc6czx0cRyUcCmbRolOyOJGOkLNyS5ZRm1CB4syhfuQv/hz87rj0s+/yuYt7LUeeAbFNBi+XGD2bqU4SLtgFbl02lbOnJRuzoNprEPbf3yBX8Xdb+UtzVy2j+XMvc5HAmy83m1/vwy3nlLtT0gedRRacnXL4ZmJ1mUkMG41PwFTL5afiDwKCqzvl7HmTaDer72a4+91UDsCajX3rFUnu7JpKiYvfOFM8kJmTG71rEXmC3ookN4JjRCTVqQK6xMvAOeVSSJ3MIp7lpQvrBigMHzNvfp4iR8DJ89J4qqDBd649mxnltWcKL37qh6L+VgnAE5IiE/ML9sg0gkZQZyl4/L4noqJAeZ0tqaai5vOQ60uz4JPbBxtb7PKH6BCfMkkLFot6IZ85ycrKJPZV9q26TBX5AgkIzoP0Y5YF9JfiEuQXW4X73IfCeY0/lT+y9+BQuK3hQ1giH/hrjxMzWZZ3k=
