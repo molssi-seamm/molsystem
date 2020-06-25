@@ -15,8 +15,8 @@ MolSystem
 	   :target: https://lgtm.com/projects/g/molssi-seamm/molsystem/context:python
 	   :alt: Code Quality
 
-.. image:: https://readthedocs.org/projects/lammps-step/badge/?version=latest
-           :target: https://lammps-step.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/molsystem/badge/?version=latest
+           :target: https://molsystem.readthedocs.io/en/latest/?badge=latest
 	   :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/molssi-seamm/molsystem/shield.svg
