@@ -3,9 +3,6 @@
 import collections.abc
 import copy
 import logging
-import pprint  # noqa F401
-from typing import MutableMapping  # noqa F401
-from typing import Optional  # noqa F401
 from typing import Any, Dict, List
 
 import numpy as np
@@ -71,9 +68,6 @@ class Table(collections.abc.MutableMapping):
 
             # and log the changes
             self._log_changes(tmp)
-
-            # and delete the copy
-            del tmp
 
     def __getitem__(self, key) -> Any:
         """Allow [] access to the dictionary!"""
