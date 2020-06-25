@@ -1,16 +1,11 @@
-pip
-bump2version
-wheel
-watchdog
-flake8
-tox
+-r requirements_install.txt
+
 coverage
-Sphinx
-sphinxcontrib-napoleon
-cryptography
-PyYAML
+flake8
+jinja2
 pytest
 pytest-runner
-pytype
+sphinx
+tox
+twine
 yapf
-isort

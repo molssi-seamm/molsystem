@@ -1,0 +1,26 @@
+name: test
+channels:
+dependencies:
+    # Base depends
+  - python
+  - pip
+  - configargparse
+  - py-cpuinfo
+
+    # Testing
+  - coverage
+  - flake8
+  - pytest
+  - pytest-cov
+  - pytest-runner
+
+    # Pip-only installs
+  - pip:
+    - seamm_util>=0.9
+    - seamm>=0.9
+    - seamm-widgets>=0.9
+
+      # Testing
+    - yapf
+    - codecov
+
