@@ -3,8 +3,6 @@
 import collections.abc
 import copy
 import logging
-import pprint  # noqa F401
-from typing import Optional  # noqa F401
 from typing import Any, Iterable
 
 logger = logging.getLogger(__name__)

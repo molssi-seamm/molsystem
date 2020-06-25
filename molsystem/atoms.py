@@ -88,9 +88,6 @@ class Atoms(molsystem.Table):
             # and log the changes
             self._log_changes(tmp)
 
-            # and delete the copy
-            del tmp
-
     @property
     def n_atoms(self) -> int:
         """The number of atoms"""
