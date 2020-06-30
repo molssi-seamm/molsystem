@@ -4,7 +4,7 @@ coverage
 flake8
 jinja2
 pytest
-pytest-runner
+pytest-runner==5.2
 sphinx
 tox
 twine
