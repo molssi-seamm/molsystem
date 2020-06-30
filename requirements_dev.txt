@@ -8,4 +8,4 @@ pytest-runner
 sphinx
 tox
 twine
-yapf
+yapf==0.30.0
