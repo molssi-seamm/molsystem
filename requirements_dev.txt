@@ -6,6 +6,6 @@ jinja2
 pytest
 pytest-runner
 sphinx
-tox
+tox==3.16.1
 twine
 yapf
