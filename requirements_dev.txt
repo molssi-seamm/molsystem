@@ -1,6 +1,6 @@
 -r requirements_install.txt
 
-coverage
+coverage==5.1
 flake8
 jinja2
 pytest
