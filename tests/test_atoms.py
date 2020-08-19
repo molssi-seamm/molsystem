@@ -20,24 +20,19 @@ za = np.array(z)
 atnoa = np.array(atno)
 
 
-def test_construction():
+def test_construction(system):
     """Simplest test that we can make an Atoms object"""
-    system = None
-    atoms = molsystem.Atoms(system)
-    assert str(type(atoms)) == "<class 'molsystem.atoms.Atoms'>"
+    atoms = system['atoms']
+    assert str(type(atoms)) == "<class 'molsystem.atoms._Atoms'>"
 
 
-def test_keys():
+def test_keys(atoms):
     """Test the default keys in an Atoms object"""
-    system = None
-    atoms = molsystem.Atoms(system)
-    assert sorted([*atoms.keys()]) == ['atno', 'x', 'y', 'z']
+    assert sorted([*atoms.keys()]) == ['element', 'id', 'x', 'y', 'z']
 
 
-def test_n_atoms_empty():
+def test_n_atoms_empty(atoms):
     """Test how many atoms an empty object has"""
-    system = None
-    atoms = molsystem.Atoms(system)
     assert atoms.n_atoms == 0
 
 
