@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import collections.abc
+from itertools import zip_longest
 import logging
 import pandas
 from typing import Any, Dict
 
+from molsystem.column import _Column as Column
+
 logger = logging.getLogger(__name__)
+
+column_types = {
+    'int': 'INTEGER',
+    'float': 'REAL',
+    'str': 'TEXT',
+    'bytes': 'BLOB'
+}
+
+
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,...s3n-1), ..."
+    return zip_longest(*[iter(iterable)] * n)
 
 
 class _Table(collections.abc.MutableMapping):
@@ -20,9 +35,11 @@ class _Table(collections.abc.MutableMapping):
     Rows can be added ('append') or removed ('delete').
     """
 
-    def __init__(self, system, table: str) -> None:
+    def __init__(self, system, table: str, other=None) -> None:
         self._system = system
         self._table = table
+        if other is not None:
+            self.copy(other)
 
     def __enter__(self) -> Any:
         self.system.__enter__()
@@ -33,10 +50,11 @@ class _Table(collections.abc.MutableMapping):
 
     def __getitem__(self, key) -> Any:
         """Allow [] to access the data!"""
-        result = []
-        for line in self.cursor.execute(f'SELECT {key} FROM {self.table}'):
-            result.append(line[0])
-        return result
+        # result = []
+        # for line in self.cursor.execute(f'SELECT {key} FROM {self.table}'):
+        #     result.append(line[0])
+        # return result
+        return Column(self, key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
@@ -71,19 +89,22 @@ class _Table(collections.abc.MutableMapping):
         columns.remove(key)
         column_def = ', '.join(columns)
 
+        # Need the unquoted version!
+        table = self._table
+
         sql = f"""
         -- disable foreign key constraint check
         PRAGMA foreign_keys=off;
 
         -- Here you can drop column
-        CREATE TABLE tmp_{self.table}
-           AS SELECT {column_def} FROM {self.table};
+        CREATE TABLE "tmp_{table}"
+           AS SELECT {column_def} FROM "{table}";
 
         -- drop the table
-        DROP TABLE {self.table};
+        DROP TABLE "{table}";
 
         -- rename the new_table to the table
-        ALTER TABLE tmp_{self.table} RENAME TO {self.table};
+        ALTER TABLE "tmp_{table}" RENAME TO "{table}";
 
         -- enable foreign key constraint check
         PRAGMA foreign_keys=on;
@@ -92,9 +113,9 @@ class _Table(collections.abc.MutableMapping):
         with self.db:
             self.db.executescript(sql)
 
-    def __iter__(self) -> Any:
+    def __iter__(self) -> iter:
         """Allow iteration over the object"""
-        return iter(self.attributes.keys())
+        return iter([*self.attributes.keys()])
 
     def __len__(self) -> int:
         """The len() command"""
@@ -112,7 +133,11 @@ class _Table(collections.abc.MutableMapping):
 
     def __contains__(self, item) -> bool:
         """Return a boolean indicating if a key exists."""
-        return item in self.attributes
+        # Normal the tablename is used as an identifier, so is quoted with ".
+        # Here we need it as a string literal so strip any quotes from it.
+
+        tmp_item = item.strip('"')
+        return tmp_item in self.attributes
 
     def __eq__(self, other) -> Any:
         """Return a boolean if this object is equal to another"""
@@ -188,7 +213,7 @@ class _Table(collections.abc.MutableMapping):
     @property
     def table(self) -> str:
         """The name of this table."""
-        return self._table
+        return '"' + self._table + '"'
 
     @property
     def n_rows(self) -> int:
@@ -201,17 +226,24 @@ class _Table(collections.abc.MutableMapping):
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes."""
         result = {}
-        for line in self.db.execute(
+        table = self.table.strip('"')
+        for row in self.db.execute(
             "   SELECT *"
-            f"    FROM pragma_table_info('{self.table}')"
+            f"    FROM pragma_table_info('{table}')"
             " ORDER BY 'cid'"
         ):
-            result[line['name']] = {
-                'type': line['type'],
-                'notnull': bool(line['notnull']),
-                'default': line['dflt_value'],
-                'primary key': bool(line['pk'])
+            result[row['name']] = {
+                'type': row['type'],
+                'notnull': bool(row['notnull']),
+                'default': row['dflt_value'],
+                'primary key': bool(row['pk'])
             }
+        for row in self.db.execute(f"PRAGMA foreign_key_list('{self.table}')"):
+            if row['to'] is None:
+                result[row['from']]['fk'] = row['table']
+            else:
+                result[row['from']]['fk'] = f"{row['table']}.{row['to']}"
+
         return result
 
     @property
@@ -287,7 +319,11 @@ class _Table(collections.abc.MutableMapping):
 
         # Create the column
         parameters = []
-        column_def = f'{name} {coltype}'
+        if coltype in column_types:
+            column_type = column_types[coltype]
+        else:
+            column_type = coltype
+        column_def = f'{name} {column_type}'
         if default is not None:
             if coltype == 'str':
                 column_def += f" DEFAULT '{default}'"
@@ -299,12 +335,12 @@ class _Table(collections.abc.MutableMapping):
             column_def += f' REFERENCES {references}'
 
         if table_exists:
-            if pk:
-                column_def += ' PRIMARY KEY'
             self.cursor.execute(
                 f'ALTER TABLE {self.table} ADD {column_def}', parameters
             )
         else:
+            if pk:
+                column_def += ' PRIMARY KEY'
             self.cursor.execute(
                 f'CREATE TABLE {self.table} ({column_def})', parameters
             )
@@ -345,7 +381,7 @@ class _Table(collections.abc.MutableMapping):
             if key not in self:
                 raise KeyError(
                     f'"{key}" is not an attribute of the table '
-                    f'"{self.table}"!'
+                    f'{self.table}!'
                 )
             length = self.length_of_values(value)
             lengths[key] = length
@@ -367,6 +403,12 @@ class _Table(collections.abc.MutableMapping):
         # Check that any missing attributes have defaults
         attributes = self.attributes
         for key in attributes:
+            if (
+                not attributes[key]['notnull'] or
+                attributes[key]['primary key']
+            ):
+                continue
+
             if key not in kwargs:
                 if (
                     'default' not in attributes[key] or
@@ -401,6 +443,47 @@ class _Table(collections.abc.MutableMapping):
             f'INSERT INTO {self.table} ({columns}) VALUES ({places})',
             parameters
         )
+
+    def rows(self, *args):
+        """Return an iterator over the rows."""
+        if len(args) == 0:
+            return self.db.execute(f'SELECT * FROM {self.table}')
+
+        sql = f'SELECT * FROM {self.table} WHERE'
+
+        parameters = []
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' "{col}" {op} ?'
+            parameters.append(value)
+
+        return self.db.execute(sql, parameters)
+
+    def copy(self, other):
+        """Replace this object with a copy of another."""
+        if self.table in self.system:
+            del self.system[self.table]
+
+        filename = self.system.filename
+        other_filename = other.system.filename
+        # Careful ... need unquoted other table
+        if filename != other_filename:
+            # Attach the previous database in order to do comparisons.
+            self.cursor.execute(f'ATTACH DATABASE "{other_filename}" AS other')
+            other_table = f'"other.{other._table}"'
+        else:
+            other_table = other.table
+        table = self.table
+
+        self.cursor.execute(
+            f'CREATE TABLE {table} AS SELECT * FROM {other_table}'
+        )
+        self.db.commit()
+
+        # Detach the other database if needed
+        if filename != other_filename:
+            self.cursor.execute("DETACH DATABASE other")
 
     def length_of_values(self, values: Any) -> int:
         """Return the length of the values argument.

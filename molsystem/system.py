@@ -118,10 +118,14 @@ class System(collections.abc.MutableMapping):
 
     def __contains__(self, item):
         """Return a boolean indicating if a key exists."""
+        # Normal the tablename is used as an identifier, so is quoted with ".
+        # Here we need it as a string literal so strip any quotes from it.
+
+        tmp_item = item.strip('"')
         self.cursor.execute(
             "SELECT COUNT(*)"
             "  FROM sqlite_master"
-            f" WHERE type = 'table' and name = '{item}'"
+            f" WHERE type = 'table' and name = '{tmp_item}'"
         )
         return self.cursor.fetchone()[0] == 1
 
@@ -248,7 +252,7 @@ class System(collections.abc.MutableMapping):
                 " WHERE item = 'coordinate type'"
             )
 
-    def create_table(self, name, cls=_Table):
+    def create_table(self, name, cls=_Table, other=None):
         """Create a new table with the given name.
 
         Parameters
@@ -267,7 +271,7 @@ class System(collections.abc.MutableMapping):
         if name in self:
             raise KeyError(f"'{name}' already exists in the system.")
 
-        return cls(self, name)
+        return cls(self, name, other)
 
     def _log_changes(self, previous, backup_file):
         """Track changes to the system"""

@@ -7,7 +7,30 @@ import shutil
 import tempfile
 
 import pytest
-import molsystem
+from molsystem.system import System
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run-timing",
+        action="store_true",
+        default=False,
+        help="run timing tests"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "timing: mark test as timing to run")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run-timing"):
+        # --run-timing given in cli: do not skip timing tests
+        return
+    skip_timing = pytest.mark.skip(reason="need --run-timing option to run")
+    for item in items:
+        if "timing" in item.keywords:
+            item.add_marker(skip_timing)
 
 
 def mk_table(system, name='table1'):
@@ -22,17 +45,17 @@ def mk_table(system, name='table1'):
 @pytest.fixture()
 def system(tmp_path):
     filepath = tmp_path / 'seamm.db'
-    system = molsystem.System(filename=filepath)
+    system = System(filename=filepath)
     return system
 
 
 @pytest.fixture()
 def two_systems(tmp_path):
     filepath = tmp_path / 'seamm1.db'
-    system1 = molsystem.System(filename=filepath)
+    system1 = System(filename=filepath)
 
     filepath = tmp_path / 'seamm2.db'
-    system2 = molsystem.System(filename=filepath)
+    system2 = System(filename=filepath)
 
     return system1, system2
 
@@ -42,7 +65,7 @@ def system2():
     newpath = tempfile.mkdtemp()
     filepath = os.path.join(newpath, 'seamm2.db')
 
-    system = molsystem.System(filename=filepath)
+    system = System(filename=filepath)
 
     yield system
 

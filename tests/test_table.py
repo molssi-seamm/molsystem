@@ -49,10 +49,9 @@ def test_append_several_scalar(simple_table):
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=0.0, atno=6)
     assert (
-        np.array_equal(simple_table['x'], x) and
-        np.array_equal(simple_table['y'], y) and
-        np.array_equal(simple_table['z'], [0.0, 0.0, 0.0]) and
-        np.array_equal(simple_table['atno'], [6, 6, 6])
+        simple_table['x'] == x and simple_table['y'] == y and
+        simple_table['z'] == [0.0, 0.0, 0.0] and
+        simple_table['atno'] == [6, 6, 6]
     )
 
 
@@ -61,10 +60,9 @@ def test_append_several_scalar_first(simple_table):
     with simple_table as tmp:
         tmp.append(atno=6, x=x, y=y, z=0.0)
     assert (
-        np.array_equal(simple_table['x'], x) and
-        np.array_equal(simple_table['y'], y) and
-        np.array_equal(simple_table['z'], [0.0, 0.0, 0.0]) and
-        np.array_equal(simple_table['atno'], [6, 6, 6])
+        simple_table['x'] == x and simple_table['y'] == y and
+        simple_table['z'] == [0.0, 0.0, 0.0] and
+        simple_table['atno'] == [6, 6, 6]
     )
 
 
@@ -74,10 +72,7 @@ def test_append_using_default(simple_table):
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z)
 
-    assert (
-        simple_table.n_rows == 3 and
-        np.array_equal(simple_table['atno'], [-1, -1, -1])
-    )
+    assert (simple_table.n_rows == 3 and simple_table['atno'] == [-1, -1, -1])
 
 
 def test_append_ndarrays_3x100(simple_table):
@@ -160,7 +155,7 @@ def test_add_attribute_with_values(simple_table):
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
         tmp.add_attribute('name', values=['H1', 'O', 'H2'])
-    assert np.array_equal(simple_table['name'], ['H1', 'O', 'H2'])
+    assert simple_table['name'] == ['H1', 'O', 'H2']
 
 
 def test_add_attribute_with_one_value(simple_table):
@@ -168,7 +163,7 @@ def test_add_attribute_with_one_value(simple_table):
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
         tmp.add_attribute('name', values=['H1'])
-    assert np.array_equal(simple_table['name'], ['H1', 'H1', 'H1'])
+    assert simple_table['name'] == ['H1', 'H1', 'H1']
 
 
 def test_add_attribute_with_one_value_not_list(simple_table):
@@ -176,7 +171,7 @@ def test_add_attribute_with_one_value_not_list(simple_table):
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
         tmp.add_attribute('spin', coltype='int', default=0, values=1)
-    assert np.array_equal(simple_table['spin'], [1, 1, 1])
+    assert simple_table['spin'] == [1, 1, 1]
 
 
 def test_add_attribute_with_wrong_number_of_values(simple_table):
@@ -192,7 +187,7 @@ def test_add_attribute_with_wrong_number_of_values(simple_table):
     assert (
         simple_table.n_rows == 0 and err == (
             "The number of values given, 2, must be either 1, or the number of"
-            " rows in table1: 3"
+            ' rows in "table1": 3'
         )
     )
 
@@ -208,14 +203,14 @@ def test_get_attribute_by_slice(simple_table):
     """Get several values using a slice"""
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert np.array_equal(simple_table['atno'][::2], [8, 1])
+    assert simple_table['atno'][::2] == [8, 1]
 
 
 def test_getting_x(simple_table):
     """Test getting the x column of coordinates"""
     with simple_table as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert np.array_equal(simple_table['x'], [1.0, 2.0, 3.0])
+    assert simple_table['x'] == [1.0, 2.0, 3.0]
 
 
 def test_contains(simple_table):
@@ -252,7 +247,7 @@ def test_set_column(simple_table):
 
     assert (
         simple_table.n_rows == 3 and simple_table.version == 2 and
-        np.array_equal(simple_table['atno'], [10, 10, 10])
+        simple_table['atno'] == [10, 10, 10]
     )
 
 
@@ -268,7 +263,7 @@ def test_set_column_with_array(simple_table):
 
     assert (
         simple_table.n_rows == 3 and simple_table.version == 2 and
-        np.array_equal(simple_table['x'], values)
+        simple_table['x'] == values
     )
 
 
@@ -297,7 +292,7 @@ def test_append_error_invalid_length(simple_table):
     assert (
         simple_table.n_rows == 0 and err == (
             'key "atno" has the wrong number of values, '
-            '2. Should be 1 or the number of rows in table1 (3).'
+            '2. Should be 1 or the number of rows in "table1" (3).'
         )
     )
 
@@ -308,10 +303,7 @@ def test_add_attribute_with_no_default(simple_table):
         tmp.add_attribute('new', coltype='float')
         tmp.append(x=x, y=y, z=z, atno=atno, new=[-1, -2, -3])
 
-    assert (
-        simple_table.n_rows == 3 and
-        np.array_equal(simple_table['new'], [-1, -2, -3])
-    )
+    assert (simple_table.n_rows == 3 and simple_table['new'] == [-1, -2, -3])
 
 
 def test_add_attribute_with_no_default_error(simple_table):
@@ -348,9 +340,7 @@ def test_inequality(two_tables):
 
     with table2 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-        atnos = tmp['atno']
-        atnos[2] = 13
-        tmp['atno'] = atnos
+        tmp['atno'][2] = 13
 
     assert table1.n_rows == 3 and table1 != table2
 

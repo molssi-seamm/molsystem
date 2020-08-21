@@ -40,29 +40,12 @@ class _Atoms(molsystem.table._Table):
         other: Atoms_tp = None
     ) -> None:
 
-        super().__init__(system, table)
+        super().__init__(system, table, other)
 
         self._word = 'atoms'
 
-        # copy constructor
-        if isinstance(other, _Atoms):
-            raise NotImplementedError()
-        else:
-            if 'atoms' not in self:
-                self._initialize()
-
-    def __exit__(self, etype, value, traceback) -> None:
-        if etype is None:
-            # No exception occurred, so replace ourselves with the tmp copy
-            tmp = self._checkpoints.pop()
-            self._coordinate_type, tmp._coordinate_type = (
-                tmp._coordinate_type, self._coordinate_type
-            )
-            self._public, tmp._public = tmp._public, self._public
-            self._private, tmp._private = tmp._private, self._private
-
-            # and log the changes
-            self._log_changes(tmp)
+        if self.table not in self.system:
+            self._initialize()
 
     @property
     def n_atoms(self) -> int:
@@ -106,23 +89,35 @@ class _Atoms(molsystem.table._Table):
         #     raise KeyError("The coordinates are required!")
 
         # Need to handle the elements specially. Can give atomic numbers,
-        # symbols, or references to the elements. By construction the
-        # references to elements are identical to atomic numbers.
+        # or symbols. By construction the references to elements are identical
+        # to their atomic numbers.
 
         if 'symbol' in kwargs:
             symbols = kwargs.pop('symbol')
-            kwargs['element'] = self.to_atnos(symbols)
-            
+            kwargs['atno'] = self.to_atnos(symbols)
+
         super().append(**kwargs)
+
+    def atoms(self, *args):
+        """Return an iterator over the atoms."""
+        return self.rows(*args)
 
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers."""
+        result = []
+
+        parameters = [(x,) for x in symbols]
+        for row in self.db.executemany(
+            'SELECT atno WHERE symbol = ?', parameters
+        ):
+            result.append(row['atno'])
+
     def _initialize(self):
         """Set up the atom table. It needs to have a primary key
         to be used as a foreign key in the bonds table and elsewhere.
         """
         self.add_attribute('id', coltype='int', pk=True)
-        self.add_attribute('element', coltype='int', references='elements')
+        self.add_attribute('atno', coltype='int', references='elements')
         self.add_attribute('x', coltype='float', index=True)
         self.add_attribute('y', coltype='float', index=True)
         self.add_attribute('z', coltype='float', index=True)
