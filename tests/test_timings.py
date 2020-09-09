@@ -9,7 +9,7 @@ import shutil
 import tempfile
 import time
 
-from molsystem import System  # noqa: F401
+from molsystem import Systems  # noqa: F401
 """Tests for the System classes."""
 
 natoms = 1000000
@@ -17,10 +17,12 @@ natoms = 1000000
 
 @pytest.fixture(scope="module")
 def msystem():
+    systems = Systems()
+
     newpath = tempfile.mkdtemp()
     filepath = os.path.join(newpath, 'seamm.db')
 
-    system = System(filename=filepath)
+    system = systems.create_system('seamm', filename=filepath)
 
     yield system
 

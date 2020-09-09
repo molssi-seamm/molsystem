@@ -5,18 +5,14 @@
 
 import pytest  # noqa: F401
 
-from molsystem import System
 
-
-def test_construction():
+def test_construction(system):
     """Simplest test that we can make a System object"""
-    system = System()
-    assert str(type(system)) == "<class 'molsystem.system.System'>"
+    assert str(type(system)) == "<class 'molsystem.system._System'>"
 
 
-def test_version_empty():
+def test_version_empty(system):
     """Simplest test that we can make a System object"""
-    system = System()
     assert system.version == 0
 
 
@@ -52,5 +48,5 @@ def test_delete_table(system_with_two_tables):
 
 def test_elements(system):
     """Test that we can access the element table"""
-    table = system['elements']
+    table = system['element']
     assert table.n_rows == 118

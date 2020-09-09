@@ -50,35 +50,11 @@ class _Table(collections.abc.MutableMapping):
 
     def __getitem__(self, key) -> Any:
         """Allow [] to access the data!"""
-        # result = []
-        # for line in self.cursor.execute(f'SELECT {key} FROM {self.table}'):
-        #     result.append(line[0])
-        # return result
         return Column(self, key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
-        length = self.length_of_values(value)
-        if length == 1:
-            self.cursor.execute(f'UPDATE {self.table} SET {key} = ?', value)
-        elif length == self.n_rows:
-            parameters = []
-            self.cursor.execute(f'SELECT rowid FROM {self.table}')
-            for val in value:
-                rowid = self.cursor.fetchone()[0]
-                parameters.append((val, rowid))
-
-            self.cursor.executemany(
-                f'UPDATE {self.table} SET {key} = ? WHERE rowid = ?',
-                parameters
-            )
-        elif length == 0:
-            self.cursor.execute(f'UPDATE {self.table} SET {key} = ?', (value,))
-        else:
-            raise ValueError(
-                f'The number of values ({length}) must be 1 or the number of '
-                f'rows ({self.n_rows})'
-            )
+        self[key][0:] = value
 
     def __delitem__(self, key) -> None:
         """Allow deletion of keys"""
@@ -112,6 +88,7 @@ class _Table(collections.abc.MutableMapping):
 
         with self.db:
             self.db.executescript(sql)
+        self.db.commit()
 
     def __iter__(self) -> iter:
         """Allow iteration over the object"""
@@ -158,15 +135,20 @@ class _Table(collections.abc.MutableMapping):
         is_same = True
         # Need to check the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
-        filename = self.system.filename
-        other_filename = other.system.filename
-        if filename != other_filename:
-            # Attach the previous database in order to do comparisons.
-            self.cursor.execute(f"ATTACH DATABASE '{other_filename}' AS other")
-            other_table = f'other.{other.table}'
+
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
         else:
             other_table = other.table
         table = self.table
+
         self.cursor.execute(
             f"""
             SELECT COUNT(*) FROM
@@ -190,8 +172,8 @@ class _Table(collections.abc.MutableMapping):
                 is_same = False
 
         # Detach the other database if needed
-        if filename != other_filename:
-            self.cursor.execute("DETACH DATABASE other")
+        if detach:
+            self.system.detach(other.system)
 
         return is_same
 
@@ -226,10 +208,9 @@ class _Table(collections.abc.MutableMapping):
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes."""
         result = {}
-        table = self.table.strip('"')
         for row in self.db.execute(
             "   SELECT *"
-            f"    FROM pragma_table_info('{table}')"
+            f"    FROM pragma_table_info('{self._table}')"
             " ORDER BY 'cid'"
         ):
             result[row['name']] = {
@@ -323,7 +304,7 @@ class _Table(collections.abc.MutableMapping):
             column_type = column_types[coltype]
         else:
             column_type = coltype
-        column_def = f'{name} {column_type}'
+        column_def = f'"{name}" {column_type}'
         if default is not None:
             if coltype == 'str':
                 column_def += f" DEFAULT '{default}'"
@@ -357,7 +338,9 @@ class _Table(collections.abc.MutableMapping):
         if values is not None:
             self[name] = values
 
-    def append(self, **kwargs: Dict[str, Any]) -> None:
+        self.db.commit()
+
+    def append(self, n=None, **kwargs: Dict[str, Any]) -> None:
         """Append one or more rows
 
         The keywords are the names of attributes and the value to use.
@@ -373,7 +356,92 @@ class _Table(collections.abc.MutableMapping):
             None
         """
 
-        # Check keys and lengths of added rows
+        n_rows, lengths = self._get_n_rows(**kwargs)
+
+        if n is not None:
+            if n_rows != 1 and n_rows != n:
+                raise RuntimeError(
+                    f"Requested number of rows ({n}) not compatible with the "
+                    f"length of the data ({n_rows})."
+                )
+            n_rows = n
+
+        # Check that any missing attributes have defaults
+        attributes = self.attributes
+        for key in attributes:
+            if (
+                not attributes[key]['notnull'] or
+                attributes[key]['primary key']
+            ):
+                continue
+
+            if key not in kwargs:
+                if (
+                    'default' not in attributes[key] or
+                    attributes[key]['default'] is None
+                ):
+                    raise KeyError(
+                        "There is no default for attribute "
+                        "'{}'. You must supply a value".format(key)
+                    )
+
+        # Add id's if needed
+        if 'id' not in kwargs and 'id' in attributes:
+            self.cursor.execute(f"SELECT MAX(id) FROM {self.table}")
+            last_id = self.cursor.fetchone()[0]
+            if last_id is None:  # Table is empty
+                last_id = 0
+            kwargs['id'] = [*range(last_id + 1, last_id + n_rows + 1)]
+            lengths['id'] = n_rows
+
+        # All okay, so proceed.
+        values = {}
+        for key, value in kwargs.items():
+            if lengths[key] == 0:
+                values[key] = [value] * n_rows
+            elif lengths[key] == 1:
+                values[key] = [value[0]] * n_rows
+            else:
+                values[key] = value
+
+        parameters = []
+        for row in range(n_rows):
+            line = []
+            for key, value in values.items():
+                line.append(value[row])
+            parameters.append(line)
+
+        columns = '"' + '", "'.join(kwargs.keys()) + '"'
+        places = ', '.join(['?'] * len(values.keys()))
+
+        self.cursor.executemany(
+            f'INSERT INTO {self.table} ({columns}) VALUES ({places})',
+            parameters
+        )
+
+        self.db.commit()
+
+        if 'id' in kwargs:
+            return kwargs['id']
+
+    def rows(self, *args):
+        """Return an iterator over the rows."""
+        if len(args) == 0:
+            return self.db.execute(f'SELECT * FROM {self.table}')
+
+        sql = f'SELECT * FROM {self.table} WHERE'
+
+        parameters = []
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' "{col}" {op} ?'
+            parameters.append(value)
+
+        return self.db.execute(sql, parameters)
+
+    def _get_n_rows(self, **kwargs):
+        """Get the total number of rows represented in the arguments."""
         n_rows = None
 
         lengths = {}
@@ -399,79 +467,25 @@ class _Table(collections.abc.MutableMapping):
                         '{}. Should be 1 or the number of rows in {} ({}).'
                         .format(length, self.table, n_rows)
                     )
-
-        # Check that any missing attributes have defaults
-        attributes = self.attributes
-        for key in attributes:
-            if (
-                not attributes[key]['notnull'] or
-                attributes[key]['primary key']
-            ):
-                continue
-
-            if key not in kwargs:
-                if (
-                    'default' not in attributes[key] or
-                    attributes[key]['default'] is None
-                ):
-                    raise KeyError(
-                        "There is no default for attribute "
-                        "'{}'. You must supply a value".format(key)
-                    )
-
-        # All okay, so proceed.
-        values = {}
-        for key, value in kwargs.items():
-            if lengths[key] == 0:
-                values[key] = [value] * n_rows
-            elif lengths[key] == 1:
-                values[key] = [value[0]] * n_rows
-            else:
-                values[key] = value
-
-        parameters = []
-        for row in range(n_rows):
-            line = []
-            for key, value in values.items():
-                line.append(value[row])
-            parameters.append(line)
-
-        columns = ', '.join(kwargs.keys())
-        places = ', '.join(['?'] * len(values.keys()))
-
-        self.cursor.executemany(
-            f'INSERT INTO {self.table} ({columns}) VALUES ({places})',
-            parameters
-        )
-
-    def rows(self, *args):
-        """Return an iterator over the rows."""
-        if len(args) == 0:
-            return self.db.execute(f'SELECT * FROM {self.table}')
-
-        sql = f'SELECT * FROM {self.table} WHERE'
-
-        parameters = []
-        for col, op, value in grouped(args, 3):
-            if op == '==':
-                op = '='
-            sql += f' "{col}" {op} ?'
-            parameters.append(value)
-
-        return self.db.execute(sql, parameters)
+        return n_rows, lengths
 
     def copy(self, other):
         """Replace this object with a copy of another."""
         if self.table in self.system:
             del self.system[self.table]
 
-        filename = self.system.filename
-        other_filename = other.system.filename
-        # Careful ... need unquoted other table
-        if filename != other_filename:
-            # Attach the previous database in order to do comparisons.
-            self.cursor.execute(f'ATTACH DATABASE "{other_filename}" AS other')
-            other_table = f'"other.{other._table}"'
+        # Need the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
         else:
             other_table = other.table
         table = self.table
@@ -482,8 +496,8 @@ class _Table(collections.abc.MutableMapping):
         self.db.commit()
 
         # Detach the other database if needed
-        if filename != other_filename:
-            self.cursor.execute("DETACH DATABASE other")
+        if detach:
+            self.system.detach(other.system)
 
     def length_of_values(self, values: Any) -> int:
         """Return the length of the values argument.
@@ -559,12 +573,15 @@ class _Table(collections.abc.MutableMapping):
 
         # Need to check the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
-        filename = self.system.filename
-        other_filename = other.system.filename
-        if filename != other_filename:
-            # Attach the previous database in order to do comparisons.
-            self.cursor.execute(f"ATTACH DATABASE '{other_filename}' AS other")
-            other_table = f'other.{other.table}'
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
         else:
             other_table = other.table
         table = self.table
@@ -607,13 +624,22 @@ class _Table(collections.abc.MutableMapping):
 
         # See about the rows added
         added = {}
-        for row in self.db.execute(
-            f"""
-            SELECT rowid, * FROM {table}
-            WHERE rowid NOT IN (SELECT rowid FROM {other_table})
-            """
-        ):
-            added[row['rowid']] = row[1:]
+        if 'id' in self:
+            for row in self.db.execute(
+                f"""
+                SELECT * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['id']] = row[1:]
+        else:
+            for row in self.db.execute(
+                f"""
+                SELECT rowid, * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['rowid']] = row[1:]
 
         if len(added) > 0:
             result['columns in added rows'] = row.keys()[1:]
@@ -634,8 +660,8 @@ class _Table(collections.abc.MutableMapping):
             result['removed'] = removed
 
         # Detach the other database if needed
-        if filename != other_filename:
-            self.cursor.execute("DETACH DATABASE other")
+        if detach:
+            self.system.detach(other.system)
 
         return result
 

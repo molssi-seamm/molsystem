@@ -15,13 +15,15 @@ atno = [8, 1, 1]
 
 def test_construction(system):
     """Simplest test that we can make an Atoms object"""
-    atoms = system['atoms']
+    atoms = system.atoms
     assert str(type(atoms)) == "<class 'molsystem.atoms._Atoms'>"
 
 
 def test_keys(atoms):
     """Test the default keys in an Atoms object"""
-    assert sorted([*atoms.keys()]) == ['atno', 'id', 'x', 'y', 'z']
+    result = ['atno', 'configuration', 'id', 'x', 'y', 'z']
+
+    assert sorted([*atoms.keys()]) == result
 
 
 def test_n_atoms_empty(atoms):
@@ -31,7 +33,6 @@ def test_n_atoms_empty(atoms):
 
 def test_append_one(atoms):
     """Test adding one atom"""
-    print(atoms.attributes)
     with atoms as tmp:
         tmp.append(x=1.0, y=2.0, z=3.0, atno=[6])
     assert atoms.n_atoms == 1
@@ -64,24 +65,25 @@ def test_append_using_default(atoms):
 
 def test_append_error(atoms):
     """Test adding atoms with an error"""
+    atoms.configuration = 1
     with pytest.raises(KeyError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, bad=99)
     assert atoms.n_atoms == 0 and atoms.version == 0
-    assert (
-        str(e.value) == '\'"bad" is not an attribute of the table "atoms"!\''
-    )
+    assert (str(e.value) == '\'"bad" is not an attribute of the atoms.\'')
 
 
 def test_add_attribute(atoms):
     """Test adding an attribute"""
+    result = ['atno', 'configuration', 'id', 'name', 'x', 'y', 'z']
     with atoms as tmp:
         tmp.add_attribute('name')
-    assert sorted([*atoms.keys()]) == ['atno', 'id', 'name', 'x', 'y', 'z']
+    assert sorted([*atoms.keys()]) == result
 
 
 def test_add_duplicate_attribute(atoms):
     """Test duplicate adding an attribute"""
+    result = ['atno', 'configuration', 'id', 'name', 'x', 'y', 'z']
     with atoms as tmp:
         tmp.add_attribute('name')
     with pytest.raises(RuntimeError) as e:
@@ -89,9 +91,9 @@ def test_add_duplicate_attribute(atoms):
             ver = tmp.version
             tmp.add_attribute('name')
     assert (
-        sorted([*atoms.keys()]) == ['atno', 'id', 'name', 'x', 'y', 'z'] and
-        ver == 1 and atoms.version == 1 and
-        str(e.value) == "_Atoms attribute 'name' is already defined!"
+        sorted([*atoms.keys()]) == result and ver == 1 and
+        atoms.version == 1 and
+        str(e.value) == "_Table attribute 'name' is already defined!"
     )
 
 
@@ -124,13 +126,11 @@ def test_add_attribute_with_wrong_number_of_values(atoms):
     with pytest.raises(IndexError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno)
-            tmp.add_attribute(
-                'spin', coltype=np.int8, default=0, values=[1, 2]
-            )
+            tmp.add_attribute('spin', coltype='int', default=0, values=[1, 2])
     assert (
         atoms.n_atoms == 0 and str(e.value) == (
             "The number of values given, "
-            '2, must be either 1, or the number of rows in "atoms": 3'
+            '2, must be either 1, or the number of rows in "atom": 3'
         )
     )
 
@@ -170,7 +170,7 @@ def test_deleting_column(atoms):
     """Test deleting a column"""
     with atoms as tmp:
         del tmp['atno']
-    assert sorted([*atoms.keys()]) == ['id', 'x', 'y', 'z']
+    assert sorted([*atoms.keys()]) == ['configuration', 'id', 'x', 'y', 'z']
 
 
 def test_set_column(atoms):
@@ -215,7 +215,7 @@ def test_append_error_invalid_column(atoms):
             tmp.append(x=x, y=y, z=z, atno=atno, junk=99)
     assert (
         atoms.n_atoms == 0 and
-        str(e.value) == '\'"junk" is not an attribute of the table "atoms"!\''
+        str(e.value) == '\'"junk" is not an attribute of the atoms.\''
     )
 
 
@@ -227,7 +227,7 @@ def test_append_error_invalid_length(atoms):
     assert (
         atoms.n_atoms == 0 and str(e.value) == (
             'key "atno" has the wrong number of values, '
-            '2. Should be 1 or the number of rows in "atoms" (3).'
+            '2. Should be 1 or the number of atoms (3).'
         )
     )
 
@@ -266,7 +266,7 @@ def test_inequality(two_systems):
         tmp.append(x=x, y=y, z=z, atno=atno)
 
     with atoms2 as tmp:
-        atno2 = atno
+        atno2 = list(atno)
         atno2[2] = 13
         tmp.append(x=x, y=y, z=z, atno=atno2)
 
@@ -276,13 +276,15 @@ def test_inequality(two_systems):
 def test_str(atoms):
     """Test string representation of atoms object"""
     string_rep = """\
-   id  atno    x    y    z
-1   1     8  1.0  4.0  7.0
-2   2     1  2.0  5.0  8.0
-3   3    13  3.0  6.0  9.0"""  # noqa: W291
+   atno  configuration    x    y    z
+1     8              1  1.0  4.0  7.0
+2     1              1  2.0  5.0  8.0
+3     1              1  3.0  6.0  9.0"""  # noqa: W291
 
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
+
+    print(str(atoms))
 
     assert str(atoms) == string_rep
 
@@ -290,40 +292,17 @@ def test_str(atoms):
 def test_repr(atoms):
     """Test representation of atoms object"""
     string_rep = """\
-   id  atno    x    y    z
-1   1     8  1.0  4.0  7.0
-2   2     1  2.0  5.0  8.0
-3   3    13  3.0  6.0  9.0"""  # noqa: W291
+   atno  configuration    x    y    z
+1     8              1  1.0  4.0  7.0
+2     1              1  2.0  5.0  8.0
+3     1              1  3.0  6.0  9.0"""  # noqa: W291
 
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
+
+    print(repr(atoms))
 
     assert repr(atoms) == string_rep
-
-
-def test_copy_constructor(atoms):
-    """Test copy constructor"""
-    system = atoms.system
-
-    with atoms as tmp:
-        tmp.append(x=x, y=y, z=z, atno=atno)
-
-    atoms2 = system.create_table('atoms copy', molsystem.atoms._Atoms, atoms)
-
-    assert atoms == atoms2
-
-
-def test_copy_constructor_with_change(atoms):
-    """Test copy constructor and changing copy"""
-    system = atoms.system
-
-    with atoms as tmp:
-        tmp.append(x=x, y=y, z=z, atno=atno)
-
-    atoms2 = system.create_table('atoms copy', molsystem.atoms._Atoms, atoms)
-    atoms2['atno'][0] = 22
-
-    assert atoms != atoms2
 
 
 def test_equals(atoms):
@@ -345,16 +324,3 @@ def test_equals_with_change(atoms):
     atoms2['atno'][0] = 22
 
     assert atoms == atoms2
-
-
-def test_copy_with_change(atoms):
-    """Test copy and changing copy"""
-    system = atoms.system
-
-    with atoms as tmp:
-        tmp.append(x=x, y=y, z=z, atno=atno)
-
-    atoms2 = system.create_table('atoms copy', molsystem.atoms._Atoms, atoms)
-    atoms2['atno'][0] = 22
-
-    assert atoms != atoms2

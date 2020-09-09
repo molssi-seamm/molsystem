@@ -5,86 +5,187 @@
 
 import collections.abc
 import logging
-import os
-import shutil
 import sqlite3
-import tempfile
 from typing import Any, Dict
 
 # import molsystem
-from molsystem.table import _Table
-from molsystem.atoms import _Atoms
+from molsystem.table import _Table as Table
+from molsystem.atoms import _Atoms as Atoms
+from molsystem.template import _Template as Template
+from molsystem.templateatoms import _Templateatoms as Templateatoms
+from molsystem.templatebonds import _Templatebonds as Templatebonds
+from molsystem.bonds import _Bonds as Bonds
+from molsystem.cell_parameters import _CellParameters as CellParameters
 import seamm_util
 
 logger = logging.getLogger(__name__)
 
 
-class System(collections.abc.MutableMapping):
+class _System(collections.abc.MutableMapping):
+    """A single system -- molecule, crystal, etc. -- in SEAMM.
 
-    def __init__(self, other=None, **kwargs):
-        # these are the only things not copied
+    Based on a SQLite database, this class provides a general
+    datastructure for storing a 'system', which is an atom, molecule,
+    crystal or a collection of any number of such components all held in
+    a single system, in analogy to a thermodynamic system, which is what
+    an experiment is perfromed on.
+
+    The system can hold multiple different configurations of the atoms,
+    such as found in an MD trajectory or conformer search. The number of
+    atoms may change across configurations as may the bonding, so the
+    system is capabale of handling a trajectory for e.g. a grand
+    canonical simulation or simulating desposition on a surface. The
+    system also can contain bonds as are used in classical valence
+    forcefields, and can also cope with changing bonds in e.g. reactive
+    forcefields.
+
+    The system class also supports the concept of template molecules or
+    subsets, which can be used to define molecules, residues, etc. which
+    are then repeated in the full structure. Templates make the process
+    of building complex, repeated structures simpler and more efficient,
+    and also help track the individual components. There is a lighter
+    variation of templates called subsets which do not define a
+    substructure, but can label and track such substructures. Atoms may
+    belong to more than one subset, or to none other than the special
+    subset 'all' which contains all the atoms in a given configuration.
+
+    The key tables are:
+
+    system -- a container for all the components, plus storage for the
+        system-wide parameters and options.
+
+    configuration -- a list of configurations in e.g. a trajectory.
+    configuration_subset -- connnects configurations with subsets.
+
+    cell -- the information about the periodicity of a configuration, if
+        needed.
+
+    symmetry -- the point or space group symmetry of the configuration.
+    symop -- the symmetry operations for the group.
+
+    template -- a list of all templates.
+    templateatom -- holds the atoms in a template, if present.
+    templatebond -- holds the bonds between the template atoms, if present.
+
+    subset -- an instantiation of a template, connected with one or more
+        configurations of the system.
+    subset_atom -- connects the subset to the atoms, and optionally connects
+        the atom to a template atom.
+
+    atom -- the nonvarying part of the description of the atoms
+    coordinates -- the varying part of the description of atoms
+
+    element -- basic information about the elements. The atomic number
+        (atno) is used for foreign keys in other tables.
+
+    This system class provides an anchor for the other component and
+    handles system-wide information such as the periodicity and the
+    coordinate system used.
+
+    It also tracks the current configuration and template, which are
+    conveniences to avoid having to specify the configuration or
+    template for every access to the data.
+
+    There is one special, required subset 'all' that contains all of the
+    atoms in each configuration of the system. If there are differing
+    numbers or types of atoms in the system, or if the bonding changes,
+    there will be multiple versions of the subset, each corresponding to
+    a different set of atoms or bonds.
+
+    One or more configurations are connected with each 'all' subset,
+    which is how the atoms and bonding are connected to the
+    configurations.
+    """
+
+    def __init__(self, parent, name, **kwargs):
+        self._parent = parent
+        self._name = name
+        self._attached = []
+        self._id = 1  # The id of the system. Currently there is only 1
+        self._current_configuration = None  # The current configuration
+        self._configurations = {}  # template and subset all for configs
         self._checkpoints = []
         self._filename = None
         self._db = None
         self._cursor = None
-
-        # copy constructor
-        if other and isinstance(other, System):
-            raise NotImplementedError(
-                'copy constructor is under construction!'
-            )
-        else:
-            pass
+        self._items = {}
+        self._symbol_to_atno = {}
 
         if 'filename' in kwargs:
             self.filename = kwargs.pop('filename')
         else:
-            self.filename = 'system.seamm'
+            self.filename = 'seamm.db'
 
     def __enter__(self) -> Any:
         self.db.commit()
 
-        tmpdir = tempfile.mkdtemp()
-        filepath = os.path.join(tmpdir, 'backup.seamm')
-        backup = sqlite3.connect(filepath)
-        backup.row_factory = sqlite3.Row
-        self._db.execute('PRAGMA foreign_keys = ON')
-
-        self.db.backup(backup)
-
-        self._checkpoints.append((backup, tmpdir, filepath))
+        backup = self.parent.copy_system(self, temporary=True)
+        self._checkpoints.append(backup)
         return self
 
     def __exit__(self, etype, value, traceback) -> None:
-        backup, tmpdir, backup_file = self._checkpoints.pop()
+        backup = self._checkpoints.pop()
 
         if etype is None:
             self.db.commit()
 
             # Log the changes
-            self._log_changes(backup, backup_file)
+            diffs = self.diff(backup)
+            if len(diffs) > 0:
+                self.version = self.version + 1
 
             # Not sure why this commit is needed...
             self.db.commit()
         else:
-            self.cursor.close()
-            self.db.close()
-            self._db = sqlite3.connect(self._filename)
-            self._db.row_factory = sqlite3.Row
-            self._db.execute('PRAGMA foreign_keys = ON')
-            self._cursor = self._db.cursor()
-            backup.backup(self._db)
+            self.parent.overwrite(self, backup)
 
         # and delete the copy
-        backup.close()
-        shutil.rmtree(tmpdir)
+        del self.parent[backup.name]
 
     def __getitem__(self, key):
-        """Allow [] access to the dictionary!"""
-        if key == 'atoms':
-            return _Atoms(self, key)
+        """Allow [] access to the dictionary!
+
+        Because some of the items, such as template contain state,
+        we need to ensure that the same object is used everywhere. Hence
+        the self._items array to sotre the instances.
+
+        Parameters
+        ----------
+        key : str
+            The table name or name of a multi-table item like atoms.
+
+        Returns
+        -------
+        table : Table or Atom, Template, Templateatoms, ...
+        """
+        if key == 'atom' or key == 'atoms':
+            if 'atom' not in self._items:
+                self._items['atom'] = Atoms(self)
+            return self._items['atom']
+        elif key == 'template' or key == 'templates':
+            if 'template' not in self._items:
+                self._items['template'] = Template(self)
+            return self._items['template']
+        elif key == 'templateatom' or key == 'templateatoms':
+            if 'templateatom' not in self._items:
+                self._items['templateatom'] = Templateatoms(self)
+            return self._items['templateatom']
+        elif key == 'templatebond' or key == 'templatebonds':
+            if 'templatebond' not in self._items:
+                self._items['templatebond'] = Templatebonds(self)
+            return self._items['templatebond']
+        elif key == 'bond' or key == 'bonds':
+            if 'bond' not in self._items:
+                self._items['bond'] = Bonds(self)
+            return self._items['bond']
+        elif key == 'cell':
+            if 'cell' not in self._items:
+                self._items['cell'] = CellParameters(self)
+            return self._items['cell']
         else:
-            return _Table(self, key)
+            if key not in self._items:
+                self._items[key] = Table(self, key)
+            return self._items[key]
 
     def __setitem__(self, key, value):
         """Allow x[key] access to the data"""
@@ -108,13 +209,13 @@ class System(collections.abc.MutableMapping):
         )
         return self.cursor.fetchone()[0]
 
-    def __repr__(self):
-        """The string representation of this object"""
-        raise NotImplementedError()
+    # def __repr__(self):
+    #     """The string representation of this object"""
+    #     raise NotImplementedError()
 
-    def __str__(self):
-        """The pretty string representation of this object"""
-        raise NotImplementedError()
+    # def __str__(self):
+    #     """The pretty string representation of this object"""
+    #     raise NotImplementedError()
 
     def __contains__(self, item):
         """Return a boolean indicating if a key exists."""
@@ -131,18 +232,103 @@ class System(collections.abc.MutableMapping):
 
     def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
-        raise NotImplementedError()
+        if self is other:
+            return True
 
-    def list(self):
-        """Return a list of all the tables in the system."""
-        result = []
-        for row in self.db.execute(
-            "SELECT name"
-            "  FROM sqlite_master"
-            " WHERE type = 'table'"
-        ):
-            result.append(row['name'])
+        tables = set(self.list())
+        other_tables = set(other.list())
+
+        added = tables - other_tables
+        removed = other_tables - tables
+        in_common = tables & other_tables
+
+        if len(added) > 0:
+            return False
+        if len(removed) > 0:
+            return False
+
+        # Need the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+        name = self.name
+        other_name = other.name
+        detach = False
+        if name != other_name and not self.is_attached(other_name):
+            # Attach the other system in order to do comparisons.
+            self.attach(other)
+            detach = True
+
+        # Check the tables in both systems
+        result = True
+        for table in in_common:
+            if Table(self, table) != Table(other, table):
+                result = False
+                break
+
+        # Detach the other database if needed
+        if detach:
+            self.detach(other)
+
         return result
+
+    @property
+    def atoms(self):
+        """The atoms, which are held as a dictionary of arrays"""
+        return self['atom']
+
+    @property
+    def bonds(self):
+        """The bonds, which are held as a dictionary of arrays"""
+        return self['bond']
+
+    @property
+    def cell(self):
+        """The periodic cell."""
+        return self['cell']
+
+    @property
+    def configurations(self):
+        """The dictionary of configurations."""
+        return self._configurations
+
+    @property
+    def coordinate_system(self):
+        """The coordinates system used, 'fractional' or 'Cartesian'"""
+        self.cursor.execute(
+            "SELECT coordinatesystem FROM system WHERE id = ?'", (self._id,)
+        )
+        return self.cursor.fetchone()[0]
+
+    @coordinate_system.setter
+    def coordinate_system(self, value):
+        if value.lower()[0] == 'f':
+            self.cursor.execute(
+                "UPDATE system SET coordinatesystem = 'fractional'"
+                " WHERE id = ?", (self._id,)
+            )
+        else:
+            self.cursor.execute(
+                "UPDATE system SET coordinatesystem = 'Cartesian'"
+                " WHERE id = ?", (self._id,)
+            )
+
+    @property
+    def current_configuration(self):
+        """The current configuration to work with."""
+        return self._current_configuration
+
+    @current_configuration.setter
+    def current_configuration(self, value):
+        if value not in self.configurations:
+            raise KeyError(f"configuration '{value}' doe not exist.")
+        self._current_configuration = value
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @property
+    def db(self):
+        return self._db
 
     @property
     def filename(self):
@@ -167,12 +353,9 @@ class System(collections.abc.MutableMapping):
                 self._initialize()
 
     @property
-    def db(self):
-        return self._db
-
-    @property
-    def cursor(self):
-        return self._cursor
+    def name(self):
+        """Return the name of this system."""
+        return self._name
 
     @property
     def n_atoms(self):
@@ -180,9 +363,9 @@ class System(collections.abc.MutableMapping):
         return self.atoms.n_atoms
 
     @property
-    def atoms(self):
-        """The atoms, which are held as a dictionary of arrays"""
-        return self['atoms']
+    def n_configurations(self):
+        """The number of configurations of the system."""
+        return self['configuration'].n_rows
 
     @property
     def n_bonds(self):
@@ -190,69 +373,156 @@ class System(collections.abc.MutableMapping):
         return self.bonds.n_bonds
 
     @property
-    def bonds(self):
-        """The bonds, which are held as a dictionary of arrays"""
-        return self['bonds']
-
-    @property
-    def cell(self):
-        """The periodic cell."""
-        return self['cell']
-
-    @property
     def periodicity(self):
         """The periodicity of the system, 0, 1, 2 or 3"""
         self.cursor.execute(
-            "SELECT value FROM metadata WHERE item = 'periodicity'"
+            "SELECT periodicity FROM system WHERE id=?", (self._id,)
         )
-        return int(self.cursor.fetchone()[0])
+        return self.cursor.fetchone()[0]
+
+    @property
+    def parent(self):
+        """The parent of this, i.e. a Systems object."""
+        return self._parent
 
     @periodicity.setter
     def periodicity(self, value):
         if value < 0 or value > 3:
             raise ValueError('The periodicity must be between 0 and 3.')
         self.cursor.execute(
-            "UPDATE metadata SET value = ? WHERE item = 'periodicity'",
-            (str(value))
+            "UPDATE system SET periodicity = ? WHERE id = ?",
+            (value, self._id)
         )
 
     @property
     def version(self):
         """The version of the system, incrementing from 0"""
-        self.cursor.execute(
-            "SELECT value FROM metadata WHERE item = 'version'"
-        )
+        self.cursor.execute("SELECT version FROM system")
         return int(self.cursor.fetchone()[0])
 
     @version.setter
     def version(self, value):
-        self.cursor.execute(
-            "UPDATE metadata SET value = ? WHERE item = 'version'",
-            (str(value),)
-        )
+        self.cursor.execute("UPDATE system SET version = ?", (str(value),))
 
-    @property
-    def coordinate_type(self):
-        """The coordinates of the system, 'fractional' or 'Cartesian'"""
-        self.cursor.execute(
-            "SELECT value FROM metadata WHERE item = 'coordinate type'"
-        )
-        return self.cursor.fetchone()[0]
+    def add_configuration(
+        self,
+        system=1,
+        name=None,
+        symmetry=None,
+        cell=None,
+        changed_atoms=False,
+        changed_bonds=False
+    ):
+        """Add a new configuration to the system.
 
-    @coordinate_type.setter
-    def coordinate_type(self, value):
-        if value.lower()[0] == 'f':
-            self.cursor.execute(
-                "UPDATE metadata SET text = 'fractional'"
-                " WHERE item = 'coordinate type'"
-            )
+        Parameters
+        ----------
+        system : int = 1
+            The system for which this is a configuration. (optional)
+        name : str = None
+            A textual name for the configuration (optional)
+        symmetry : int or str = None
+            The id or name of the point or space group (optional)
+        cell : Cell or 6-vector = None
+            The cell parameters, default to last ones.
+        changed_atoms : bool = False
+            Whether the atoms have changed in number or identity from the
+            previous configuration.
+        changed_bonds : bool = False
+            Whether the bonding has changed from the previous configuration.
+
+        Returns
+        -------
+        configuration : int
+            The id of the new configuration.
+
+        What needs to be done depends on whether the atoms or bonds are
+        changing:
+
+        Case 1: The bonds are changing.
+            * create a new template
+            * create a subset for the new template
+            * if the atoms aren't changing copy the previous connections in
+              subset_atom to this instance.
+            This routine does not create any templateatoms or bonds.
+
+        Case 2: The atoms are changing
+            * create new subset using the previous template
+            This routine does not connect the atoms to the new 'all' subset,
+            nor does it add any templateatoms or bonds to the new template.
+
+        Case 3: Neither the atoms nor bonding is changing
+            * Connect the previous 'all' subset to the configuration in the
+              configuration_subset table.
+        """
+        # Work out the subset and template for 'all'
+        if len(self._configurations) == 0:
+            changed_bonds = True
+            changed_atoms = True
+            tid = self['template'].append(name='all', type='all')[0]
+            sid = self['subset'].append(template=tid)[0]
         else:
-            self.cursor.execute(
-                "UPDATE metadata SET text = 'Cartesian'"
-                " WHERE item = 'coordinate type'"
-            )
+            last_configuration = max(self._configurations)
+            last_sid, last_tid = self._configurations[last_configuration]
+            sid = last_sid
+            tid = last_tid
 
-    def create_table(self, name, cls=_Table, other=None):
+            if changed_bonds:
+                # Case 1
+                # If the bonding changed, need a new template and new subset
+                tid = self['template'].append(name='all', type='all')
+                sid = self['subset'].append(template=tid)
+                if not changed_atoms:
+                    atom_ids = self['atom'].atoms(
+                        configuration=last_configuration
+                    )
+                    self['subset_atom'].append(subset=sid, atom=atom_ids)
+            elif changed_atoms:
+                # Case 2
+                sid = self['subset'].append(template=tid)[0]
+            else:
+                # Case 3
+                pass
+
+        cid = self['configuration'].append(
+            system=system, name=name, symmetry=symmetry
+        )[0]
+
+        self['configuration_subset'].append(configuration=cid, subset=sid)
+        self._configurations[cid] = (sid, tid)
+
+        return cid
+
+    def all_subset(self, configuration=None):
+        if configuration is None:
+            configuration = self.current_configuration
+        return self._configurations[configuration][0]
+
+    def all_template(self, configuration=None):
+        if configuration is None:
+            configuration = self.current_configuration
+        return self._configurations[configuration][1]
+
+    def attach(self, other):
+        """Attach another system to this one's database."""
+        if self.is_attached(other.name):
+            return
+        self.db.execute(
+            f"ATTACH DATABASE '{other.filename}' AS '{other.name}'"
+        )
+        self._attached.append(other.name)
+
+    def is_attached(self, name):
+        """Return whether another system is attached to this one."""
+        return name in self._attached
+
+    def detach(self, other):
+        """Detach an attached system."""
+        if self.is_attached(other.name):
+            self.cursor.execute(f'DETACH DATABASE "{other.name}"')
+            self._attached.remove(other.name)
+
+    def create_table(self, name, cls=Table, other=None):
         """Create a new table with the given name.
 
         Parameters
@@ -260,8 +530,8 @@ class System(collections.abc.MutableMapping):
         name : str
             The name of the new table.
 
-        cls : _Table subclass
-            The class of the new table, defaults to _Table
+        cls : Table subclass
+            The class of the new table, defaults to Table
 
         Returns
         -------
@@ -271,159 +541,169 @@ class System(collections.abc.MutableMapping):
         if name in self:
             raise KeyError(f"'{name}' already exists in the system.")
 
-        return cls(self, name, other)
+        self._items[name] = cls(self, name, other)
+        return self._items[name]
 
-    def _log_changes(self, previous, backup_file):
-        """Track changes to the system"""
-        changed = False
+    def diff(self, other):
+        """Differences between this system and another."""
+        result = {}
 
-        # Attach the previous database in order to do comparisons.
-        self.cursor.execute(f"ATTACH DATABASE '{backup_file}' AS previous")
+        if self is other:
+            return result
 
-        # Tables
-        self.cursor.execute(
+        tables = set(self.list())
+        other_tables = set(other.list())
+
+        added = tables - other_tables
+        removed = other_tables - tables
+        in_common = tables & other_tables
+
+        if len(added) > 0:
+            result['tables added'] = list(added)
+        if len(removed) > 0:
+            result['tables removed'] = list(removed)
+
+        # Need the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+        name = self.name
+        other_name = other.name
+        detach = False
+        if name != other_name and not self.is_attached(other_name):
+            # Attach the other system in order to do comparisons.
+            self.attach(other)
+            detach = True
+
+        # Check the tables in both systems
+        for table in in_common:
+            tmp = Table(self, table).diff(Table(other, table))
+            if len(tmp) > 0:
+                result[f"table '{table}' diffs"] = tmp
+
+        # Detach the other database if needed
+        if detach:
+            self.detach(other)
+
+        return result
+
+    def list(self):
+        """Return a list of all the tables in the system."""
+        result = []
+        for row in self.db.execute(
             "SELECT name"
             "  FROM sqlite_master"
             " WHERE type = 'table'"
-        )
-        tables = [x[0] for x in self.cursor.fetchall()]
+        ):
+            result.append(row['name'])
+        return result
 
-        self.cursor.execute(
-            "SELECT name"
-            "  FROM previous.sqlite_master"
-            " WHERE type = 'table'"
-        )
-        previous_tables = [x[0] for x in self.cursor.fetchall()]
+    def to_atnos(self, symbols):
+        """Convert element symbols to atomic numbers.
 
-        for table in tables:
-            if table not in previous_tables:
-                changed = True
-                print(f'Table {table} added to the system.')
-        for table in previous_tables:
-            if table not in tables:
-                changed = True
-                print(f'Table {table} deleted from the system.')
+        Parameters
+        ----------
+        symbols : [str]
+            The atomic symbols
 
-        # Now check each table
-        for table in tables:
-            attributes = self.attributes(table)
-            columns = set(attributes)
-            if table in previous_tables:
-                previous_attributes = self.attributes(f'previous.{table}')
-                previous_columns = set(previous_attributes)
-                added = columns - previous_columns
-                if len(added) > 0:
-                    changed = True
-                    print(
-                        f'The following columns were added to table {table}:'
-                    )
-                    print('\t' + '\n\t'.join(added))
-                removed = previous_columns - columns
-                if len(removed) > 0:
-                    changed = True
-                    print(
-                        'The following columns were removed from table '
-                        f'{table}:'
-                    )
-                    print('\t' + '\n\t'.join(removed))
-                in_common = previous_columns & columns
-                if len(in_common) > 0:
-                    column_def = 'rowid, ' + ', '.join(in_common)
-
-                    # Diff the tables....
-                    print(f"Diff'ing table = {table}")
-
-                    self.cursor.execute(
-                        f'SELECT COUNT(*) FROM previous.{table}'
-                    )
-                    n_rows = self.cursor.fetchone()[0]
-                    print(f'   There were {n_rows} rows.')
-
-                    self.cursor.execute(f'SELECT COUNT(*) FROM {table}')
-                    n_rows = self.cursor.fetchone()[0]
-                    print(f'   Now there are {n_rows} rows.')
-
-                    self.cursor.execute(
-                        f'SELECT {column_def} FROM'
-                        '       ('
-                        f'           SELECT {column_def} FROM previous.{table}'
-                        '           EXCEPT'
-                        f'           SELECT {column_def} FROM {table}'
-                        '       )'
-                        ' UNION ALL '
-                        f'SELECT {column_def} FROM'
-                        '       ('
-                        f'           SELECT {column_def} FROM {table}'
-                        '           EXCEPT'
-                        f'           SELECT {column_def} FROM previous.{table}'
-                        '       )'
-                        ' ORDER BY rowid'
-                    )
-                    lines = self.cursor.fetchall()
-                    print(f'Found {len(lines)} lines of differences.')
-                    if len(lines) > 0:
-                        changed = True
-                    last = None
-                    if table == 'metadata':
-                        for line in lines:
-                            if last is None:
-                                last = line
-                            elif line['rowid'] == last['rowid']:
-                                for k1, v1, v2 in zip(last.keys(), last, line):
-                                    if v1 != v2:
-                                        print(
-                                            f"{line['item']} changed from "
-                                            f"{v1} to {v2}"
-                                        )
-                            else:
-                                last = line
-                    else:
-                        for line in lines:
-                            if last is None:
-                                last = line
-                            elif line['rowid'] == last['rowid']:
-                                for k1, v1, v2 in zip(last.keys(), last, line):
-                                    if v1 != v2:
-                                        print(
-                                            f"{line['rowid']}, {k1} changed "
-                                            f"from {v1} to {v2}"
-                                        )
-                            else:
-                                last = line
-        # Detach the previous database
-        self.cursor.execute("DETACH DATABASE previous")
-
-        if changed:
-            self.version += 1
-            print('The system was changed')
-        else:
-            print('The system was not changed')
-
-        return changed
+        Returns
+        -------
+        atnos : [int]
+            The corresponding atomic numbers (1..118)
+        """
+        return [self._symbol_to_atno[x] for x in symbols]
 
     def _initialize(self):
         """Initialize the SQLite database."""
-        if 'elements' not in self:
+        if 'element' not in self:
             self._initialize_elements()
 
-        if 'metadata' not in self:
-            self._initialize_metadata()
+        if 'symmetry' not in self:
+            self._initialize_symmetry()
 
-    def _initialize_metadata(self):
-        """Set up the table of metadata."""
-        table = self['metadata']
-        table.add_attribute('item', coltype='str')
-        table.add_attribute('value', coltype='str')
+        if 'cell' not in self:
+            self._initialize_cell()
 
-        table.append(item='version', value='0')
-        table.append(item='periodicity', value='0')
-        table.append(item='coordinate type', value='Cartesian')
+        if 'system' not in self:
+            self._initialize_system()
+        self._id = 1
 
+        if 'configuration' not in self:
+            self._initialize_configurations()
+        else:
+            # Get all the configurations from the database
+            for row in self.db.execute(
+                "SELECT configuration, subset, template FROM "
+                "       configuration_subset, subset, template"
+                " WHERE template.name = 'all' AND template.type = 'all'"
+                "   AND template.id = template AND subset.id = subset"
+            ):
+                config = row['configuration']
+                self._configurations[config] = (row['subset'], row['template'])
+        if 'atom' not in self:
+            self._initialize_atoms()
+
+        if 'subset' not in self:
+            self._initialize_subsets()
+
+        # If needed, set up the first configuration, and the 'all' subset
+        if self.n_configurations == 0:
+            self.current_configuration = self.add_configuration()
+
+    def _initialize_system(self):
+        """Set up the table for the system."""
+        table = self['system']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute(
+            'name', coltype='str', notnull=True, default='default'
+        )
+        table.add_attribute('version', coltype='int', notnull=True, default=0)
+        table.add_attribute(
+            'periodicity', coltype='int', notnull=True, default=0
+        )
+        table.add_attribute(
+            'coordinatesystem',
+            coltype='str',
+            notnull=True,
+            default='Cartesian'
+        )
+
+        table.append(
+            id=1,
+            name='default',
+            version=0,
+            periodicity=0,
+            coordinatesystem='Cartesian'
+        )
         self.db.commit()
+
+    def _initialize_atoms(self):
+        """Set up the tables for atoms."""
+        table = Table(self, 'atom')
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('atno', coltype='int', references='element')
+
+        table = self['coordinates']
+        table.add_attribute(
+            'configuration', coltype='int', references='configuration'
+        )
+        table.add_attribute('atom', coltype='int', references='atom')
+        table.add_attribute('x', coltype='float')
+        table.add_attribute('y', coltype='float')
+        table.add_attribute('z', coltype='float')
+
+    def _initialize_cell(self):
+        """Set up the tables for the cell."""
+        table = self['cell']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('a', coltype='float', default=10.0)
+        table.add_attribute('b', coltype='float', default=10.0)
+        table.add_attribute('c', coltype='float', default=10.0)
+        table.add_attribute('alpha', coltype='float', default=90.0)
+        table.add_attribute('beta', coltype='float', default=90.0)
+        table.add_attribute('gamma', coltype='float', default=90.0)
 
     def _initialize_elements(self):
         """Set up the table of elements."""
-        table = self['elements']
+        table = self['element']
         table.add_attribute('atno', coltype='int', pk=True)
         table.add_attribute('symbol', coltype='str', index='unique')
         table.add_attribute('mass', coltype='float')
@@ -434,7 +714,79 @@ class System(collections.abc.MutableMapping):
                 atno=data['atomic number'],
                 mass=data['atomic weight']
             )
+            self._symbol_to_atno[symbol] = data['atomic number']
         self.db.commit()
+
+    def _initialize_configurations(self):
+        """Set up the table of configurations."""
+        table = self['configuration']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('system', coltype='int', references='system')
+        table.add_attribute('name', coltype='str')
+        table.add_attribute('symmetry', coltype='int', references='symmetry')
+        table.add_attribute('cell', coltype='int', references='cell')
+        self.db.commit()
+
+    def _initialize_subsets(self):
+        """Set up the tables for handling subsets.
+        """
+        # The definition of the subsets -- templates
+        table = self['template']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('name', coltype='str')
+        table.add_attribute('type', coltype='str')
+
+        # The subsets
+        table = self['subset']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('template', coltype='int', references='template')
+
+        # The template atoms (if any) for the subset
+        table = Table(self, 'templateatom')
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('template', coltype='int', references='template')
+        table.add_attribute('name', coltype='str')
+        table.add_attribute('atno', coltype='int', references='element')
+
+        # The template coordinates (if any) for the subset
+        table = Table(self, 'templatecoordinates')
+        table.add_attribute(
+            'templateatom', coltype='int', references='templateatom'
+        )
+        table.add_attribute('x', coltype='float')
+        table.add_attribute('y', coltype='float')
+        table.add_attribute('z', coltype='float')
+
+        # And bonding for the template
+        table = self['templatebond']
+        table.add_attribute('i', coltype='int', references='templateatom')
+        table.add_attribute('j', coltype='int', references='templateatom')
+        table.add_attribute('bondorder', coltype='int', default=1)
+
+        # The connection from the subsets to the configurations
+        table = self['configuration_subset']
+        table.add_attribute(
+            'configuration', coltype='int', references='configuration'
+        )
+        table.add_attribute('subset', coltype='int', references='subset')
+
+        # The connection between subsets and the atoms in the system
+        table = self['subset_atom']
+        table.add_attribute('atom', coltype='int', references='atom')
+        table.add_attribute('subset', coltype='int', references='subset')
+        table.add_attribute(
+            'templateatom', coltype='int', references='templateatom'
+        )
+
+    def _initialize_symmetry(self):
+        """Set up the tables for symmetry."""
+        table = self['symmetry']
+        table.add_attribute('id', coltype='int', pk=True)
+        table.add_attribute('group', coltype='str')
+
+        table = self['symmetryoperation']
+        table.add_attribute('symmetry', coltype='int', references='symmetry')
+        table.add_attribute('symop', coltype='str')
 
     def attributes(self, tablename: str) -> Dict[str, Any]:
         """The attributes -- columns -- of a given table.
@@ -469,16 +821,20 @@ class System(collections.abc.MutableMapping):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    system = System()
+    system = _System()
+
+    import pprint
+
+    system = _System()
     with system as s:
         s.periodicity = 3
-        # s.coordinate_type = 'f'
+        s.coordinate_system = 'f'
 
-    print(f'metadata? {"metadata" in system}')
+    print(f'system? {"system" in system}')
     print(f'  table1? {"table1" in system}')
 
-    metadata = system['metadata']
-    # pprint.pprint(metadata.attributes)
+    table = system['system']
+    pprint.pprint(table.attributes)
 
     table1 = system.create_table('table1')
     table1.add_attribute('atno', coltype='int', default=-1)

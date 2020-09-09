@@ -9,12 +9,16 @@ In some ways this a bit like pandas; however, we also need more control than a
 simple pandas dataframe provides....
 """
 
+import collections.abc
+from itertools import zip_longest
 import logging
 from typing import Any, Dict, TypeVar
 
 import numpy as np
+import pandas
 
-import molsystem
+from molsystem.column import _Column as Column
+from molsystem.table import _Table as Table
 
 System_tp = TypeVar("System_tp", "System", None)
 Atoms_tp = TypeVar("Atoms_tp", "_Atoms", str, None)
@@ -22,57 +26,294 @@ Atoms_tp = TypeVar("Atoms_tp", "_Atoms", str, None)
 logger = logging.getLogger(__name__)
 
 
-class _Atoms(molsystem.table._Table):
-    """The Atoms class holds arrays of attributes describing atoms
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,...s3n-1), ..."
+    return zip_longest(*[iter(iterable)] * n)
 
-    Two attributes are required: the coordinates ('xyz') and atomic numbers
-    ('atno'). Other attributes can be created, either from a list of predefined
-    ones or by specifying the metadata required of an attribute. Attributes can
-    also be removed. See the method 'add_attribute' for more detail.
 
-    Atoms can be added ('append') or removed ('delete').
+class _Atoms(collections.abc.MutableMapping):
+    """The Atoms class holds arrays of attributes describing atoms.
+
+    In order to handle changes in bonding (and numbers of atoms) the
+    system class has several tables covering the atoms and bonds. See
+    the main documentation for a more detailed description. The key
+    tables are:
+
+    configuration -- a list of configurations in e.g. a trajectory
+    configuration_subset -- connnects configurations with subset
+
+    template -- a simple list of templates
+    templateatom -- holds the atoms in a template, if present.
+    templatebond -- holds the bonds between the template atoms, if present
+
+    subset -- an instantiation of a template, connected with one or more
+              configurations of the system.
+    subset_atom -- connects the subset to the atoms, and optionally connects
+                   the atom to a template atom.
+
+    atom -- the nonvarying part of the description of the atoms
+    coordinates -- the varying part of the description of atoms
+
+    The description of the atoms is split into two parts: the identity
+    of the atom in the 'atom' table; and the coordinates and other
+    varying attributes in the table 'coordinates' as indicated above.
+
+    This class handles the situation where the number and type of atoms
+    changes from configuration to configuration, as it would for example
+    in a grand canonical simulation or simulating surface deposition.
+
+    The configuration if either given explicitly or the "current configuration"
+    is used. The current configuration is set and stored in the system object.
+
+    Given this configuration, this class provides the illusion that
+    there is a single set of atoms in a single table containing both the
+    identity of the atoms and their coordinates.
+
+    Underneath, this is handled by a subset "all", which is a special
+    subset that contains all of the atoms in the system. This subset is
+    defined by one or more templates "all" which are instantiated in the
+    subset table and connected to configurations via the
+    configuration_subset table.
+
+    If the number of atoms in the system is fixed and there are no bonds
+    or they don't change (the case in classical MD), there will be one
+    template "all" instantiated as one subset. All configurations will
+    point to this one subset. If there are no bonds in the system, then
+    this is all that is needed. However if there are bonds, the atoms
+    involved in bonds need to be in the templateatom table and the bonds
+    entered in the templatebond table.
+
+    If the bonds change over time, then for each bond configuration
+    there needs to be a distinct "all" template, with the appropriate
+    templateatoms and templatebonds. This template is instantiated as a
+    new subset and connected to one or more configurations.
+
+    If the number of atoms changes over time, each new set of atoms also
+    requires a new template and subset connected to the atoms in that
+    configuration. A subset may persist over a number of configurations,
+    but each time the atoms change a new subset is required.
+
+    If both the atoms and the bonds change, then a corresponding subset
+    is needed each time either changes.
     """
 
     def __init__(
         self,
         system: System_tp,
-        table: str = 'atoms',
-        other: Atoms_tp = None
+        atom_tablename='atom',
+        coordinates_tablename='coordinates',
     ) -> None:
 
-        super().__init__(system, table, other)
+        self._system = system
+        self._atom_tablename = atom_tablename
+        self._coordinates_tablename = coordinates_tablename
 
-        self._word = 'atoms'
+        self._atom_table = Table(system, self._atom_tablename)
+        self._coordinates_table = Table(system, self._coordinates_tablename)
 
-        if self.table not in self.system:
-            self._initialize()
+    def __enter__(self) -> Any:
+        self.system.__enter__()
+        return self
+
+    def __exit__(self, etype, value, traceback) -> None:
+        self.system.__exit__(etype, value, traceback)
+
+    def __getitem__(self, key) -> Any:
+        """Allow [] to access the data!"""
+        if key in self._atom_table.attributes:
+            sql = (
+                'WHERE id IN (SELECT atom FROM subset_atom '
+                f'WHERE subset = {self.system.all_subset()})'
+            )
+            return Column(self._atom_table, key, where=sql)
+        elif key in self._coordinates_table.attributes:
+            where = f"WHERE configuration = {self.current_configuration}"
+            return Column(self._coordinates_table, key, where=where)
+        else:
+            raise KeyError(f"'{key}' not in atoms")
+
+    def __setitem__(self, key, value) -> None:
+        """Allow x[key] access to the data"""
+        column = self[key]
+        column[0:] = value
+
+    def __delitem__(self, key) -> None:
+        """Allow deletion of keys"""
+        if key in self._atom_table.attributes:
+            del self._atom_table[key]
+        elif key in self._coordinates_table.attributes:
+            del self._coordinates_table[key]
+
+    def __iter__(self) -> iter:
+        """Allow iteration over the object"""
+        return iter([*self.attributes.keys()])
+
+    def __len__(self) -> int:
+        """The len() command"""
+        return len(self.attributes)
+
+    def __repr__(self) -> str:
+        """The string representation of this object"""
+        df = self.to_dataframe()
+        return repr(df)
+
+    def __str__(self) -> str:
+        """The pretty string representation of this object"""
+        df = self.to_dataframe()
+        return str(df)
+
+    def __contains__(self, item) -> bool:
+        """Return a boolean indicating if a key exists."""
+        # Normal the tablename is used as an identifier, so is quoted with ".
+        # Here we need it as a string literal so strip any quotes from it.
+
+        tmp_item = item.strip('"')
+        return tmp_item in self.attributes
+
+    def __eq__(self, other) -> Any:
+        """Return a boolean if this object is equal to another"""
+        if self._atom_table != other._atom_table:
+            return False
+        if self._coordinates_table != other._coordinates_table:
+            return False
+        return True
+
+    @property
+    def system(self):
+        """The system that we belong to."""
+        return self._system
+
+    @property
+    def db(self):
+        """The database connection."""
+        return self.system.db
+
+    @property
+    def cursor(self):
+        """The database connection."""
+        return self.system.cursor
+
+    @property
+    def table(self) -> str:
+        """The name of this table."""
+        return '"' + self._atom_tablename + '"'
+
+    @property
+    def current_configuration(self):
+        """The configuration of the system being used"""
+        return self.system.current_configuration
+
+    @current_configuration.setter
+    def current_configuration(self, value):
+        self.system.current_configuration = value
+
+    @property
+    def n_rows(self) -> int:
+        """The number of rows in the table."""
+        self.cursor.execute(f'SELECT COUNT(*) FROM {self.table}')
+        result = self.cursor.fetchone()[0]
+        return result
 
     @property
     def n_atoms(self) -> int:
-        """The number of atoms"""
-        return self.n_rows
+        """The number of atoms *in the current* configuration."""
+        self.cursor.execute(
+            "SELECT COUNT(*) FROM subset_atom WHERE subset = ?",
+            (self.system.all_subset(),)
+        )
+        return self.cursor.fetchone()[0]
 
     @property
-    def coordinate_type(self):
-        """The type of coordinates: 'fractional' or 'Cartesian'"""
-        return self._coordinate_type
+    def atom_ids(self) -> [int]:
+        """The ids of the atoms *in the current* configuration."""
+        return [
+            x[0] for x in self.db.execute(
+                "SELECT atom FROM subset_atom WHERE subset = ?",
+                (self.system.all_subset(),)
+            )
+        ]
 
-    @coordinate_type.setter
-    def coordinate_type(self, value):
-        try:
-            if 'fractional'.startswith(value.lower()):
-                self._coordinate_type = 'fractional'
-            elif 'cartesian'.startswith(value.lower()):
-                self._coordinate_type = 'Cartesian'
-            else:
-                raise ValueError(
-                    "The coordinate_type must be 'Cartesian' or 'fractional', "
-                    "not '{}'".format(value)
-                )
-        except Exception:
-            raise ValueError(
-                "The coordinate_type must be 'Cartesian' or 'fractional', "
-                "not '{}'".format(value)
+    @property
+    def attributes(self) -> Dict[str, Any]:
+        """The definitions of the attributes.
+        Combine the attributes of the atom and coordinates tables to
+        make it look like a single larger table.
+        """
+
+        result = self._atom_table.attributes
+
+        for key, value in self._coordinates_table.attributes.items():
+            if key != 'atom':  # atom key links the tables together, so ignore
+                result[key] = value
+
+        return result
+
+    @property
+    def coordinate_system(self):
+        """The type of coordinates: 'fractional' or 'Cartesian'"""
+        return self._system.coordinate_system
+
+    @coordinate_system.setter
+    def coordinate_system(self, value):
+        self._system.coordinate_system = value
+
+    @property
+    def version(self):
+        return self._system.version
+
+    def add_attribute(
+        self,
+        name: str,
+        coltype: str = 'float',
+        default: Any = None,
+        notnull: bool = False,
+        index: bool = False,
+        pk: bool = False,
+        references: str = None,
+        values: Any = None,
+        configuration_dependent: bool = False
+    ) -> None:
+        """Adds a new attribute.
+
+        If the default value is None, you must always provide values wherever
+        needed, for example when adding a row.
+
+        Parameters
+        ----------
+            name : str
+                the name of the attribute.
+            coltype : str = 'float'
+                the type of the attribute (column). Must be one of 'int',
+                'float', 'str' or 'byte'. Defaults to 'float'.
+            default : Any
+                the default value for the attribute if no value is given.
+            notnull : bool = False
+                whether the value must be non-null
+            index :  bool = False
+                whether to create an index on the column
+            pk : bool
+                whether the column is the primay key
+            references : str = None
+                If the column reference another table, i.e. is a FK
+            values : Any
+                either a single value or a list of values length 'nrows' of
+                values to fill the column.
+            configuration_dependent : bool = False
+                whether the attribute belongs with the coordinates (True)
+                or atoms (False)
+
+        Returns
+        -------
+            None
+        """
+
+        if configuration_dependent:
+            self._coordinates_table.add_attribute(
+                name, coltype, default, notnull, index, pk, references, values
+            )
+        else:
+            self._atom_table.add_attribute(
+                name, coltype, default, notnull, index, pk, references, values
             )
 
     def append(self, **kwargs: Dict[str, Any]) -> None:
@@ -84,10 +325,6 @@ class _Atoms(molsystem.table._Table):
         field corrresponding to a key.
         """
 
-        # Check keys and lengths of added atoms
-        # if 'x' not in kwargs or 'y' not in kwargs or 'z' not in kwargs:
-        #     raise KeyError("The coordinates are required!")
-
         # Need to handle the elements specially. Can give atomic numbers,
         # or symbols. By construction the references to elements are identical
         # to their atomic numbers.
@@ -96,31 +333,129 @@ class _Atoms(molsystem.table._Table):
             symbols = kwargs.pop('symbol')
             kwargs['atno'] = self.to_atnos(symbols)
 
-        super().append(**kwargs)
+        # How many new rows there are
+        n_rows, lengths = self._get_n_rows(**kwargs)
+
+        # Fill in the atom table
+        data = {}
+        for column in self._atom_table.attributes:
+            if column != 'id' and column in kwargs:
+                data[column] = kwargs.pop(column)
+
+        if len(data) == 0:
+            data['atno'] = [None] * n_rows
+
+        ids = self._atom_table.append(n=n_rows, **data)
+
+        # Now append to the coordinates table
+        data = {'atom': ids}
+        for column in self._coordinates_table.attributes:
+            if column != 'id' and column in kwargs:
+                data[column] = kwargs.pop(column)
+        if 'configuration' not in data:
+            data['configuration'] = self.current_configuration
+
+        self._coordinates_table.append(n=n_rows, **data)
+
+        # And to the subset 'all'
+        subset_atom = self.system['subset_atom']
+        subset_atom.append(subset=self.system.all_subset(), atom=ids)
+
+        return ids
 
     def atoms(self, *args):
         """Return an iterator over the atoms."""
-        return self.rows(*args)
+        atom_tbl = self._atom_tablename
+        coord_tbl = self._coordinates_tablename
+        atom_columns = [*self._atom_table.attributes]
+        coord_columns = [*self._coordinates_table.attributes]
+        coord_columns.remove('atom')
+
+        columns = [f'{atom_tbl}.{x}' for x in atom_columns]
+        columns += [f'{coord_tbl}.{x}' for x in coord_columns]
+        column_defs = ', '.join(columns)
+
+        sql = (
+            f'SELECT {column_defs} FROM {atom_tbl}, {coord_tbl}'
+            f' WHERE {atom_tbl}.id IN ('
+            f'   SELECT atom FROM subset_atom WHERE subset = ?'
+            f') AND {coord_tbl}.atom = {atom_tbl}.id'
+        )
+        if len(args) == 0:
+            return self.db.execute(sql, (self.system.all_subset(),))
+
+        parameters = [self.system.all_subset()]
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' AND "{col}" {op} ?'
+            parameters.append(value)
+
+        return self.db.execute(sql, parameters)
 
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers."""
-        result = []
+        return self._system.to_atnos(symbols)
 
-        parameters = [(x,) for x in symbols]
-        for row in self.db.executemany(
-            'SELECT atno WHERE symbol = ?', parameters
-        ):
-            result.append(row['atno'])
+    def _get_n_rows(self, **kwargs):
+        """Get the total number of rows represented in the arguments."""
+        n_rows = None
 
-    def _initialize(self):
-        """Set up the atom table. It needs to have a primary key
-        to be used as a foreign key in the bonds table and elsewhere.
+        lengths = {}
+        for key, value in kwargs.items():
+            if key not in self:
+                raise KeyError(f'"{key}" is not an attribute of the atoms.')
+            length = self.length_of_values(value)
+            lengths[key] = length
+
+            if n_rows is None:
+                n_rows = 1 if length == 0 else length
+
+            if length > 1 and length != n_rows:
+                if n_rows == 1:
+                    n_rows = length
+                else:
+                    raise IndexError(
+                        'key "{}" has the wrong number of values, '
+                        .format(key) +
+                        '{}. Should be 1 or the number of atoms ({}).'
+                        .format(length, n_rows)
+                    )
+        return n_rows, lengths
+
+    def length_of_values(self, values: Any) -> int:
+        """Return the length of the values argument.
+
+        Parameters
+        ----------
+        values : Any
+            The values, which might be a string, single value, list, tuple,
+            etc.
+
+        Returns
+        -------
+        length : int
+            The length of the values. 0 indicates a scalar
         """
-        self.add_attribute('id', coltype='int', pk=True)
-        self.add_attribute('atno', coltype='int', references='elements')
-        self.add_attribute('x', coltype='float', index=True)
-        self.add_attribute('y', coltype='float', index=True)
-        self.add_attribute('z', coltype='float', index=True)
+        if isinstance(values, str):
+            return 0
+        else:
+            try:
+                return len(values)
+            except TypeError:
+                return 0
+
+    def to_dataframe(self):
+        """Return the contents of the table as a Pandas Dataframe."""
+        data = {}
+        rows = self.atoms()
+        for row in rows:
+            data[row[0]] = row[1:]
+
+        columns = [x[0] for x in rows.description[1:]]
+        df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
+
+        return df
 
 
 if __name__ == '__main__':  # pragma: no cover
