@@ -6,6 +6,7 @@ dependencies:
   - pip
   - configargparse
   - numpy
+  - pandas
 
     # Testing
   - coverage
