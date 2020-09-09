@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 molsystem
 A general class for handling molecular and periodic systems.
@@ -51,19 +52,14 @@ setup(
     # Required packages, pulls from pip if needed; do not use for Conda
     # deployment
     install_requires=requirements,
-
     test_suite='tests',
 
     # Valid platforms your code works on, adjust to your flavor
-    platforms=['Linux',
-               'Mac OS-X',
-               'Unix',
-               'Windows'],
+    platforms=['Linux', 'Mac OS-X', 'Unix', 'Windows'],
 
     # Manual control if final package is compressible or not, set False to
     # prevent the .egg from being made
     # zip_safe=False,
-
     keywords='molsystem',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

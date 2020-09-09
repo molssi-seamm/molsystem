@@ -5,7 +5,8 @@ dependencies:
   - python
   - pip
   - configargparse
-  - py-cpuinfo
+  - numpy
+  - pandas
 
     # Testing
   - coverage
@@ -16,10 +17,7 @@ dependencies:
 
     # Pip-only installs
   - pip:
-    - seamm_util>=0.9
-    - seamm>=0.9
-    - seamm-widgets>=0.9
-
+    - pathvalidate
       # Testing
     - yapf
     - codecov

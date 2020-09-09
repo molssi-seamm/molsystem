@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
 
 import collections.abc
-import copy
+from itertools import zip_longest
 import logging
-from typing import Any, Dict, List
+import pandas
+from typing import Any, Dict
 
-import numpy as np
-import pandas as pd
+from molsystem.column import _Column as Column
+
 logger = logging.getLogger(__name__)
 
+column_types = {
+    'int': 'INTEGER',
+    'float': 'REAL',
+    'str': 'TEXT',
+    'bytes': 'BLOB'
+}
 
-class Table(collections.abc.MutableMapping):
+
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,...s3n-1), ..."
+    return zip_longest(*[iter(iterable)] * n)
+
+
+class _Table(collections.abc.MutableMapping):
     """A dictionary-like object for holding tabular data
 
-    For efficiency the data is stored as arrays using Pandas. In addtion, there
-    may be empty ("free") space at the end of the table to make adding small
-    numbers of rows repeatedly reasonable efficient.
-
-    Metadata is used and stored to define the attributes ("columns").
+    This is a wrapper around and SQL table, with columns being the attributes.
 
     Attributes can be created, either from a list of predefined
     ones or by specifying the metadata required of an attribute. Attributes can
@@ -26,152 +35,212 @@ class Table(collections.abc.MutableMapping):
     Rows can be added ('append') or removed ('delete').
     """
 
-    allocate_min = 128
-    """The minimum number of rows to allocate at a time."""
-
-    allocate_factor = 0.5
-    """Allocate the current number of rows times this factor -- but at least
-    'allocate_min' rows -- when space is needed."""
-
-    def __init__(self, other: 'Table' = None) -> None:
-
-        # this is the only thing not copied
-        self._checkpoints = []
-        self._word = 'rows'
-
-        # copy constructor
-        if other and isinstance(other, Table):
-            self._public = copy.deepcopy(other._public)
-            self._private = copy.deepcopy(other._private)
-        else:
-            self._public = pd.DataFrame(
-                index=pd
-                .RangeIndex(start=0, stop=Table.allocate_min, name='uid')
-            )
-            self._private = {
-                'version': 0,
-                'n_rows': 0,
-                'attributes': {},
-            }
+    def __init__(self, system, table: str, other=None) -> None:
+        self._system = system
+        self._table = table
+        if other is not None:
+            self.copy(other)
 
     def __enter__(self) -> Any:
-        tmp = copy.deepcopy(self)
-        self._checkpoints.append(tmp)
-        return tmp
+        self.system.__enter__()
+        return self
 
     def __exit__(self, etype, value, traceback) -> None:
-        if etype is None:
-            # No exception occurred, so replace ourselves with the tmp copy
-            tmp = self._checkpoints.pop()
-            self._public, tmp._public = tmp._public, self._public
-            self._private, tmp._private = tmp._private, self._private
-
-            # and log the changes
-            self._log_changes(tmp)
+        self.system.__exit__(etype, value, traceback)
 
     def __getitem__(self, key) -> Any:
-        """Allow [] access to the dictionary!"""
-        return self._public[key][0:self.n_rows]
+        """Allow [] to access the data!"""
+        return Column(self, key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
-        self._public[key][0:self.n_rows] = value
+        self[key][0:] = value
 
     def __delitem__(self, key) -> None:
         """Allow deletion of keys"""
-        self._public.drop(key, axis=1, inplace=True)
+        # The easy way, which is not supported in SQLite :-(
+        # self.cursor.execute(f'ALTER TABLE {self.table} DROP {key}')
 
-    def __iter__(self) -> Any:
+        columns = set(self.attributes)
+        columns.remove(key)
+        column_def = ', '.join(columns)
+
+        # Need the unquoted version!
+        table = self._table
+
+        sql = f"""
+        -- disable foreign key constraint check
+        PRAGMA foreign_keys=off;
+
+        -- Here you can drop column
+        CREATE TABLE "tmp_{table}"
+           AS SELECT {column_def} FROM "{table}";
+
+        -- drop the table
+        DROP TABLE "{table}";
+
+        -- rename the new_table to the table
+        ALTER TABLE "tmp_{table}" RENAME TO "{table}";
+
+        -- enable foreign key constraint check
+        PRAGMA foreign_keys=on;
+        """
+
+        with self.db:
+            self.db.executescript(sql)
+        self.db.commit()
+
+    def __iter__(self) -> iter:
         """Allow iteration over the object"""
-        return iter(self._public)
+        return iter([*self.attributes.keys()])
 
     def __len__(self) -> int:
         """The len() command"""
-        return len(self._public)
+        return len(self.attributes)
 
     def __repr__(self) -> str:
         """The string representation of this object"""
-        return repr(self._public[0:self.n_rows])
+        df = self.to_dataframe()
+        return repr(df)
 
     def __str__(self) -> str:
         """The pretty string representation of this object"""
-        return self._public[0:self.n_rows].to_string()
+        df = self.to_dataframe()
+        return str(df)
 
     def __contains__(self, item) -> bool:
         """Return a boolean indicating if a key exists."""
-        if item in self._public:
-            return True
-        return False
+        # Normal the tablename is used as an identifier, so is quoted with ".
+        # Here we need it as a string literal so strip any quotes from it.
+
+        tmp_item = item.strip('"')
+        return tmp_item in self.attributes
 
     def __eq__(self, other) -> Any:
         """Return a boolean if this object is equal to another"""
-        return self._public.equals(other._public)
+        # Check numbers of rows
+        if self.n_rows != other.n_rows:
+            return False
+
+        # Check the columns
+        attributes = self.attributes
+        columns = set(attributes)
+
+        other_attributes = other.attributes
+        other_columns = set(other_attributes)
+
+        if columns != other_columns:
+            return False
+
+        is_same = True
+        # Need to check the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
+        else:
+            other_table = other.table
+        table = self.table
+
+        self.cursor.execute(
+            f"""
+            SELECT COUNT(*) FROM
+            (SELECT rowid, * FROM {other_table}
+            EXCEPT
+            SELECT rowid, * FROM {table})
+            """
+        )
+        if self.cursor.fetchone()[0] != 0:
+            is_same = False
+        else:
+            self.cursor.execute(
+                f"""
+                SELECT COUNT(*) FROM
+                (SELECT rowid, * FROM {table}
+                EXCEPT
+                SELECT rowid, * FROM {other_table})
+                """
+            )
+            if self.cursor.fetchone()[0] != 0:
+                is_same = False
+
+        # Detach the other database if needed
+        if detach:
+            self.system.detach(other.system)
+
+        return is_same
 
     @property
-    def version(self) -> int:
-        """The version of the table, which increments monotonically as changes
-        are made."""
-        return self._private['version']
+    def system(self):
+        """The system that we belong to."""
+        return self._system
+
+    @property
+    def db(self):
+        """The database connection."""
+        return self.system.db
+
+    @property
+    def cursor(self):
+        """The database connection."""
+        return self.system.cursor
+
+    @property
+    def table(self) -> str:
+        """The name of this table."""
+        return '"' + self._table + '"'
 
     @property
     def n_rows(self) -> int:
         """The number of rows in the table."""
-        return self._private['n_rows']
+        self.cursor.execute(f'SELECT COUNT(*) FROM {self.table}')
+        result = self.cursor.fetchone()[0]
+        return result
 
     @property
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes."""
-        return self._private['attributes']
+        result = {}
+        for row in self.db.execute(
+            "   SELECT *"
+            f"    FROM pragma_table_info('{self._table}')"
+            " ORDER BY 'cid'"
+        ):
+            result[row['name']] = {
+                'type': row['type'],
+                'notnull': bool(row['notnull']),
+                'default': row['dflt_value'],
+                'primary key': bool(row['pk'])
+            }
+        for row in self.db.execute(f"PRAGMA foreign_key_list('{self.table}')"):
+            if row['to'] is None:
+                result[row['from']]['fk'] = row['table']
+            else:
+                result[row['from']]['fk'] = f"{row['table']}.{row['to']}"
+
+        return result
 
     @property
-    def free(self) -> int:
-        """How many rows are pre-allocated but free.
-
-        When setting this, space will be allocated if needed so that this
-        number of rows can be added without further allocation.
-        """
-
-        return len(self) - self.n_rows
-
-    @free.setter
-    def free(self, n: int) -> None:
-        n_add = n - self.free
-        if n_add > 0:
-            self.allocate(n_add)
-
-    @property
-    def index(self) -> pd.RangeIndex:
-        """The index of the underlying pandas table."""
-        return self._public.index
-
-    def _log_changes(self, previous: pd.DataFrame) -> bool:
-        """Track changes to the table"""
-        changed = False
-        self._private['version'] += 1
-        for key in self:
-            if key not in previous:
-                print("attribute '{}' added".format(key))
-                changed = True
-            elif not np.array_equal(self[key], previous[key]):
-                print("'{}' changed.".format(key))
-                changed = True
-        for key in previous:
-            if key not in self:
-                print("attribute '{}' deleted".format(key))
-                changed = True
-
-        if not changed:
-            self._private['version'] -= 1
-            print('The table was not changed')
-
-        return changed
+    def version(self):
+        return self.system.version
 
     def add_attribute(
         self,
         name: str,
-        coltype: Any = None,
+        coltype: str = 'float',
         default: Any = None,
-        values: List = None
+        notnull: bool = False,
+        index: bool = False,
+        pk: bool = False,
+        references: str = None,
+        values: Any = None
     ) -> None:
         """Adds a new attribute.
 
@@ -184,15 +253,29 @@ class Table(collections.abc.MutableMapping):
 
         Args:
             name: the name of the attribute.
-            coltype: the type of the attribute (column). Must be an acceptable
-                numpy type.
+            coltype: the type of the attribute (column). Must be one of 'int',
+                'float', 'str' or 'byte'
             default: the default value for the attribute if no value is given.
+            notnull: whether the value must be non-null
             values: either a single value or a list of values length 'nrows' of
                 values to fill the column.
 
         Returns:
             None
         """
+
+        # Does the table exist?
+        if self.table in self.system:
+            table_exists = True
+            if pk:
+                raise ValueError(
+                    'The primary key can only be set on the first attribute '
+                    'of a table that does not yet exist.'
+                )
+        else:
+            table_exists = False
+            if pk:
+                notnull = True
 
         if name in self:
             raise RuntimeError(
@@ -201,89 +284,63 @@ class Table(collections.abc.MutableMapping):
                 )
             )
 
-        if name not in self.attributes:
-            # Not yet defined
-            attr = self.define_attribute(name, coltype, default)
-        else:
-            # If we have the attributes, check that any given are reasonable.
-            attr = self.attributes[name]
-            if coltype is not None:
-                if attr['type'] != coltype:
-                    raise ValueError(
-                        "Column type should be '{}', not '{}'".format(
-                            attr['type'], coltype
-                        )
-                    )
-            if default is not None:
-                if default != attr['default']:
-                    raise ValueError(
-                        "Default should be '{}', not '{}'".format(
-                            attr['default'], default
-                        )
-                    )
+        # not null columns must have defaults
+        if not pk and notnull and default is None:
+            raise ValueError(f'Not null attributes must have defaults: {name}')
 
-        n = len(self)
         # see if the values are given
         if values is not None:
-            try:
-                length = len(values)
-            except TypeError:
-                length = 1
+            length = self.length_of_values(values)
 
-            if length != 1 and length != self.n_rows:
+            if length > 1 and length != self.n_rows:
                 raise IndexError(
-                    "The number of values given, "
-                    "{}, must be either 1, or the number of {}: {}".format(
-                        length, self._word, self.n_rows
-                    )
+                    f"The number of values given, {length}, must be either 1, "
+                    f"or the number of rows in {self.table}: {self.n_rows}"
                 )
 
-        column = np.full(
-            shape=(n,), fill_value=attr['default'], dtype=attr['type']
-        )
+        # Create the column
+        parameters = []
+        if coltype in column_types:
+            column_type = column_types[coltype]
+        else:
+            column_type = coltype
+        column_def = f'"{name}" {column_type}'
+        if default is not None:
+            if coltype == 'str':
+                column_def += f" DEFAULT '{default}'"
+            else:
+                column_def += f' DEFAULT {default}'
+        if notnull:
+            column_def += ' NOT NULL'
+        if references is not None:
+            column_def += f' REFERENCES {references}'
 
-        if values is not None:
-            column[0:self.n_rows] = values
-
-        added = pd.DataFrame(data=column, columns=[name])
-        self._public = self._public.join(added)
-
-    def define_attribute(
-        self,
-        name: str,
-        coltype: Any = None,
-        default: Any = None
-    ) -> Dict[str, Any]:
-        """Defines a new attribute
-
-        If the default value is None, you must always provide values wherever
-        needed, for example when adding a row.
-
-        Args:
-            name: the name of the attribute.
-            coltype: the type of the attribute (column). Must be an acceptable
-                numpy type.
-            default: the default value for the attribute if no value is given.
-
-        Returns:
-            None
-        """
-
-        if name in self.attributes:
-            raise RuntimeError(
-                "{} attribute '{}' is already defined!".format(
-                    self.__class__.__name__, name
-                )
+        if table_exists:
+            self.cursor.execute(
+                f'ALTER TABLE {self.table} ADD {column_def}', parameters
+            )
+        else:
+            if pk:
+                column_def += ' PRIMARY KEY'
+            self.cursor.execute(
+                f'CREATE TABLE {self.table} ({column_def})', parameters
             )
 
-        # Setup the attributes
-        tmp = self.attributes[name] = {}
-        tmp['type'] = coltype
-        tmp['default'] = default
+        if index == 'unique':
+            self.cursor.execute(
+                f"CREATE UNIQUE INDEX idx_{name} ON {self.table} ('{name}')"
+            )
+        elif index:
+            self.cursor.execute(
+                f"CREATE INDEX idx_{name} ON {self.table} ('{name}')"
+            )
 
-        return tmp
+        if values is not None:
+            self[name] = values
 
-    def append(self, **kwargs: Dict[str, Any]) -> None:
+        self.db.commit()
+
+    def append(self, n=None, **kwargs: Dict[str, Any]) -> None:
         """Append one or more rows
 
         The keywords are the names of attributes and the value to use.
@@ -299,158 +356,377 @@ class Table(collections.abc.MutableMapping):
             None
         """
 
-        # Check keys and lengths of added rows
+        n_rows, lengths = self._get_n_rows(**kwargs)
+
+        if n is not None:
+            if n_rows != 1 and n_rows != n:
+                raise RuntimeError(
+                    f"Requested number of rows ({n}) not compatible with the "
+                    f"length of the data ({n_rows})."
+                )
+            n_rows = n
+
+        # Check that any missing attributes have defaults
+        attributes = self.attributes
+        for key in attributes:
+            if (
+                not attributes[key]['notnull'] or
+                attributes[key]['primary key']
+            ):
+                continue
+
+            if key not in kwargs:
+                if (
+                    'default' not in attributes[key] or
+                    attributes[key]['default'] is None
+                ):
+                    raise KeyError(
+                        "There is no default for attribute "
+                        "'{}'. You must supply a value".format(key)
+                    )
+
+        # Add id's if needed
+        if 'id' not in kwargs and 'id' in attributes:
+            self.cursor.execute(f"SELECT MAX(id) FROM {self.table}")
+            last_id = self.cursor.fetchone()[0]
+            if last_id is None:  # Table is empty
+                last_id = 0
+            kwargs['id'] = [*range(last_id + 1, last_id + n_rows + 1)]
+            lengths['id'] = n_rows
+
+        # All okay, so proceed.
+        values = {}
+        for key, value in kwargs.items():
+            if lengths[key] == 0:
+                values[key] = [value] * n_rows
+            elif lengths[key] == 1:
+                values[key] = [value[0]] * n_rows
+            else:
+                values[key] = value
+
+        parameters = []
+        for row in range(n_rows):
+            line = []
+            for key, value in values.items():
+                line.append(value[row])
+            parameters.append(line)
+
+        columns = '"' + '", "'.join(kwargs.keys()) + '"'
+        places = ', '.join(['?'] * len(values.keys()))
+
+        self.cursor.executemany(
+            f'INSERT INTO {self.table} ({columns}) VALUES ({places})',
+            parameters
+        )
+
+        self.db.commit()
+
+        if 'id' in kwargs:
+            return kwargs['id']
+
+    def rows(self, *args):
+        """Return an iterator over the rows."""
+        if len(args) == 0:
+            return self.db.execute(f'SELECT * FROM {self.table}')
+
+        sql = f'SELECT * FROM {self.table} WHERE'
+
+        parameters = []
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' "{col}" {op} ?'
+            parameters.append(value)
+
+        return self.db.execute(sql, parameters)
+
+    def _get_n_rows(self, **kwargs):
+        """Get the total number of rows represented in the arguments."""
         n_rows = None
 
+        lengths = {}
         for key, value in kwargs.items():
             if key not in self:
                 raise KeyError(
-                    '"{key}" is not an attribute of the {cls}!'.format(
-                        key=key, cls=self.__class__.__name__.lower()
-                    )
+                    f'"{key}" is not an attribute of the table '
+                    f'{self.table}!'
                 )
-            try:
-                length = len(value)
-            except TypeError:
-                length = 1
+            length = self.length_of_values(value)
+            lengths[key] = length
 
             if n_rows is None:
-                n_rows = length
+                n_rows = 1 if length == 0 else length
 
-            if length != 1 and length != n_rows:
+            if length > 1 and length != n_rows:
                 if n_rows == 1:
                     n_rows = length
                 else:
                     raise IndexError(
                         'key "{}" has the wrong number of values, '
                         .format(key) +
-                        '{}. Should be 1 or the number of {} ({}).'
-                        .format(length, self._word, n_rows)
+                        '{}. Should be 1 or the number of rows in {} ({}).'
+                        .format(length, self.table, n_rows)
                     )
+        return n_rows, lengths
 
-        # Check that any missing attributes have defaults
-        for key in self:
-            if key not in kwargs:
-                if key not in self.attributes:
-                    # Don't think this can happen ... but test anyway
-                    raise KeyError(
-                        "Cannot handle attribute '{}'.".format(key)
-                    )  # pragma: no cover
-                if 'default' not in self.attributes[key] or \
-                   self.attributes[key]['default'] is None:
-                    raise KeyError(
-                        "There is no default for attribute "
-                        "'{}'. You must supply a value".format(key)
-                    )
+    def copy(self, other):
+        """Replace this object with a copy of another."""
+        if self.table in self.system:
+            del self.system[self.table]
 
-        # All okay, so proceed.
-        to_add = {}
-        for key, value in kwargs.items():
-            to_add[key] = np.full(
-                shape=(n_rows,),
-                fill_value=self.attributes[key]['default'],
-                dtype=self.attributes[key]['type']
-            )
-            to_add[key] = value
-        for key in self:
-            if key not in kwargs:
-                to_add[key] = np.full(
-                    shape=(n_rows,),
-                    fill_value=self.attributes[key]['default'],
-                    dtype=self.attributes[key]['type']
-                )
+        # Need the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
 
-        df_tmp = pd.DataFrame(
-            to_add,
-            index=pd.RangeIndex(
-                start=self.n_rows, stop=self.n_rows + n_rows, name='uid'
-            )
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
+        else:
+            other_table = other.table
+        table = self.table
+
+        self.cursor.execute(
+            f'CREATE TABLE {table} AS SELECT * FROM {other_table}'
         )
+        self.db.commit()
 
-        # check that there is space
-        if n_rows > self.free:
-            delta = (
-                int(Table.allocate_factor * (self.n_rows + n_rows)) - self.free
-            )
-            if delta < Table.allocate_min:
-                delta = Table.allocate_min
-            self.allocate(delta)
+        # Detach the other database if needed
+        if detach:
+            self.system.detach(other.system)
 
-        self._public.update(df_tmp)
-        self._private['n_rows'] += n_rows
+    def length_of_values(self, values: Any) -> int:
+        """Return the length of the values argument.
 
-    def allocate(self, n: int) -> None:
-        """Pre-allocates space for <n> more rows.
+        Parameters
+        ----------
+        values : Any
+            The values, which might be a string, single value, list, tuple,
+            etc.
 
-        Ensures that there is space for <n> more rows. Note that if there is
-        already sufficient space, nothing is done. This method will not reduce
-        the available space. See 'trim' for reducing space.
-
-        Args:
-            n: the number of rows to add, >= 1
-
-        Returns:
-            None
+        Returns
+        -------
+        length : int
+            The length of the values. 0 indicates a scalar
         """
-        logger.debug('Allocating space for {} more {}'.format(n, self._word))
+        if isinstance(values, str):
+            return 0
+        else:
+            try:
+                return len(values)
+            except TypeError:
+                return 0
 
-        to_add = {}
-        for key in self:
-            default = self.attributes[key]['default']
-            if default == 0:
-                to_add[key] = np.zeros(
-                    shape=(n,), dtype=self.attributes[key]['type']
-                )
+    def to_dataframe(self):
+        """Return the contents of the table as a Pandas Dataframe."""
+        data = {}
+        for line in self.cursor.execute(f'SELECT rowid, * FROM {self.table}'):
+            data[line[0]] = line[1:]
+        columns = [x[0] for x in self.cursor.description[1:]]
+
+        df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
+
+        return df
+
+    def diff(self, other):
+        """Difference between this table and another
+
+        Parameters
+        ----------
+        other : _Table
+            The other table to diff against
+
+        Result
+        ------
+        result : Dict
+            The differences, decribed in a dictionary
+        """
+        result = {}
+
+        # Check the columns
+        attributes = self.attributes
+        columns = set(attributes)
+
+        other_attributes = other.attributes
+        other_columns = set(other_attributes)
+
+        if columns == other_columns:
+            column_def = 'rowid, *'
+        else:
+            added = columns - other_columns
+            if len(added) > 0:
+                result['columns added'] = list(added)
+            removed = other_columns - columns
+            if len(removed) > 0:
+                result['columns removed'] = list(removed)
+
+            in_common = other_columns & columns
+            if len(in_common) > 0:
+                column_def = 'rowid, ' + ', '.join(in_common)
             else:
-                to_add[key] = np.full(
-                    shape=(n,),
-                    fill_value=default,
-                    dtype=self.attributes[key]['type']
-                )
+                # No columns shared
+                return result
 
-        start = self.index.max() + 1
-        df_tmp = pd.DataFrame(
-            to_add,
-            index=pd.RangeIndex(start=start, stop=start + n, name='uid')
-        )
-        self._public = self._public.append(df_tmp)
+        # Need to check the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+        name = self.system.name
+        other_name = other.system.name
+        detach = False
+        if name != other_name:
+            if not self.system.is_attached(other_name):
+                # Attach the other system in order to do comparisons.
+                self.system.attach(other.system)
+                detach = True
+            other_table = f'"{other_name}".{other.table}'
+        else:
+            other_table = other.table
+        table = self.table
 
-    def trim(self) -> None:
-        """Removes any extra space at the end of the table.
+        changed = {}
+        last = None
+        for row in self.db.execute(
+            f"""
+            SELECT {column_def} FROM
+            (
+            SELECT {column_def} FROM {other_table}
+            EXCEPT
+            SELECT {column_def} FROM {table}
+            )
+            UNION ALL
+            SELECT {column_def} FROM
+            (
+            SELECT {column_def} FROM {table}
+            EXCEPT
+            SELECT {column_def} FROM {other_table}
+            )
+            ORDER BY rowid
+            """
+        ):
+            if last is None:
+                last = row
+            elif row['rowid'] == last['rowid']:
+                # changes = []
+                changes = set()
+                for k1, v1, v2 in zip(last.keys(), last, row):
+                    if v1 != v2:
+                        # changes.append((k1, v1, v2))
+                        changes.add((k1, v1, v2))
+                changed[row['rowid']] = changes
+                last = None
+            else:
+                last = row
+        if len(changed) > 0:
+            result['changed'] = changed
 
-        When rows are added, space is allocated for a reasonable number of rows
-        for performance reasons. The method removes any unused space, trimming
-        the table to exactly the needed size.
+        # See about the rows added
+        added = {}
+        if 'id' in self:
+            for row in self.db.execute(
+                f"""
+                SELECT * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['id']] = row[1:]
+        else:
+            for row in self.db.execute(
+                f"""
+                SELECT rowid, * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['rowid']] = row[1:]
 
-        Args:
-            None
+        if len(added) > 0:
+            result['columns in added rows'] = row.keys()[1:]
+            result['added'] = added
 
-        Returns:
-            None
-        """
-        if self.free > 0:
-            self._public.drop(self.index.to_list()[self.n_rows:], inplace=True)
+        # See about the rows removed
+        removed = {}
+        for row in self.db.execute(
+            f"""
+            SELECT rowid, * FROM {other_table}
+            WHERE rowid NOT IN (SELECT rowid FROM {table})
+            """
+        ):
+            removed[row['rowid']] = row[1:]
+
+        if len(removed) > 0:
+            result['columns in removed rows'] = row.keys()[1:]
+            result['removed'] = removed
+
+        # Detach the other database if needed
+        if detach:
+            self.system.detach(other.system)
+
+        return result
 
 
 if __name__ == '__main__':  # pragma: no cover
-    import numpy.random as nprand
+    import json
+    import os.path
+    import tempfile
     import timeit
     import time
 
-    def run(nper=1000, nrepeat=100, preallocate=False) -> None:
-        table = Table()
-        for column in ('a', 'b', 'c'):
-            table.add_attribute(column, coltype=np.float64, default=np.nan)
+    from molsystem import System
+    import numpy
 
-        a = nprand.uniform(low=0, high=100, size=nper)
-        b = nprand.uniform(low=0, high=100, size=nper)
-        c = nprand.uniform(low=0, high=100, size=nper)
+    x = [1.0, 2.0, 3.0]
+    y = [4.0, 5.0, 6.0]
+    z = [7.0, 8.0, 9.0]
+    atno = [8, 1, 1]
 
-        with table as tmp:
-            if preallocate:
-                tmp.allocate(nper * nrepeat)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        print(tmpdirname)
+        filepath = os.path.join(tmpdirname, 'system1.db')
+        system1 = System(filename=filepath)
+
+        table1 = system1.create_table('table1')
+        table1.add_attribute('atno', coltype='int')
+        for column in ('x', 'y', 'z'):
+            table1.add_attribute(column, coltype='float')
+        with table1 as tmp:
+            tmp.append(x=x, y=y, z=z, atno=atno)
+
+        table2 = system1.create_table('table2')
+        table2.add_attribute('atno', coltype='int')
+        for column in ('x', 'y', 'z'):
+            table2.add_attribute(column, coltype='float')
+        x1 = x
+        x1[0] = 0.0
+        with table2 as tmp:
+            tmp.append(x=x1, y=y, z=z, atno=[10, 1, 1])
+            tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
+
+        print('table1 -> table2')
+        diffs = table2.diff(table1)
+        print(json.dumps(diffs, indent=4))
+
+        print('table2 -> table1')
+        diffs = table1.diff(table2)
+        print(json.dumps(diffs, indent=4))
+
+    exit()
+
+    def run(nper=1000, nrepeat=100) -> None:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filepath = os.path.join(tmpdirname, 'seamm.db')
+            system = System(filename=filepath)
+            table = system.create_table('table1')
+            for column in ('a', 'b', 'c'):
+                table.add_attribute(column, coltype='float')
+
+            a = numpy.random.uniform(low=0, high=100, size=nper)
+            b = numpy.random.uniform(low=0, high=100, size=nper)
+            c = numpy.random.uniform(low=0, high=100, size=nper)
+
             for i in range(0, nrepeat):
-                tmp.append(a=a, b=b, c=c)
+                table.append(a=a.tolist(), b=b.tolist(), c=c.tolist())
                 a += 10.0
                 b += 5.0
                 c -= 3.0
