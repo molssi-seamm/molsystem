@@ -9,6 +9,7 @@ import sqlite3
 from typing import Any, Dict
 
 # import molsystem
+from molsystem.elemental_data import element_data
 from molsystem.table import _Table as Table
 from molsystem.atoms import _Atoms as Atoms
 from molsystem.template import _Template as Template
@@ -16,7 +17,6 @@ from molsystem.templateatoms import _Templateatoms as Templateatoms
 from molsystem.templatebonds import _Templatebonds as Templatebonds
 from molsystem.bonds import _Bonds as Bonds
 from molsystem.cell_parameters import _CellParameters as CellParameters
-import seamm_util
 
 logger = logging.getLogger(__name__)
 
@@ -708,7 +708,7 @@ class _System(collections.abc.MutableMapping):
         table.add_attribute('symbol', coltype='str', index='unique')
         table.add_attribute('mass', coltype='float')
 
-        for symbol, data in seamm_util.element_data.items():
+        for symbol, data in element_data.items():
             table.append(
                 symbol=symbol,
                 atno=data['atomic number'],
