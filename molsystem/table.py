@@ -136,8 +136,8 @@ class _Table(collections.abc.MutableMapping):
         # Need to check the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
 
-        name = self.system.name
-        other_name = other.system.name
+        name = self.system.nickname
+        other_name = other.system.nickname
         detach = False
         if name != other_name:
             if not self.system.is_attached(other_name):
@@ -477,8 +477,8 @@ class _Table(collections.abc.MutableMapping):
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
 
-        name = self.system.name
-        other_name = other.system.name
+        name = self.system.nickname
+        other_name = other.system.nickname
         detach = False
         if name != other_name:
             if not self.system.is_attached(other_name):
@@ -573,8 +573,8 @@ class _Table(collections.abc.MutableMapping):
 
         # Need to check the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
-        name = self.system.name
-        other_name = other.system.name
+        name = self.system.nickname
+        other_name = other.system.nickname
         detach = False
         if name != other_name:
             if not self.system.is_attached(other_name):

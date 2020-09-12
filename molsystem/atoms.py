@@ -215,25 +215,6 @@ class _Atoms(collections.abc.MutableMapping):
         return result
 
     @property
-    def n_atoms(self) -> int:
-        """The number of atoms *in the current* configuration."""
-        self.cursor.execute(
-            "SELECT COUNT(*) FROM subset_atom WHERE subset = ?",
-            (self.system.all_subset(),)
-        )
-        return self.cursor.fetchone()[0]
-
-    @property
-    def atom_ids(self) -> [int]:
-        """The ids of the atoms *in the current* configuration."""
-        return [
-            x[0] for x in self.db.execute(
-                "SELECT atom FROM subset_atom WHERE subset = ?",
-                (self.system.all_subset(),)
-            )
-        ]
-
-    @property
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes.
         Combine the attributes of the atom and coordinates tables to
@@ -259,7 +240,7 @@ class _Atoms(collections.abc.MutableMapping):
 
     @property
     def version(self):
-        return self._system.version
+        return self.system.version
 
     def add_attribute(
         self,
@@ -316,7 +297,7 @@ class _Atoms(collections.abc.MutableMapping):
                 name, coltype, default, notnull, index, pk, references, values
             )
 
-    def append(self, **kwargs: Dict[str, Any]) -> None:
+    def append(self, configuration=None, **kwargs: Dict[str, Any]) -> None:
         """Append one or more atoms
 
         The keys give the field for the data. If an existing field is not
@@ -348,22 +329,24 @@ class _Atoms(collections.abc.MutableMapping):
         ids = self._atom_table.append(n=n_rows, **data)
 
         # Now append to the coordinates table
-        data = {'atom': ids}
+        if configuration is None:
+            configuration = self.current_configuration
+        data = {'configuration': configuration, 'atom': ids}
         for column in self._coordinates_table.attributes:
             if column != 'id' and column in kwargs:
                 data[column] = kwargs.pop(column)
-        if 'configuration' not in data:
-            data['configuration'] = self.current_configuration
 
         self._coordinates_table.append(n=n_rows, **data)
 
         # And to the subset 'all'
         subset_atom = self.system['subset_atom']
-        subset_atom.append(subset=self.system.all_subset(), atom=ids)
+        subset_atom.append(
+            subset=self.system.all_subset(configuration), atom=ids
+        )
 
         return ids
 
-    def atoms(self, *args):
+    def atoms(self, *args, configuration=None):
         """Return an iterator over the atoms."""
         atom_tbl = self._atom_tablename
         coord_tbl = self._coordinates_tablename
@@ -381,10 +364,11 @@ class _Atoms(collections.abc.MutableMapping):
             f'   SELECT atom FROM subset_atom WHERE subset = ?'
             f') AND {coord_tbl}.atom = {atom_tbl}.id'
         )
+        all_subset = self.system.all_subset(configuration)
         if len(args) == 0:
-            return self.db.execute(sql, (self.system.all_subset(),))
+            return self.db.execute(sql, (all_subset,))
 
-        parameters = [self.system.all_subset()]
+        parameters = [all_subset]
         for col, op, value in grouped(args, 3):
             if op == '==':
                 op = '='
@@ -392,6 +376,15 @@ class _Atoms(collections.abc.MutableMapping):
             parameters.append(value)
 
         return self.db.execute(sql, parameters)
+
+    def atom_ids(self, configuration=None) -> [int]:
+        """The ids of the atoms the configuration."""
+        return [
+            x[0] for x in self.db.execute(
+                "SELECT atom FROM subset_atom WHERE subset = ?",
+                (self.system.all_subset(configuration),)
+            )
+        ]
 
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers."""
@@ -444,6 +437,14 @@ class _Atoms(collections.abc.MutableMapping):
                 return len(values)
             except TypeError:
                 return 0
+
+    def n_atoms(self, configuration=None) -> int:
+        """The number of atoms in a configuration."""
+        self.cursor.execute(
+            "SELECT COUNT(*) FROM subset_atom WHERE subset = ?",
+            (self.system.all_subset(configuration),)
+        )
+        return self.cursor.fetchone()[0]
 
     def to_dataframe(self):
         """Return the contents of the table as a Pandas Dataframe."""

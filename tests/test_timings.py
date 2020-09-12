@@ -38,7 +38,7 @@ def matoms(msystem):
 @pytest.mark.timing
 def test_creation(matoms):
     """Create a system with a million atoms"""
-    print('\nCreating a system with {natoms} atoms')
+    print(f'\nCreating a system with {natoms} atoms')
     t0 = time.perf_counter()
     rng = numpy.random.default_rng()
     atno = rng.integers(1, 101, size=natoms)
@@ -57,13 +57,13 @@ def test_creation(matoms):
     size = os.path.getsize(filename) / 1024 / 1024
     print(f'       database is {size:.3} MB')
 
-    assert matoms.n_atoms == natoms
+    assert matoms.n_atoms() == natoms
 
 
 @pytest.mark.timing
 def test_access(matoms):
     """Check that we can access the created system"""
-    assert matoms.n_atoms == natoms
+    assert matoms.n_atoms() == natoms
 
 
 @pytest.mark.timing
@@ -72,7 +72,7 @@ def test_loop_over_atoms(matoms):
     n = 0
     for atom in matoms.atoms():
         n += 1
-    assert n == matoms.n_atoms
+    assert n == matoms.n_atoms()
 
 
 @pytest.mark.timing
@@ -81,5 +81,6 @@ def test_selection(matoms):
     n = 0
     for atom in matoms.atoms('atno', '==', 6):
         n += 1
-    print(f'\nFound {n} carbon atoms in {natoms}')
+    print(f'\nFound {n} carbon atoms in {natoms} atoms')
+    print(f'There should be about {int(natoms / 100)}')
     assert atom['atno'] == 6

@@ -21,9 +21,9 @@ def test_iteration(AceticAcid):
     j = []
     order = []
     for bond in bonds.bonds():
-        i.append(bond.i)
-        j.append(bond.j)
-        order.append(bond.bondorder)
+        i.append(bond['i'])
+        j.append(bond['j'])
+        order.append(bond['bondorder'])
 
     assert order == [1, 1, 1, 1, 1, 2, 1]
     assert i == [1, 1, 1, 1, 5, 5, 7]
@@ -51,10 +51,9 @@ def test_get_item(AceticAcid):
     system = AceticAcid
     bonds = system['bond']
     bond = bonds.get_bond(5, 7)
-    assert bond._asdict() == {'i': 5, 'j': 7, 'bondorder': 2}
+    assert [*bond] == [5, 7, 2]
     bond = bonds.get_bond(7, 5)
-    assert bond._asdict() == {'i': 5, 'j': 7, 'bondorder': 2}
-    assert str(type(bond)) == "<class 'molsystem.bonds.Bond'>"
+    assert [*bond] == [5, 7, 2]
 
 
 def test_ddelete_bond(AceticAcid):
@@ -119,7 +118,7 @@ def test_adding_attribute(AceticAcid):
     bonds.add_attribute('name', coltype='str')
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 4
-    assert bond._fields == ('i', 'j', 'bondorder', 'name')
+    assert bond.keys() == ['i', 'j', 'bondorder', 'name']
 
 
 def test_adding_attribute_with_values(AceticAcid):
@@ -130,8 +129,8 @@ def test_adding_attribute_with_values(AceticAcid):
     bonds.add_attribute('name', coltype='str', values=names)
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 4
-    assert bond._fields == ('i', 'j', 'bondorder', 'name')
-    assert bond.name == 'C-O'
+    assert bond.keys() == ['i', 'j', 'bondorder', 'name']
+    assert bond['name'] == 'C-O'
 
 
 def test_column(AceticAcid):

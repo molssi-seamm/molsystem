@@ -103,7 +103,7 @@ class Systems(collections.abc.MutableMapping):
                 raise RuntimeError(f"File '{path}' exists!")
 
         filename = str(path)
-        system = _System(self, name, filename=filename)
+        system = _System(self, nickname=name, filename=filename)
 
         data['system'] = system
         data['path'] = path
@@ -155,7 +155,7 @@ class Systems(collections.abc.MutableMapping):
         db.close()
 
         # and open it
-        system = _System(self, name, filename=filename)
+        system = _System(self, nickname=name, filename=filename)
 
         data['system'] = system
         data['path'] = path
@@ -181,7 +181,7 @@ class Systems(collections.abc.MutableMapping):
         filename = str(path)
 
         # and open it
-        system = _System(self, name, filename=filename)
+        system = _System(self, nickname=name, filename=filename)
 
         data['system'] = system
         data['path'] = path
@@ -194,7 +194,7 @@ class Systems(collections.abc.MutableMapping):
         system.db.commit()
         system.cursor.close()
         system.db.close()
-        path = self._systems[system.name]['path']
+        path = self._systems[system.nickname]['path']
         path.unlink()
         system._db = sqlite3.connect(path)
         system._db.row_factory = sqlite3.Row

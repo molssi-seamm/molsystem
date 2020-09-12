@@ -20,7 +20,7 @@ def test_periodic_system(system):
     system.coordinate_system = 'fractional'
     system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
     system.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
-    assert system.n_atoms == 2 and system.version == 0
+    assert system.n_atoms() == 2 and system.version == 0
 
 
 def test_periodic_context(system):
@@ -30,7 +30,7 @@ def test_periodic_context(system):
         tmp.coordinate_system = 'fractional'
         tmp.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
         tmp.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
-    assert system.n_atoms == 2 and system.version == 1
+    assert system.n_atoms() == 2 and system.version == 1
 
 
 def test_cell_object(vanadium):

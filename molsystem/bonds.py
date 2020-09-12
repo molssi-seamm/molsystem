@@ -166,18 +166,21 @@ class _Bonds(Table):
                 raise RuntimeError(
                     'Please do not give both bonds and arrays of data!'
                 )
-            if isinstance(bonds, self.bond_tuple):
+            if isinstance(bonds, sqlite3.Row):
                 # One bond
-                kwargs = bonds._asdict()
+                kwargs = {}
+                for key, value in zip(bonds.keys(), bonds):
+                    kwargs[key] = value
             else:
                 first = True
                 for bond in bonds:
                     if first:
-                        for key, value in bond._asdict():
+                        keys = bond.keys()
+                        for key, value in zip(keys, bond):
                             kwargs[key] = [value]
                         first = False
                     else:
-                        for key, value in bond._asdict():
+                        for key, value in zip(keys, bond):
                             kwargs[key].append(value)
 
         # Check keys and lengths of added bonds
@@ -315,7 +318,7 @@ class _Bonds(Table):
             "    AND templatebond.j = jatom.templateatom"
             "    AND iatom.subset = ? and jatom.subset = ?"
         )
-        return self.bond_db.execute(sql, (all_subset, all_subset))
+        return self.db.execute(sql, (all_subset, all_subset))
 
     def contains_bond(self, key):
         if isinstance(key, self.bond_tuple):
@@ -371,7 +374,7 @@ class _Bonds(Table):
             "   AND iatom.atom = ? AND jatom.atom = ?"
         )
         all_subset = self._system.all_subset()
-        cursor = self.bond_db.execute(sql, (all_subset, all_subset, i, j))
+        cursor = self.db.execute(sql, (all_subset, all_subset, i, j))
         row = cursor.fetchone()
         if row is None:
             raise KeyError(f'No bond from {i} to {j} found')

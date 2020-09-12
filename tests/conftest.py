@@ -180,6 +180,7 @@ def AceticAcid(system):
     order =  [1, 1, 1, 1, 1, 2, 1]  # noqa: E222
     # yapf: enable
 
+    system.name = 'acetic acid'
     ids = system['atoms'].append(x=x, y=y, z=z, atno=atno)
 
     i = [ids[x] for x in i_atom]
@@ -193,6 +194,7 @@ def AceticAcid(system):
 @pytest.fixture()
 def vanadium(system):
     """BCC vanadium crystal, without symmetry."""
+    system.name = 'BCC Vanadium'
     system.periodicity = 3
     system.coordinate_system = 'fractional'
     system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
