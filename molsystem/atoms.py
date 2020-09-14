@@ -14,7 +14,7 @@ from itertools import zip_longest
 import logging
 from typing import Any, Dict, TypeVar
 
-import numpy as np
+import numpy
 import pandas
 
 from molsystem.column import _Column as Column
@@ -120,17 +120,7 @@ class _Atoms(collections.abc.MutableMapping):
 
     def __getitem__(self, key) -> Any:
         """Allow [] to access the data!"""
-        if key in self._atom_table.attributes:
-            sql = (
-                'WHERE id IN (SELECT atom FROM subset_atom '
-                f'WHERE subset = {self.system.all_subset()})'
-            )
-            return Column(self._atom_table, key, where=sql)
-        elif key in self._coordinates_table.attributes:
-            where = f"WHERE configuration = {self.current_configuration}"
-            return Column(self._coordinates_table, key, where=where)
-        else:
-            raise KeyError(f"'{key}' not in atoms")
+        return self.get_column(key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
@@ -386,6 +376,131 @@ class _Atoms(collections.abc.MutableMapping):
             )
         ]
 
+    def atomic_numbers(self, configuration: int = None) -> [int]:
+        """The atomic numbers of the atoms in the configuration."""
+        return [*self['atno']]
+
+    def coordinates(
+        self,
+        configuration=None,
+        fractionals=True,
+        in_cell=False,
+        as_array=False
+    ):
+        """Return the coordinates optionally translated back into the principal
+        unit cell.
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration of interest.
+        frationals : bool = True
+            Return the coordinates as fractional coordinates for periodic
+            systems. Non-periodic systems always use Cartesian coordinates.
+        in_cell : bool, str = False
+            Whether to translate the atoms into the unit cell, and if so
+            whether to do so by molecule or just atoms.
+        as_array : bool = False
+            Whether to return the results as a numpy array or as a list of
+            lists (the default).
+
+        Returns
+        -------
+        abc : [N][float*3]
+            The coordinates, either Cartesian or fractional
+        """
+        if configuration is None:
+            configuration = self.current_configuration
+
+        xyz = []
+        for row in self.atoms(configuration=configuration):
+            xyz.append([row['x'], row['y'], row['z']])
+
+        periodicity = self.system.periodicity
+        if periodicity == 0:
+            if as_array:
+                return numpy.array(xyz)
+            else:
+                return xyz
+
+        cell = self.system['cell'].cell(configuration)
+
+        if 'molecule' in in_cell:
+            # Need fractionals...
+            if self.system.coordinate_system == 'Cartesian':
+                UVW = cell.to_fractionals(xyz, as_array=True)
+            elif not isinstance(xyz, numpy.ndarray):
+                UVW = numpy.array(xyz)
+            else:
+                UVW = xyz
+
+            molecules = self.system.find_molecules(configuration=configuration)
+
+            for indices in molecules:
+                indices = numpy.array([i - 1 for i in indices])
+                uvw_mol = numpy.take(UVW, indices, axis=0)
+                center = numpy.average(uvw_mol, axis=0)
+                delta = numpy.floor(center)
+                uvw_mol -= delta
+                numpy.put_along_axis(
+                    UVW, numpy.expand_dims(indices, axis=1), uvw_mol, axis=0
+                )
+            if fractionals:
+                if as_array:
+                    return UVW
+                else:
+                    return UVW.tolist()
+            else:
+                return cell.to_cartesians(UVW, as_array=as_array)
+        elif in_cell:
+            # Need fractionals...
+            if self.system.coordinate_system == 'Cartesian':
+                UVW = cell.to_fractionals(xyz, as_array=True)
+            elif not isinstance(xyz, numpy.ndarray):
+                UVW = numpy.array(xyz)
+            else:
+                UVW = xyz
+            delta = numpy.floor(UVW)
+            UVW -= delta
+            if fractionals:
+                if as_array:
+                    return UVW
+                else:
+                    return UVW.tolist()
+            else:
+                return cell.to_cartesians(UVW, as_array=as_array)
+        else:
+            if fractionals:
+                if self.system.coordinate_system == 'Cartesian':
+                    return cell.to_fractionals(xyz, as_array=as_array)
+                elif as_array:
+                    return numpy.array(xyz)
+                else:
+                    return xyz
+            else:
+                if self.system.coordinate_system == 'fractional':
+                    return cell.to_cartesians(xyz, as_array=as_array)
+                elif as_array:
+                    return numpy.array(xyz)
+                else:
+                    return xyz
+
+    def get_column(self, key, configuration=None) -> Any:
+        """Allow [] to access the data!"""
+        if configuration is None:
+            configuration = self.system.current_configuration
+        if key in self._atom_table.attributes:
+            sql = (
+                'WHERE id IN (SELECT atom FROM subset_atom '
+                f'WHERE subset = {self.system.all_subset(configuration)})'
+            )
+            return Column(self._atom_table, key, where=sql)
+        elif key in self._coordinates_table.attributes:
+            where = f"WHERE configuration = {configuration}"
+            return Column(self._coordinates_table, key, where=where)
+        else:
+            raise KeyError(f"'{key}' not in atoms")
+
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers."""
         return self._system.to_atnos(symbols)
@@ -446,6 +561,10 @@ class _Atoms(collections.abc.MutableMapping):
         )
         return self.cursor.fetchone()[0]
 
+    def symbols(self, configuration: int = None) -> [str]:
+        """Convert element symbols to atomic numbers."""
+        return self._system.to_symbols(self.atomic_numbers(configuration))
+
     def to_dataframe(self):
         """Return the contents of the table as a Pandas Dataframe."""
         data = {}
@@ -470,7 +589,7 @@ if __name__ == '__main__':  # pragma: no cover
         x = nprand.uniform(low=0, high=100, size=nper)
         y = nprand.uniform(low=0, high=100, size=nper)
         z = nprand.uniform(low=0, high=100, size=nper)
-        atno = np.array(nper * [6])
+        atno = numpy.array(nper * [6])
         with atoms as tmp:
             for i in range(0, nrepeat):
                 tmp.append(x=x, y=y, z=z, atno=atno)

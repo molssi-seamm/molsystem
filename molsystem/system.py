@@ -4,7 +4,10 @@
 """
 
 import collections.abc
+from collections import Counter
+from functools import reduce
 import logging
+import math
 import sqlite3
 from typing import Any, Dict
 
@@ -18,11 +21,16 @@ from molsystem.templatebonds import _Templatebonds as Templatebonds
 from molsystem.bonds import _Bonds as Bonds
 from molsystem.cell_parameters import _CellParameters as CellParameters
 
+from molsystem.cif import CIFMixin
 from molsystem.molfile import MolFileMixin
+from molsystem.topology import TopologyMixin
+
 logger = logging.getLogger(__name__)
 
 
-class _System(MolFileMixin, collections.abc.MutableMapping):
+class _System(
+    MolFileMixin, CIFMixin, TopologyMixin, collections.abc.MutableMapping
+):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
 
     Based on a SQLite database, this class provides a general
@@ -296,7 +304,7 @@ class _System(MolFileMixin, collections.abc.MutableMapping):
     def coordinate_system(self):
         """The coordinates system used, 'fractional' or 'Cartesian'"""
         self.cursor.execute(
-            "SELECT coordinatesystem FROM system WHERE id = ?'", (self._id,)
+            "SELECT coordinatesystem FROM system WHERE id = ?", (self._id,)
         )
         return self.cursor.fetchone()[0]
 
@@ -605,6 +613,60 @@ class _System(MolFileMixin, collections.abc.MutableMapping):
             self.detach(other)
 
         return result
+
+    def formula(self, configuration=None):
+        """Return the chemical formula of the configuration.
+
+        Returns a tuple with the formula, empirical formula and number of
+        formula units (Z).
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration to use, defaults to the current configuration.
+
+        Returns
+        -------
+        formulas : (str, str, int)
+            The chemical formula, empirical formula and Z.
+        """
+        counts = Counter(self.atoms.symbols(configuration))
+
+        # Order the elements ... Merck CH then alphabetical,
+        # or if no C or H, then just alphabetically
+        formula_list = []
+        if 'C' in counts and 'H' in counts:
+            formula_list.append(('C', counts.pop('C')))
+            formula_list.append(('H', counts.pop('H')))
+
+        for element in sorted(counts.keys()):
+            formula_list.append((element, counts[element]))
+
+        counts = []
+        for _, count in formula_list:
+            counts.append(count)
+
+        formula = []
+        for element, count in formula_list:
+            if count > 1:
+                formula.append(f'{element}{count}')
+            else:
+                formula.append(element)
+
+        # And the empirical formula
+        Z = reduce(math.gcd, counts)
+        empirical_formula_list = []
+        for element, count in formula_list:
+            empirical_formula_list.append((element, int(count / Z)))
+
+        empirical_formula = []
+        for element, count in empirical_formula_list:
+            if count > 1:
+                empirical_formula.append(f'{element}{count}')
+            else:
+                empirical_formula.append(element)
+
+        return formula, empirical_formula, Z
 
     def list(self):
         """Return a list of all the tables in the system."""

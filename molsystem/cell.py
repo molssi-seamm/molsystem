@@ -1,8 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import math
+
+import numpy
 
 logger = logging.getLogger(__name__)
+
+
+def cos(value):
+    return math.cos(math.radians(value))
+
+
+def sin(value):
+    return math.sin(math.radians(value))
 
 
 class Cell(object):
@@ -104,6 +115,15 @@ class Cell(object):
             raise ValueError('parameters must be of length 6')
         self._parameters = list(value)
 
+    @property
+    def volume(self):
+        """The volume of the cell."""
+        a, b, c, alpha, beta, gamma = self.parameters
+        return (
+            a * b * c * (1 - cos(alpha)**2 - cos(beta)**2 - cos(gamma)**2) +
+            2 * math.sqrt(cos(alpha) * cos(beta) * cos(gamma))
+        )
+
     def equal(self, other, tol=1.0e-6):
         """Check if we are equal to another iterable to within a tolerance.
 
@@ -127,3 +147,163 @@ class Cell(object):
                 return False
 
         return True
+
+    def to_cartesians(self, uvw, as_array=False):
+        """Convert fraction coordinates to Cartesians
+
+        see https://en.wikipedia.org/wiki/Fractional_coordinates for a
+        description.
+
+        Parameters
+        ----------
+        uvw : [N][3*float] or ndarray
+            The fractional coordinates.
+
+        Returns
+        -------
+        xyz : [N][float*3] or ndarray
+            The Cartesian coordinates.
+        """
+        if isinstance(uvw, numpy.ndarray):
+            UVW = uvw
+        else:
+            UVW = numpy.array(uvw)
+
+        T = self.to_cartesians_transform(as_array=True)
+        XYZ = UVW @ T
+
+        if as_array:
+            return XYZ
+        else:
+            return XYZ.tolist()
+
+    def to_cartesians_transform(self, as_array=False):
+        """Matrix to convert fractional coordinates to Cartesian.
+
+        see https://en.wikipedia.org/wiki/Fractional_coordinates for a
+        description.
+
+        Parameters
+        ----------
+        as_array : bool = False
+            Whether to return a numpy array or Python lists
+
+        Returns
+        -------
+        transform : [N][float*3] or ndarray
+            The transformation matrix
+        """
+        a, b, c, alpha, beta, gamma = self.parameters
+
+        ca = cos(alpha)
+        cb = cos(beta)
+        cg = cos(gamma)
+        sg = sin(gamma)
+
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
+        # Transpose of ...
+        # [a, b * cg, c * cb],
+        # [0, b * sg, c * (ca - cb * cg) / sg],
+        # [0, 0, V / (a * b * sg)]
+        T = [
+                [
+                    a,
+                    0,
+                    0
+                ],
+                [
+                    b * cg,
+                    b * sg,
+                    0
+                ],
+                [
+                    c * cb,
+                    c * (ca - cb * cg) / sg,
+                    V / (a * b * sg)
+                ]
+            ]  # yapf: disable
+
+        if as_array:
+            return numpy.array(T)
+        else:
+            return T
+
+    def to_fractionals(self, xyz, as_array=False):
+        """Convert Cartesian coordinates to fractional.
+
+        see https://en.wikipedia.org/wiki/Fractional_coordinates for a
+        description.
+
+        Parameters
+        ----------
+        xyz : [N][3*float] or ndarray
+            The Cartesian coordinates.
+
+        Returns
+        -------
+        uvw : [N][float*3] or ndarray
+            The ractional coordinates.
+        """
+        if isinstance(xyz, numpy.ndarray):
+            XYZ = xyz
+        else:
+            XYZ = numpy.array(xyz)
+
+        T = self.to_fractionals_transform(as_array=True)
+        UVW = XYZ @ T
+
+        if as_array:
+            return UVW
+        else:
+            return UVW.tolist()
+
+    def to_fractionals_transform(self, as_array=False):
+        """Matrix to convert Cartesian coordinates to fractional.
+
+        see https://en.wikipedia.org/wiki/Fractional_coordinates for a
+        description.
+
+        Parameters
+        ----------
+        as_array : bool = False
+            Whether to return a numpy array or Python lists
+
+        Returns
+        -------
+        transform : [N][float*3] or ndarray
+            The transformation matrix
+        """
+        a, b, c, alpha, beta, gamma = self.parameters
+
+        ca = cos(alpha)
+        cb = cos(beta)
+        cg = cos(gamma)
+        sg = sin(gamma)
+
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
+        # Transpose...
+        # [1 / a, -cg / (a * sg), b * c * (ca * cg - cb) / (V * sg)],
+        # [0, 1 / (b * sg), a * c * (cb * cg - ca) / (V * sg)],
+        # [0, 0, a * b * sg / V]
+        T = [
+                [
+                    1 / a,
+                    0,
+                    0
+                ],
+                [
+                    -cg / (a * sg),
+                    1 / (b * sg),
+                    0
+                ],
+                [
+                    b * c * (ca * cg - cb) / (V * sg),
+                    a * c * (cb * cg - ca) / (V * sg),
+                    a * b * sg / V
+                ]
+            ]  # yapf: disable
+
+        if as_array:
+            return numpy.array(T)
+        else:
+            return T
