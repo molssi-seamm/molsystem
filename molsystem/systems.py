@@ -202,27 +202,3 @@ class Systems(collections.abc.MutableMapping):
         system._cursor = system._db.cursor()
         other.db.commit()
         other.db.backup(system._db)
-
-
-if __name__ == '__main__':  # pragma: no cover
-    systems = Systems()
-    system = systems.create_system('seamm', force=True)
-
-    with system as tmp:
-        tmp.periodicity = 3
-        tmp.coordinate_system = 'f'
-
-    print(f'system? {"system" in system}')
-    print(f'  table1? {"table1" in system}')
-
-    # table = system['system']
-    # import pprint
-    # pprint.pprint(table.attributes)
-
-    system2 = systems.copy_system(system)
-
-    table1 = system.create_table('table1')
-    table1.add_attribute('atno', coltype='int', default=-1)
-    print('tables: ' + ', '.join(iter(system)))
-
-    print('tables: ' + ', '.join(iter(system2)))
