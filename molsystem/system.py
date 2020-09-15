@@ -23,13 +23,15 @@ from molsystem.cell_parameters import _CellParameters as CellParameters
 
 from molsystem.cif import CIFMixin
 from molsystem.molfile import MolFileMixin
+from molsystem.pdb import PDBMixin
 from molsystem.topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
 
 
 class _System(
-    MolFileMixin, CIFMixin, TopologyMixin, collections.abc.MutableMapping
+    PDBMixin, MolFileMixin, CIFMixin, TopologyMixin,
+    collections.abc.MutableMapping
 ):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
 
@@ -918,24 +920,3 @@ class _System(
                 'primary key': bool(line['pk'])
             }
         return result
-
-
-if __name__ == '__main__':  # pragma: no cover
-    system = _System()
-
-    import pprint
-
-    system = _System()
-    with system as s:
-        s.periodicity = 3
-        s.coordinate_system = 'f'
-
-    print(f'system? {"system" in system}')
-    print(f'  table1? {"table1" in system}')
-
-    table = system['system']
-    pprint.pprint(table.attributes)
-
-    table1 = system.create_table('table1')
-    table1.add_attribute('atno', coltype='int', default=-1)
-    print('tables: ' + ', '.join(iter(system)))
