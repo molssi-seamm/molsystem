@@ -17,6 +17,8 @@ class TopologyMixin:
         ----------
         configuration : int = None
             The configuration to use, defaults to the current configuration.
+        as_indices : bool = False
+            Whether to return 0-based indices (True) or atom ids (False)
 
         Returns
         -------
@@ -59,24 +61,23 @@ class TopologyMixin:
                 next_atoms = tmp
             molecules.append(sorted(atoms))
         if as_indices:
-            tmp = []
-            for molecule in molecules:
-                tmp.append([to_index[j] for j in molecule])
-            return tmp
+            return [[to_index[j] for j in js] for js in molecules]
         else:
             return molecules
 
-    def bonded_neighbors(self, configuration=None):
+    def bonded_neighbors(self, configuration=None, as_indices=False):
         """The atoms bonded to each atom in the system.
 
         Parameters
         ----------
         configuration : int = None
             The configuration to use, defaults to the current configuration.
+        as_indices : bool = False
+            Whether to return 0-based indices (True) or atom ids (False)
 
         Returns
         -------
-        neighbors : {}[int]
+        neighbors : {int: [int]} or [[int]] for indices
             list of atom ids for each atom id
         """
         neighbors = {}
@@ -101,4 +102,15 @@ class TopologyMixin:
             neighbors[i].append(j)
             neighbors[j].append(i)
 
-        return neighbors
+        if as_indices:
+            # Convert to indices
+            to_index = {j: i for i, j in enumerate(atom_ids)}
+            result = [[]] * n_atoms
+            for i, js in neighbors.items():
+                result[to_index[i]] = sorted([to_index[j] for j in js])
+            return result
+        else:
+            for i in neighbors:
+                neighbors[i].sort()
+
+            return neighbors
