@@ -141,7 +141,7 @@ class CIFMixin:
 
         # Cell information
         if self.periodicity == 3:
-            cell = self['cell_parameters'].cell(configuration)
+            cell = self['cell'].cell(configuration)
             a, b, c, alpha, beta, gamma = cell.parameters
             volume = cell.volume
             lines.append("_symmetry_space_group_name_H-M   'P 1'")
