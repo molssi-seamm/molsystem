@@ -330,9 +330,12 @@ class _Atoms(collections.abc.MutableMapping):
 
         # And to the subset 'all'
         subset_atom = self.system['subset_atom']
-        subset_atom.append(
-            subset=self.system.all_subset(configuration), atom=ids
-        )
+        if isinstance(configuration, int):
+            config = configuration
+        else:
+            config = configuration[0]
+
+        subset_atom.append(subset=self.system.all_subset(config), atom=ids)
 
         return ids
 
@@ -425,7 +428,7 @@ class _Atoms(collections.abc.MutableMapping):
 
         cell = self.system['cell'].cell(configuration)
 
-        if 'molecule' in in_cell:
+        if isinstance(in_cell, str) and 'molecule' in in_cell:
             # Need fractionals...
             if self.system.coordinate_system == 'Cartesian':
                 UVW = cell.to_fractionals(xyz, as_array=True)
@@ -576,34 +579,3 @@ class _Atoms(collections.abc.MutableMapping):
         df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
 
         return df
-
-
-if __name__ == '__main__':  # pragma: no cover
-    import numpy.random as nprand
-    import timeit
-    import time
-
-    def run(nper=1000, nrepeat=100, preallocate=False) -> None:
-        system = None
-        atoms = _Atoms(system)
-        x = nprand.uniform(low=0, high=100, size=nper)
-        y = nprand.uniform(low=0, high=100, size=nper)
-        z = nprand.uniform(low=0, high=100, size=nper)
-        atno = numpy.array(nper * [6])
-        with atoms as tmp:
-            for i in range(0, nrepeat):
-                tmp.append(x=x, y=y, z=z, atno=atno)
-                x += 10.0
-                y += 5.0
-                z -= 3.0
-
-    nrepeat = 1
-    nper = 10
-    t = timeit.timeit(
-        "run(nper={}, nrepeat={})".format(nper, nrepeat),
-        setup="from __main__ import run",
-        timer=time.time,
-        number=1
-    )
-
-    print("Creating {} atoms took {:.3f} s".format(nper * nrepeat, t))
