@@ -2,7 +2,10 @@
 
 """Functions for handling PDB files
 
-ToDo: Need to understand more fully the PDB/mmcif format and the how to
+To Do
+^^^^^
+
+Need to understand more fully the PDB/mmcif format and the how to
 carry the information about residues, chains, hetero groups, waters, etc.
 At the moment this is ignoring much of the information, and putting residue,
 chain, etc information directly on atoms.
@@ -11,112 +14,114 @@ I think we should use templates and subsets, but am not (yet) sure.
 
 Presumably this metadata is most useful for setting up complicated
 simulations.
------------------------------------------------------------------------
+
+File Format
+^^^^^^^^^^^
 
 For complete documentation, see
 http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
 
-Order of records:
+Order of records::
 
-RECORD TYPE             EXISTENCE           CONDITIONS IF  OPTIONAL
---------------------------------------------------------------------------------------
-HEADER                  Mandatory
-OBSLTE                  Optional            Mandatory in  entries that have been
-                                            replaced by a newer entry.
-TITLE                   Mandatory
-SPLIT                   Optional            Mandatory when  large macromolecular
-                                            complexes  are split into multiple PDB
-                                            entries.
-CAVEAT                  Optional            Mandatory when there are outstanding  errors
-                                            such  as chirality.
-COMPND                  Mandatory
-SOURCE                  Mandatory
-KEYWDS                  Mandatory
-EXPDTA                  Mandatory
-NUMMDL                  Optional            Mandatory for  NMR ensemble entries.
-MDLTYP                  Optional            Mandatory for  NMR minimized average
-                                            Structures or when the entire  polymer
-                                            chain contains C alpha or P atoms only.
-AUTHOR                  Mandatory
-REVDAT                  Mandatory
-SPRSDE                  Optional            Mandatory for a replacement entry.
-JRNL                    Optional            Mandatory for a publication describes
-                                            the experiment.
-REMARK 0                Optional            Mandatory for a re-refined structure
-REMARK 1                Optional
-REMARK 2                Mandatory
-REMARK 3                Mandatory
-REMARK N                Optional            Mandatory under certain conditions.
-DBREF                   Optional            Mandatory for all polymers.
-DBREF1/DBREF2           Optional            Mandatory when certain sequence  database
-                                            accession  and/or sequence numbering
-                                            does  not fit preceding DBREF format.
-SEQADV                  Optional            Mandatory if sequence  conflict exists.
-SEQRES                  Mandatory           Mandatory if ATOM records exist.
-MODRES                  Optional            Mandatory if modified group exists  in the
-                                            coordinates.
-HET                     Optional            Mandatory if a non-standard group other
-                                            than water appears in the coordinates.
-HETNAM                  Optional            Mandatory if a non-standard group other
-                                            than  water appears in the coordinates.
-HETSYN                  Optional
-FORMUL                  Optional            Mandatory if a non-standard group or
-                                            water appears in the coordinates.
-HELIX                   Optional
-SHEET                   Optional
-SSBOND                  Optional            Mandatory if a  disulfide bond is present.
-LINK                    Optional            Mandatory if  non-standard residues appear
-                                            in a  polymer
-CISPEP                  Optional
-SITE                    Optional
-CRYST1                  Mandatory
-ORIGX1 ORIGX2 ORIGX3    Mandatory
-SCALE1 SCALE2 SCALE3    Mandatory
-MTRIX1 MTRIX2 MTRIX3    Optional            Mandatory if  the complete asymmetric unit
-                                            must  be generated from the given coordinates
-                                            using non-crystallographic symmetry.
-MODEL                   Optional            Mandatory if more than one model
-                                            is  present in the entry.
-ATOM                    Optional            Mandatory if standard residues exist.
-ANISOU                  Optional
-TER                     Optional            Mandatory if ATOM records exist.
-HETATM                  Optional            Mandatory if non-standard group exists.
-ENDMDL                  Optional            Mandatory if MODEL appears.
-CONECT                  Optional            Mandatory if non-standard group appears
-                                            and  if LINK or SSBOND records exist.
-MASTER                  Mandatory
-END                     Mandatory
+    RECORD TYPE             EXISTENCE           CONDITIONS IF  OPTIONAL
+    --------------------------------------------------------------------------------------
+    HEADER                  Mandatory
+    OBSLTE                  Optional            Mandatory in  entries that have been
+                                                replaced by a newer entry.
+    TITLE                   Mandatory
+    SPLIT                   Optional            Mandatory when  large macromolecular
+                                                complexes  are split into multiple PDB
+                                                entries.
+    CAVEAT                  Optional            Mandatory when there are outstanding  errors
+                                                such  as chirality.
+    COMPND                  Mandatory
+    SOURCE                  Mandatory
+    KEYWDS                  Mandatory
+    EXPDTA                  Mandatory
+    NUMMDL                  Optional            Mandatory for  NMR ensemble entries.
+    MDLTYP                  Optional            Mandatory for  NMR minimized average
+                                                Structures or when the entire  polymer
+                                                chain contains C alpha or P atoms only.
+    AUTHOR                  Mandatory
+    REVDAT                  Mandatory
+    SPRSDE                  Optional            Mandatory for a replacement entry.
+    JRNL                    Optional            Mandatory for a publication describes
+                                                the experiment.
+    REMARK 0                Optional            Mandatory for a re-refined structure
+    REMARK 1                Optional
+    REMARK 2                Mandatory
+    REMARK 3                Mandatory
+    REMARK N                Optional            Mandatory under certain conditions.
+    DBREF                   Optional            Mandatory for all polymers.
+    DBREF1/DBREF2           Optional            Mandatory when certain sequence  database
+                                                accession  and/or sequence numbering
+                                                does  not fit preceding DBREF format.
+    SEQADV                  Optional            Mandatory if sequence  conflict exists.
+    SEQRES                  Mandatory           Mandatory if ATOM records exist.
+    MODRES                  Optional            Mandatory if modified group exists  in the
+                                                coordinates.
+    HET                     Optional            Mandatory if a non-standard group other
+                                                than water appears in the coordinates.
+    HETNAM                  Optional            Mandatory if a non-standard group other
+                                                than  water appears in the coordinates.
+    HETSYN                  Optional
+    FORMUL                  Optional            Mandatory if a non-standard group or
+                                                water appears in the coordinates.
+    HELIX                   Optional
+    SHEET                   Optional
+    SSBOND                  Optional            Mandatory if a  disulfide bond is present.
+    LINK                    Optional            Mandatory if  non-standard residues appear
+                                                in a  polymer
+    CISPEP                  Optional
+    SITE                    Optional
+    CRYST1                  Mandatory
+    ORIGX1 ORIGX2 ORIGX3    Mandatory
+    SCALE1 SCALE2 SCALE3    Mandatory
+    MTRIX1 MTRIX2 MTRIX3    Optional            Mandatory if  the complete asymmetric unit
+                                                must  be generated from the given coordinates
+                                                using non-crystallographic symmetry.
+    MODEL                   Optional            Mandatory if more than one model
+                                                is  present in the entry.
+    ATOM                    Optional            Mandatory if standard residues exist.
+    ANISOU                  Optional
+    TER                     Optional            Mandatory if ATOM records exist.
+    HETATM                  Optional            Mandatory if non-standard group exists.
+    ENDMDL                  Optional            Mandatory if MODEL appears.
+    CONECT                  Optional            Mandatory if non-standard group appears
+                                                and  if LINK or SSBOND records exist.
+    MASTER                  Mandatory
+    END                     Mandatory
 
-Description of HETATM records:
+Description of HETATM records::
 
-COLUMNS       DATA  TYPE     FIELD         DEFINITION
------------------------------------------------------------------------
- 1 - 6        Record name    "HETATM"
- 7 - 11       Integer        serial        Atom serial number.
-13 - 16       Atom           name          Atom name.
-17            Character      altLoc        Alternate location indicator.
-18 - 20       Residue name   resName       Residue name.
-22            Character      chainID       Chain identifier.
-23 - 26       Integer        resSeq        Residue sequence number.
-27            AChar          iCode         Code for insertion of residues.
-31 - 38       Real(8.3)      x             Orthogonal coordinates for X.
-39 - 46       Real(8.3)      y             Orthogonal coordinates for Y.
-47 - 54       Real(8.3)      z             Orthogonal coordinates for Z.
-55 - 60       Real(6.2)      occupancy     Occupancy.
-61 - 66       Real(6.2)      tempFactor    Temperature factor.
-77 - 78       LString(2)     element       Element symbol; right-justified.
-79 - 80       LString(2)     charge        Charge on the atom.
+    COLUMNS       DATA  TYPE     FIELD         DEFINITION
+    -----------------------------------------------------------------------
+     1 - 6        Record name    "HETATM"
+     7 - 11       Integer        serial        Atom serial number.
+    13 - 16       Atom           name          Atom name.
+    17            Character      altLoc        Alternate location indicator.
+    18 - 20       Residue name   resName       Residue name.
+    22            Character      chainID       Chain identifier.
+    23 - 26       Integer        resSeq        Residue sequence number.
+    27            AChar          iCode         Code for insertion of residues.
+    31 - 38       Real(8.3)      x             Orthogonal coordinates for X.
+    39 - 46       Real(8.3)      y             Orthogonal coordinates for Y.
+    47 - 54       Real(8.3)      z             Orthogonal coordinates for Z.
+    55 - 60       Real(6.2)      occupancy     Occupancy.
+    61 - 66       Real(6.2)      tempFactor    Temperature factor.
+    77 - 78       LString(2)     element       Element symbol; right-justified.
+    79 - 80       LString(2)     charge        Charge on the atom.
 
-Description of CONECT records:
+Description of CONECT records::
 
-COLUMNS       DATA  TYPE      FIELD        DEFINITION
--------------------------------------------------------------------------
- 1 -  6        Record name    "CONECT"
- 7 - 11        Integer        serial       Atom  serial number
-12 - 16        Integer        serial       Serial number of bonded atom
-17 - 21        Integer        serial       Serial  number of bonded atom
-22 - 26        Integer        serial       Serial number of bonded atom
-27 - 31        Integer        serial       Serial number of bonded atom
+    COLUMNS       DATA  TYPE      FIELD        DEFINITION
+    -------------------------------------------------------------------------
+     1 -  6        Record name    "CONECT"
+     7 - 11        Integer        serial       Atom  serial number
+    12 - 16        Integer        serial       Serial number of bonded atom
+    17 - 21        Integer        serial       Serial  number of bonded atom
+    22 - 26        Integer        serial       Serial number of bonded atom
+    27 - 31        Integer        serial       Serial number of bonded atom
 """  # noqa: E501
 
 import collections
