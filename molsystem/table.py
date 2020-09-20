@@ -240,30 +240,43 @@ class _Table(collections.abc.MutableMapping):
         index: bool = False,
         pk: bool = False,
         references: str = None,
+        on_delete: str = 'cascade',
+        on_update: str = 'cascade',
         values: Any = None
     ) -> None:
         """Adds a new attribute.
 
-        If the attribute has been defined previously, the column type and
-        default will automatically be those given in the definition. If they
-        are provided as arguments, they must be the same as in the definition.
-
         If the default value is None, you must always provide values wherever
         needed, for example when adding a row.
 
-        Args:
-            name: the name of the attribute.
-            coltype: the type of the attribute (column). Must be one of 'int',
-                'float', 'str' or 'byte'
-            default: the default value for the attribute if no value is given.
-            notnull: whether the value must be non-null
-            values: either a single value or a list of values length 'nrows' of
-                values to fill the column.
+        Parameters
+        ----------
+        name : str
+            The name of the attribute.
+        coltype : str
+            The type of the attribute (column). Must be one of 'int',
+            'float', 'str' or 'byte'
+        default : int, float, str or byte
+            The default value for the attribute if no value is given.
+        notnull : bool = False
+            Whether the value must be non-null
+        index : bool = False
+            Whether to create an index on the column
+        pk : bool = False
+            Whether the column is the primry keys
+        references : str = None
+            If not null, the column is a foreign key for this table.
+        on_delete : str = 'cascade'
+            How to handle deletions of a foregin keys
+        on_update : str = 'cascade'
+            How to handle updates of a foregin key
+        values : Any
+            Either a single value or a list of values length 'nrows' of
+            values to fill the column.
 
         Returns:
             None
         """
-
         # Does the table exist?
         if self.table in self.system:
             table_exists = True
@@ -314,6 +327,10 @@ class _Table(collections.abc.MutableMapping):
             column_def += ' NOT NULL'
         if references is not None:
             column_def += f' REFERENCES {references}'
+            if on_delete is not None and on_delete != '':
+                column_def += f' ON DELETE {on_delete}'
+            if on_update is not None and on_update != '':
+                column_def += f' ON UPDATE {on_update}'
 
         if table_exists:
             self.cursor.execute(
@@ -423,6 +440,22 @@ class _Table(collections.abc.MutableMapping):
 
         if 'id' in kwargs:
             return kwargs['id']
+
+    def remove(self, *args):
+        """Remove rows matching the selection."""
+        if len(args) == 0:
+            return self.db.execute(f'DELETE FROM {self.table}')
+
+        sql = f'DELETE FROM {self.table} WHERE'
+
+        parameters = []
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' "{col}" {op} ?'
+            parameters.append(value)
+
+        return self.db.execute(sql, parameters)
 
     def rows(self, *args):
         """Return an iterator over the rows."""
