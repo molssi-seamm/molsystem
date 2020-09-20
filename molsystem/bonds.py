@@ -5,7 +5,6 @@
 Based on tables in an SQLite database.
 """
 
-from collections import namedtuple
 import logging
 import sqlite3
 from typing import Any, Dict, TypeVar
@@ -95,7 +94,6 @@ class _Bonds(Table):
 
         super().__init__(system, table)
 
-        self._bond_tuple = None  # A tuple for representing bonds
         self._bond_db = None
 
     def __getitem__(self, key):
@@ -112,33 +110,6 @@ class _Bonds(Table):
             self._bond_db.row_factory = self._row_factory
             self._bond_db.execute('PRAGMA foreign_keys = ON')
         return self._bond_db
-
-    @property
-    def bond_tuple(self):
-        if self._bond_tuple is None:
-            self._bond_tuple = namedtuple(
-                'Bond', self.attributes, module=self.__module__
-            )
-        return self._bond_tuple
-
-    def add_attribute(
-        self,
-        name: str,
-        coltype: str = 'float',
-        default: Any = None,
-        notnull: bool = False,
-        index: bool = False,
-        pk: bool = False,
-        references: str = None,
-        values: Any = None
-    ) -> None:
-        """Adds a new attribute to the bonds table (templatebond)."""
-        super().add_attribute(
-            name, coltype, default, notnull, index, pk, references, values
-        )
-
-        # And update the named 'Bond' tuple
-        self._bond_tuple = None
 
     def append(
         self,
@@ -291,21 +262,28 @@ class _Bonds(Table):
         else:
             self._system['templatebond'].append(i=ti, j=tj)
 
-    def bonds(self, configuration=None):
+    def bonds(self, subset=None, configuration=None):
         """Returns an iterator over the rows of the bonds.
 
         Note that these are references to the main atom table.
 
         Parameters
         ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
         configuration : int = None
-            The configuration of interest
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
 
         Returns
         -------
-        An SQLite cursor with the rows.
+        sqlite3.Cursor
+            A cursor that returns sqlite3.Row objects for the bonds.
         """
-        all_subset = self._system.all_subset(configuration)
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+
         columns = []
         for column in self.attributes:
             if column != 'i' and column != 'j':
@@ -318,7 +296,7 @@ class _Bonds(Table):
             "    AND templatebond.j = jatom.templateatom"
             "    AND iatom.subset = ? and jatom.subset = ?"
         )
-        return self.db.execute(sql, (all_subset, all_subset))
+        return self.db.execute(sql, (subset, subset))
 
     def contains_bond(self, key):
         if isinstance(key, self.bond_tuple):
@@ -429,29 +407,32 @@ class _Bonds(Table):
             table = Table(self._system, 'templatebond')
             return Column(table, key, sql=sql)
 
-    def n_bonds(self, configuration: int = None) -> int:
+    def n_bonds(self, subset: int = None, configuration: int = None) -> int:
         """The number of bonds.
 
         Parameters
         ----------
-        system : System
-            The system this is part of.
-        configuration: int = None
-            The configuration to use, defaulting to the current configuration
+        bonds : int = None
+            Get the bonds for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
 
         Returns
         -------
-        n_bonds : int
-            The number of bonds in the configuration.
+        int
+            Number of bonds
         """
-        if configuration is None:
-            configuration = self._system.current_configuration
-        all_template = self._system.all_template(configuration)
+        if subset is None:
+            template = self.system.all_template(configuration)
+        else:
+            template = self.system.subsets.template(subset)
 
         self.cursor.execute(
             "SELECT COUNT(*) FROM templateatom, templatebond "
             " WHERE templatebond.i = templateatom.id"
-            "   AND templateatom.template = ?", (all_template,)
+            "   AND templateatom.template = ?", (template,)
         )
         return self.cursor.fetchone()[0]
 

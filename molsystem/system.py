@@ -11,10 +11,10 @@ import math
 import sqlite3
 from typing import Any, Dict
 
-# import molsystem
 from molsystem.elemental_data import element_data
 from molsystem.table import _Table as Table
 from molsystem.atoms import _Atoms as Atoms
+from molsystem.subset import _Subsets as Subsets
 from molsystem.template import _Template as Template
 from molsystem.templateatoms import _Templateatoms as Templateatoms
 from molsystem.templatebonds import _Templatebonds as Templatebonds
@@ -24,13 +24,14 @@ from molsystem.cell_parameters import _CellParameters as CellParameters
 from molsystem.cif import CIFMixin
 from molsystem.molfile import MolFileMixin
 from molsystem.pdb import PDBMixin
+from molsystem.smiles import SMILESMixin
 from molsystem.topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
 
 
 class _System(
-    PDBMixin, MolFileMixin, CIFMixin, TopologyMixin,
+    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin,
     collections.abc.MutableMapping
 ):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
@@ -190,6 +191,10 @@ class _System(
             if 'bond' not in self._items:
                 self._items['bond'] = Bonds(self)
             return self._items['bond']
+        elif key == 'subset' or key == 'subsets':
+            if 'subset' not in self._items:
+                self._items['subset'] = Subsets(self)
+            return self._items['subset']
         elif key == 'cell':
             if 'cell' not in self._items:
                 self._items['cell'] = CellParameters(self)
@@ -388,19 +393,9 @@ class _System(
         return self._nickname
 
     @property
-    def n_atoms(self):
-        """The number of atoms in the system."""
-        return self.atoms.n_atoms
-
-    @property
     def n_configurations(self):
         """The number of configurations of the system."""
         return self['configuration'].n_rows
-
-    @property
-    def n_bonds(self):
-        """The number of bonds in the system."""
-        return self.bonds.n_bonds
 
     @property
     def periodicity(self):
@@ -423,6 +418,26 @@ class _System(
             "UPDATE system SET periodicity = ? WHERE id = ?",
             (value, self._id)
         )
+
+    @property
+    def subsets(self):
+        """The subsets"""
+        return self['subset']
+
+    @property
+    def templates(self):
+        """The templates"""
+        return self['template']
+
+    @property
+    def templateatoms(self):
+        """The template atoms"""
+        return self['templateatom']
+
+    @property
+    def templatebonds(self):
+        """The template bonds"""
+        return self['templatebond']
 
     @property
     def version(self):
@@ -491,7 +506,7 @@ class _System(
             changed_bonds = True
             changed_atoms = True
             tid = self['template'].append(name='all', type='all')[0]
-            sid = self['subset'].append(template=tid)[0]
+            sid = self['subset'].create(template=tid)
         else:
             last_configuration = max(self._configurations)
             last_sid, last_tid = self._configurations[last_configuration]
@@ -681,6 +696,44 @@ class _System(
             result.append(row['name'])
         return result
 
+    def n_atoms(self, subset=None, configuration=None) -> int:
+        """The number of atoms in a subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        return self.atoms.n_atoms(subset=subset, configuration=configuration)
+
+    def n_bonds(self, subset: int = None, configuration: int = None) -> int:
+        """The number of bonds.
+
+        Parameters
+        ----------
+        bonds : int = None
+            Get the bonds for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of bonds
+        """
+        return self.bonds.n_bonds(subset=subset, configuration=configuration)
+
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers.
 
@@ -836,7 +889,11 @@ class _System(
         table = self['template']
         table.add_attribute('id', coltype='int', pk=True)
         table.add_attribute('name', coltype='str')
-        table.add_attribute('type', coltype='str')
+        table.add_attribute('type', coltype='str', default='general')
+        self.db.execute(
+            "CREATE UNIQUE INDEX 'idx_template_name_type'"
+            '    ON template ("name", "type")'
+        )
 
         # The subsets
         table = self['subset']
