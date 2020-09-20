@@ -147,7 +147,7 @@ def templates(system):
     #       C  H  H  H  C =O  O  H
     i_atom = [0, 0, 0, 0, 4, 4, 6]
     j_atom = [1, 2, 3, 4, 5, 6, 7]
-    order =  [1, 1, 1, 1, 1, 2, 1]  # noqa: E222
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
     tid = templates.append(name='acetic acid', type='molecule')[0]
@@ -177,7 +177,7 @@ def AceticAcid(system):
     #       C  H  H  H  C =O  O  H
     i_atom = [0, 0, 0, 0, 4, 4, 6]
     j_atom = [1, 2, 3, 4, 5, 6, 7]
-    order =  [1, 1, 1, 1, 1, 2, 1]  # noqa: E222
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
     system.name = 'acetic acid'
@@ -185,6 +185,38 @@ def AceticAcid(system):
 
     i = [ids[x] for x in i_atom]
     j = [ids[x] for x in j_atom]
+
+    system['bonds'].append(i=i, j=j, bondorder=order)
+
+    return system
+
+
+@pytest.fixture
+def disordered(AceticAcid):
+    """Two acetic acid molecules with different atom order"""
+    # yapf: disable
+    #       C       H        H        H        C        =O      O        H
+    x = [ 1.0797, 0.5782,  0.7209,  0.7052,  0.5713, -0.1323, 0.9757,  2.1724]  # noqa: E221, E501, E201
+    y = [ 0.0181, 3.1376, -0.6736, -0.3143,  1.3899,  1.7142, 2.2970,  0.0161]  # noqa: E221, E501, E201
+    z = [-0.0184, 0.2813, -0.7859,  0.9529, -0.3161, -1.2568, 0.5919, -0.0306]  # noqa: E221, E501
+    atno = [6, 1, 1, 1, 6, 8, 8, 1]  # noqa: E221
+
+    #       C  H  H  H  C =O  O  H
+    i_atom = [0, 0, 0, 0, 4, 4, 6]
+    j_atom = [1, 2, 3, 4, 5, 6, 7]
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
+    # yapf: enable
+
+    system = AceticAcid
+    ids = system['atoms'].append(
+        x=[*reversed(x)],
+        y=[*reversed(y)],
+        z=[*reversed(z)],
+        atno=[*reversed(atno)]
+    )
+
+    i = [ids[7 - x] for x in i_atom]
+    j = [ids[7 - x] for x in j_atom]
 
     system['bonds'].append(i=i, j=j, bondorder=order)
 

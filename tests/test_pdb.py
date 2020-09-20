@@ -10,6 +10,8 @@ ruler = """\
 #-----+++++ ----#--- #----#   --------########--------######------          --##
 """  # noqa: E501
 
+# https://files.rcsb.org/ligands/download/HEM_ideal.pdb
+
 heme = """\
 ATOM      1  CHA HEM A   1      -2.161  -0.125   0.490  1.00 10.00           C
 ATOM      2  CHB HEM A   1       1.458  -3.419   0.306  1.00 10.00           C
