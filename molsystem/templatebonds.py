@@ -131,11 +131,10 @@ class _Templatebonds(Table):
         if template is None:
             template = self._templates.current_template
 
-        return self.cursor.execute(
+        return self.db.execute(
             f'SELECT * FROM {self._table}'
-            '  WHERE i IN (SELECT id FROM templateatom WHERE template = ?)'
-            '    AND j IN (SELECT id FROM templateatom WHERE template = ?)',
-            (template, template)
+            '  WHERE i IN (SELECT id FROM templateatom WHERE template = ?)',
+            (template,)
         )
 
     def n_bonds(self, template: int = None) -> int:

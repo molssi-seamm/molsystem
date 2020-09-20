@@ -155,6 +155,28 @@ class _Templateatoms(Atoms):
 
         return ids
 
+    def atomic_numbers(self, template: int = None) -> [int]:
+        """The atomic numbers of the atoms in a template.
+
+        Parameters
+        ----------
+        template : int = None
+            Which template, defaulting to the current template.
+
+        Returns
+        -------
+        ids : [int]
+            The ids of the atoms in the template.
+        """
+        if template is None:
+            template = self.current_template
+        return [
+            x[0] for x in self.db.execute(
+                f"SELECT atno FROM {self._atom_tablename} WHERE template = ?",
+                (template,)
+            )
+        ]
+
     def atom_ids(self, template: int = None) -> [int]:
         """The ids of the atoms in a template.
 
@@ -168,10 +190,12 @@ class _Templateatoms(Atoms):
         ids : [int]
             The ids of the atoms in the template.
         """
+        if template is None:
+            template = self.current_template
         return [
             x[0] for x in self.db.execute(
                 f"SELECT id FROM {self._atom_tablename} WHERE template = ?",
-                (self.current_template,)
+                (template,)
             )
         ]
 
