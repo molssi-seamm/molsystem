@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A dictionary-like object for holding template
+"""A dictionary-like object for holding templates
 
 
 """
@@ -58,11 +58,120 @@ class _Template(Table):
 
     def set_current_template(self, name, type_='general'):
         """Set the current template given the name and optionally type."""
+        id = self.find(name, type_=type_)
+        self._current_template = id
+
+    def find(self, name, type_='general', create=False):
+        """Find a single template given the name and type.
+
+        Parameters
+        ----------
+        name : str
+            The name of the template.
+        type_ : str = 'general'
+            The type of template, e.g. 'all', 'molecule', 'residue'
+        create : bool = False
+            Create the template if it does not exist.
+
+        Returns
+        -------
+        int
+            The id of the template.
+
+        Raises
+        ------
+        KeyError
+           If the template does not exist and 'create' is not requested.
+        """
         self.cursor.execute(
             f'SELECT id FROM {self.table} WHERE "name" = ? AND "type" = ?',
             (name, type_)
         )
         row = self.cursor.fetchone()
         if row is None:
-            raise KeyError(f"There is no template '{name}' of type '{type_}'.")
-        self._current_template = row[0]
+            if create:
+                return self.create(name, type_=type_)
+            else:
+                raise KeyError(
+                    f"There is no template '{name}' of type '{type_}'."
+                )
+        return row[0]
+
+    def exists(self, name, type_='general'):
+        """Return if the template exists given the name and type.
+
+        Parameters
+        ----------
+        name : str
+            The name of the template.
+        type_ : str = 'general'
+            The type of template, e.g. 'all', 'molecule', 'residue'
+
+        Returns
+        -------
+        bool
+            True if it exists; False otherwise.
+        """
+        self.cursor.execute(
+            f'SELECT COUNT(*) FROM {self.table} WHERE "name" = ? '
+            'AND "type" = ?', (name, type_)
+        )
+        row = self.cursor.fetchone()
+        return row[0] == 1
+
+    def create(self, name, type_='general', atnos=None, bonds=None):
+        """Create a new template."""
+        if self.exists(name, type_=type_):
+            raise KeyError(f"The template '{name}' of type '{type_}' exists.")
+
+        tid = self.append(name=name, type=type_)[0]
+
+        if atnos is not None:
+            tatom_ids = self.system.templateatoms.append(
+                atno=atnos, template=tid
+            )
+
+            if bonds is not None:
+                iatoms = []
+                jatoms = []
+                orders = []
+                for i, j, order in bonds:
+                    iatoms.append(tatom_ids[i])
+                    jatoms.append(tatom_ids[j])
+                    orders.append(order)
+                self.system.templatebonds.append(
+                    template=tid, i=iatoms, j=jatoms, bondorder=orders
+                )
+        return tid
+
+    def templates(self, name=None, type_=None):
+        """Return an itereator over the given templates.
+
+        Parameters
+        ----------
+        name : str
+            The name of the template.
+        type_ : str = 'general'
+            The type of template, e.g. 'all', 'molecule', 'residue'
+
+        Returns
+        -------
+        sqlite.cursor
+            The iterator over rows.
+        """
+        if name is None:
+            if type_ is None:
+                return self.db.execute(f'SELECT * FROM {self.table}')
+            else:
+                return self.db.execute(
+                    f'SELECT * FROM {self.table} WHERE "type" = ?', (type_,)
+                )
+        elif type_ is None:
+            return self.db.execute(
+                f'SELECT * FROM {self.table} WHERE "name" = ?', (name,)
+            )
+        else:
+            return self.db.execute(
+                f'SELECT * FROM {self.table} WHERE "name" = ? AND "type" = ?',
+                (name, type_)
+            )
