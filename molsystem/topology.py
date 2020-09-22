@@ -67,7 +67,9 @@ class TopologyMixin:
         else:
             return molecules
 
-    def bonded_neighbors(self, configuration=None, as_indices=False):
+    def bonded_neighbors(
+        self, configuration=None, as_indices=False, first_index=0
+    ):
         """The atoms bonded to each atom in the system.
 
         Parameters
@@ -76,6 +78,8 @@ class TopologyMixin:
             The configuration to use, defaults to the current configuration.
         as_indices : bool = False
             Whether to return 0-based indices (True) or atom ids (False)
+        first_index : int = 0
+            The smallest index, e.g. 0 or 1
 
         Returns
         -------
@@ -106,8 +110,8 @@ class TopologyMixin:
 
         if as_indices:
             # Convert to indices
-            to_index = {j: i for i, j in enumerate(atom_ids)}
-            result = [[]] * n_atoms
+            to_index = {j: i + first_index for i, j in enumerate(atom_ids)}
+            result = [[]] * (n_atoms + first_index)
             for i, js in neighbors.items():
                 result[to_index[i]] = sorted([to_index[j] for j in js])
             return result

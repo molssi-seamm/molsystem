@@ -436,6 +436,37 @@ class _Bonds(Table):
         )
         return self.cursor.fetchone()[0]
 
+    def remove(self, subset=None, configuration=None):
+        """Removes all the bonds in a subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        None
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+
+        sql = (
+            "DELETE FROM templatebond"
+            " WHERE i in ("
+            "     SELECT id FROM templateatom, subset_atom"
+            "      WHERE id = templateatom AND subset = ?"
+            " ) AND j in ("
+            "     SELECT id FROM templateatom, subset_atom"
+            "      WHERE id = templateatom AND subset = ?"
+            " )"
+        )
+        self.db.execute(sql, (subset, subset))
+
     def to_dataframe(self, configuration=None):
         """Return the bonds as a Pandas Dataframe."""
         all_subset = self._system.all_subset(configuration)

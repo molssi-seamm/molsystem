@@ -568,6 +568,26 @@ class _System(
             self.cursor.execute(f'DETACH DATABASE "{other.name}"')
             self._attached.remove(other.name)
 
+    def clear(self, configuration=None) -> int:
+        """Remove everything from the configuration
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        # Delete the atoms
+        self.atoms.remove(configuration=configuration)
+
+        # Delete the template atoms.
+        self.templateatoms.remove(template=self.all_template(configuration))
+
     def create_table(self, name, cls=Table, other=None):
         """Create a new table with the given name.
 

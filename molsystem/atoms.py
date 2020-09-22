@@ -752,6 +752,47 @@ class _Atoms(collections.abc.MutableMapping):
         )
         return self.cursor.fetchone()[0]
 
+    def remove(self, subset=None, configuration=None) -> int:
+        """Delete the atoms for the subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+            # Bonds only if removing all atoms, i.e. subset all
+            self.system.bonds.remove(subset=subset)
+
+        # Coordinates
+        self.db.execute(
+            "DELETE FROM coordinates"
+            " WHERE atom IN ("
+            "   SELECT atom FROM subset_atom WHERE subset = ?"
+            ")", (subset,)
+        )
+
+        # Atoms
+        self.db.execute(
+            "DELETE FROM atom"
+            " WHERE id IN ("
+            "   SELECT atom FROM subset_atom WHERE subset = ?"
+            ")", (subset,)
+        )
+
+        # Subset-Atoms
+        self.db.execute("DELETE FROM subset_atom WHERE subset = ?", (subset,))
+
     def symbols(self, subset=None, configuration: int = None) -> [str]:
         """The element symbols for the atoms in a subset or configuration
 
