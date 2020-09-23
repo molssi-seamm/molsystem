@@ -28,21 +28,21 @@ def test_keys(atoms):
 
 def test_n_atoms_empty(atoms):
     """Test how many atoms an empty object has"""
-    assert atoms.n_atoms == 0
+    assert atoms.n_atoms() == 0
 
 
 def test_append_one(atoms):
     """Test adding one atom"""
     with atoms as tmp:
         tmp.append(x=1.0, y=2.0, z=3.0, atno=[6])
-    assert atoms.n_atoms == 1
+    assert atoms.n_atoms() == 1
 
 
 def test_append_several(atoms):
     """Test adding several atoms"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert atoms.n_atoms == 3
+    assert atoms.n_atoms() == 3
 
 
 def test_append_several_scalar(atoms):
@@ -60,7 +60,7 @@ def test_append_using_default(atoms):
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z)
 
-    assert (atoms.n_atoms == 3 and atoms['atno'] == [None, None, None])
+    assert (atoms.n_atoms() == 3 and atoms['atno'] == [None, None, None])
 
 
 def test_append_error(atoms):
@@ -69,7 +69,7 @@ def test_append_error(atoms):
     with pytest.raises(KeyError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, bad=99)
-    assert atoms.n_atoms == 0 and atoms.version == 0
+    assert atoms.n_atoms() == 0 and atoms.version == 0
     assert (str(e.value) == '\'"bad" is not an attribute of the atoms.\'')
 
 
@@ -128,7 +128,7 @@ def test_add_attribute_with_wrong_number_of_values(atoms):
             tmp.append(x=x, y=y, z=z, atno=atno)
             tmp.add_attribute('spin', coltype='int', default=0, values=[1, 2])
     assert (
-        atoms.n_atoms == 0 and str(e.value) == (
+        atoms.n_atoms() == 0 and str(e.value) == (
             "The number of values given, "
             '2, must be either 1, or the number of rows in "atom": 3'
         )
@@ -182,7 +182,7 @@ def test_set_column(atoms):
         tmp['atno'] = 10
 
     assert (
-        atoms.n_atoms == 3 and atoms.version == 2 and
+        atoms.n_atoms() == 3 and atoms.version == 2 and
         atoms['atno'] == [10, 10, 10]
     )
 
@@ -197,7 +197,9 @@ def test_set_column_with_array(atoms):
     with atoms as tmp:
         tmp['x'] = values
 
-    assert (atoms.n_atoms == 3 and atoms.version == 2 and atoms['x'] == values)
+    assert (
+        atoms.n_atoms() == 3 and atoms.version == 2 and atoms['x'] == values
+    )
 
 
 def test_append_error_no_coordinates(atoms):
@@ -205,7 +207,7 @@ def test_append_error_no_coordinates(atoms):
     with atoms as tmp:
         tmp.append(y=y, z=z, atno=atno)
 
-    assert (atoms.n_atoms == 3 and atoms['x'] == [None, None, None])
+    assert (atoms.n_atoms() == 3 and atoms['x'] == [None, None, None])
 
 
 def test_append_error_invalid_column(atoms):
@@ -214,7 +216,7 @@ def test_append_error_invalid_column(atoms):
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, junk=99)
     assert (
-        atoms.n_atoms == 0 and
+        atoms.n_atoms() == 0 and
         str(e.value) == '\'"junk" is not an attribute of the atoms.\''
     )
 
@@ -225,7 +227,7 @@ def test_append_error_invalid_length(atoms):
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=[3, 4])
     assert (
-        atoms.n_atoms == 0 and str(e.value) == (
+        atoms.n_atoms() == 0 and str(e.value) == (
             'key "atno" has the wrong number of values, '
             '2. Should be 1 or the number of atoms (3).'
         )
@@ -238,7 +240,7 @@ def test_add_attribute_with_no_default(atoms):
         tmp.add_attribute('new', coltype='float')
         tmp.append(x=x, y=y, z=z, atno=atno, new=[-1, -2, -3])
 
-    assert (atoms.n_atoms == 3 and atoms['new'] == [-1, -2, -3])
+    assert (atoms.n_atoms() == 3 and atoms['new'] == [-1, -2, -3])
 
 
 def test_equality(two_systems):
@@ -253,7 +255,7 @@ def test_equality(two_systems):
     with atoms2 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
 
-    assert atoms1.n_atoms == 3 and atoms1 == atoms2
+    assert atoms1.n_atoms() == 3 and atoms1 == atoms2
 
 
 def test_inequality(two_systems):
@@ -270,7 +272,7 @@ def test_inequality(two_systems):
         atno2[2] = 13
         tmp.append(x=x, y=y, z=z, atno=atno2)
 
-    assert atoms1.n_atoms == 3 and atoms1 != atoms2
+    assert atoms1.n_atoms() == 3 and atoms1 != atoms2
 
 
 def test_str(atoms):
@@ -284,7 +286,8 @@ def test_str(atoms):
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
 
-    print(str(atoms))
+    if str(atoms) != string_rep:
+        print(str(atoms))
 
     assert str(atoms) == string_rep
 
@@ -300,7 +303,8 @@ def test_repr(atoms):
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
 
-    print(repr(atoms))
+    if repr(atoms) != string_rep:
+        print(repr(atoms))
 
     assert repr(atoms) == string_rep
 

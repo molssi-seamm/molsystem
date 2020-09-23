@@ -4,24 +4,36 @@
 """
 
 import collections.abc
+from collections import Counter
+from functools import reduce
 import logging
+import math
 import sqlite3
 from typing import Any, Dict
 
-# import molsystem
 from molsystem.elemental_data import element_data
 from molsystem.table import _Table as Table
 from molsystem.atoms import _Atoms as Atoms
+from molsystem.subset import _Subsets as Subsets
 from molsystem.template import _Template as Template
 from molsystem.templateatoms import _Templateatoms as Templateatoms
 from molsystem.templatebonds import _Templatebonds as Templatebonds
 from molsystem.bonds import _Bonds as Bonds
 from molsystem.cell_parameters import _CellParameters as CellParameters
 
+from molsystem.cif import CIFMixin
+from molsystem.molfile import MolFileMixin
+from molsystem.pdb import PDBMixin
+from molsystem.smiles import SMILESMixin
+from molsystem.topology import TopologyMixin
+
 logger = logging.getLogger(__name__)
 
 
-class _System(collections.abc.MutableMapping):
+class _System(
+    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin,
+    collections.abc.MutableMapping
+):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
 
     Based on a SQLite database, this class provides a general
@@ -97,9 +109,9 @@ class _System(collections.abc.MutableMapping):
     configurations.
     """
 
-    def __init__(self, parent, name, **kwargs):
+    def __init__(self, parent, nickname=None, **kwargs):
         self._parent = parent
-        self._name = name
+        self._nickname = nickname
         self._attached = []
         self._id = 1  # The id of the system. Currently there is only 1
         self._current_configuration = None  # The current configuration
@@ -110,6 +122,7 @@ class _System(collections.abc.MutableMapping):
         self._cursor = None
         self._items = {}
         self._symbol_to_atno = {}
+        self._atno_to_symbol = {}
 
         if 'filename' in kwargs:
             self.filename = kwargs.pop('filename')
@@ -140,7 +153,7 @@ class _System(collections.abc.MutableMapping):
             self.parent.overwrite(self, backup)
 
         # and delete the copy
-        del self.parent[backup.name]
+        del self.parent[backup.nickname]
 
     def __getitem__(self, key):
         """Allow [] access to the dictionary!
@@ -178,6 +191,10 @@ class _System(collections.abc.MutableMapping):
             if 'bond' not in self._items:
                 self._items['bond'] = Bonds(self)
             return self._items['bond']
+        elif key == 'subset' or key == 'subsets':
+            if 'subset' not in self._items:
+                self._items['subset'] = Subsets(self)
+            return self._items['subset']
         elif key == 'cell':
             if 'cell' not in self._items:
                 self._items['cell'] = CellParameters(self)
@@ -294,7 +311,7 @@ class _System(collections.abc.MutableMapping):
     def coordinate_system(self):
         """The coordinates system used, 'fractional' or 'Cartesian'"""
         self.cursor.execute(
-            "SELECT coordinatesystem FROM system WHERE id = ?'", (self._id,)
+            "SELECT coordinatesystem FROM system WHERE id = ?", (self._id,)
         )
         return self.cursor.fetchone()[0]
 
@@ -355,22 +372,30 @@ class _System(collections.abc.MutableMapping):
     @property
     def name(self):
         """Return the name of this system."""
-        return self._name
+        self.cursor.execute(
+            "SELECT name FROM system WHERE id = ?", (self._id,)
+        )
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        else:
+            return result[0]
+
+    @name.setter
+    def name(self, value):
+        self.cursor.execute(
+            "UPDATE system SET name = ? WHERE id = ?", (value, self._id)
+        )
 
     @property
-    def n_atoms(self):
-        """The number of atoms in the system."""
-        return self.atoms.n_atoms
+    def nickname(self):
+        """The name used in Systems for this system"""
+        return self._nickname
 
     @property
     def n_configurations(self):
         """The number of configurations of the system."""
         return self['configuration'].n_rows
-
-    @property
-    def n_bonds(self):
-        """The number of bonds in the system."""
-        return self.bonds.n_bonds
 
     @property
     def periodicity(self):
@@ -395,6 +420,26 @@ class _System(collections.abc.MutableMapping):
         )
 
     @property
+    def subsets(self):
+        """The subsets"""
+        return self['subset']
+
+    @property
+    def templates(self):
+        """The templates"""
+        return self['template']
+
+    @property
+    def templateatoms(self):
+        """The template atoms"""
+        return self['templateatom']
+
+    @property
+    def templatebonds(self):
+        """The template bonds"""
+        return self['templatebond']
+
+    @property
     def version(self):
         """The version of the system, incrementing from 0"""
         self.cursor.execute("SELECT version FROM system")
@@ -403,6 +448,7 @@ class _System(collections.abc.MutableMapping):
     @version.setter
     def version(self, value):
         self.cursor.execute("UPDATE system SET version = ?", (str(value),))
+        self.db.commit()
 
     def add_configuration(
         self,
@@ -460,7 +506,7 @@ class _System(collections.abc.MutableMapping):
             changed_bonds = True
             changed_atoms = True
             tid = self['template'].append(name='all', type='all')[0]
-            sid = self['subset'].append(template=tid)[0]
+            sid = self['subset'].create(template=tid)
         else:
             last_configuration = max(self._configurations)
             last_sid, last_tid = self._configurations[last_configuration]
@@ -505,12 +551,12 @@ class _System(collections.abc.MutableMapping):
 
     def attach(self, other):
         """Attach another system to this one's database."""
-        if self.is_attached(other.name):
+        if self.is_attached(other.nickname):
             return
         self.db.execute(
-            f"ATTACH DATABASE '{other.filename}' AS '{other.name}'"
+            f"ATTACH DATABASE '{other.filename}' AS '{other.nickname}'"
         )
-        self._attached.append(other.name)
+        self._attached.append(other.nickname)
 
     def is_attached(self, name):
         """Return whether another system is attached to this one."""
@@ -521,6 +567,26 @@ class _System(collections.abc.MutableMapping):
         if self.is_attached(other.name):
             self.cursor.execute(f'DETACH DATABASE "{other.name}"')
             self._attached.remove(other.name)
+
+    def clear(self, configuration=None) -> int:
+        """Remove everything from the configuration
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        # Delete the atoms
+        self.atoms.remove(configuration=configuration)
+
+        # Delete the template atoms.
+        self.templateatoms.remove(template=self.all_template(configuration))
 
     def create_table(self, name, cls=Table, other=None):
         """Create a new table with the given name.
@@ -565,8 +631,8 @@ class _System(collections.abc.MutableMapping):
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
-        name = self.name
-        other_name = other.name
+        name = self.nickname
+        other_name = other.nickname
         detach = False
         if name != other_name and not self.is_attached(other_name):
             # Attach the other system in order to do comparisons.
@@ -585,6 +651,60 @@ class _System(collections.abc.MutableMapping):
 
         return result
 
+    def formula(self, configuration=None):
+        """Return the chemical formula of the configuration.
+
+        Returns a tuple with the formula, empirical formula and number of
+        formula units (Z).
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration to use, defaults to the current configuration.
+
+        Returns
+        -------
+        formulas : (str, str, int)
+            The chemical formula, empirical formula and Z.
+        """
+        counts = Counter(self.atoms.symbols(configuration))
+
+        # Order the elements ... Merck CH then alphabetical,
+        # or if no C or H, then just alphabetically
+        formula_list = []
+        if 'C' in counts and 'H' in counts:
+            formula_list.append(('C', counts.pop('C')))
+            formula_list.append(('H', counts.pop('H')))
+
+        for element in sorted(counts.keys()):
+            formula_list.append((element, counts[element]))
+
+        counts = []
+        for _, count in formula_list:
+            counts.append(count)
+
+        formula = []
+        for element, count in formula_list:
+            if count > 1:
+                formula.append(f'{element}{count}')
+            else:
+                formula.append(element)
+
+        # And the empirical formula
+        Z = reduce(math.gcd, counts)
+        empirical_formula_list = []
+        for element, count in formula_list:
+            empirical_formula_list.append((element, int(count / Z)))
+
+        empirical_formula = []
+        for element, count in empirical_formula_list:
+            if count > 1:
+                empirical_formula.append(f'{element}{count}')
+            else:
+                empirical_formula.append(element)
+
+        return formula, empirical_formula, Z
+
     def list(self):
         """Return a list of all the tables in the system."""
         result = []
@@ -595,6 +715,44 @@ class _System(collections.abc.MutableMapping):
         ):
             result.append(row['name'])
         return result
+
+    def n_atoms(self, subset=None, configuration=None) -> int:
+        """The number of atoms in a subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        return self.atoms.n_atoms(subset=subset, configuration=configuration)
+
+    def n_bonds(self, subset: int = None, configuration: int = None) -> int:
+        """The number of bonds.
+
+        Parameters
+        ----------
+        bonds : int = None
+            Get the bonds for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of bonds
+        """
+        return self.bonds.n_bonds(subset=subset, configuration=configuration)
 
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers.
@@ -611,6 +769,21 @@ class _System(collections.abc.MutableMapping):
         """
         return [self._symbol_to_atno[x] for x in symbols]
 
+    def to_symbols(self, atnos):
+        """Convert atomic numbers to element symbols.
+
+        Parameters
+        ----------
+        atnos : [int]
+            The atomic numbers (1..118)
+
+        Returns
+        -------
+        symboles : [str]
+            The corresponding atomic symbols
+        """
+        return [self._atno_to_symbol[x] for x in atnos]
+
     def _initialize(self):
         """Initialize the SQLite database."""
         if 'element' not in self:
@@ -624,6 +797,7 @@ class _System(collections.abc.MutableMapping):
 
         if 'system' not in self:
             self._initialize_system()
+            self.name = self._nickname
         self._id = 1
 
         if 'configuration' not in self:
@@ -715,6 +889,7 @@ class _System(collections.abc.MutableMapping):
                 mass=data['atomic weight']
             )
             self._symbol_to_atno[symbol] = data['atomic number']
+            self._atno_to_symbol[data['atomic number']] = symbol
         self.db.commit()
 
     def _initialize_configurations(self):
@@ -734,7 +909,11 @@ class _System(collections.abc.MutableMapping):
         table = self['template']
         table.add_attribute('id', coltype='int', pk=True)
         table.add_attribute('name', coltype='str')
-        table.add_attribute('type', coltype='str')
+        table.add_attribute('type', coltype='str', default='general')
+        self.db.execute(
+            "CREATE UNIQUE INDEX 'idx_template_name_type'"
+            '    ON template ("name", "type")'
+        )
 
         # The subsets
         table = self['subset']
@@ -818,24 +997,3 @@ class _System(collections.abc.MutableMapping):
                 'primary key': bool(line['pk'])
             }
         return result
-
-
-if __name__ == '__main__':  # pragma: no cover
-    system = _System()
-
-    import pprint
-
-    system = _System()
-    with system as s:
-        s.periodicity = 3
-        s.coordinate_system = 'f'
-
-    print(f'system? {"system" in system}')
-    print(f'  table1? {"table1" in system}')
-
-    table = system['system']
-    pprint.pprint(table.attributes)
-
-    table1 = system.create_table('table1')
-    table1.add_attribute('atno', coltype='int', default=-1)
-    print('tables: ' + ', '.join(iter(system)))

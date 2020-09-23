@@ -3,6 +3,8 @@
 
 """Tests for the system class."""
 
+import pprint
+
 import pytest  # noqa: F401
 
 
@@ -50,3 +52,34 @@ def test_elements(system):
     """Test that we can access the element table"""
     table = system['element']
     assert table.n_rows == 118
+
+
+def test_formula(AceticAcid):
+    """Test the formula generation."""
+    formula, empirical_formula, Z = AceticAcid.formula()
+    assert ''.join(formula) == 'C2H4O2'
+    assert ''.join(empirical_formula) == 'CH2O'
+    assert Z == 2
+
+
+def test_formula_periodic(vanadium):
+    """Test the formula generation."""
+    formula, empirical_formula, Z = vanadium.formula()
+    assert ''.join(formula) == 'V2'
+    assert ''.join(empirical_formula) == 'V'
+    assert Z == 2
+
+
+def test_clear(CH3COOH_3H2O):
+    """Test making subsets for the molecules."""
+    result = [2, 3, 4, 5]
+
+    system = CH3COOH_3H2O
+    sids = system.create_molecule_subsets()
+    if sids != result:
+        pprint.pprint(sids)
+    assert sids == result
+
+    system.clear()
+
+    assert system.n_atoms() == 0

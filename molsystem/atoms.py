@@ -14,7 +14,7 @@ from itertools import zip_longest
 import logging
 from typing import Any, Dict, TypeVar
 
-import numpy as np
+import numpy
 import pandas
 
 from molsystem.column import _Column as Column
@@ -120,17 +120,7 @@ class _Atoms(collections.abc.MutableMapping):
 
     def __getitem__(self, key) -> Any:
         """Allow [] to access the data!"""
-        if key in self._atom_table.attributes:
-            sql = (
-                'WHERE id IN (SELECT atom FROM subset_atom '
-                f'WHERE subset = {self.system.all_subset()})'
-            )
-            return Column(self._atom_table, key, where=sql)
-        elif key in self._coordinates_table.attributes:
-            where = f"WHERE configuration = {self.current_configuration}"
-            return Column(self._coordinates_table, key, where=where)
-        else:
-            raise KeyError(f"'{key}' not in atoms")
+        return self.get_column(key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
@@ -215,25 +205,6 @@ class _Atoms(collections.abc.MutableMapping):
         return result
 
     @property
-    def n_atoms(self) -> int:
-        """The number of atoms *in the current* configuration."""
-        self.cursor.execute(
-            "SELECT COUNT(*) FROM subset_atom WHERE subset = ?",
-            (self.system.all_subset(),)
-        )
-        return self.cursor.fetchone()[0]
-
-    @property
-    def atom_ids(self) -> [int]:
-        """The ids of the atoms *in the current* configuration."""
-        return [
-            x[0] for x in self.db.execute(
-                "SELECT atom FROM subset_atom WHERE subset = ?",
-                (self.system.all_subset(),)
-            )
-        ]
-
-    @property
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes.
         Combine the attributes of the atom and coordinates tables to
@@ -259,7 +230,7 @@ class _Atoms(collections.abc.MutableMapping):
 
     @property
     def version(self):
-        return self._system.version
+        return self.system.version
 
     def add_attribute(
         self,
@@ -270,6 +241,8 @@ class _Atoms(collections.abc.MutableMapping):
         index: bool = False,
         pk: bool = False,
         references: str = None,
+        on_delete: str = 'cascade',
+        on_update: str = 'cascade',
         values: Any = None,
         configuration_dependent: bool = False
     ) -> None:
@@ -280,43 +253,64 @@ class _Atoms(collections.abc.MutableMapping):
 
         Parameters
         ----------
-            name : str
-                the name of the attribute.
-            coltype : str = 'float'
-                the type of the attribute (column). Must be one of 'int',
-                'float', 'str' or 'byte'. Defaults to 'float'.
-            default : Any
-                the default value for the attribute if no value is given.
-            notnull : bool = False
-                whether the value must be non-null
-            index :  bool = False
-                whether to create an index on the column
-            pk : bool
-                whether the column is the primay key
-            references : str = None
-                If the column reference another table, i.e. is a FK
-            values : Any
-                either a single value or a list of values length 'nrows' of
-                values to fill the column.
-            configuration_dependent : bool = False
-                whether the attribute belongs with the coordinates (True)
-                or atoms (False)
+        name : str
+            The name of the attribute.
+        coltype : str
+            The type of the attribute (column). Must be one of 'int',
+            'float', 'str' or 'byte'
+        default : int, float, str or byte
+            The default value for the attribute if no value is given.
+        notnull : bool = False
+            Whether the value must be non-null
+        index : bool = False
+            Whether to create an index on the column
+        pk : bool = False
+            Whether the column is the primry keys
+        references : str = None
+            If not null, the column is a foreign key for this table.
+        on_delete : str = 'cascade'
+            How to handle deletions of a foregin keys
+        on_update : str = 'cascade'
+            How to handle updates of a foregin key
+        values : Any
+            Either a single value or a list of values length 'nrows' of
+            values to fill the column.
+        configuration_dependent : bool = False
+            Whether the attribute belongs with the coordinates (True)
+            or atoms (False)
 
         Returns
         -------
             None
         """
-
         if configuration_dependent:
             self._coordinates_table.add_attribute(
-                name, coltype, default, notnull, index, pk, references, values
+                name,
+                coltype=coltype,
+                default=default,
+                notnull=notnull,
+                index=index,
+                pk=pk,
+                references=references,
+                on_delete=on_delete,
+                on_update=on_update,
+                values=values
             )
         else:
             self._atom_table.add_attribute(
-                name, coltype, default, notnull, index, pk, references, values
+                name,
+                coltype=coltype,
+                default=default,
+                notnull=notnull,
+                index=index,
+                pk=pk,
+                references=references,
+                on_delete=on_delete,
+                on_update=on_update,
+                values=values
             )
 
-    def append(self, **kwargs: Dict[str, Any]) -> None:
+    def append(self, configuration=None, **kwargs: Dict[str, Any]) -> None:
         """Append one or more atoms
 
         The keys give the field for the data. If an existing field is not
@@ -348,50 +342,338 @@ class _Atoms(collections.abc.MutableMapping):
         ids = self._atom_table.append(n=n_rows, **data)
 
         # Now append to the coordinates table
-        data = {'atom': ids}
+        if configuration is None:
+            configuration = self.current_configuration
+        data = {'configuration': configuration, 'atom': ids}
         for column in self._coordinates_table.attributes:
             if column != 'id' and column in kwargs:
                 data[column] = kwargs.pop(column)
-        if 'configuration' not in data:
-            data['configuration'] = self.current_configuration
 
         self._coordinates_table.append(n=n_rows, **data)
 
         # And to the subset 'all'
         subset_atom = self.system['subset_atom']
-        subset_atom.append(subset=self.system.all_subset(), atom=ids)
+        if isinstance(configuration, int):
+            config = configuration
+        else:
+            config = configuration[0]
+
+        subset_atom.append(subset=self.system.all_subset(config), atom=ids)
 
         return ids
 
-    def atoms(self, *args):
-        """Return an iterator over the atoms."""
+    def atoms(
+        self, *args, subset=None, configuration=None, template_order=False
+    ):
+        """Return an iterator over the atoms.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+        template_order : bool = False
+            If True, and there are template atoms associated with the atoms,
+            return rows in the order of the template.
+
+        Returns
+        -------
+        sqlite3.Cursor
+            A cursor that returns sqlite3.Row objects for the atoms.
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+
+        # If we are asked to use template order, see if all the atoms
+        # have associated template atoms.
+        if template_order:
+            self.cursor.execute(
+                'SELECT COUNT(*) FROM subset_atom WHERE subset = ?'
+                '    AND templateatom IS NULL', (subset,)
+            )
+            n = self.cursor.fetchone()[0]
+            if n > 0:
+                raise RuntimeError(
+                    'Not all of the atoms are defined in the template for '
+                    f'subset {subset} - {n} are not'
+                )
+
         atom_tbl = self._atom_tablename
         coord_tbl = self._coordinates_tablename
         atom_columns = [*self._atom_table.attributes]
         coord_columns = [*self._coordinates_table.attributes]
         coord_columns.remove('atom')
 
-        columns = [f'{atom_tbl}.{x}' for x in atom_columns]
-        columns += [f'{coord_tbl}.{x}' for x in coord_columns]
+        columns = [f'at.{x}' for x in atom_columns]
+        columns += [f'co.{x}' for x in coord_columns]
         column_defs = ', '.join(columns)
 
         sql = (
-            f'SELECT {column_defs} FROM {atom_tbl}, {coord_tbl}'
-            f' WHERE {atom_tbl}.id IN ('
-            f'   SELECT atom FROM subset_atom WHERE subset = ?'
-            f') AND {coord_tbl}.atom = {atom_tbl}.id'
+            f'SELECT {column_defs}'
+            f'  FROM {atom_tbl} as at, {coord_tbl} as co, subset_atom as sa'
+            '  WHERE at.id == sa.atom AND sa.subset = ? AND co.atom = at.id'
         )
-        if len(args) == 0:
-            return self.db.execute(sql, (self.system.all_subset(),))
 
-        parameters = [self.system.all_subset()]
+        if len(args) == 0:
+            if template_order:
+                sql += " ORDER BY templateatom"
+            return self.db.execute(sql, (subset,))
+
+        parameters = [subset]
         for col, op, value in grouped(args, 3):
             if op == '==':
                 op = '='
             sql += f' AND "{col}" {op} ?'
             parameters.append(value)
+        if template_order:
+            sql += " ORDER BY templateatom"
 
         return self.db.execute(sql, parameters)
+
+    def atom_ids(self, subset=None, configuration=None, template_order=False):
+        """The ids of the atoms the subset or configuration.
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+        template_order : bool = False
+            If True, and there are template atoms associated with the atoms,
+            return rows in the order of the template.
+
+        Returns
+        -------
+        [int]
+            The ids of the requested atoms.
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+        if template_order:
+            return [
+                x[0] for x in self.db.execute(
+                    "SELECT atom, templateatom FROM subset_atom "
+                    "WHERE subset = ? ORDER BY templateatom", (subset,)
+                )
+            ]
+        else:
+            return [
+                x[0] for x in self.db.execute(
+                    "SELECT atom FROM subset_atom WHERE subset = ?", (subset,)
+                )
+            ]
+
+    def atomic_numbers(
+        self,
+        subset: int = None,
+        configuration: int = None,
+        template_order: bool = False
+    ) -> [float]:
+        """The atomic numbers of the atoms in the subset or configuration.
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the values for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+        template_order : bool = False
+            If True, and there are template atoms associated with the atoms,
+            return rows in the order of the template.
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
+        """
+
+        column = self.get_column(
+            'atno',
+            subset=subset,
+            configuration=configuration,
+            template_order=template_order
+        )
+        return [*column]
+
+    def coordinates(
+        self,
+        subset=None,
+        configuration=None,
+        template_order=False,
+        fractionals=True,
+        in_cell=False,
+        as_array=False
+    ):
+        """Return the coordinates optionally translated back into the principal
+        unit cell.
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+        template_order : bool = False
+            If True, and there are template atoms associated with the atoms,
+            return rows in the order of the template.
+        frationals : bool = True
+            Return the coordinates as fractional coordinates for periodic
+            systems. Non-periodic systems always use Cartesian coordinates.
+        in_cell : bool, str = False
+            Whether to translate the atoms into the unit cell, and if so
+            whether to do so by molecule or just atoms.
+        as_array : bool = False
+            Whether to return the results as a numpy array or as a list of
+            lists (the default).
+
+        Returns
+        -------
+        abc : [N][float*3]
+            The coordinates, either Cartesian or fractional
+        """
+        if configuration is None:
+            configuration = self.current_configuration
+
+        xyz = []
+        for row in self.atoms(
+            subset=subset,
+            configuration=configuration,
+            template_order=template_order
+        ):
+            xyz.append([row['x'], row['y'], row['z']])
+
+        periodicity = self.system.periodicity
+        if periodicity == 0:
+            if as_array:
+                return numpy.array(xyz)
+            else:
+                return xyz
+
+        cell = self.system['cell'].cell(configuration)
+
+        if isinstance(in_cell, str) and 'molecule' in in_cell:
+            # Need fractionals...
+            if self.system.coordinate_system == 'Cartesian':
+                UVW = cell.to_fractionals(xyz, as_array=True)
+            elif not isinstance(xyz, numpy.ndarray):
+                UVW = numpy.array(xyz)
+            else:
+                UVW = xyz
+
+            molecules = self.system.find_molecules(configuration=configuration)
+
+            for indices in molecules:
+                indices = numpy.array([i - 1 for i in indices])
+                uvw_mol = numpy.take(UVW, indices, axis=0)
+                center = numpy.average(uvw_mol, axis=0)
+                delta = numpy.floor(center)
+                uvw_mol -= delta
+                numpy.put_along_axis(
+                    UVW, numpy.expand_dims(indices, axis=1), uvw_mol, axis=0
+                )
+            if fractionals:
+                if as_array:
+                    return UVW
+                else:
+                    return UVW.tolist()
+            else:
+                return cell.to_cartesians(UVW, as_array=as_array)
+        elif in_cell:
+            # Need fractionals...
+            if self.system.coordinate_system == 'Cartesian':
+                UVW = cell.to_fractionals(xyz, as_array=True)
+            elif not isinstance(xyz, numpy.ndarray):
+                UVW = numpy.array(xyz)
+            else:
+                UVW = xyz
+            delta = numpy.floor(UVW)
+            UVW -= delta
+            if fractionals:
+                if as_array:
+                    return UVW
+                else:
+                    return UVW.tolist()
+            else:
+                return cell.to_cartesians(UVW, as_array=as_array)
+        else:
+            if fractionals:
+                if self.system.coordinate_system == 'Cartesian':
+                    return cell.to_fractionals(xyz, as_array=as_array)
+                elif as_array:
+                    return numpy.array(xyz)
+                else:
+                    return xyz
+            else:
+                if self.system.coordinate_system == 'fractional':
+                    return cell.to_cartesians(xyz, as_array=as_array)
+                elif as_array:
+                    return numpy.array(xyz)
+                else:
+                    return xyz
+
+    def get_column(
+        self,
+        key: str,
+        subset: int = None,
+        configuration: int = None,
+        template_order: bool = False
+    ) -> Any:
+        """Get a Column object with the requested data
+
+        Parameters
+        ----------
+        key : str
+            The attribute to get.
+        subset : int = None
+            Get the values for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        Column
+            A Column object containing the data.
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+
+        if key in self._atom_table.attributes:
+            sql = (
+                f'SELECT at.rowid, at.{key}, sa.templateatom'
+                f'  FROM {self._atom_tablename} as at, subset_atom as sa'
+                f' WHERE at.id = sa.atom AND sa.subset = {subset}'
+            )
+            if template_order:
+                sql += " ORDER BY sa.templateatom"
+            return Column(self._atom_table, key, sql=sql)
+        elif key in self._coordinates_table.attributes:
+            sql = (
+                f'SELECT co.rowid, co.{key}, sa.templateatom'
+                f'  FROM {self._atom_tablename} as at,'
+                f'       {self._coordinates_tablename} as co,'
+                '        subset_atom as sa'
+                f' WHERE co.atom = at.id AND at.id = sa.atom'
+                f'   AND sa.subset = {subset}'
+            )
+            if template_order:
+                sql += " ORDER BY sa.templateatom"
+            return Column(self._coordinates_table, key, sql=sql)
+        else:
+            raise KeyError(f"'{key}' not in atoms")
 
     def to_atnos(self, symbols):
         """Convert element symbols to atomic numbers."""
@@ -445,6 +727,94 @@ class _Atoms(collections.abc.MutableMapping):
             except TypeError:
                 return 0
 
+    def n_atoms(self, subset=None, configuration=None) -> int:
+        """The number of atoms in a subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+
+        self.cursor.execute(
+            "SELECT COUNT(*) FROM subset_atom WHERE subset = ?", (subset,)
+        )
+        return self.cursor.fetchone()[0]
+
+    def remove(self, subset=None, configuration=None) -> int:
+        """Delete the atoms for the subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        if subset is None:
+            subset = self.system.all_subset(configuration)
+            # Bonds only if removing all atoms, i.e. subset all
+            self.system.bonds.remove(subset=subset)
+
+        # Coordinates
+        self.db.execute(
+            "DELETE FROM coordinates"
+            " WHERE atom IN ("
+            "   SELECT atom FROM subset_atom WHERE subset = ?"
+            ")", (subset,)
+        )
+
+        # Atoms
+        self.db.execute(
+            "DELETE FROM atom"
+            " WHERE id IN ("
+            "   SELECT atom FROM subset_atom WHERE subset = ?"
+            ")", (subset,)
+        )
+
+        # Subset-Atoms
+        self.db.execute("DELETE FROM subset_atom WHERE subset = ?", (subset,))
+
+    def symbols(self, subset=None, configuration: int = None) -> [str]:
+        """The element symbols for the atoms in a subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the values for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        [str]
+            The element symbols
+        """
+
+        return self._system.to_symbols(
+            self.atomic_numbers(subset=subset, configuration=configuration)
+        )
+
     def to_dataframe(self):
         """Return the contents of the table as a Pandas Dataframe."""
         data = {}
@@ -456,34 +826,3 @@ class _Atoms(collections.abc.MutableMapping):
         df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
 
         return df
-
-
-if __name__ == '__main__':  # pragma: no cover
-    import numpy.random as nprand
-    import timeit
-    import time
-
-    def run(nper=1000, nrepeat=100, preallocate=False) -> None:
-        system = None
-        atoms = _Atoms(system)
-        x = nprand.uniform(low=0, high=100, size=nper)
-        y = nprand.uniform(low=0, high=100, size=nper)
-        z = nprand.uniform(low=0, high=100, size=nper)
-        atno = np.array(nper * [6])
-        with atoms as tmp:
-            for i in range(0, nrepeat):
-                tmp.append(x=x, y=y, z=z, atno=atno)
-                x += 10.0
-                y += 5.0
-                z -= 3.0
-
-    nrepeat = 1
-    nper = 10
-    t = timeit.timeit(
-        "run(nper={}, nrepeat={})".format(nper, nrepeat),
-        setup="from __main__ import run",
-        timer=time.time,
-        number=1
-    )
-
-    print("Creating {} atoms took {:.3f} s".format(nper * nrepeat, t))

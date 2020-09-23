@@ -147,7 +147,7 @@ def templates(system):
     #       C  H  H  H  C =O  O  H
     i_atom = [0, 0, 0, 0, 4, 4, 6]
     j_atom = [1, 2, 3, 4, 5, 6, 7]
-    order =  [1, 1, 1, 1, 1, 2, 1]  # noqa: E222
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
     tid = templates.append(name='acetic acid', type='molecule')[0]
@@ -177,9 +177,10 @@ def AceticAcid(system):
     #       C  H  H  H  C =O  O  H
     i_atom = [0, 0, 0, 0, 4, 4, 6]
     j_atom = [1, 2, 3, 4, 5, 6, 7]
-    order =  [1, 1, 1, 1, 1, 2, 1]  # noqa: E222
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
+    system.name = 'acetic acid'
     ids = system['atoms'].append(x=x, y=y, z=z, atno=atno)
 
     i = [ids[x] for x in i_atom]
@@ -190,11 +191,78 @@ def AceticAcid(system):
     return system
 
 
+@pytest.fixture
+def disordered(AceticAcid):
+    """Two acetic acid molecules with different atom order"""
+    # yapf: disable
+    #       C       H        H        H        C        =O      O        H
+    x = [ 1.0797, 0.5782,  0.7209,  0.7052,  0.5713, -0.1323, 0.9757,  2.1724]  # noqa: E221, E501, E201
+    y = [ 0.0181, 3.1376, -0.6736, -0.3143,  1.3899,  1.7142, 2.2970,  0.0161]  # noqa: E221, E501, E201
+    z = [-0.0184, 0.2813, -0.7859,  0.9529, -0.3161, -1.2568, 0.5919, -0.0306]  # noqa: E221, E501
+    atno = [6, 1, 1, 1, 6, 8, 8, 1]  # noqa: E221
+
+    #       C  H  H  H  C =O  O  H
+    i_atom = [0, 0, 0, 0, 4, 4, 6]
+    j_atom = [1, 2, 3, 4, 5, 6, 7]
+    order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
+    # yapf: enable
+
+    system = AceticAcid
+    ids = system['atoms'].append(
+        x=[*reversed(x)],
+        y=[*reversed(y)],
+        z=[*reversed(z)],
+        atno=[*reversed(atno)]
+    )
+
+    i = [ids[7 - x] for x in i_atom]
+    j = [ids[7 - x] for x in j_atom]
+
+    system['bonds'].append(i=i, j=j, bondorder=order)
+
+    return system
+
+
 @pytest.fixture()
 def vanadium(system):
     """BCC vanadium crystal, without symmetry."""
+    system.name = 'BCC Vanadium'
     system.periodicity = 3
     system.coordinate_system = 'fractional'
     system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
     system.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
+    return system
+
+
+@pytest.fixture()
+def CH3COOH_3H2O(AceticAcid):
+    """System with acetic acid and 3 water molecules"""
+    system = AceticAcid
+
+    # TIP3P
+    r0 = 0.9572
+    theta0 = 104.52
+
+    # H locations are ±x, 0, z
+    x = r0 * math.sin(math.radians(theta0 / 2))
+    z = r0 * math.cos(math.radians(theta0 / 2))
+
+    X = [0.0, x, -x]
+    Z = [0.0, z, z]
+
+    atno = [8, 1, 1]
+    i_atom = [0, 0]
+    j_atom = [1, 2]
+
+    system = AceticAcid
+    system.name = 'acetic acid with 3 waters'
+
+    for no in range(1, 4):
+        ids = system['atoms'].append(x=X, y=no * 5.0, z=Z, atno=atno)
+
+        i = [ids[x] for x in i_atom]
+        j = [ids[x] for x in j_atom]
+
+        system['bonds'].append(i=i, j=j)
+
     return system

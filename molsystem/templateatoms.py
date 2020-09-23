@@ -155,6 +155,28 @@ class _Templateatoms(Atoms):
 
         return ids
 
+    def atomic_numbers(self, template: int = None) -> [int]:
+        """The atomic numbers of the atoms in a template.
+
+        Parameters
+        ----------
+        template : int = None
+            Which template, defaulting to the current template.
+
+        Returns
+        -------
+        ids : [int]
+            The ids of the atoms in the template.
+        """
+        if template is None:
+            template = self.current_template
+        return [
+            x[0] for x in self.db.execute(
+                f"SELECT atno FROM {self._atom_tablename} WHERE template = ?",
+                (template,)
+            )
+        ]
+
     def atom_ids(self, template: int = None) -> [int]:
         """The ids of the atoms in a template.
 
@@ -168,15 +190,31 @@ class _Templateatoms(Atoms):
         ids : [int]
             The ids of the atoms in the template.
         """
+        if template is None:
+            template = self.current_template
         return [
             x[0] for x in self.db.execute(
                 f"SELECT id FROM {self._atom_tablename} WHERE template = ?",
-                (self.current_template,)
+                (template,)
             )
         ]
 
     def atoms(self, *args, template=None):
-        """Return an iterator over the atoms."""
+        """Get an iterator over atoms in the template.
+
+        Parameters
+        ----------
+        args : str, int or float
+            SQL restrictions for a WHERE statement, each argument being
+            one word, e.g. "atno" "=" 5
+        template : int = None
+            Which template, defaulting to the current template.
+
+        Returns
+        -------
+        SQLite3.Cursor :
+            The cursor containing the result.
+        """
         atom_tbl = self._atom_tablename
         coord_tbl = self._coordinates_tablename
         atom_columns = [*self._atom_table.attributes]
@@ -206,3 +244,33 @@ class _Templateatoms(Atoms):
             parameters.append(value)
 
         return self.db.execute(sql, parameters)
+
+    def remove(self, *args, template=None):
+        """Remove atoms in the template.
+
+        Parameters
+        ----------
+        args : str, int or float
+            SQL restrictions for a WHERE statement, each argument being
+            one word, e.g. "atno" "=" 5
+        template : int = None
+            Which template, defaulting to the current template.
+
+        Returns
+        -------
+        None
+        """
+        if template is None:
+            template = self.current_template
+
+        sql = f'DELETE FROM {self.table} WHERE template = ?'
+
+        parameters = [template]
+        for col, op, value in grouped(args, 3):
+            if op == '==':
+                op = '='
+            sql += f' AND "{col}" {op} ?'
+            parameters.append(value)
+
+        self.db.execute(sql, parameters)
+        self.db.commit()

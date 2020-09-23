@@ -21,11 +21,11 @@ def test_iteration(AceticAcid):
     j = []
     order = []
     for bond in bonds.bonds():
-        i.append(bond.i)
-        j.append(bond.j)
-        order.append(bond.bondorder)
+        i.append(bond['i'])
+        j.append(bond['j'])
+        order.append(bond['bondorder'])
 
-    assert order == [1, 1, 1, 1, 1, 2, 1]
+    assert order == [1, 1, 1, 1, 2, 1, 1]
     assert i == [1, 1, 1, 1, 5, 5, 7]
     assert j == [2, 3, 4, 5, 6, 7, 8]
 
@@ -50,11 +50,10 @@ def test_get_item(AceticAcid):
     """Test that we can access a bond."""
     system = AceticAcid
     bonds = system['bond']
-    bond = bonds.get_bond(5, 7)
-    assert bond._asdict() == {'i': 5, 'j': 7, 'bondorder': 2}
-    bond = bonds.get_bond(7, 5)
-    assert bond._asdict() == {'i': 5, 'j': 7, 'bondorder': 2}
-    assert str(type(bond)) == "<class 'molsystem.bonds.Bond'>"
+    bond = bonds.get_bond(5, 6)
+    assert [*bond] == [5, 6, 2]
+    bond = bonds.get_bond(6, 5)
+    assert [*bond] == [5, 6, 2]
 
 
 def test_ddelete_bond(AceticAcid):
@@ -84,8 +83,8 @@ def test_str(AceticAcid):
 2  1  3          1
 3  1  4          1
 4  1  5          1
-5  5  6          1
-6  5  7          2
+5  5  6          2
+6  5  7          1
 7  7  8          1"""
     system = AceticAcid
     bonds = system['bond']
@@ -102,8 +101,8 @@ def test_repr(AceticAcid):
 2  1  3          1
 3  1  4          1
 4  1  5          1
-5  5  6          1
-6  5  7          2
+5  5  6          2
+6  5  7          1
 7  7  8          1"""
     system = AceticAcid
     bonds = system['bond']
@@ -119,7 +118,7 @@ def test_adding_attribute(AceticAcid):
     bonds.add_attribute('name', coltype='str')
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 4
-    assert bond._fields == ('i', 'j', 'bondorder', 'name')
+    assert bond.keys() == ['i', 'j', 'bondorder', 'name']
 
 
 def test_adding_attribute_with_values(AceticAcid):
@@ -130,13 +129,13 @@ def test_adding_attribute_with_values(AceticAcid):
     bonds.add_attribute('name', coltype='str', values=names)
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 4
-    assert bond._fields == ('i', 'j', 'bondorder', 'name')
-    assert bond.name == 'C-O'
+    assert bond.keys() == ['i', 'j', 'bondorder', 'name']
+    assert bond['name'] == 'C-O'
 
 
 def test_column(AceticAcid):
     """Test getting columns of the bond data."""
-    answer = [1, 1, 1, 1, 1, 2, 1]
+    answer = [1, 1, 1, 1, 2, 1, 1]
     system = AceticAcid
     bonds = system['bond']
     bondorders = bonds.get_column('bondorder')
@@ -147,14 +146,14 @@ def test_column(AceticAcid):
 
 def test_set_column(AceticAcid):
     """Test setting columns of the bond data."""
-    answer = [1, 1, 1, 1, 1, 3, 1]
+    answer = [1, 1, 1, 1, 2, 3, 1]
     answer2 = """\
    i  j  bondorder
 1  1  2          1
 2  1  3          1
 3  1  4          1
 4  1  5          1
-5  5  6          1
+5  5  6          2
 6  5  7          3
 7  7  8          1"""
     system = AceticAcid

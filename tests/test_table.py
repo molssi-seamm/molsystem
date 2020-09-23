@@ -183,7 +183,6 @@ def test_add_attribute_with_wrong_number_of_values(simple_table):
     except IndexError as e:
         err = str(e)
 
-    print(err)
     assert (
         simple_table.n_rows == 0 and err == (
             "The number of values given, 2, must be either 1, or the number of"
@@ -446,11 +445,9 @@ def test_diff(two_tables):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
-    print(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
-    print(diffs)
     assert diffs == ref2
 
 
@@ -489,11 +486,9 @@ def test_diff_two_systems(two_tables_in_two_systems):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
-    print(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
-    print(diffs)
     assert diffs == ref2
 
 
@@ -535,9 +530,7 @@ def test_diff_add_columns(two_tables_in_two_systems):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
-    print(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
-    print(diffs)
     assert diffs == ref2
