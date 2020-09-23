@@ -1,21 +1,25 @@
 name: test
 channels:
+  - default
+  - conda-forge
 dependencies:
-    # Base depends
+  # Base depends
   - python
   - pip
   - configargparse
   - numpy
   - pandas
+  # Module dependencies
+  - openbabel
 
-    # Testing
+  # Testing
   - coverage
   - flake8
   - pytest
   - pytest-cov
   - pytest-runner
 
-    # Pip-only installs
+  # Pip-only installs
   - pip:
     - pathvalidate
       # Testing
