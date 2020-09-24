@@ -56,13 +56,86 @@ class _Template(Table):
             raise KeyError(f"Template '{value}' does not exist.")
         self._current_template = value
 
-    def set_current_template(self, name, type_='general'):
-        """Set the current template given the name and optionally type."""
-        id = self.find(name, type_=type_)
-        self._current_template = id
+    def append_to_system(
+        self,
+        template,
+        n_copies=1,
+        coordinates=None,
+        configuration=None,
+        create_subsets=True
+    ):
+        """ Append one or more copies of a template to the system.
+        
+        Parameters
+        ----------
+        
+        """
+    def create(self, name, type_='general', atnos=None, bonds=None):
+        """Create a new template.
+
+        Parameters
+        ----------
+        name : str
+            The name of the template.
+        type_ : str = 'general'
+            The type of template, e.g. 'all', 'molecule', 'residue'
+        atnos : [int] = None
+            The atomic numbers of the template atoms (optional)
+        bond : [(int, int, int)]
+            The bonds as (i, j, order) (optional)
+
+        Returns
+        -------
+        int
+            The template id.
+        """
+        if self.exists(name, type_=type_):
+            raise KeyError(f"The template '{name}' of type '{type_}' exists.")
+
+        tid = self.append(name=name, type=type_)[0]
+
+        if atnos is not None:
+            tatom_ids = self.system.templateatoms.append(
+                atno=atnos, template=tid
+            )
+
+            if bonds is not None:
+                iatoms = []
+                jatoms = []
+                orders = []
+                for i, j, order in bonds:
+                    iatoms.append(tatom_ids[i])
+                    jatoms.append(tatom_ids[j])
+                    orders.append(order)
+                self.system.templatebonds.append(
+                    template=tid, i=iatoms, j=jatoms, bondorder=orders
+                )
+        return tid
+
+    def exists(self, name, type_='general'):
+        """Return if the template exists given the name and type.
+
+        Parameters
+        ----------
+        name : str
+            The name of the template.
+        type_ : str = 'general'
+            The type of template, e.g. 'all', 'molecule', 'residue'
+
+        Returns
+        -------
+        bool
+            True if it exists; False otherwise.
+        """
+        self.cursor.execute(
+            f'SELECT COUNT(*) FROM {self.table} WHERE "name" = ? '
+            'AND "type" = ?', (name, type_)
+        )
+        row = self.cursor.fetchone()
+        return row[0] == 1
 
     def find(self, name, type_='general', create=False):
-        """Find a single template given the name and type.
+        """Find a single template given the name and typ.
 
         Parameters
         ----------
@@ -97,52 +170,22 @@ class _Template(Table):
                 )
         return row[0]
 
-    def exists(self, name, type_='general'):
-        """Return if the template exists given the name and type.
+    def set_current_template(self, name, type_='general'):
+        """Set the current template given the name and optionally type.
 
         Parameters
         ----------
         name : str
-            The name of the template.
+            The name of the template. The name/type pair must be unique.
         type_ : str = 'general'
-            The type of template, e.g. 'all', 'molecule', 'residue'
-
+            The type of template.
+        
         Returns
         -------
-        bool
-            True if it exists; False otherwise.
+        None
         """
-        self.cursor.execute(
-            f'SELECT COUNT(*) FROM {self.table} WHERE "name" = ? '
-            'AND "type" = ?', (name, type_)
-        )
-        row = self.cursor.fetchone()
-        return row[0] == 1
-
-    def create(self, name, type_='general', atnos=None, bonds=None):
-        """Create a new template."""
-        if self.exists(name, type_=type_):
-            raise KeyError(f"The template '{name}' of type '{type_}' exists.")
-
-        tid = self.append(name=name, type=type_)[0]
-
-        if atnos is not None:
-            tatom_ids = self.system.templateatoms.append(
-                atno=atnos, template=tid
-            )
-
-            if bonds is not None:
-                iatoms = []
-                jatoms = []
-                orders = []
-                for i, j, order in bonds:
-                    iatoms.append(tatom_ids[i])
-                    jatoms.append(tatom_ids[j])
-                    orders.append(order)
-                self.system.templatebonds.append(
-                    template=tid, i=iatoms, j=jatoms, bondorder=orders
-                )
-        return tid
+        id = self.find(name, type_=type_)
+        self._current_template = id
 
     def templates(self, name=None, type_=None):
         """Return an itereator over the given templates.
