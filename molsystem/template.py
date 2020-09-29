@@ -65,11 +65,13 @@ class _Template(Table):
         create_subsets=True
     ):
         """ Append one or more copies of a template to the system.
-        
+
         Parameters
         ----------
-        
+
         """
+        pass
+
     def create(self, name, type_='general', atnos=None, bonds=None):
         """Create a new template.
 
@@ -179,7 +181,7 @@ class _Template(Table):
             The name of the template. The name/type pair must be unique.
         type_ : str = 'general'
             The type of template.
-        
+
         Returns
         -------
         None
