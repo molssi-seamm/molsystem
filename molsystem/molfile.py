@@ -196,12 +196,13 @@ class MolFileMixin:
                 bondorders = []
                 for lineno, line in lines:
                     if 'M  V30 END BOND' in line:
-                        self.bonds.append(
-                            i=iatoms,
-                            j=jatoms,
-                            bondorder=bondorders,
-                            configuration=configuration
-                        )
+                        if len(iatoms) > 0:
+                            self.bonds.append(
+                                i=iatoms,
+                                j=jatoms,
+                                bondorder=bondorders,
+                                configuration=configuration
+                            )
                         break
                     bondorder, iatom, jatom = line.split()[3:6]
                     iatoms.append(atom_ids[int(iatom) - 1])
