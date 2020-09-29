@@ -93,20 +93,20 @@ class TopologyMixin:
         n_atoms = atoms.n_atoms(configuration)
 
         if n_atoms == 0:
-            return neighbors
+            if as_indices:
+                return []
+            else:
+                return neighbors
 
         atom_ids = atoms.atom_ids(configuration)
         neighbors = {i: [] for i in atom_ids}
 
-        if bonds.n_bonds(configuration) == 0:
-            # No bonds, so just atoms....
-            return neighbors
-
-        for bond in bonds.bonds(configuration):
-            i = bond['i']
-            j = bond['j']
-            neighbors[i].append(j)
-            neighbors[j].append(i)
+        if bonds.n_bonds(configuration) > 0:
+            for bond in bonds.bonds(configuration):
+                i = bond['i']
+                j = bond['j']
+                neighbors[i].append(j)
+                neighbors[j].append(i)
 
         if as_indices:
             # Convert to indices
