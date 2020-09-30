@@ -12,7 +12,13 @@ logger = logging.getLogger(__name__)
 class SMILESMixin:
     """A mixin for handling SMILES."""
 
-    def to_smiles(self, canonical=False, configuration=None, name=False):
+    def to_smiles(
+        self,
+        canonical=False,
+        configuration=None,
+        name=False,
+        hydrogens=False
+    ):
         """Create the SMILES string from the system.
 
         Parameters
@@ -23,13 +29,20 @@ class SMILESMixin:
             The configuration to use, defaults to the current configuration.
         name : bool = False
             Whether to return the name of the system
+        hydrogens : bool = False
+            Whether to keep H's in the SMILES string.
+
         Returns
         -------
         str
             The SMILES string, or (SMILES, name) if the rname is requested
         """
+        logger.info('to_smiles')
 
         molfile = self.to_molfile_text()
+        logger.info('...molfile = ')
+        logger.info(molfile)
+        logger.info('...end molfile')
 
         obConversion = openbabel.OBConversion()
         if canonical:
@@ -39,9 +52,19 @@ class SMILESMixin:
         mol = openbabel.OBMol()
         obConversion.ReadString(mol, molfile)
 
+        logger.info(f'MolFile has {mol.NumAtoms()} atoms')
+
         if not name:
             obConversion.AddOption('n')
+        if hydrogens:
+            obConversion.AddOption('h')
         smiles = obConversion.WriteString(mol)
+
+        logger.info('')
+        logger.info('')
+        logger.info('')
+        logger.info('')
+        logger.info(f"smiles = '{smiles}'")
 
         if name:
             return smiles.strip().split('\t')

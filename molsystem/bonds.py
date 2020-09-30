@@ -171,6 +171,9 @@ class _Bonds(Table):
             len_j = 1
             j = (j,)
 
+        if len_i == 0 and len_j == 0:
+            return
+
         if len_i == 1:
             if len_j > 1:
                 i = len_j * [i[0]]
