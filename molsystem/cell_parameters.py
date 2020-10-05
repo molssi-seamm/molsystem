@@ -96,7 +96,7 @@ class _CellParameters(Table):
                     'cell must be a 6-vector or six separate values'
                 )
         elif len(args) == 6:
-            parameters = args
+            parameters = [*args]
         else:
             raise ValueError('cell must be a 6-vector or six separate values')
 
