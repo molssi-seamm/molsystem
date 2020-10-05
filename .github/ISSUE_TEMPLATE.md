@@ -1,6 +1,6 @@
-* MolSSI_System version:
-* Python version:
-* Operating System:
+* molsystem version: 
+* Python version: 
+* Operating System: 
 
 ### Description
 
