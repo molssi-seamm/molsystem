@@ -2,7 +2,11 @@
 
 """Functions for handling CIF files"""
 
+import io
 import logging
+import math
+
+import CifFile
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +107,99 @@ class CIFMixin:
 
         # And that is it!
         return '\n'.join(lines)
+
+    def from_cif_text(self, text, configuration=None):
+        """Create the system from a CIF file..
+
+        Parameters
+        ----------
+        text : str
+            The text from the CIF file
+        configuration : int = None
+            The configuration to use, defaults to the current configuration.
+
+        Returns
+        -------
+        None
+        """
+
+        cif = CifFile.ReadCif(io.StringIO(text))
+
+        data_blocks = [*cif.keys()]
+
+        if len(data_blocks) != 1:
+            raise RuntimeError(
+                f'There are {len(data_blocks)} data blocks in the cif file.'
+            )
+        data_block = cif[data_blocks[0]]
+
+        # Reset the system
+        self.clear()
+        self.periodicity = 3
+        self.coordinate_system = 'fractional'
+
+        # The cell
+        a = data_block['_cell_length_a']
+        b = data_block['_cell_length_b']
+        c = data_block['_cell_length_c']
+        alpha = data_block['_cell_angle_alpha']
+        beta = data_block['_cell_angle_beta']
+        gamma = data_block['_cell_angle_gamma']
+        self.cell.set_cell(a, b, c, alpha, beta, gamma)
+
+        # Add the atoms
+        # TEMPORARILY lower the symmetry to P1
+        delta = 1.0e-04
+        for x, y, z, symbol in zip(
+            data_block['_atom_site_fract_x'],
+            data_block['_atom_site_fract_y'],
+            data_block['_atom_site_fract_z'],
+            data_block['_atom_site_type_symbol']
+        ):  # yapf: disable
+            xs = []
+            ys = []
+            zs = []
+            symbols = []
+            x = float(x)
+            y = float(y)
+            z = float(z)
+            for symop in data_block['_space_group_symop_operation_xyz']:
+                x_eq, y_eq, z_eq = symop.split(',')
+                x_new = eval(x_eq)
+                y_new = eval(y_eq)
+                z_new = eval(z_eq)
+                # Translate into cell.
+                x_new = x_new - math.floor(x_new)
+                y_new = y_new - math.floor(y_new)
+                z_new = z_new - math.floor(z_new)
+                # check for almost 1, should be 0
+                if abs(1 - x_new) < delta:
+                    x_new = 0.0
+                if abs(1 - y_new) < delta:
+                    y_new = 0.0
+                if abs(1 - z_new) < delta:
+                    z_new = 0.0
+                found = False
+                for x0, y0, z0 in zip(xs, ys, zs):
+                    if (
+                        abs(x_new - x0) < delta and abs(y_new - y0) < delta and
+                        abs(z_new - z0) < delta
+                    ):
+                        found = True
+                        break
+                if not found:
+                    xs.append(x_new)
+                    ys.append(y_new)
+                    zs.append(z_new)
+                    symbols.append(symbol)
+            self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
+
+        # self.atoms.append(
+        #     x=data_block['_atom_site_fract_x'],
+        #     y=data_block['_atom_site_fract_y'],
+        #     z=data_block['_atom_site_fract_z'],
+        #     symbol=data_block['_atom_site_type_symbol']
+        # )
 
     def to_mmcif_text(self, configuration=None):
         """Create the text of a mmCIF file from the confguration.
