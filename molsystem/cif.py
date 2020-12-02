@@ -261,13 +261,17 @@ class CIFMixin:
 
         # The atoms
         lines.append('loop_')
-        lines.append(' _atom_site_type_symbol')
-        lines.append(' _atom_site_label')
-        lines.append(' _atom_site_symmetry_multiplicity')
-        lines.append(' _atom_site_fract_x')
-        lines.append(' _atom_site_fract_y')
-        lines.append(' _atom_site_fract_z')
-        lines.append(' _atom_site_occupancy')
+        lines.append(' _chem_comp_atom.comp_id')
+        lines.append(' _chem_comp_atom.atom_id')
+        lines.append(' _chem_comp_atom.type_symbol')
+        lines.append(' _chem_comp_atom.model_Cartn_x')
+        lines.append(' _chem_comp_atom.model_Cartn_y')
+        lines.append(' _chem_comp_atom.model_Cartn_z')
+        lines.append(' _chem_comp_atom.pdbx_model_Cartn_x_ideal')
+        lines.append(' _chem_comp_atom.pdbx_model_Cartn_y_ideal')
+        lines.append(' _chem_comp_atom.pdbx_model_Cartn_z_ideal')
+        lines.append(' _chem_comp_atom.pdbx_component_comp_id')
+        lines.append(' _chem_comp_atom.pdbx_residue_numbering')
 
         # Need unique names
         if 'names' in atoms:
@@ -288,7 +292,9 @@ class CIFMixin:
         XYZ = atoms.coordinates(
             configuration=configuration, in_cell='molecule'
         )
-        XYZa = atoms.coordinates(configuration=configuration)
+        XYZa = atoms.coordinates(
+            configuration=configuration, fractionals=False
+        )
 
         symbols = atoms.symbols(configuration)
         for element, name, xyza, xyz in zip(symbols, names, XYZa, XYZ):
