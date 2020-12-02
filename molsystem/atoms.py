@@ -505,6 +505,48 @@ class _Atoms(collections.abc.MutableMapping):
         )
         return [*column]
 
+    def atomic_masses(
+        self,
+        subset: int = None,
+        configuration: int = None,
+        template_order: bool = False
+    ) -> [float]:
+        """The atomic masses of the atoms in the subset or configuration.
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the values for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+        template_order : bool = False
+            If True, and there are template atoms associated with the atoms,
+            return rows in the order of the template.
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
+        """
+
+        if 'mass' in self:
+            column = self.get_column(
+                'mass',
+                subset=subset,
+                configuration=configuration,
+                template_order=template_order
+            )
+            return [*column]
+        else:
+            atnos = self.atomic_numbers(
+                subset=subset,
+                configuration=configuration,
+                template_order=template_order
+            )
+            return self._system.default_masses(atnos=atnos)
+
     def coordinates(
         self,
         subset=None,
@@ -572,7 +614,9 @@ class _Atoms(collections.abc.MutableMapping):
             else:
                 UVW = xyz
 
-            molecules = self.system.find_molecules(configuration=configuration)
+            molecules = self.system.find_molecules(
+                configuration=configuration, as_indices=True
+            )
 
             for indices in molecules:
                 indices = numpy.array([i - 1 for i in indices])
@@ -843,11 +887,13 @@ class _Atoms(collections.abc.MutableMapping):
         )
         return self.cursor.fetchone()[0]
 
-    def remove(self, subset=None, configuration=None) -> int:
-        """Delete the atoms for the subset or configuration
+    def remove(self, atoms=None, subset=None, configuration=None) -> int:
+        """Delete the atoms listed, or in a subset or configuration
 
         Parameters
         ----------
+        atoms : [int] = None
+            The list of atoms to delete
         subset : int = None
             Get the atoms for the subset. Defaults to the 'all/all' subset
             for the configuration given.
@@ -857,9 +903,30 @@ class _Atoms(collections.abc.MutableMapping):
 
         Returns
         -------
-        int
-            Number of atoms
+        None
         """
+        if atoms is not None:
+            # Delete the listed atoms and coordinates
+            subset = self.system.all_subset(configuration)
+
+            # Need to handle bonds first
+            self.system.bonds.remove(atoms=atoms, subset=subset)
+
+            parameters = [(i,) for i in atoms]
+            # Coordinates
+            self.db.executemany(
+                "DELETE FROM coordinates WHERE atom = ?", parameters
+            )
+
+            # Atoms
+            self.db.executemany("DELETE FROM atom WHERE id = ?", parameters)
+
+            # Subset-Atoms
+            self.db.executemany(
+                "DELETE FROM subset_atom WHERE atom = ?", parameters
+            )
+
+            return
         if subset is None:
             subset = self.system.all_subset(configuration)
             # Bonds only if removing all atoms, i.e. subset all
