@@ -123,6 +123,8 @@ class _System(
         self._items = {}
         self._symbol_to_atno = {}
         self._atno_to_symbol = {}
+        self._symbol_to_mass = {}
+        self._atno_to_mass = {}
 
         if 'filename' in kwargs:
             self.filename = kwargs.pop('filename')
@@ -779,10 +781,98 @@ class _System(
 
         Returns
         -------
-        symboles : [str]
+        symbols : [str]
             The corresponding atomic symbols
         """
         return [self._atno_to_symbol[x] for x in atnos]
+
+    def default_masses(self, symbols=None, atnos=None):
+        """Get the atomic mass given atomic symbols or numbers.
+
+        Parameters
+        ----------
+        symbols : [str] = None
+            The atomic symbols
+        atnos : [int] = None
+            The atomic numbers (1..118)
+
+        Returns
+        -------
+        masses : [float]
+            The default atomic masses
+        """
+        if symbols is not None:
+            return [self._symbol_to_mass[x] for x in symbols]
+        if atnos is not None:
+            return [self._atno_to_mass[x] for x in atnos]
+        else:
+            # return all the masses, in order
+            return [self._atno_to_mass[x] for x in range(1, 118)]
+
+    def mass(self, subset=None, configuration=None):
+        """Return the total atomic masses for the subset or configuration
+
+        Parameters
+        ----------
+        subset : int = None
+            Get the atoms for the subset. Defaults to the 'all/all' subset
+            for the configuration given.
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration. Not used if the subset is given.
+
+        Returns
+        -------
+        float
+            The summed atomic masses.
+        """
+        masses = self.atoms.atomic_masses(
+            subset=subset, configuration=configuration
+        )
+        return sum(masses)
+
+    def volume(self, configuration=None):
+        """Return the volume of a configuration
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration.
+
+        Returns
+        -------
+        float
+            The volume of the cell.
+        """
+        if self.periodicity != 3:
+            raise RuntimeError('Density is only defined for 3-D systems.')
+
+        return self.cell.cell(configuration=configuration).volume
+
+    def density(self, configuration=None):
+        """Return the density of the system.
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration of interest. Defaults to the current
+            configuration.
+
+        Returns
+        -------
+        float
+            The density of the cell.
+        """
+        if self.periodicity != 3:
+            raise RuntimeError('Density is only defined for 3-D systems.')
+        if configuration is None:
+            configuration = self.current_configuration
+        volume = self.volume(configuration=configuration)
+        mass = self.mass(configuration=configuration)
+
+        # converting from g/mol / Å^3 to g/cm^3
+        return (mass / volume) * (1.0e+24 / 6.02214076E+23)
 
     def _initialize(self):
         """Initialize the SQLite database."""
@@ -890,6 +980,8 @@ class _System(
             )
             self._symbol_to_atno[symbol] = data['atomic number']
             self._atno_to_symbol[data['atomic number']] = symbol
+            self._symbol_to_mass[symbol] = data['atomic weight']
+            self._atno_to_mass[data['atomic number']] = data['atomic weight']
         self.db.commit()
 
     def _initialize_configurations(self):
