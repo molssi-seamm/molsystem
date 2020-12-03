@@ -123,6 +123,8 @@ jobs:
 
   deploy:
     name: PyPi ${{ matrix.os }} Py${{ matrix.python-version }}
+    # Run only for tagged releases.
+    if: startsWith(github.ref, 'refs/tags')
     runs-on: ${{ matrix.os }}
     needs: [lint, test]
     strategy:
