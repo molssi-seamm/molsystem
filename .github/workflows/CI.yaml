@@ -23,7 +23,6 @@ jobs:
   test-win:
     name: Test ${{ matrix.os }} Py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
-    needs: lint
     strategy:
       matrix:
         os: [windows-latest]
