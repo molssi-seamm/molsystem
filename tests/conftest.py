@@ -235,6 +235,20 @@ def vanadium(system):
 
 
 @pytest.fixture()
+def copper(system):
+    """FCC copper crystal, without symmetry."""
+    x = [0.0, 0.5, 0.5, 0.0]
+    y = [0.0, 0.5, 0.0, 0.5]
+    z = [0.0, 0.0, 0.5, 0.5]
+    system.name = 'FCC Copper'
+    system.periodicity = 3
+    system.coordinate_system = 'fractional'
+    system.cell.set_cell(3.61491, 3.61491, 3.61491, 90, 90, 90)
+    system.atoms.append(x=x, y=y, z=z, symbol=['Cu'])
+    return system
+
+
+@pytest.fixture()
 def CH3COOH_3H2O(AceticAcid):
     """System with acetic acid and 3 water molecules"""
     system = AceticAcid
