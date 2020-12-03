@@ -131,6 +131,12 @@ class _System(
         else:
             self.filename = 'seamm.db'
 
+    def __del__(self):
+        """Destructor: need to close the database if any."""
+        if self._db is not None:
+            self.db.commit()
+            self.db.close()
+
     def __enter__(self) -> Any:
         self.db.commit()
 
