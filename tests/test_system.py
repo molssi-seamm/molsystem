@@ -11,11 +11,13 @@ import pytest  # noqa: F401
 def test_construction(system):
     """Simplest test that we can make a System object"""
     assert str(type(system)) == "<class 'molsystem.system._System'>"
+    del system
 
 
 def test_version_empty(system):
     """Simplest test that we can make a System object"""
     assert system.version == 0
+    del system
 
 
 def test_create_table(system):
