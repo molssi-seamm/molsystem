@@ -267,13 +267,17 @@ _chem_comp.formula   'C2 H4 O2'
 _chemical_formula_structural   CH2O
 _chemical_formula_sum   'C2 H4 O2'
 loop_
- _atom_site_type_symbol
- _atom_site_label
- _atom_site_symmetry_multiplicity
- _atom_site_fract_x
- _atom_site_fract_y
- _atom_site_fract_z
- _atom_site_occupancy
+ _chem_comp_atom.comp_id
+ _chem_comp_atom.atom_id
+ _chem_comp_atom.type_symbol
+ _chem_comp_atom.model_Cartn_x
+ _chem_comp_atom.model_Cartn_y
+ _chem_comp_atom.model_Cartn_z
+ _chem_comp_atom.pdbx_model_Cartn_x_ideal
+ _chem_comp_atom.pdbx_model_Cartn_y_ideal
+ _chem_comp_atom.pdbx_model_Cartn_z_ideal
+ _chem_comp_atom.pdbx_component_comp_id
+ _chem_comp_atom.pdbx_residue_numbering
 MOL1 C C 1.080 0.018 -0.018 1.080 0.018 -0.018 HET 1
 MOL1 H H 0.578 3.138 0.281 0.578 3.138 0.281 HET 1
 MOL1 H2 H 0.721 -0.674 -0.786 0.721 -0.674 -0.786 HET 1
