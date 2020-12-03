@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pprint  # noqa: F401
 import pytest  # noqa: F401
 
 import molsystem  # noqa: F401
@@ -420,3 +421,26 @@ def test_set_periodic_coordinates_cartesians(vanadium):
 
     xyz = system.atoms.coordinates()
     assert np.allclose(xyz, xyz0)
+
+
+def test_remove_atoms(copper):
+    """Test removing one atom from FCC copper"""
+    system = copper
+
+    assert system.n_atoms() == 4
+
+    tmp = system.bonded_neighbors(as_indices=True)
+
+    ids = system.atoms.atom_ids()
+    first = [ids[0]]
+
+    with system as tmp:
+        tmp.atoms.remove(atoms=first)
+
+    tmp = system.bonded_neighbors(as_indices=True)
+
+    assert system.n_atoms() == 3
+
+    xyz = system.atoms.coordinates()
+
+    assert xyz == [[0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [0.0, 0.5, 0.5]]
