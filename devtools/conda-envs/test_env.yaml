@@ -1,12 +1,17 @@
 name: test
+
 channels:
   - conda-forge
+
 dependencies:
   # Base depends
   - python
   - pip
   - numpy
   - pandas
+
+  # molsystem requires, and only available via Conda.
+  - openbabel
 
   # Testing
   - codecov
