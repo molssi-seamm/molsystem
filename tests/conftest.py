@@ -54,7 +54,11 @@ def system():
 
     yield system
 
-    del systems['seamm']
+    try:
+        del systems['seamm']
+    except:  # noqa: E722
+        print('Caught error deleting the database')
+        pass
 
 
 @pytest.fixture()
