@@ -44,7 +44,16 @@ def mk_table(system, name='table1'):
 @pytest.fixture()
 def atoms(system):
     """An empty atoms table."""
-    return system.atoms
+    systems = Systems()
+    system = systems.create_system('seamm', temporary=True)
+
+    yield system.atoms
+
+    try:
+        del systems['seamm']
+    except:  # noqa: E722
+        print('Caught error deleting the database')
+        pass
 
 
 @pytest.fixture()
