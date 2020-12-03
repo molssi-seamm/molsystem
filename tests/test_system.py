@@ -83,3 +83,9 @@ def test_clear(CH3COOH_3H2O):
     system.clear()
 
     assert system.n_atoms() == 0
+
+
+def test_density(vanadium):
+    """Test the density, and implicitly the mass and volume."""
+
+    assert abs(vanadium.density() - 6.0817308915133) < 1.0e-06
