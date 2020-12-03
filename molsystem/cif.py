@@ -160,6 +160,10 @@ class CIFMixin:
             ys = []
             zs = []
             symbols = []
+            # These variables *are* used in the eval below.
+            x = float(x)
+            y = float(y)
+            z = float(z)
             for symop in data_block['_space_group_symop_operation_xyz']:
                 x_eq, y_eq, z_eq = symop.split(',')
                 x_new = eval(x_eq)
