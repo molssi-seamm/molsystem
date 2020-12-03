@@ -680,13 +680,22 @@ class _Table(collections.abc.MutableMapping):
 
         # See about the rows removed
         removed = {}
-        for row in self.db.execute(
-            f"""
-            SELECT rowid, * FROM {other_table}
-            WHERE rowid NOT IN (SELECT rowid FROM {table})
-            """
-        ):
-            removed[row['rowid']] = row[1:]
+        if 'id' in self:
+            for row in self.db.execute(
+                f"""
+                SELECT * FROM {other_table}
+                WHERE rowid NOT IN (SELECT rowid FROM {table})
+                """
+            ):
+                removed[row['id']] = row[1:]
+        else:
+            for row in self.db.execute(
+                f"""
+                SELECT rowid, * FROM {other_table}
+                WHERE rowid NOT IN (SELECT rowid FROM {table})
+                """
+            ):
+                removed[row['rowid']] = row[1:]
 
         if len(removed) > 0:
             result['columns in removed rows'] = row.keys()[1:]
