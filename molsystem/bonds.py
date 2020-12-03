@@ -439,11 +439,13 @@ class _Bonds(Table):
         )
         return self.cursor.fetchone()[0]
 
-    def remove(self, subset=None, configuration=None):
-        """Removes all the bonds in a subset or configuration
+    def remove(self, atoms=None, subset=None, configuration=None):
+        """Removes all the bonds for the atoms, or in a subset or configuration
 
         Parameters
         ----------
+        atoms : [int] = None
+            The list of atoms whose bonds are removed
         subset : int = None
             Get the atoms for the subset. Defaults to the 'all/all' subset
             for the configuration given.
@@ -455,20 +457,48 @@ class _Bonds(Table):
         -------
         None
         """
-        if subset is None:
-            subset = self.system.all_subset(configuration)
+        if atoms is not None:
+            if subset is None:
+                subset = self.system.all_subset(configuration)
+            # Delete the bonds in the template
+            sql = (
+                "DELETE FROM templatebond"
+                " WHERE i in ("
+                "     SELECT templateatom FROM subset_atom"
+                "      WHERE subset = ? AND atom = ?"
+                " ) OR j in ("
+                "     SELECT templateatom FROM subset_atom"
+                "      WHERE subset = ? AND atom = ?"
+                " )"
+            )
+            parameters = [(subset, i, subset, i) for i in atoms]
+            self.db.executemany(sql, parameters)
 
-        sql = (
-            "DELETE FROM templatebond"
-            " WHERE i in ("
-            "     SELECT id FROM templateatom, subset_atom"
-            "      WHERE id = templateatom AND subset = ?"
-            " ) AND j in ("
-            "     SELECT id FROM templateatom, subset_atom"
-            "      WHERE id = templateatom AND subset = ?"
-            " )"
-        )
-        self.db.execute(sql, (subset, subset))
+            # and the atoms...
+            sql = (
+                "DELETE FROM templateatom"
+                " WHERE id in ("
+                "     SELECT templateatom FROM subset_atom"
+                "      WHERE subset = ? AND atom = ?"
+                " )"
+            )
+            parameters = [(subset, i) for i in atoms]
+            self.db.executemany(sql, parameters)
+        else:
+            if subset is None:
+                subset = self.system.all_subset(configuration)
+
+            sql = (
+                "DELETE FROM templatebond"
+                " WHERE i in ("
+                "     SELECT id FROM templateatom, subset_atom"
+                "      WHERE id = templateatom AND subset = ?"
+                " ) AND j in ("
+                "     SELECT id FROM templateatom, subset_atom"
+                "      WHERE id = templateatom AND subset = ?"
+                " )"
+            )
+            self.db.execute(sql, (subset, subset))
 
     def to_dataframe(self, configuration=None):
         """Return the bonds as a Pandas Dataframe."""

@@ -44,7 +44,16 @@ def mk_table(system, name='table1'):
 @pytest.fixture()
 def atoms(system):
     """An empty atoms table."""
-    return system.atoms
+    systems = Systems()
+    system = systems.create_system('seamm', temporary=True)
+
+    yield system.atoms
+
+    try:
+        del systems['seamm']
+    except:  # noqa: E722
+        print('Caught error deleting the database')
+        pass
 
 
 @pytest.fixture()
@@ -54,7 +63,11 @@ def system():
 
     yield system
 
-    del systems['seamm']
+    try:
+        del systems['seamm']
+    except:  # noqa: E722
+        print('Caught error deleting the database')
+        pass
 
 
 @pytest.fixture()
@@ -231,6 +244,20 @@ def vanadium(system):
     system.coordinate_system = 'fractional'
     system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
     system.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
+    return system
+
+
+@pytest.fixture()
+def copper(system):
+    """FCC copper crystal, without symmetry."""
+    x = [0.0, 0.5, 0.5, 0.0]
+    y = [0.0, 0.5, 0.0, 0.5]
+    z = [0.0, 0.0, 0.5, 0.5]
+    system.name = 'FCC Copper'
+    system.periodicity = 3
+    system.coordinate_system = 'fractional'
+    system.cell.set_cell(3.61491, 3.61491, 3.61491, 90, 90, 90)
+    system.atoms.append(x=x, y=y, z=z, symbol=['Cu'])
     return system
 
 

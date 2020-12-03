@@ -1,3 +1,4 @@
 numpy==1.19.0
 pandas==1.1.1
 pathvalidate==2.3.0
+pycifrw==4.4.1

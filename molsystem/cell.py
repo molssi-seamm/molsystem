@@ -119,9 +119,13 @@ class Cell(object):
     def volume(self):
         """The volume of the cell."""
         a, b, c, alpha, beta, gamma = self.parameters
+        # Roundoff errors!
+        value = cos(alpha) * cos(beta) * cos(gamma)
+        if value < 0.0 and abs(value) < 1.0e-8:
+            value = 0.0
         return (
             a * b * c * (1 - cos(alpha)**2 - cos(beta)**2 - cos(gamma)**2) +
-            2 * math.sqrt(cos(alpha) * cos(beta) * cos(gamma))
+            2 * math.sqrt(value)
         )
 
     def equal(self, other, tol=1.0e-6):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pprint  # noqa: F401
 import pytest  # noqa: F401
 
 import molsystem  # noqa: F401
@@ -328,3 +329,118 @@ def test_equals_with_change(atoms):
     atoms2['atno'][0] = 22
 
     assert atoms == atoms2
+
+
+def test_coordinates(AceticAcid):
+    """Test getting coordinates."""
+    system = AceticAcid
+
+    xs = [1.0797, 0.5782, 0.7209, 0.7052, 0.5713, -0.1323, 0.9757, 2.1724]
+    ys = [0.0181, 3.1376, -0.6736, -0.3143, 1.3899, 1.7142, 2.2970, 0.0161]
+    zs = [-0.0184, 0.2813, -0.7859, 0.9529, -0.3161, -1.2568, 0.5919, -0.0306]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    xyz = system.atoms.coordinates()
+    assert np.allclose(xyz, xyz0)
+
+
+def test_set_coordinates(AceticAcid):
+    """Test setting coordinates."""
+    system = AceticAcid
+
+    xs = [1.08, 0.58, 0.72, 0.71, 0.57, -0.13, 0.98, 2.17]
+    ys = [0.02, 3.14, -0.67, -0.31, 1.39, 1.71, 2.30, 0.02]
+    zs = [-0.02, 0.28, -0.79, 0.95, -0.32, -1.26, 0.59, -0.03]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    system.atoms.set_coordinates(xyz0)
+
+    xyz = system.atoms.coordinates()
+    assert np.allclose(xyz, xyz0)
+
+
+def test_periodic_coordinates(vanadium):
+    """Test getting coordinates."""
+    system = vanadium
+
+    xs = [0.0, 0.5]
+    ys = [0.0, 0.5]
+    zs = [0.0, 0.5]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    xyz = system.atoms.coordinates()
+    assert np.allclose(xyz, xyz0)
+
+
+def test_periodic_coordinates_cartesians(vanadium):
+    """Test getting coordinates in Cartesian coordinates."""
+    system = vanadium
+
+    xs = [0.0, 1.515]
+    ys = [0.0, 1.515]
+    zs = [0.0, 1.515]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    xyz = system.atoms.coordinates(fractionals=False)
+    assert np.allclose(xyz, xyz0)
+
+
+def test_set_periodic_coordinates(vanadium):
+    """Test setting coordinates."""
+    system = vanadium
+
+    xs = [0.1, 0.6]
+    ys = [0.1, 0.6]
+    zs = [0.1, 0.6]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    system.atoms.set_coordinates(xyz0)
+
+    xyz = system.atoms.coordinates()
+    assert np.allclose(xyz, xyz0)
+
+
+def test_set_periodic_coordinates_cartesians(vanadium):
+    """Test setting coordinates in Cartesian coordinates."""
+    system = vanadium
+
+    xs = [0.303, 1.818]
+    ys = [0.303, 1.818]
+    zs = [0.303, 1.818]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    system.atoms.set_coordinates(xyz0, fractionals=False)
+
+    xyz = system.atoms.coordinates(fractionals=False)
+    assert np.allclose(xyz, xyz0)
+
+    xs = [0.1, 0.6]
+    ys = [0.1, 0.6]
+    zs = [0.1, 0.6]
+    xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    xyz = system.atoms.coordinates()
+    assert np.allclose(xyz, xyz0)
+
+
+def test_remove_atoms(copper):
+    """Test removing one atom from FCC copper"""
+    system = copper
+
+    assert system.n_atoms() == 4
+
+    tmp = system.bonded_neighbors(as_indices=True)
+
+    ids = system.atoms.atom_ids()
+    first = [ids[0]]
+
+    with system as tmp:
+        tmp.atoms.remove(atoms=first)
+
+    tmp = system.bonded_neighbors(as_indices=True)
+
+    assert system.n_atoms() == 3
+
+    xyz = system.atoms.coordinates()
+
+    assert xyz == [[0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [0.0, 0.5, 0.5]]

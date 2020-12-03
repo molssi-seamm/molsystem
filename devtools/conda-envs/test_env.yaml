@@ -1,28 +1,29 @@
 name: test
+
 channels:
-  - default
   - conda-forge
+
 dependencies:
   # Base depends
   - python
   - pip
-  - configargparse
   - numpy
   - pandas
-  # Module dependencies
+
+  # molsystem requires, and only available via Conda.
   - openbabel
 
   # Testing
-  - coverage
+  - codecov
   - flake8
   - pytest
   - pytest-cov
-  - pytest-runner
 
   # Pip-only installs
   - pip:
     - pathvalidate
-      # Testing
+    - pycifrw
+
+    # Testing
     - yapf
-    - codecov
 

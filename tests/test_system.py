@@ -11,11 +11,13 @@ import pytest  # noqa: F401
 def test_construction(system):
     """Simplest test that we can make a System object"""
     assert str(type(system)) == "<class 'molsystem.system._System'>"
+    del system
 
 
 def test_version_empty(system):
     """Simplest test that we can make a System object"""
     assert system.version == 0
+    del system
 
 
 def test_create_table(system):
@@ -83,3 +85,9 @@ def test_clear(CH3COOH_3H2O):
     system.clear()
 
     assert system.n_atoms() == 0
+
+
+def test_density(vanadium):
+    """Test the density, and implicitly the mass and volume."""
+
+    assert abs(vanadium.density() - 6.0817308915133) < 1.0e-06
