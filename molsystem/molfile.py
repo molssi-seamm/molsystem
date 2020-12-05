@@ -105,6 +105,7 @@ class MolFileMixin:
             The configuration to use, defaults to the current configuration.
         """
 
+        self.clear(configuration=configuration)
         self.periodicity = 0
 
         n_molecules = 0
