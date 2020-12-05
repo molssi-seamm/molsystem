@@ -134,7 +134,7 @@ class CIFMixin:
         data_block = cif[data_blocks[0]]
 
         # Reset the system
-        self.clear()
+        self.clear(configuration=configuration)
         self.periodicity = 3
         self.coordinate_system = 'fractional'
 
