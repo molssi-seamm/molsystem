@@ -88,6 +88,8 @@ class _Bonds(Table):
 
     If both the atoms and the bonds change, then a corresponding subset
     is needed each time either changes.
+
+    :meta public:
     """
 
     def __init__(self, system: System_tp, table: str = 'templatebond') -> None:

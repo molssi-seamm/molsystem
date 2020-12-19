@@ -12,6 +12,8 @@ labels = ('a', 'b', 'c', 'alpha', 'beta', 'gamma')
 
 class _CellParameters(Table):
     """The representation of the periodic cell
+
+    :meta public:
     """
 
     def __init__(self, system, table='cell'):

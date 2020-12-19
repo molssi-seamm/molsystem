@@ -30,6 +30,8 @@ class _Templateatoms(Atoms):
     itself be time-dependent, and is controlled by the subset 'all'.
 
     Atoms can be added ('append') or removed ('delete').
+
+    :meta public:
     """
 
     def __init__(

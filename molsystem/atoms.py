@@ -95,6 +95,8 @@ class _Atoms(collections.abc.MutableMapping):
 
     If both the atoms and the bonds change, then a corresponding subset
     is needed each time either changes.
+
+    :meta public:
     """
 
     def __init__(

@@ -40,6 +40,8 @@ class _Templatebonds(Table):
     also be removed. See the method 'add_attribute' for more detail.
 
     Bonds can be added ('append') or removed ('delete').
+
+    :meta public:
     """
 
     def __init__(self, system: System_tp, table: str = 'templatebond') -> None:

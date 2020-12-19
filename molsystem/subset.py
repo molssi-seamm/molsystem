@@ -27,6 +27,7 @@ class _Subsets(Table):
     database scheme underlying the system and hence the subsets.. The
     following tables handle subsets:
 
+    :meta public:
     """
 
     def __init__(self, system: System_tp, tablename: str = 'subset') -> None:

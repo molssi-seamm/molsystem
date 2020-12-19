@@ -35,6 +35,8 @@ class _Template(Table):
     templatebond -- Bonds linking template atoms i & j if present.
 
     Templates can be added ('append') or removed ('delete').
+
+    :meta public:
     """
 
     def __init__(self, system: System_tp, tablename: str = 'template') -> None:
