@@ -557,6 +557,29 @@ class _System(
             configuration = self.current_configuration
         return self._configurations[configuration][1]
 
+    def append(self, name=None):
+        """Add a new system to the database.
+        
+        Create a new, empty system by appending to the system table in
+        the database.
+
+        Parameters
+        ----------
+        name : str = None
+            The name for the system, or if None one will be generated.
+
+        Returns:
+        id : int
+            The id of the newly created system.
+        """
+        id = self['system'].append(
+            name=name,
+            version=0,
+            periodicity=0,
+            coordinatesystem='Cartesian'
+        )
+        return id
+    
     def attach(self, other):
         """Attach another system to this one's database."""
         if self.is_attached(other.nickname):
