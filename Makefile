@@ -60,7 +60,7 @@ typing: ## check typing
 	pytype $(MODULE)
 
 test: ## run tests quickly with the default Python
-	py.test
+	py.test -rP
 
 dependencies:
 	pur -r requirements_dev.txt
@@ -70,7 +70,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source $(MODULE) -m pytest
+	coverage run --source $(MODULE) -m pytest tests
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html

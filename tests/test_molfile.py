@@ -104,22 +104,22 @@ M  END
 """
 
 
-def test_from_text(system):
-    """Create a system from the text of a Molfile"""
-    system.from_molfile_text(text1)
-    if str(system.atoms) != atoms1:
-        print(system.atoms)
-    if str(system.bonds) != bonds1:
-        print(system.bonds)
-    assert str(system.atoms) == atoms1
-    assert str(system.bonds) == bonds1
+def test_from_text(configuration):
+    """Create a configuration from the text of a Molfile"""
+    configuration.from_molfile_text(text1)
+    if str(configuration.atoms) != atoms1:
+        print(configuration.atoms)
+    if str(configuration.bonds) != bonds1:
+        print(configuration.bonds)
+    assert str(configuration.atoms) == atoms1
+    assert str(configuration.bonds) == bonds1
 
 
-def test_to_text(system):
-    """Create the text of a Molfile from a system"""
-    system.from_molfile_text(text1)
+def test_to_text(configuration):
+    """Create the text of a Molfile from a configuration"""
+    configuration.from_molfile_text(text1)
     # Second line contains the current date/time
-    text_sv = system.to_molfile_text()
+    text_sv = configuration.to_molfile_text()
     text = text_sv.splitlines()
     del text[1]
     text = '\n'.join(text)
@@ -134,7 +134,7 @@ def test_to_text(system):
 
 
 def test_to_text2(AceticAcid):
-    """Write a manually created system to molfile"""
+    """Write a manually created configuration to molfile"""
     # Second line contains the current date/time
     text_sv = AceticAcid.to_molfile_text()
     text = text_sv.splitlines()

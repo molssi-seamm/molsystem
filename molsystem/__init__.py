@@ -8,7 +8,8 @@ A general implementation for molecular and periodic systems.
 # Bring up the classes so that they appear to be directly in
 # the molsystem package.
 
-from molsystem.systems import Systems  # noqa: F401
+import molsystem.elements  # noqa: F401
+from molsystem.system_db import SystemDB  # noqa: F401
 from molsystem.cell import Cell  # noqa: F401
 
 # Handle versioneer

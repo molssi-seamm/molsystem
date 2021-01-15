@@ -1,5 +1,5 @@
-Welcome to the documentation for the MolSystem plug-in
-====================================================== 
+Welcome to the documentation for MolSystem
+==========================================
 
 Contents:
 

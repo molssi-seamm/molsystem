@@ -4,9 +4,8 @@ import collections.abc
 from itertools import zip_longest
 import logging
 import pandas
-from typing import Any, Dict
 
-from molsystem.column import _Column as Column
+from .column import _Column
 
 logger = logging.getLogger(__name__)
 
@@ -26,31 +25,71 @@ def grouped(iterable, n):
 class _Table(collections.abc.MutableMapping):
     """A dictionary-like object for holding tabular data
 
-    This is a wrapper around and SQL table, with columns being the attributes.
+    This is a wrapper around an SQL table, with columns being the attributes.
 
     Attributes can be created, either from a list of predefined
     ones or by specifying the metadata required of an attribute. Attributes can
-    also be removed. See the method 'add_attribute' for more detail.
+    also be deleted. See the method 'add_attribute' for more detail.
 
-    Rows can be added ('append') or removed ('delete').
+    Rows can be added ('append') or deleted ('delete').
+
+    :meta public:
     """
 
-    def __init__(self, system, table: str, other=None) -> None:
-        self._system = system
-        self._table = table
+    def __init__(self, system_db, table: str, other=None, logger=logger):
+        self._system_db = system_db
+        self.logger = logger
+        if '.' in table:
+            self._schema, self._table = table.split('.')
+        else:
+            self._schema = 'main'
+            self._table = table
         if other is not None:
             self.copy(other)
+        self._checkpoints = []
 
-    def __enter__(self) -> Any:
-        self.system.__enter__()
+    def __enter__(self):
+        """Copy the table to a backup for a 'with' statement."""
+        n = len(self._checkpoints)
+        checkpoint = f'temp.{self._table}_checkpoint_{n}'
+        self.db.execute(
+            f"CREATE TEMP TABLE {checkpoint} AS SELECT * FROM {self.table}"
+        )
+        self.db.commit()
+        self._checkpoints.append(checkpoint)
         return self
 
     def __exit__(self, etype, value, traceback) -> None:
-        self.system.__exit__(etype, value, traceback)
+        """Handle returning from a 'with' statement."""
+        checkpoint = self._checkpoints.pop()
 
-    def __getitem__(self, key) -> Any:
+        if etype is None:
+            self.db.commit()
+
+            # Log the changes
+            previous = _Table(self.system_db, checkpoint)
+            diffs = self.diff(previous)
+            if diffs is not None:
+                self.logger.debug(diffs)
+        else:
+            # Delete everything in the table and copy the checkpoint back.
+            self.db.execute('PRAGMA foreign_keys = OFF')
+            self.clear()
+            self.db.execute(
+                f"INSERT INTO {self.table} SELECT * FROM {checkpoint}"
+            )
+            self.db.execute('PRAGMA foreign_keys = ON')
+            self.db.commit()
+
+        # Drop the temporary table
+        self.db.execute(f"DROP TABLE {checkpoint}")
+        self.db.commit()
+
+        return False
+
+    def __getitem__(self, key):
         """Allow [] to access the data!"""
-        return Column(self, key)
+        return self.get_column(key)
 
     def __setitem__(self, key, value) -> None:
         """Allow x[key] access to the data"""
@@ -73,21 +112,20 @@ class _Table(collections.abc.MutableMapping):
         PRAGMA foreign_keys=off;
 
         -- Here you can drop column
-        CREATE TABLE "tmp_{table}"
-           AS SELECT {column_def} FROM "{table}";
+        CREATE TABLE {self.schema}."tmp_{table}"
+           AS SELECT {column_def} FROM {self.table};
 
         -- drop the table
-        DROP TABLE "{table}";
+        DROP TABLE {self.table};
 
         -- rename the new_table to the table
-        ALTER TABLE "tmp_{table}" RENAME TO "{table}";
+        ALTER TABLE {self.schema}."tmp_{table}"
+          RENAME TO "{self._table}";
 
         -- enable foreign key constraint check
         PRAGMA foreign_keys=on;
         """
-
-        with self.db:
-            self.db.executescript(sql)
+        self.db.executescript(sql)
         self.db.commit()
 
     def __iter__(self) -> iter:
@@ -116,7 +154,7 @@ class _Table(collections.abc.MutableMapping):
         tmp_item = item.strip('"')
         return tmp_item in self.attributes
 
-    def __eq__(self, other) -> Any:
+    def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
         # Check numbers of rows
         if self.n_rows != other.n_rows:
@@ -135,16 +173,18 @@ class _Table(collections.abc.MutableMapping):
         is_same = True
         # Need to check the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
+        db = self.system_db
+        other_db = other.system_db
 
-        name = self.system.nickname
-        other_name = other.system.nickname
         detach = False
-        if name != other_name:
-            if not self.system.is_attached(other_name):
-                # Attach the other system in order to do comparisons.
-                self.system.attach(other.system)
+        if db.filename != other_db.filename:
+            if db.is_attached(other_db):
+                schema = db.attached_as(other_db)
+            else:
+                # Attach the other system_db in order to do comparisons.
+                schema = self.system_db.attach(other_db)
                 detach = True
-            other_table = f'"{other_name}".{other.table}'
+            other_table = f'"{schema}"."{other._table}"'
         else:
             other_table = other.table
         table = self.table
@@ -173,29 +213,34 @@ class _Table(collections.abc.MutableMapping):
 
         # Detach the other database if needed
         if detach:
-            self.system.detach(other.system)
+            self.system_db.detach(other_db)
 
         return is_same
 
     @property
-    def system(self):
-        """The system that we belong to."""
-        return self._system
+    def system_db(self):
+        """The system_db that we belong to."""
+        return self._system_db
 
     @property
     def db(self):
         """The database connection."""
-        return self.system.db
+        return self.system_db.db
 
     @property
     def cursor(self):
         """The database connection."""
-        return self.system.cursor
+        return self.system_db.cursor
+
+    @property
+    def schema(self):
+        """The database schema the table is in."""
+        return f'"{self._schema}"'
 
     @property
     def table(self) -> str:
         """The name of this table."""
-        return '"' + self._table + '"'
+        return f'"{self._schema}"."{self._table}"'
 
     @property
     def n_rows(self) -> int:
@@ -205,12 +250,12 @@ class _Table(collections.abc.MutableMapping):
         return result
 
     @property
-    def attributes(self) -> Dict[str, Any]:
+    def attributes(self):
         """The definitions of the attributes."""
         result = {}
         for row in self.db.execute(
             "   SELECT *"
-            f"    FROM pragma_table_info('{self._table}')"
+            f"    FROM {self.schema}.pragma_table_info('{self._table}')"
             " ORDER BY 'cid'"
         ):
             result[row['name']] = {
@@ -227,22 +272,22 @@ class _Table(collections.abc.MutableMapping):
 
         return result
 
-    @property
-    def version(self):
-        return self.system.version
+    # @property
+    # def version(self):
+    #     return self.system_db.version
 
     def add_attribute(
         self,
         name: str,
         coltype: str = 'float',
-        default: Any = None,
+        default=None,
         notnull: bool = False,
         index: bool = False,
         pk: bool = False,
         references: str = None,
         on_delete: str = 'cascade',
         on_update: str = 'cascade',
-        values: Any = None
+        values=None
     ) -> None:
         """Adds a new attribute.
 
@@ -278,7 +323,7 @@ class _Table(collections.abc.MutableMapping):
             None
         """
         # Does the table exist?
-        if self.table in self.system:
+        if self.table in self.system_db:
             table_exists = True
             if pk:
                 raise ValueError(
@@ -345,11 +390,15 @@ class _Table(collections.abc.MutableMapping):
 
         if index == 'unique':
             self.cursor.execute(
-                f"CREATE UNIQUE INDEX idx_{name} ON {self.table} ('{name}')"
+                f'CREATE UNIQUE INDEX {self.schema}."idx_{name}"'
+                f'  ON "{self._table}"'
+                f"  ('{name}')"
             )
         elif index:
             self.cursor.execute(
-                f"CREATE INDEX idx_{name} ON {self.table} ('{name}')"
+                f'CREATE INDEX {self.schema}."idx_{name}"'
+                f'  ON "{self._table}"'
+                f"  ('{name}')"
             )
 
         if values is not None:
@@ -357,7 +406,7 @@ class _Table(collections.abc.MutableMapping):
 
         self.db.commit()
 
-    def append(self, n=None, **kwargs: Dict[str, Any]) -> None:
+    def append(self, n=None, **kwargs):
         """Append one or more rows
 
         The keywords are the names of attributes and the value to use.
@@ -365,15 +414,25 @@ class _Table(collections.abc.MutableMapping):
         'None' in which case an error is thrown. It is an error if there is not
         an exisiting attribute corresponding to any given as arguments.
 
-        Args:
-            kwargs: any number <attribute name> = <value> keyword arguments
-                giving existing attributes and values.
+        Parameters
+        ----------
+        kwargs : keyword arguments
+            Giving existing attributes and values.
 
-        Returns:
-            None
+        Returns
+        -------
+        [int]
+            The ids of the created rows.
         """
 
-        n_rows, lengths = self._get_n_rows(**kwargs)
+        if len(kwargs) > 0:
+            n_rows, lengths = self._get_n_rows(**kwargs)
+        else:
+            lengths = {}
+            if n is not None:
+                n_rows = n
+            else:
+                n_rows = 1
 
         if n is not None:
             if n_rows != 1 and n_rows != n:
@@ -441,20 +500,232 @@ class _Table(collections.abc.MutableMapping):
         if 'id' in kwargs:
             return kwargs['id']
 
-    def remove(self, *args):
-        """Remove rows matching the selection."""
+    def clear(self):
+        """Delete all rows from the table."""
+        self.db.execute(f'DELETE FROM {self.table}')
+
+    def diff(self, other):
+        """Difference between this table and another
+
+        Parameters
+        ----------
+        other : _Table
+            The other table to diff against
+
+        Result
+        ------
+        result : dict
+            The differences, described in a dictionary
+        """
+        self.logger.debug("diffs for {self.table}")
+        result = {}
+        summary = {}
+
+        # Check the columns
+        attributes = self.attributes
+        columns = set(attributes)
+
+        other_attributes = other.attributes
+        other_columns = set(other_attributes)
+
+        if columns == other_columns:
+            column_def = 'rowid, *'
+        else:
+            added = columns - other_columns
+            if len(added) > 0:
+                self.logger.debug(
+                    f"      columns added: {', '.join(sorted(added))}"
+                )
+                result['columns added'] = added
+                summary['columns add'] = added
+            deleted = other_columns - columns
+            if len(deleted) > 0:
+                self.logger.debug(
+                    f"     columns deleted: {', '.join(sorted(deleted))}"
+                )
+                result['columns deleted'] = deleted
+                summary['columns deleted'] = deleted
+
+            in_common = other_columns & columns
+            if len(in_common) > 0:
+                column_def = 'rowid, ' + ', '.join(
+                    [f'"{x}"' for x in in_common]
+                )
+            else:
+                # No columns shared
+                return result
+
+        # Need to check the contents of the tables. See if they are in the same
+        # database or if we need to attach the other database temporarily.
+        db = self.system_db
+        other_db = other.system_db
+
+        detach = False
+        if db.filename != other_db.filename:
+            if db.is_attached(other_db):
+                schema = db.attached_as(other_db)
+            else:
+                # Attach the other system_db in order to do comparisons.
+                schema = self.system_db.attach(other_db)
+                detach = True
+            other_table = f'"{schema}"."{other._table}"'
+        else:
+            other_table = other.table
+        table = self.table
+
+        changed = {}
+        last = None
+        sql = f"""
+        SELECT {column_def} FROM
+         (
+          SELECT {column_def} FROM {other_table}
+           EXCEPT
+          SELECT {column_def} FROM {table}
+         )
+        UNION ALL
+        SELECT {column_def} FROM
+         (
+          SELECT {column_def} FROM {table}
+           EXCEPT
+          SELECT {column_def} FROM {other_table}
+         )
+        ORDER BY rowid
+        """
+        changed_columns = set()
+        for row in self.db.execute(sql):
+            if last is None:
+                last = row
+            elif row['rowid'] == last['rowid']:
+                changes = set()
+                for k1, v1, v2 in zip(last.keys(), last, row):
+                    if v1 != v2:
+                        changed_columns.add(k1)
+                        changes.add((k1, v1, v2))
+                changed[row['rowid']] = changes
+                last = None
+            else:
+                last = row
+        if len(changed) > 0:
+            self.logger.debug(
+                f"    columns changed: {', '.join(sorted(changed_columns))}"
+            )
+            result['changed'] = changed
+            summary['columns changed'] = changed_columns
+
+        # See about the rows added
+        added = {}
+        if 'id' in self:
+            for row in self.db.execute(
+                f"""
+                SELECT * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['id']] = row[1:]
+        else:
+            for row in self.db.execute(
+                f"""
+                SELECT rowid, * FROM {table}
+                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
+                """
+            ):
+                added[row['rowid']] = row[1:]
+
+        if len(added) > 0:
+            self.logger.debug(f"         rows added: {len(added)}")
+            result['columns in added rows'] = row.keys()[1:]
+            result['added'] = added
+            summary['rows added'] = len(added)
+
+        # See about the rows deleted
+        deleted = {}
+        if 'id' in self:
+            for row in self.db.execute(
+                f"""
+                SELECT * FROM {other_table}
+                WHERE rowid NOT IN (SELECT rowid FROM {table})
+                """
+            ):
+                deleted[row['id']] = row[1:]
+        else:
+            for row in self.db.execute(
+                f"""
+                SELECT rowid, * FROM {other_table}
+                WHERE rowid NOT IN (SELECT rowid FROM {table})
+                """
+            ):
+                deleted[row['rowid']] = row[1:]
+
+        if len(deleted) > 0:
+            self.logger.debug(f"       rows deleted: {len(deleted)}")
+            result['columns in deleted rows'] = row.keys()[1:]
+            result['deleted'] = deleted
+            summary['rows deleted'] = len(deleted)
+
+        # Detach the other database if needed
+        if detach:
+            self.system_db.detach(other_db)
+
+        if len(result) == 0:
+            self.logger.debug("    no changes")
+            result = None
+        else:
+            result['summary'] = summary
+
+        return result
+
+    def get_column(self, column, sql=None, where=''):
+        """Return a column of data from the table.
+
+        Parameters
+        ----------
+        column : str
+            The name of the column.
+        sql : str = None
+            Optional SQL statement to get the rows.
+        where : str = ''
+            Optional WHERE clause when getting the rows if no SQL is given.
+            Should be the complete clause, starting with 'WHERE ...'
+        """
+        return _Column(self, column=column, sql=sql, where=where)
+
+    def get_column_data(self, column, sql=None, where=''):
+        """Return a column of data from the table as a list.
+
+        Parameters
+        ----------
+        column : str
+            The name of the column.
+        sql : str = None
+            Optional SQL statement to get the rows.
+        where : str = ''
+            Optional WHERE clause when getting the rows if no SQL is given.
+            Should be the complete clause, starting with 'WHERE ...'
+        """
+        result = []
+        if sql is None:
+            sql = f'SELECT {column} FROM {self.table} {where}'
+
+        for row in self.db.execute(sql):
+            result.append(row[0])
+        return result
+
+    def delete(self, *args):
+        """Delete rows matching the selection."""
         if len(args) == 0:
             return self.db.execute(f'DELETE FROM {self.table}')
 
         sql = f'DELETE FROM {self.table} WHERE'
 
         parameters = []
+        clause = []
         for col, op, value in grouped(args, 3):
             if op == '==':
                 op = '='
-            sql += f' "{col}" {op} ?'
+            clause.append(f'"{col}" {op} ?')
             parameters.append(value)
 
+        sql += ' AND '.join(clause)
         return self.db.execute(sql, parameters)
 
     def rows(self, *args):
@@ -465,12 +736,14 @@ class _Table(collections.abc.MutableMapping):
         sql = f'SELECT * FROM {self.table} WHERE'
 
         parameters = []
+        clause = []
         for col, op, value in grouped(args, 3):
             if op == '==':
                 op = '='
-            sql += f' "{col}" {op} ?'
+            clause.append(f'"{col}" {op} ?')
             parameters.append(value)
 
+        sql += ' AND '.join(clause)
         return self.db.execute(sql, parameters)
 
     def _get_n_rows(self, **kwargs):
@@ -504,21 +777,21 @@ class _Table(collections.abc.MutableMapping):
 
     def copy(self, other):
         """Replace this object with a copy of another."""
-        if self.table in self.system:
-            del self.system[self.table]
+        if self.table in self.system_db:
+            del self.system_db[self.table]
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
 
-        name = self.system.nickname
-        other_name = other.system.nickname
+        name = self.system_db.nickname
+        other_name = other.system_db.nickname
         detach = False
         if name != other_name:
-            if not self.system.is_attached(other_name):
-                # Attach the other system in order to do comparisons.
-                self.system.attach(other.system)
+            if not self.system_db.is_attached(other_name):
+                # Attach the other system_db in order to do comparisons.
+                self.system_db.attach(other.system_db)
                 detach = True
-            other_table = f'"{other_name}".{other.table}'
+            other_table = f'"{other_name}"."{other._table}"'
         else:
             other_table = other.table
         table = self.table
@@ -530,9 +803,9 @@ class _Table(collections.abc.MutableMapping):
 
         # Detach the other database if needed
         if detach:
-            self.system.detach(other.system)
+            self.system_db.detach(other.system_db)
 
-    def length_of_values(self, values: Any) -> int:
+    def length_of_values(self, values):
         """Return the length of the values argument.
 
         Parameters
@@ -564,145 +837,3 @@ class _Table(collections.abc.MutableMapping):
         df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
 
         return df
-
-    def diff(self, other):
-        """Difference between this table and another
-
-        Parameters
-        ----------
-        other : _Table
-            The other table to diff against
-
-        Result
-        ------
-        result : Dict
-            The differences, decribed in a dictionary
-        """
-        result = {}
-
-        # Check the columns
-        attributes = self.attributes
-        columns = set(attributes)
-
-        other_attributes = other.attributes
-        other_columns = set(other_attributes)
-
-        if columns == other_columns:
-            column_def = 'rowid, *'
-        else:
-            added = columns - other_columns
-            if len(added) > 0:
-                result['columns added'] = list(added)
-            removed = other_columns - columns
-            if len(removed) > 0:
-                result['columns removed'] = list(removed)
-
-            in_common = other_columns & columns
-            if len(in_common) > 0:
-                column_def = 'rowid, ' + ', '.join(in_common)
-            else:
-                # No columns shared
-                return result
-
-        # Need to check the contents of the tables. See if they are in the same
-        # database or if we need to attach the other database temporarily.
-        name = self.system.nickname
-        other_name = other.system.nickname
-        detach = False
-        if name != other_name:
-            if not self.system.is_attached(other_name):
-                # Attach the other system in order to do comparisons.
-                self.system.attach(other.system)
-                detach = True
-            other_table = f'"{other_name}".{other.table}'
-        else:
-            other_table = other.table
-        table = self.table
-
-        changed = {}
-        last = None
-        for row in self.db.execute(
-            f"""
-            SELECT {column_def} FROM
-            (
-            SELECT {column_def} FROM {other_table}
-            EXCEPT
-            SELECT {column_def} FROM {table}
-            )
-            UNION ALL
-            SELECT {column_def} FROM
-            (
-            SELECT {column_def} FROM {table}
-            EXCEPT
-            SELECT {column_def} FROM {other_table}
-            )
-            ORDER BY rowid
-            """
-        ):
-            if last is None:
-                last = row
-            elif row['rowid'] == last['rowid']:
-                # changes = []
-                changes = set()
-                for k1, v1, v2 in zip(last.keys(), last, row):
-                    if v1 != v2:
-                        # changes.append((k1, v1, v2))
-                        changes.add((k1, v1, v2))
-                changed[row['rowid']] = changes
-                last = None
-            else:
-                last = row
-        if len(changed) > 0:
-            result['changed'] = changed
-
-        # See about the rows added
-        added = {}
-        if 'id' in self:
-            for row in self.db.execute(
-                f"""
-                SELECT * FROM {table}
-                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
-                """
-            ):
-                added[row['id']] = row[1:]
-        else:
-            for row in self.db.execute(
-                f"""
-                SELECT rowid, * FROM {table}
-                WHERE rowid NOT IN (SELECT rowid FROM {other_table})
-                """
-            ):
-                added[row['rowid']] = row[1:]
-
-        if len(added) > 0:
-            result['columns in added rows'] = row.keys()[1:]
-            result['added'] = added
-
-        # See about the rows removed
-        removed = {}
-        if 'id' in self:
-            for row in self.db.execute(
-                f"""
-                SELECT * FROM {other_table}
-                WHERE rowid NOT IN (SELECT rowid FROM {table})
-                """
-            ):
-                removed[row['id']] = row[1:]
-        else:
-            for row in self.db.execute(
-                f"""
-                SELECT rowid, * FROM {other_table}
-                WHERE rowid NOT IN (SELECT rowid FROM {table})
-                """
-            ):
-                removed[row['rowid']] = row[1:]
-
-        if len(removed) > 0:
-            result['columns in removed rows'] = row.keys()[1:]
-            result['removed'] = removed
-
-        # Detach the other database if needed
-        if detach:
-            self.system.detach(other.system)
-
-        return result

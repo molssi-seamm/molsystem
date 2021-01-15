@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import pprint
 
 import numpy as np
 import pytest  # noqa: F401
@@ -92,7 +93,7 @@ def test_append_ndarrays_3x100(simple_table):
             xaa += 10.0
             yaa += 5.0
             zaa -= 3.0
-    assert simple_table.n_rows == 300 and simple_table.version == 1
+    assert simple_table.n_rows == 300
 
 
 def test_append_ndarrays_3x10_one_by_one(simple_table):
@@ -112,7 +113,7 @@ def test_append_ndarrays_3x10_one_by_one(simple_table):
             xaa += 10.0
             yaa += 5.0
             zaa -= 3.0
-    assert simple_table.n_rows == 30 and simple_table.version == 10
+    assert simple_table.n_rows == 30
 
 
 def test_append_error(simple_table):
@@ -123,7 +124,7 @@ def test_append_error(simple_table):
             raise RuntimeError()
     except RuntimeError:
         pass
-    assert simple_table.n_rows == 0 and simple_table.version == 0
+    assert simple_table.n_rows == 0
 
 
 def test_add_attribute(simple_table):
@@ -139,15 +140,11 @@ def test_add_duplicate_attribute(simple_table):
         tmp.add_attribute('name')
     try:
         with simple_table as tmp:
-            ver = tmp.version
             tmp.add_attribute('name')
     except RuntimeError as e:
         err = str(e)
-    assert (
-        sorted([*simple_table.keys()]) == ['atno', 'name', 'x', 'y', 'z'] and
-        ver == 1 and simple_table.version == 1 and
-        err == "_Table attribute 'name' is already defined!"
-    )
+    assert sorted([*simple_table.keys()]) == ['atno', 'name', 'x', 'y', 'z']
+    assert err == "_Table attribute 'name' is already defined!"
 
 
 def test_add_attribute_with_values(simple_table):
@@ -186,7 +183,7 @@ def test_add_attribute_with_wrong_number_of_values(simple_table):
     assert (
         simple_table.n_rows == 0 and err == (
             "The number of values given, 2, must be either 1, or the number of"
-            ' rows in "table1": 3'
+            ' rows in "main"."table1": 3'
         )
     )
 
@@ -229,13 +226,6 @@ def test_deleting_column(simple_table):
     assert sorted([*simple_table.keys()]) == ['x', 'y', 'z']
 
 
-def test_no_change(simple_table):
-    """Test not making a change"""
-    with simple_table as tmp:
-        ver = tmp.version
-    assert ver == 0 and simple_table.version == 0
-
-
 def test_set_column(simple_table):
     """Test setting a column using a scalar"""
     with simple_table as tmp:
@@ -244,10 +234,8 @@ def test_set_column(simple_table):
     with simple_table as tmp:
         tmp['atno'] = 10
 
-    assert (
-        simple_table.n_rows == 3 and simple_table.version == 2 and
-        simple_table['atno'] == [10, 10, 10]
-    )
+    assert simple_table.n_rows == 3
+    assert simple_table['atno'] == [10, 10, 10]
 
 
 def test_set_column_with_array(simple_table):
@@ -260,10 +248,8 @@ def test_set_column_with_array(simple_table):
     with simple_table as tmp:
         tmp['x'] = values
 
-    assert (
-        simple_table.n_rows == 3 and simple_table.version == 2 and
-        simple_table['x'] == values
-    )
+    assert simple_table.n_rows == 3
+    assert simple_table['x'] == values
 
 
 def test_append_error_invalid_column(simple_table):
@@ -276,7 +262,7 @@ def test_append_error_invalid_column(simple_table):
 
     assert (
         simple_table.n_rows == 0 and
-        err == '\'"junk" is not an attribute of the table "table1"!\''
+        err == '\'"junk" is not an attribute of the table "main"."table1"!\''
     )
 
 
@@ -291,7 +277,7 @@ def test_append_error_invalid_length(simple_table):
     assert (
         simple_table.n_rows == 0 and err == (
             'key "atno" has the wrong number of values, '
-            '2. Should be 1 or the number of rows in "table1" (3).'
+            '2. Should be 1 or the number of rows in "main"."table1" (3).'
         )
     )
 
@@ -420,6 +406,10 @@ def test_diff(two_tables):
         'columns in added rows': ['atno', 'x', 'y', 'z'],
         'added': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns changed': {'atno', 'x'},
+            'rows added': 1
         }
     }
 
@@ -427,9 +417,13 @@ def test_diff(two_tables):
         'changed': {
             1: {('atno', 10, 8), ('x', 0.0, 1.0)}
         },
-        'columns in removed rows': ['atno', 'x', 'y', 'z'],
-        'removed': {
+        'columns in deleted rows': ['atno', 'x', 'y', 'z'],
+        'deleted': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns changed': {'atno', 'x'},
+            'rows deleted': 1
         }
     }
 
@@ -445,13 +439,17 @@ def test_diff(two_tables):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
+    if diffs != ref1:
+        pprint.pprint(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
+    if diffs != ref1:
+        pprint.pprint(diffs)
     assert diffs == ref2
 
 
-def test_diff_two_systems(two_tables_in_two_systems):
+def test_diff_two_dbs(two_tables_in_two_dbs):
     """Test diffing two tables in the different databases."""
 
     ref1 = {
@@ -461,6 +459,10 @@ def test_diff_two_systems(two_tables_in_two_systems):
         'columns in added rows': ['atno', 'x', 'y', 'z'],
         'added': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns changed': {'atno', 'x'},
+            'rows added': 1
         }
     }
 
@@ -468,13 +470,17 @@ def test_diff_two_systems(two_tables_in_two_systems):
         'changed': {
             1: {('atno', 10, 8), ('x', 0.0, 1.0)}
         },
-        'columns in removed rows': ['atno', 'x', 'y', 'z'],
-        'removed': {
+        'columns in deleted rows': ['atno', 'x', 'y', 'z'],
+        'deleted': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns changed': {'atno', 'x'},
+            'rows deleted': 1
         }
     }
 
-    table1, table2 = two_tables_in_two_systems
+    table1, table2 = two_tables_in_two_dbs
 
     with table1 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
@@ -486,38 +492,52 @@ def test_diff_two_systems(two_tables_in_two_systems):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
+    if diffs != ref1:
+        pprint.pprint(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
+    if diffs != ref2:
+        pprint.pprint(diffs)
     assert diffs == ref2
 
 
-def test_diff_add_columns(two_tables_in_two_systems):
+def test_diff_add_columns(two_tables_in_two_dbs):
     """Test diffing two tables with different numbers of columns."""
 
     ref1 = {
-        'columns removed': ['spin'],
+        'columns deleted': {'spin'},
         'changed': {
             1: {('x', 1.0, 0.0), ('atno', 8, 10)}
         },
         'columns in added rows': ['atno', 'x', 'y', 'z'],
         'added': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns changed': {'atno', 'x'},
+            'columns deleted': {'spin'},
+            'rows added': 1
         }
-    }
+    }  # yapf: disable
 
     ref2 = {
-        'columns added': ['spin'],
+        'columns added': {'spin'},
         'changed': {
             1: {('x', 0.0, 1.0), ('atno', 10, 8)}
         },
-        'columns in removed rows': ['atno', 'x', 'y', 'z'],
-        'removed': {
+        'columns in deleted rows': ['atno', 'x', 'y', 'z'],
+        'deleted': {
             4: (12, 20.0, 21.0, 22.0)
+        },
+        'summary': {
+            'columns add': {'spin'},
+            'columns changed': {'atno', 'x'},
+            'rows deleted': 1
         }
-    }
+    }  # yapf: disable
 
-    table1, table2 = two_tables_in_two_systems
+    table1, table2 = two_tables_in_two_dbs
 
     with table1 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
@@ -530,7 +550,11 @@ def test_diff_add_columns(two_tables_in_two_systems):
         tmp.append(x=20.0, y=21.0, z=22.0, atno=12)
 
     diffs = table2.diff(table1)
+    if diffs != ref1:
+        pprint.pprint(diffs)
     assert diffs == ref1
 
     diffs = table1.diff(table2)
+    if diffs != ref2:
+        pprint.pprint(diffs)
     assert diffs == ref2

@@ -59,11 +59,11 @@ def test_several_molecules_canonical(CH3COOH_3H2O):
     assert smiles == correct
 
 
-def test_from_smiles(system):
-    """Create a system from SMILES"""
+def test_from_smiles(configuration):
+    """Create a configuration from SMILES"""
     correct = ['CC(=O)O', 'acetic acid']
-    system.from_smiles('OC(=O)C', name='acetic acid')
-    result = system.to_smiles(name=True, canonical=True)
+    configuration.from_smiles('OC(=O)C', name='acetic acid')
+    result = configuration.to_smiles(name=True, canonical=True)
 
     if result != correct:
         print(result)

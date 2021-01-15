@@ -49,49 +49,49 @@ def test_multiple_molecules(CH3COOH_3H2O):
     assert molecules == result
 
 
-def test_molecule_subsets(CH3COOH_3H2O):
-    """Test making subsets for the molecules."""
-    result = [2, 3, 4, 5]
-
-    system = CH3COOH_3H2O
-    sids = system.create_molecule_subsets()
-    if sids != result:
-        pprint.pprint(sids)
-    assert sids == result
-
-    sid = sids[1]
-    assert system.atoms.n_atoms(subset=sid) == 3
-    assert system.bonds.n_bonds(subset=sid) == 0  # No bonds defined!
-
-
 def test_molecule_templates(disordered):
     """Test making templates for the molecules."""
-    result_tids = [2, 2]
-    result_sids = {2: [2, 3]}
+    result_tids = [1]
 
-    system = disordered
-    tids, sids = system.create_molecule_templates()
+    configuration = disordered
+    templates = configuration.create_molecule_templates(create_subsets=False)
+    tids = [x.id for x in templates]
     if tids != result_tids:
         print('tids')
         pprint.pprint(tids)
+    assert tids == result_tids
+
+
+def test_molecule_subsets(disordered):
+    """Test making templates and subsets for the molecules."""
+    result_tids = [1]
+    result_sids = {1: [1, 2]}
+
+    configuration = disordered
+    templates, subsets = configuration.create_molecule_templates()
+    tids = [x.id for x in templates]
+    if tids != result_tids:
+        print('tids')
+        pprint.pprint(tids)
+    sids = {t: [x.id for x in s] for t, s in subsets.items()}
     if sids != result_sids:
         print('sids')
         pprint.pprint(sids)
     assert tids == result_tids
     assert sids == result_sids
 
-    # And that the atoms are indeed order correctly
+    # And that the atoms are indeed ordered correctly
     tid = tids[0]
-    sid1, sid2 = sids[tid]
-    atnos1 = system.atoms.atomic_numbers(subset=sid1)
-    atnos2 = system.atoms.atomic_numbers(subset=sid2, template_order=True)
+    subset1, subset2 = subsets[tid]
+    atnos1 = subset1.atoms.atomic_numbers
+    atnos2 = subset2.atoms.atomic_numbers
     if atnos1 != atnos2:
         print(f'atnos1 = {atnos1}')
         print(f'atnos2 = {atnos2}')
     assert atnos1 == atnos2
 
-    coords1 = system.atoms.coordinates(subset=sid1)
-    coords2 = system.atoms.coordinates(subset=sid2, template_order=True)
+    coords1 = subset1.atoms.coordinates
+    coords2 = subset2.atoms.coordinates
 
     # At the moment the methyl hydrogens are not properly ordered -- they are
     # equivalent -- so remove them to test.

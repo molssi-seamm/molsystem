@@ -14,9 +14,9 @@ z = [7.0, 8.0, 9.0]
 atno = [8, 1, 1]
 
 
-def test_construction(system):
+def test_construction(configuration):
     """Simplest test that we can make an Atoms object"""
-    atoms = system.atoms
+    atoms = configuration.atoms
     assert str(type(atoms)) == "<class 'molsystem.atoms._Atoms'>"
 
 
@@ -29,31 +29,31 @@ def test_keys(atoms):
 
 def test_n_atoms_empty(atoms):
     """Test how many atoms an empty object has"""
-    assert atoms.n_atoms() == 0
+    assert atoms.n_atoms == 0
 
 
 def test_append_one(atoms):
     """Test adding one atom"""
     with atoms as tmp:
         tmp.append(x=1.0, y=2.0, z=3.0, atno=[6])
-    assert atoms.n_atoms() == 1
+    assert atoms.n_atoms == 1
 
 
 def test_append_several(atoms):
     """Test adding several atoms"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert atoms.n_atoms() == 3
+    assert atoms.n_atoms == 3
 
 
 def test_append_several_scalar(atoms):
     """Test adding several atoms with some scalar values"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=0.0, atno=6)
-    assert (
-        atoms['x'] == x and atoms['y'] == y and
-        atoms['z'] == [0.0, 0.0, 0.0] and atoms['atno'] == [6, 6, 6]
-    )
+    assert atoms['x'] == x
+    assert atoms['y'] == y
+    assert atoms['z'] == [0.0, 0.0, 0.0]
+    assert atoms['atno'] == [6, 6, 6]
 
 
 def test_append_using_default(atoms):
@@ -61,16 +61,17 @@ def test_append_using_default(atoms):
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z)
 
-    assert (atoms.n_atoms() == 3 and atoms['atno'] == [None, None, None])
+    assert atoms.n_atoms == 3
+    assert atoms['atno'] == [None, None, None]
 
 
 def test_append_error(atoms):
     """Test adding atoms with an error"""
-    atoms.configuration = 1
     with pytest.raises(KeyError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, bad=99)
-    assert atoms.n_atoms() == 0 and atoms.version == 0
+    assert atoms.n_atoms == 0
+    assert atoms.configuration.version == 0
     assert (str(e.value) == '\'"bad" is not an attribute of the atoms.\'')
 
 
@@ -89,13 +90,12 @@ def test_add_duplicate_attribute(atoms):
         tmp.add_attribute('name')
     with pytest.raises(RuntimeError) as e:
         with atoms as tmp:
-            ver = tmp.version
+            ver = tmp.configuration.version
             tmp.add_attribute('name')
-    assert (
-        sorted([*atoms.keys()]) == result and ver == 1 and
-        atoms.version == 1 and
-        str(e.value) == "_Table attribute 'name' is already defined!"
-    )
+    assert sorted([*atoms.keys()]) == result
+    assert ver == 1
+    assert atoms.configuration.version == 1
+    assert str(e.value) == "_Table attribute 'name' is already defined!"
 
 
 def test_add_attribute_with_values(atoms):
@@ -128,11 +128,10 @@ def test_add_attribute_with_wrong_number_of_values(atoms):
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno)
             tmp.add_attribute('spin', coltype='int', default=0, values=[1, 2])
-    assert (
-        atoms.n_atoms() == 0 and str(e.value) == (
-            "The number of values given, "
-            '2, must be either 1, or the number of rows in "atom": 3'
-        )
+    assert atoms.n_atoms == 0
+    assert str(e.value) == (
+        "The number of values given, "
+        '2, must be either 1, or the number of rows in "main"."atom": 3'
     )
 
 
@@ -182,10 +181,9 @@ def test_set_column(atoms):
     with atoms as tmp:
         tmp['atno'] = 10
 
-    assert (
-        atoms.n_atoms() == 3 and atoms.version == 2 and
-        atoms['atno'] == [10, 10, 10]
-    )
+    assert atoms.n_atoms == 3
+    assert atoms.configuration.version == 2
+    assert atoms['atno'] == [10, 10, 10]
 
 
 def test_set_column_with_array(atoms):
@@ -198,9 +196,9 @@ def test_set_column_with_array(atoms):
     with atoms as tmp:
         tmp['x'] = values
 
-    assert (
-        atoms.n_atoms() == 3 and atoms.version == 2 and atoms['x'] == values
-    )
+    assert atoms.n_atoms == 3
+    assert atoms.configuration.version == 2
+    assert atoms['x'] == values
 
 
 def test_append_error_no_coordinates(atoms):
@@ -208,7 +206,8 @@ def test_append_error_no_coordinates(atoms):
     with atoms as tmp:
         tmp.append(y=y, z=z, atno=atno)
 
-    assert (atoms.n_atoms() == 3 and atoms['x'] == [None, None, None])
+    assert atoms.n_atoms == 3
+    assert atoms['x'] == [None, None, None]
 
 
 def test_append_error_invalid_column(atoms):
@@ -216,10 +215,8 @@ def test_append_error_invalid_column(atoms):
     with pytest.raises(KeyError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, junk=99)
-    assert (
-        atoms.n_atoms() == 0 and
-        str(e.value) == '\'"junk" is not an attribute of the atoms.\''
-    )
+    assert atoms.n_atoms == 0
+    assert str(e.value) == '\'"junk" is not an attribute of the atoms.\''
 
 
 def test_append_error_invalid_length(atoms):
@@ -227,11 +224,10 @@ def test_append_error_invalid_length(atoms):
     with pytest.raises(IndexError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=[3, 4])
-    assert (
-        atoms.n_atoms() == 0 and str(e.value) == (
-            'key "atno" has the wrong number of values, '
-            '2. Should be 1 or the number of atoms (3).'
-        )
+    assert atoms.n_atoms == 0
+    assert str(e.value) == (
+        'key "atno" has the wrong number of values, '
+        '2. Should be 1 or the number of atoms (3).'
     )
 
 
@@ -241,14 +237,15 @@ def test_add_attribute_with_no_default(atoms):
         tmp.add_attribute('new', coltype='float')
         tmp.append(x=x, y=y, z=z, atno=atno, new=[-1, -2, -3])
 
-    assert (atoms.n_atoms() == 3 and atoms['new'] == [-1, -2, -3])
+    assert atoms.n_atoms == 3
+    assert atoms['new'] == [-1, -2, -3]
 
 
-def test_equality(two_systems):
+def test_equality(two_configurations):
     """Test whether two Atoms objects are equal"""
-    system1, system2 = two_systems
-    atoms1 = system1['atoms']
-    atoms2 = system2['atoms']
+    configuration1, configuration2 = two_configurations
+    atoms1 = configuration1.atoms
+    atoms2 = configuration2.atoms
 
     with atoms1 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
@@ -256,14 +253,15 @@ def test_equality(two_systems):
     with atoms2 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
 
-    assert atoms1.n_atoms() == 3 and atoms1 == atoms2
+    assert atoms1.n_atoms == 3
+    assert atoms1 == atoms2
 
 
-def test_inequality(two_systems):
+def test_inequality(two_configurations):
     """Test whether two Atoms objects are equal"""
-    system1, system2 = two_systems
-    atoms1 = system1['atoms']
-    atoms2 = system2['atoms']
+    configuration1, configuration2 = two_configurations
+    atoms1 = configuration1.atoms
+    atoms2 = configuration2.atoms
 
     with atoms1 as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
@@ -273,7 +271,8 @@ def test_inequality(two_systems):
         atno2[2] = 13
         tmp.append(x=x, y=y, z=z, atno=atno2)
 
-    assert atoms1.n_atoms() == 3 and atoms1 != atoms2
+    assert atoms1.n_atoms == 3
+    assert atoms1 != atoms2
 
 
 def test_str(atoms):
@@ -333,85 +332,85 @@ def test_equals_with_change(atoms):
 
 def test_coordinates(AceticAcid):
     """Test getting coordinates."""
-    system = AceticAcid
+    configuration = AceticAcid
 
     xs = [1.0797, 0.5782, 0.7209, 0.7052, 0.5713, -0.1323, 0.9757, 2.1724]
     ys = [0.0181, 3.1376, -0.6736, -0.3143, 1.3899, 1.7142, 2.2970, 0.0161]
     zs = [-0.0184, 0.2813, -0.7859, 0.9529, -0.3161, -1.2568, 0.5919, -0.0306]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
 
 
 def test_set_coordinates(AceticAcid):
     """Test setting coordinates."""
-    system = AceticAcid
+    configuration = AceticAcid
 
     xs = [1.08, 0.58, 0.72, 0.71, 0.57, -0.13, 0.98, 2.17]
     ys = [0.02, 3.14, -0.67, -0.31, 1.39, 1.71, 2.30, 0.02]
     zs = [-0.02, 0.28, -0.79, 0.95, -0.32, -1.26, 0.59, -0.03]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    system.atoms.set_coordinates(xyz0)
+    configuration.atoms.set_coordinates(xyz0)
 
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
 
 
 def test_periodic_coordinates(vanadium):
     """Test getting coordinates."""
-    system = vanadium
+    configuration = vanadium
 
     xs = [0.0, 0.5]
     ys = [0.0, 0.5]
     zs = [0.0, 0.5]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
 
 
 def test_periodic_coordinates_cartesians(vanadium):
     """Test getting coordinates in Cartesian coordinates."""
-    system = vanadium
+    configuration = vanadium
 
     xs = [0.0, 1.515]
     ys = [0.0, 1.515]
     zs = [0.0, 1.515]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    xyz = system.atoms.coordinates(fractionals=False)
+    xyz = configuration.atoms.get_coordinates(fractionals=False)
     assert np.allclose(xyz, xyz0)
 
 
 def test_set_periodic_coordinates(vanadium):
     """Test setting coordinates."""
-    system = vanadium
+    configuration = vanadium
 
     xs = [0.1, 0.6]
     ys = [0.1, 0.6]
     zs = [0.1, 0.6]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    system.atoms.set_coordinates(xyz0)
+    configuration.atoms.set_coordinates(xyz0)
 
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
 
 
 def test_set_periodic_coordinates_cartesians(vanadium):
     """Test setting coordinates in Cartesian coordinates."""
-    system = vanadium
+    configuration = vanadium
 
     xs = [0.303, 1.818]
     ys = [0.303, 1.818]
     zs = [0.303, 1.818]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    system.atoms.set_coordinates(xyz0, fractionals=False)
+    configuration.atoms.set_coordinates(xyz0, fractionals=False)
 
-    xyz = system.atoms.coordinates(fractionals=False)
+    xyz = configuration.atoms.get_coordinates(fractionals=False)
     assert np.allclose(xyz, xyz0)
 
     xs = [0.1, 0.6]
@@ -419,28 +418,24 @@ def test_set_periodic_coordinates_cartesians(vanadium):
     zs = [0.1, 0.6]
     xyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
 
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
 
 
 def test_remove_atoms(copper):
     """Test removing one atom from FCC copper"""
-    system = copper
+    configuration = copper
 
-    assert system.n_atoms() == 4
+    assert configuration.atoms.n_atoms == 4
 
-    tmp = system.bonded_neighbors(as_indices=True)
-
-    ids = system.atoms.atom_ids()
+    ids = configuration.atoms.ids
     first = [ids[0]]
 
-    with system as tmp:
-        tmp.atoms.remove(atoms=first)
+    with configuration.atoms as tmp:
+        tmp.delete(atoms=first)
 
-    tmp = system.bonded_neighbors(as_indices=True)
+    assert configuration.atoms.n_atoms == 3
 
-    assert system.n_atoms() == 3
-
-    xyz = system.atoms.coordinates()
+    xyz = configuration.atoms.coordinates
 
     assert xyz == [[0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [0.0, 0.5, 0.5]]

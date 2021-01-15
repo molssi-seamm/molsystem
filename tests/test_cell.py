@@ -6,35 +6,47 @@
 import pytest  # noqa: F401
 
 
-def test_construction(system):
-    """Simplest test that we can make a CellParameters object"""
-    cell = system['cell']
-    assert str(
-        type(cell)
-    ) == "<class 'molsystem.cell_parameters._CellParameters'>"
+def test_construction(configuration):
+    """Simplest test that we can make a Cell object"""
+    configuration.periodicity = 3
+    cell = configuration.cell
+    assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
 
 
-def test_periodic_system(system):
+def test_construction_error(configuration):
+    """Test that we get an error for nonperiodic systems"""
+    with pytest.raises(TypeError) as e:
+        configuration.cell
+    if str(e.value) != 'The configuration is not periodic!':
+        print(e.value)
+    assert str(e.value) == 'The configuration is not periodic!'
+
+
+def test_periodic_system(configuration):
     """Test making a simple periodic system."""
-    system.periodicity = 3
-    system.coordinate_system = 'fractional'
-    system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
-    system.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
-    assert system.n_atoms() == 2 and system.version == 0
+    configuration.periodicity = 3
+    configuration.coordinate_system = 'fractional'
+    configuration.cell.parameters = (3.03, 3.03, 3.03, 90, 90, 90)
+    configuration.atoms.append(
+        x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V'
+    )
+    assert configuration.atoms.n_atoms == 2
+    assert configuration.version == 0
 
 
-def test_periodic_context(system):
+def test_periodic_context(configuration):
     """Test using context."""
-    with system as tmp:
+    with configuration as tmp:
         tmp.periodicity = 3
         tmp.coordinate_system = 'fractional'
-        tmp.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
+        tmp.cell.parameters = (3.03, 3.03, 3.03, 90, 90, 90)
         tmp.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
-    assert system.n_atoms() == 2 and system.version == 1
+    assert configuration.atoms.n_atoms == 2
+    assert configuration.version == 1
 
 
 def test_cell_object(vanadium):
     """Test getting the cell as a Cell object."""
-    cell = vanadium.cell.cell()
-    assert str(type(cell)) == "<class 'molsystem.cell.Cell'>"
+    cell = vanadium.cell
+    assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
     assert cell == [3.03, 3.03, 3.03, 90.0, 90.0, 90.0]

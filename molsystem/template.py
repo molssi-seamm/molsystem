@@ -1,224 +1,338 @@
 # -*- coding: utf-8 -*-
-
-"""A dictionary-like object for holding templates
-
-
-"""
-
 import logging
-from typing import TypeVar
-
-from molsystem.table import _Table as Table
-
-System_tp = TypeVar("System_tp", "System", None)
-Templates_tp = TypeVar("Templates_tp", "_Templates", str, None)
 
 logger = logging.getLogger(__name__)
 
 
-class _Template(Table):
-    """The Templates class works with SQLite tables describing templates
+class _Template(object):
+    """:meta public:
+    A class providing the API for templates.
 
-    See the main documentation of SEAMM for a detailed description of the
-    database scheme underlying the system and hence these templates. The
-    following tables handle templates:
+    There are two types of templates:
 
-    template -- A simple table of all of the templates, giving a name and type.
-
-    templateatom -- An optional list of template atoms associated with a
+    simple
+        Which have a category and name, which together are unique.
+    full
+        Which have a category and name, which together are unique,
+        and also a reference to a configuration that
+        describes the atoms, bonds, and other properties of the
         template.
 
-    templatecoordinates -- An optional set of coordinates for the template
-        atoms. These are in Cartesian coordinates since the templates are
-        molecular, not periodic, in nature.
-
-    templatebond -- Bonds linking template atoms i & j if present.
-
-    Templates can be added ('append') or removed ('delete').
-
-    :meta public:
+    Parameters
+    ----------
+    system_db : SystemDB
+        The system database that this template belongs to.
+    tid : int
+        The id of the template in the template table.
+    logger : logging.Logger = logger
+        A logger to use in place of the one from this module.
     """
 
-    def __init__(self, system: System_tp, tablename: str = 'template') -> None:
-        super().__init__(system, tablename)
+    def __init__(self, system_db, tid, logger=logger):
+        self._system_db = system_db
+        self._id = tid
+        self._logger = logger
 
-        self._current_template = 1
+        # Cache for performance:
+        self._is_full = None
+        self._configuration = None
+        self._configuration_id = None
 
     @property
-    def current_template(self):
-        """The template that is the default for the moment."""
-        return self._current_template
+    def category(self):
+        """The category of this template."""
+        sql = "SELECT category FROM template WHERE id = ?"
+        self.cursor.execute(sql, (self.id,))
+        return self.cursor.fetchone()[0]
 
-    @current_template.setter
-    def current_template(self, value):
-        self.cursor.execute(
-            f'SELECT COUNT(*) FROM {self.table} WHERE id = ?', (value,)
-        )
-        if self.cursor.fetchone()[0] == 0:
-            raise KeyError(f"Template '{value}' does not exist.")
-        self._current_template = value
-
-    def append_to_system(
-        self,
-        template,
-        n_copies=1,
-        coordinates=None,
-        configuration=None,
-        create_subsets=True
-    ):
-        """ Append one or more copies of a template to the system.
-
-        Parameters
-        ----------
-
-        """
-        pass
-
-    def create(self, name, type_='general', atnos=None, bonds=None):
-        """Create a new template.
-
-        Parameters
-        ----------
-        name : str
-            The name of the template.
-        type_ : str = 'general'
-            The type of template, e.g. 'all', 'molecule', 'residue'
-        atnos : [int] = None
-            The atomic numbers of the template atoms (optional)
-        bond : [(int, int, int)]
-            The bonds as (i, j, order) (optional)
-
-        Returns
-        -------
-        int
-            The template id.
-        """
-        if self.exists(name, type_=type_):
-            raise KeyError(f"The template '{name}' of type '{type_}' exists.")
-
-        tid = self.append(name=name, type=type_)[0]
-
-        if atnos is not None:
-            tatom_ids = self.system.templateatoms.append(
-                atno=atnos, template=tid
-            )
-
-            if bonds is not None:
-                iatoms = []
-                jatoms = []
-                orders = []
-                for i, j, order in bonds:
-                    iatoms.append(tatom_ids[i])
-                    jatoms.append(tatom_ids[j])
-                    orders.append(order)
-                self.system.templatebonds.append(
-                    template=tid, i=iatoms, j=jatoms, bondorder=orders
-                )
-        return tid
-
-    def exists(self, name, type_='general'):
-        """Return if the template exists given the name and type.
-
-        Parameters
-        ----------
-        name : str
-            The name of the template.
-        type_ : str = 'general'
-            The type of template, e.g. 'all', 'molecule', 'residue'
-
-        Returns
-        -------
-        bool
-            True if it exists; False otherwise.
-        """
-        self.cursor.execute(
-            f'SELECT COUNT(*) FROM {self.table} WHERE "name" = ? '
-            'AND "type" = ?', (name, type_)
-        )
-        row = self.cursor.fetchone()
-        return row[0] == 1
-
-    def find(self, name, type_='general', create=False):
-        """Find a single template given the name and typ.
-
-        Parameters
-        ----------
-        name : str
-            The name of the template.
-        type_ : str = 'general'
-            The type of template, e.g. 'all', 'molecule', 'residue'
-        create : bool = False
-            Create the template if it does not exist.
-
-        Returns
-        -------
-        int
-            The id of the template.
+    @property
+    def configuration(self):
+        """The configuration for a full template.
 
         Raises
         ------
-        KeyError
-           If the template does not exist and 'create' is not requested.
-        """
-        self.cursor.execute(
-            f'SELECT id FROM {self.table} WHERE "name" = ? AND "type" = ?',
-            (name, type_)
-        )
-        row = self.cursor.fetchone()
-        if row is None:
-            if create:
-                return self.create(name, type_=type_)
-            else:
-                raise KeyError(
-                    f"There is no template '{name}' of type '{type_}'."
-                )
-        return row[0]
-
-    def set_current_template(self, name, type_='general'):
-        """Set the current template given the name and optionally type.
-
-        Parameters
-        ----------
-        name : str
-            The name of the template. The name/type pair must be unique.
-        type_ : str = 'general'
-            The type of template.
+        TypeError
+            If not a full template, so there is no template configuration.
 
         Returns
         -------
-        None
+        _Configuration
+            The Configuration object.
         """
-        id = self.find(name, type_=type_)
-        self._current_template = id
+        if not self.is_full:
+            raise TypeError('Not a full template')
 
-    def templates(self, name=None, type_=None):
-        """Return an itereator over the given templates.
+        if self._configuration is None:
+            cid = self.configuration_id
+            if cid is None:
+                return None
+            self._configuration = self.system_db.get_configuration(cid)
+        return self._configuration
 
-        Parameters
-        ----------
-        name : str
-            The name of the template.
-        type_ : str = 'general'
-            The type of template, e.g. 'all', 'molecule', 'residue'
+    @property
+    def configuration_id(self):
+        """The configuration id for a full template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
 
         Returns
         -------
-        sqlite.cursor
-            The iterator over rows.
+        int
+            The id of the configuration in the configuration table.
         """
-        if name is None:
-            if type_ is None:
-                return self.db.execute(f'SELECT * FROM {self.table}')
+        if not self.is_full:
+            raise TypeError('Not a full template')
+
+        if self._configuration_id is None:
+            sql = "SELECT configuration FROM template WHERE id = ?"
+            self.cursor.execute(sql, (self.id,))
+            self._configuration_id = self.cursor.fetchone()[0]
+        return self._configuration_id
+
+    @property
+    def atoms(self):
+        """The atoms for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        _Atoms
+            The atoms for the template configuration.
+        """
+
+        return self.configuration.atoms
+
+    @property
+    def bonds(self):
+        """The bonds for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        _Bonds
+            The bonds for the template configuration.
+        """
+
+        return self.configuration.bonds
+
+    @property
+    def cell(self):
+        """The cell for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template or is not periodic.
+
+        Returns
+        -------
+        _Cell
+            The cell for the template configuration.
+        """
+
+        return self.configuration.cell
+
+    @property
+    def coordinate_system(self):
+        """The coordinate system for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        str
+            The coordinate system for the template configuration.
+        """
+
+        return self.configuration.coordinate_system
+
+    @property
+    def cursor(self):
+        """The a cursor for the database."""
+        return self.system_db.cursor
+
+    @property
+    def db(self):
+        """The database connection."""
+        return self.system_db.db
+
+    @property
+    def density(self):
+        """The density for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template or is not periodic.
+
+        Returns
+        -------
+        float
+            The density for the template configuration.
+        """
+
+        return self.configuration.density
+
+    @property
+    def formula(self):
+        """The chemical formula for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        tuple(str, str, int)
+            The chemical formula, empirical formula and Z.
+        """
+
+        return self.configuration.formula
+
+    @property
+    def is_full(self):
+        """Whether this has a template configuration, i.e. is a full template.
+        """
+        if self._is_full is None:
+            if self._configuration_id is None:
+                sql = "SELECT configuration FROM template WHERE id = ?"
+                self.cursor.execute(sql, (self.id,))
+                cid = self.cursor.fetchone()[0]
+                self._is_full = cid is not None
             else:
-                return self.db.execute(
-                    f'SELECT * FROM {self.table} WHERE "type" = ?', (type_,)
-                )
-        elif type_ is None:
-            return self.db.execute(
-                f'SELECT * FROM {self.table} WHERE "name" = ?', (name,)
-            )
-        else:
-            return self.db.execute(
-                f'SELECT * FROM {self.table} WHERE "name" = ? AND "type" = ?',
-                (name, type_)
-            )
+                self._is_full = True
+        return self._is_full
+
+    @property
+    def id(self):
+        """The id for this template in the template table."""
+        return self._id
+
+    @property
+    def mass(self):
+        """The atomic mass of this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        float
+            The atomic mass of the template configuration.
+        """
+
+        return self.configuration.mass
+
+    @property
+    def name(self):
+        """The name of this template."""
+        sql = "SELECT name FROM template WHERE id = ?"
+        self.cursor.execute(sql, (self.id,))
+        return self.cursor.fetchone()[0]
+
+    @property
+    def n_atoms(self):
+        """The number of atoms for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        int
+            The number of atoms for the template configuration.
+        """
+
+        return self.configuration.n_atoms
+
+    @property
+    def n_bonds(self):
+        """The number of bonds for this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        int
+            The number of bonds for the template configuration.
+        """
+
+        return self.configuration.n_bonds
+
+    @property
+    def periodicity(self):
+        """The periodicity of this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        int
+            The periodicity of the template configuration.
+        """
+
+        return self.configuration.periodicity
+
+    @property
+    def symmetry(self):
+        """The symmetry of this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template.
+
+        Returns
+        -------
+        _Symmetry
+            The symmetry of the template configuration.
+        """
+
+        return self.configuration.symmetry
+
+    @property
+    def system_db(self):
+        """The system_db that we belong to."""
+        return self._system_db
+
+    @property
+    def volume(self):
+        """The volume of this template.
+
+        Raises
+        ------
+        TypeError
+            If not a full template or not periodic.
+
+        Returns
+        -------
+        float
+            The volume of the template configuration.
+        """
+
+        return self.configuration.volume

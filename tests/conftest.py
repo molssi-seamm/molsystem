@@ -3,10 +3,14 @@
 
 """Fixtures for testing the 'molsystem' package."""
 import math
+from pathlib import Path
 
 import pytest
 
-from molsystem.systems import Systems
+from molsystem import SystemDB
+
+path = Path(__file__).resolve().parent
+data_path = path / 'data'
 
 
 def pytest_addoption(parser):
@@ -32,9 +36,9 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_timing)
 
 
-def mk_table(system, name='table1'):
+def mk_table(db, name='table1'):
     """Create a table with some attributes."""
-    table = system.create_table(name)
+    table = db.create_table(name)
     table.add_attribute('atno', coltype='int', default=-1)
     for column in ('x', 'y', 'z'):
         table.add_attribute(column, coltype='float')
@@ -42,82 +46,112 @@ def mk_table(system, name='table1'):
 
 
 @pytest.fixture()
-def atoms(system):
+def db():
+    """Create an empty system db."""
+    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
+    system = db.create_system(name='default')
+    system.create_configuration(name='default')
+
+    yield db
+
+    db.close()
+    try:
+        del db
+    except:  # noqa: E722
+        print('Caught error deleting the database')
+
+
+@pytest.fixture()
+def system(db):
+    """An empty system."""
+    return db.system
+
+
+@pytest.fixture()
+def configuration(system):
+    """An empty system."""
+    return system.configuration
+
+
+@pytest.fixture()
+def atoms(configuration):
     """An empty atoms table."""
-    systems = Systems()
-    system = systems.create_system('seamm', temporary=True)
-
-    yield system.atoms
-
-    try:
-        del systems['seamm']
-    except:  # noqa: E722
-        print('Caught error deleting the database')
-        pass
+    return configuration.atoms
 
 
 @pytest.fixture()
-def system():
-    systems = Systems()
-    system = systems.create_system('seamm', temporary=True)
-
-    yield system
-
-    try:
-        del systems['seamm']
-    except:  # noqa: E722
-        print('Caught error deleting the database')
-        pass
+def bonds(configuration):
+    """An empty bonds table."""
+    return configuration.bonds
 
 
 @pytest.fixture()
-def two_systems():
-    systems = Systems()
+def two_dbs():
+    """Create two different dbs."""
+    db1 = SystemDB(filename='file:seamm_db1?mode=memory&cache=shared')
+    system1 = db1.create_system(name='default')
+    system1.create_configuration(name='default')
 
-    system1 = systems.create_system('seamm1', temporary=True)
-    system2 = systems.create_system('seamm2', temporary=True)
+    db2 = SystemDB(filename='file:seamm_db2?mode=memory&cache=shared')
+    system2 = db2.create_system(name='default')
+    system2.create_configuration(name='default')
 
-    yield system1, system2
+    yield db1, db2
 
-    del systems['seamm1']
-    del systems['seamm2']
-
-
-@pytest.fixture()
-def simple_table(system):
-    return mk_table(system)
-
-
-@pytest.fixture()
-def two_tables(system):
-    return mk_table(system, 'table1'), mk_table(system, 'table2')
+    db1.close()
+    db2.close()
 
 
 @pytest.fixture()
-def system_with_two_tables(system):
-    mk_table(system, 'table1')
-    mk_table(system, 'table2')
-    return system
+def two_systems(two_dbs):
+    """Two empty systems."""
+    db1, db2 = two_dbs
+    return db1.system, db2.system
 
 
 @pytest.fixture()
-def two_tables_in_two_systems(two_systems):
-    system, system2 = two_systems
-    return mk_table(system, 'table1'), mk_table(system2, 'table2')
+def two_configurations(two_systems):
+    """Two empty configuration."""
+    system1, system2 = two_systems
+    return system1.configuration, system2.configuration
 
 
 @pytest.fixture()
-def bonds(system):
-    """An empty system object
-    """
-    return system
+def simple_table(db):
+    return mk_table(db)
 
 
 @pytest.fixture()
-def templates(system):
+def two_tables(db):
+    return mk_table(db, 'table1'), mk_table(db, 'table2')
+
+
+@pytest.fixture()
+def system_with_two_tables(db):
+    mk_table(db, 'table1')
+    mk_table(db, 'table2')
+    return db.system
+
+
+@pytest.fixture()
+def db_with_two_tables(db):
+    mk_table(db, 'table1')
+    mk_table(db, 'table2')
+    return db
+
+
+@pytest.fixture()
+def two_tables_in_two_dbs(two_dbs):
+    db1, db2 = two_dbs
+    return mk_table(db1, 'table1'), mk_table(db2, 'table2')
+
+
+@pytest.fixture()
+def old_templates(system):
     """A system with a template for water."""
     templates = system['template']
     atoms = system['templateatom']
+    atoms.add_attribute('name', 'str', default='')
     bonds = system['templatebond']
 
     # TIP3P
@@ -177,8 +211,8 @@ def templates(system):
 
 
 @pytest.fixture()
-def AceticAcid(system):
-    """An system object for an acetic acid molecule
+def AceticAcid(configuration):
+    """An configuration object for an acetic acid molecule
     """
     # yapf: disable
     #       C       H        H        H        C        =O      O        H
@@ -193,15 +227,16 @@ def AceticAcid(system):
     order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
-    system.name = 'acetic acid'
-    ids = system['atoms'].append(x=x, y=y, z=z, atno=atno)
+    configuration.system.name = 'acetic acid'
+    configuration.name = 'acetic acid'
+    ids = configuration.atoms.append(x=x, y=y, z=z, atno=atno)
 
     i = [ids[x] for x in i_atom]
     j = [ids[x] for x in j_atom]
 
-    system['bonds'].append(i=i, j=j, bondorder=order)
+    configuration.bonds.append(i=i, j=j, bondorder=order)
 
-    return system
+    return configuration
 
 
 @pytest.fixture
@@ -220,8 +255,8 @@ def disordered(AceticAcid):
     order =  [1, 1, 1, 1, 2, 1, 1]  # noqa: E222
     # yapf: enable
 
-    system = AceticAcid
-    ids = system['atoms'].append(
+    configuration = AceticAcid
+    ids = configuration.atoms.append(
         x=[*reversed(x)],
         y=[*reversed(y)],
         z=[*reversed(z)],
@@ -231,40 +266,42 @@ def disordered(AceticAcid):
     i = [ids[7 - x] for x in i_atom]
     j = [ids[7 - x] for x in j_atom]
 
-    system['bonds'].append(i=i, j=j, bondorder=order)
+    configuration.bonds.append(i=i, j=j, bondorder=order)
 
-    return system
+    return configuration
 
 
 @pytest.fixture()
-def vanadium(system):
+def vanadium(configuration):
     """BCC vanadium crystal, without symmetry."""
-    system.name = 'BCC Vanadium'
-    system.periodicity = 3
-    system.coordinate_system = 'fractional'
-    system.cell.set_cell(3.03, 3.03, 3.03, 90, 90, 90)
-    system.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V')
-    return system
+    configuration.name = 'BCC Vanadium'
+    configuration.periodicity = 3
+    configuration.coordinate_system = 'fractional'
+    configuration.cell.parameters = [3.03, 3.03, 3.03, 90, 90, 90]
+    configuration.atoms.append(
+        x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V'
+    )
+    return configuration
 
 
 @pytest.fixture()
-def copper(system):
+def copper(configuration):
     """FCC copper crystal, without symmetry."""
     x = [0.0, 0.5, 0.5, 0.0]
     y = [0.0, 0.5, 0.0, 0.5]
     z = [0.0, 0.0, 0.5, 0.5]
-    system.name = 'FCC Copper'
-    system.periodicity = 3
-    system.coordinate_system = 'fractional'
-    system.cell.set_cell(3.61491, 3.61491, 3.61491, 90, 90, 90)
-    system.atoms.append(x=x, y=y, z=z, symbol=['Cu'])
-    return system
+    configuration.name = 'FCC Copper'
+    configuration.periodicity = 3
+    configuration.coordinate_system = 'fractional'
+    configuration.cell.parameters = (3.61491, 3.61491, 3.61491, 90, 90, 90)
+    configuration.atoms.append(x=x, y=y, z=z, symbol=['Cu'])
+    return configuration
 
 
 @pytest.fixture()
 def CH3COOH_3H2O(AceticAcid):
-    """System with acetic acid and 3 water molecules"""
-    system = AceticAcid
+    """Configuration with acetic acid and 3 water molecules"""
+    configuration = AceticAcid
 
     # TIP3P
     r0 = 0.9572
@@ -281,15 +318,106 @@ def CH3COOH_3H2O(AceticAcid):
     i_atom = [0, 0]
     j_atom = [1, 2]
 
-    system = AceticAcid
-    system.name = 'acetic acid with 3 waters'
+    configuration.name = 'acetic acid with 3 waters'
 
     for no in range(1, 4):
-        ids = system['atoms'].append(x=X, y=no * 5.0, z=Z, atno=atno)
+        ids = configuration.atoms.append(x=X, y=no * 5.0, z=Z, atno=atno)
 
         i = [ids[x] for x in i_atom]
         j = [ids[x] for x in j_atom]
 
-        system['bonds'].append(i=i, j=j)
+        configuration.bonds.append(i=i, j=j)
 
-    return system
+    return configuration
+
+
+# Fixtures for working with the files in data/
+
+
+@pytest.fixture()
+def full_db():
+    """Create a system database with several systems."""
+    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
+    for filename in ['acy.mmcif']:
+        with open(data_path / filename, 'r') as fd:
+            text = fd.read()
+        system = db.add_system(name=Path(filename).stem)
+        configuration = system.create_configuration(name='default')
+        configuration.from_mmcif_text(text)
+
+    yield db
+
+    db.close()
+
+
+@pytest.fixture(scope="session")
+def amino_acids():
+    """Create a system database with 20 amino acids, each as a system."""
+    db = SystemDB(filename='file:amino_acids_db?mode=memory&cache=shared')
+    db.read_cif_file(data_path / 'aminoacids.mmcif')
+
+    yield db
+
+    db.close()
+
+
+@pytest.fixture(scope="session")
+def aa_templates():
+    """Create a system database with 20 amino acids, each as a template."""
+    db = SystemDB(filename='file:aa_templates_db?mode=memory&cache=shared')
+    db.read_cif_file(data_path / 'aminoacids.mmcif')
+    templates = db.templates
+    for system in db.systems:
+        templates.create(
+            name=system.name,
+            category='amino acid',
+            configuration=system.configuration.id
+        )
+
+    yield templates
+
+    db.close()
+
+
+@pytest.fixture()
+def gly(aa_templates):
+    """The template for glycine."""
+    return aa_templates.get(8)
+
+
+@pytest.fixture()
+def simple_templates(CH3COOH_3H2O):
+    """Simple templates for water and acetic acid, plus solvated acetic acid.
+    """
+    db = CH3COOH_3H2O.system_db
+    templates = db.templates
+
+    db.read_cif_file(data_path / 'acy.mmcif')[0]
+    db.read_cif_file(data_path / 'hoh.mmcif')[0]
+
+    templates.create(name='acy', category='molecule')
+    templates.create(name='hoh', category='molecule')
+
+    return db
+
+
+@pytest.fixture()
+def full_templates(CH3COOH_3H2O):
+    """Full templates for water and acetic acid, plus solvated acetic acid.
+    """
+    db = CH3COOH_3H2O.system_db
+    templates = db.templates
+    system = CH3COOH_3H2O.system
+    system.name = 'acetic acid'
+
+    acy_sys = db.read_cif_file(data_path / 'acy.mmcif')[0]
+    acy_conf = db.get_system(acy_sys).configuration
+    acy_cid = acy_conf.id
+    hoh_sys = db.read_cif_file(data_path / 'hoh.mmcif')[0]
+    hoh_conf = db.get_system(hoh_sys).configuration
+    hoh_cid = hoh_conf.id
+
+    templates.create(name='acy', category='molecule', configuration=acy_cid)
+    templates.create(name='hoh', category='molecule', configuration=hoh_cid)
+
+    return db

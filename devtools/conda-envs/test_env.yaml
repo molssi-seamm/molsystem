@@ -32,9 +32,3 @@ dependencies:
     - pygments
     - sphinx-rtd-theme
     - pystemmer
-
-    # Documentation
-    - rinohtype
-    - pygments
-    - sphinx-rtd-theme
-    - pystemmer

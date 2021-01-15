@@ -3,37 +3,16 @@
 """A dictionary-like object for holding a system
 """
 
-import collections.abc
-from collections import Counter
-from functools import reduce
+from collections.abc import MutableMapping
 import logging
-import math
-import sqlite3
-from typing import Any, Dict
 
-from molsystem.elemental_data import element_data
-from molsystem.table import _Table as Table
-from molsystem.atoms import _Atoms as Atoms
-from molsystem.subset import _Subsets as Subsets
-from molsystem.template import _Template as Template
-from molsystem.templateatoms import _Templateatoms as Templateatoms
-from molsystem.templatebonds import _Templatebonds as Templatebonds
-from molsystem.bonds import _Bonds as Bonds
-from molsystem.cell_parameters import _CellParameters as CellParameters
-
-from molsystem.cif import CIFMixin
-from molsystem.molfile import MolFileMixin
-from molsystem.pdb import PDBMixin
-from molsystem.smiles import SMILESMixin
-from molsystem.topology import TopologyMixin
+from .configuration import _Configuration
+from .table import _Table
 
 logger = logging.getLogger(__name__)
 
 
-class _System(
-    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin,
-    collections.abc.MutableMapping
-):
+class _System(MutableMapping):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
 
     Based on a SQLite database, this class provides a general
@@ -76,8 +55,6 @@ class _System(
     symop -- the symmetry operations for the group.
 
     template -- a list of all templates.
-    templateatom -- holds the atoms in a template, if present.
-    templatebond -- holds the bonds between the template atoms, if present.
 
     subset -- an instantiation of a template, connected with one or more
         configurations of the system.
@@ -111,66 +88,23 @@ class _System(
     :meta public:
     """
 
-    def __init__(self, parent, nickname=None, **kwargs):
-        self._parent = parent
-        self._nickname = nickname
-        self._attached = []
-        self._id = 1  # The id of the system. Currently there is only 1
-        self._current_configuration = None  # The current configuration
-        self._configurations = {}  # template and subset all for configs
+    def __init__(self, system_db, _id):
+        self._system_db = system_db
+        self._id = _id
+        self._current_configuration_id = None  # The current configuration
         self._checkpoints = []
-        self._filename = None
-        self._db = None
-        self._cursor = None
         self._items = {}
-        self._symbol_to_atno = {}
-        self._atno_to_symbol = {}
-        self._symbol_to_mass = {}
-        self._atno_to_mass = {}
-
-        if 'filename' in kwargs:
-            self.filename = kwargs.pop('filename')
-        else:
-            self.filename = 'seamm.db'
 
     def __del__(self):
-        """Destructor: need to close the database if any."""
-        if self._db is not None:
-            self.db.commit()
-            self.db.close()
-
-    def __enter__(self) -> Any:
-        self.db.commit()
-
-        backup = self.parent.copy_system(self, temporary=True)
-        self._checkpoints.append(backup)
-        return self
-
-    def __exit__(self, etype, value, traceback) -> None:
-        backup = self._checkpoints.pop()
-
-        if etype is None:
-            self.db.commit()
-
-            # Log the changes
-            diffs = self.diff(backup)
-            if len(diffs) > 0:
-                self.version = self.version + 1
-
-            # Not sure why this commit is needed...
-            self.db.commit()
-        else:
-            self.parent.overwrite(self, backup)
-
-        # and delete the copy
-        del self.parent[backup.nickname]
+        """Delete all instance variables that are objects."""
+        del self._system_db
 
     def __getitem__(self, key):
         """Allow [] access to the dictionary!
 
         Because some of the items, such as template contain state,
         we need to ensure that the same object is used everywhere. Hence
-        the self._items array to sotre the instances.
+        the self._items array to store the instances.
 
         Parameters
         ----------
@@ -181,38 +115,9 @@ class _System(
         -------
         table : Table or Atom, Template, Templateatoms, ...
         """
-        if key == 'atom' or key == 'atoms':
-            if 'atom' not in self._items:
-                self._items['atom'] = Atoms(self)
-            return self._items['atom']
-        elif key == 'template' or key == 'templates':
-            if 'template' not in self._items:
-                self._items['template'] = Template(self)
-            return self._items['template']
-        elif key == 'templateatom' or key == 'templateatoms':
-            if 'templateatom' not in self._items:
-                self._items['templateatom'] = Templateatoms(self)
-            return self._items['templateatom']
-        elif key == 'templatebond' or key == 'templatebonds':
-            if 'templatebond' not in self._items:
-                self._items['templatebond'] = Templatebonds(self)
-            return self._items['templatebond']
-        elif key == 'bond' or key == 'bonds':
-            if 'bond' not in self._items:
-                self._items['bond'] = Bonds(self)
-            return self._items['bond']
-        elif key == 'subset' or key == 'subsets':
-            if 'subset' not in self._items:
-                self._items['subset'] = Subsets(self)
-            return self._items['subset']
-        elif key == 'cell':
-            if 'cell' not in self._items:
-                self._items['cell'] = CellParameters(self)
-            return self._items['cell']
-        else:
-            if key not in self._items:
-                self._items[key] = Table(self, key)
-            return self._items[key]
+        if key not in self._items:
+            self._items[key] = _Table(self, key)
+        return self._items[key]
 
     def __setitem__(self, key, value):
         """Allow x[key] access to the data"""
@@ -266,12 +171,12 @@ class _System(
         other_tables = set(other.list())
 
         added = tables - other_tables
-        removed = other_tables - tables
+        deleted = other_tables - tables
         in_common = tables & other_tables
 
         if len(added) > 0:
             return False
-        if len(removed) > 0:
+        if len(deleted) > 0:
             return False
 
         # Need the contents of the tables. See if they are in the same
@@ -287,7 +192,7 @@ class _System(
         # Check the tables in both systems
         result = True
         for table in in_common:
-            if Table(self, table) != Table(other, table):
+            if _Table(self, table) != _Table(other, table):
                 result = False
                 break
 
@@ -298,93 +203,56 @@ class _System(
         return result
 
     @property
-    def atoms(self):
-        """The atoms, which are held as a dictionary of arrays"""
-        return self['atom']
+    def configuration(self):
+        """The configuration object for the current configuration."""
+        if self._current_configuration_id is None:
+            self._current_configuration_id = self.configuration_ids[-1]
+        return _Configuration(
+            _id=self._current_configuration_id, system_db=self.system_db
+        )
 
-    @property
-    def bonds(self):
-        """The bonds, which are held as a dictionary of arrays"""
-        return self['bond']
-
-    @property
-    def cell(self):
-        """The periodic cell."""
-        return self['cell']
+    @configuration.setter
+    def configuration(self, value):
+        if isinstance(value, _Configuration):
+            value = value.id
+        if value not in self.configuration_ids:
+            raise KeyError(f"configuration '{value}' does not exist.")
+        self._current_configuration_id = value
 
     @property
     def configurations(self):
-        """The dictionary of configurations."""
-        return self._configurations
+        """The list of configuration objects for this system."""
+        result = []
+        for _id in self.configuration_ids:
+            result.append(_Configuration(system_db=self.system_db, _id=_id))
+        return result
 
     @property
-    def coordinate_system(self):
-        """The coordinates system used, 'fractional' or 'Cartesian'"""
-        self.cursor.execute(
-            "SELECT coordinatesystem FROM system WHERE id = ?", (self._id,)
-        )
-        return self.cursor.fetchone()[0]
-
-    @coordinate_system.setter
-    def coordinate_system(self, value):
-        if value.lower()[0] == 'f':
-            self.cursor.execute(
-                "UPDATE system SET coordinatesystem = 'fractional'"
-                " WHERE id = ?", (self._id,)
-            )
-        else:
-            self.cursor.execute(
-                "UPDATE system SET coordinatesystem = 'Cartesian'"
-                " WHERE id = ?", (self._id,)
-            )
-
-    @property
-    def current_configuration(self):
-        """The current configuration to work with."""
-        return self._current_configuration
-
-    @current_configuration.setter
-    def current_configuration(self, value):
-        if value not in self.configurations:
-            raise KeyError(f"configuration '{value}' doe not exist.")
-        self._current_configuration = value
+    def configuration_ids(self):
+        """The list of configuration ids."""
+        result = []
+        sql = "SELECT id FROM configuration WHERE system = ?"
+        for row in self.db.execute(sql, (self.id,)):
+            result.append(row[0])
+        return result
 
     @property
     def cursor(self):
-        return self._cursor
+        return self.system_db.cursor
 
     @property
     def db(self):
-        return self._db
+        return self.system_db.db
 
     @property
-    def filename(self):
-        """The name of the file (or URI) for the database."""
-        return self._filename
-
-    @filename.setter
-    def filename(self, value):
-        if value != self._filename:
-            if self._db is not None:
-                self.cursor.close()
-                self._db.commit()
-                self._db.close()
-                self._db = None
-                self._cursor = None
-            self._filename = value
-            if self._filename is not None:
-                self._db = sqlite3.connect(self._filename)
-                self._db.row_factory = sqlite3.Row
-                self._db.execute('PRAGMA foreign_keys = ON')
-                self._cursor = self._db.cursor()
-                self._initialize()
+    def id(self):
+        """The id of this system."""
+        return self._id
 
     @property
     def name(self):
         """Return the name of this system."""
-        self.cursor.execute(
-            "SELECT name FROM system WHERE id = ?", (self._id,)
-        )
+        self.cursor.execute("SELECT name FROM system WHERE id = ?", (self.id,))
         result = self.cursor.fetchone()
         if result is None:
             return None
@@ -393,232 +261,124 @@ class _System(
 
     @name.setter
     def name(self, value):
-        self.cursor.execute(
-            "UPDATE system SET name = ? WHERE id = ?", (value, self._id)
+        self.db.execute(
+            "UPDATE system SET name = ? WHERE id = ?", (value, self.id)
         )
-
-    @property
-    def nickname(self):
-        """The name used in Systems for this system"""
-        return self._nickname
+        self.db.commit()
 
     @property
     def n_configurations(self):
         """The number of configurations of the system."""
-        return self['configuration'].n_rows
-
-    @property
-    def periodicity(self):
-        """The periodicity of the system, 0, 1, 2 or 3"""
-        self.cursor.execute(
-            "SELECT periodicity FROM system WHERE id=?", (self._id,)
-        )
+        sql = "SELECT COUNT(*) FROM configuration WHERE system = ?"
+        self.cursor.execute(sql, (self.id,))
         return self.cursor.fetchone()[0]
 
     @property
-    def parent(self):
-        """The parent of this, i.e. a Systems object."""
-        return self._parent
+    def system_db(self):
+        """Return the SystemDB object that contains this system."""
+        return self._system_db
 
-    @periodicity.setter
-    def periodicity(self, value):
-        if value < 0 or value > 3:
-            raise ValueError('The periodicity must be between 0 and 3.')
-        self.cursor.execute(
-            "UPDATE system SET periodicity = ? WHERE id = ?",
-            (value, self._id)
-        )
-
-    @property
-    def subsets(self):
-        """The subsets"""
-        return self['subset']
-
-    @property
-    def templates(self):
-        """The templates"""
-        return self['template']
-
-    @property
-    def templateatoms(self):
-        """The template atoms"""
-        return self['templateatom']
-
-    @property
-    def templatebonds(self):
-        """The template bonds"""
-        return self['templatebond']
-
-    @property
-    def version(self):
-        """The version of the system, incrementing from 0"""
-        self.cursor.execute("SELECT version FROM system")
-        return int(self.cursor.fetchone()[0])
-
-    @version.setter
-    def version(self, value):
-        self.cursor.execute("UPDATE system SET version = ?", (str(value),))
-        self.db.commit()
-
-    def add_configuration(
+    def copy_configuration(
         self,
-        system=1,
+        configuration=None,
         name=None,
+    ):
+        """Add a new configuration by copying another configuration.
+
+        Parameters
+        ----------
+        configuration : int = None
+            The configuration to copy. Defaults to the current configuration.
+        name : str = None
+            A textual name for the configuration (optional)
+
+        Returns
+        -------
+        cid : int
+            The id of the new configuration.
+
+        """
+        configuration = self.get_configuration(configuration)
+
+        cid = self['configuration'].append(
+            system=self.id,
+            name=name,
+            periodicity=configuration.periodicity,
+            coordinatesystem=configuration.coordinatesystem,
+            symmetry=configuration.symmetry_id,
+            cell=configuration.cell_id,
+            atomset=configuration.atomset,
+            bondset=configuration.bondset
+        )[0]
+
+        return cid
+
+    def create_configuration(
+        self,
+        name=None,
+        periodicity=0,
+        coordinatesystem=None,
         symmetry=None,
         cell=None,
-        changed_atoms=False,
-        changed_bonds=False
+        atomset=None,
+        bondset=None,
+        make_current=True
     ):
         """Add a new configuration to the system.
 
         Parameters
         ----------
-        system : int = 1
-            The system for which this is a configuration. (optional)
         name : str = None
             A textual name for the configuration (optional)
+        periodicity : int = 0
+            The periodicity, 0, or 3 for 0-D or 3-D at the moment
+        coordinatesystem : str = None
+            The coordinate system, 'Cartesian' or 'fractional', to use.
+            Defaults to Cartesian for molecules and fractional for crystals.
         symmetry : int or str = None
             The id or name of the point or space group (optional)
         cell : Cell or 6-vector = None
             The cell parameters, default to last ones.
-        changed_atoms : bool = False
-            Whether the atoms have changed in number or identity from the
-            previous configuration.
-        changed_bonds : bool = False
-            Whether the bonding has changed from the previous configuration.
+        atomset : int = None
+            The set of atoms in this configurationn
+        bondset : int = None
+            The bonds in this configuration
+        make_current : bool = True
+            If True, make the current configuration.
 
         Returns
         -------
-        configuration : int
-            The id of the new configuration.
-
-        What needs to be done depends on whether the atoms or bonds are
-        changing:
-
-        Case 1: The bonds are changing.
-            * create a new template
-            * create a subset for the new template
-            * if the atoms aren't changing copy the previous connections in
-              subset_atom to this instance.
-            This routine does not create any templateatoms or bonds.
-
-        Case 2: The atoms are changing
-            * create new subset using the previous template
-            This routine does not connect the atoms to the new 'all' subset,
-            nor does it add any templateatoms or bonds to the new template.
-
-        Case 3: Neither the atoms nor bonding is changing
-            * Connect the previous 'all' subset to the configuration in the
-              configuration_subset table.
+        _Configuration
+            The new configuration.
         """
-        # Work out the subset and template for 'all'
-        if len(self._configurations) == 0:
-            changed_bonds = True
-            changed_atoms = True
-            tid = self['template'].append(name='all', type='all')[0]
-            sid = self['subset'].create(template=tid)
-        else:
-            last_configuration = max(self._configurations)
-            last_sid, last_tid = self._configurations[last_configuration]
-            sid = last_sid
-            tid = last_tid
-
-            if changed_bonds:
-                # Case 1
-                # If the bonding changed, need a new template and new subset
-                tid = self['template'].append(name='all', type='all')
-                sid = self['subset'].append(template=tid)
-                if not changed_atoms:
-                    atom_ids = self['atom'].atoms(
-                        configuration=last_configuration
-                    )
-                    self['subset_atom'].append(subset=sid, atom=atom_ids)
-            elif changed_atoms:
-                # Case 2
-                sid = self['subset'].append(template=tid)[0]
+        kwargs = {}
+        if name is not None:
+            kwargs['name'] = name
+        if periodicity != 0:
+            if coordinatesystem is None:
+                kwargs['coordinatesystem'] = 'fractional'
             else:
-                # Case 3
-                pass
+                if coordinatesystem.lower()[0] == 'c':
+                    kwargs['coordinatesystem'] = 'Cartesian'
+                else:
+                    kwargs['coordinatesystem'] = 'fractional'
+        if symmetry is not None:
+            kwargs['symmetry'] = symmetry
+        if cell is not None:
+            kwargs['cell'] = cell
+        if atomset is not None:
+            kwargs['atomset'] = atomset
+        if bondset is not None:
+            kwargs['bondset'] = bondset
 
-        cid = self['configuration'].append(
-            system=system, name=name, symmetry=symmetry
-        )[0]
+        cid = self['configuration'].append(system=self.id, **kwargs)[0]
 
-        self['configuration_subset'].append(configuration=cid, subset=sid)
-        self._configurations[cid] = (sid, tid)
+        if make_current:
+            self._current_configuration_id = cid
 
-        return cid
+        return _Configuration(_id=cid, system_db=self.system_db)
 
-    def all_subset(self, configuration=None):
-        if configuration is None:
-            configuration = self.current_configuration
-        return self._configurations[configuration][0]
-
-    def all_template(self, configuration=None):
-        if configuration is None:
-            configuration = self.current_configuration
-        return self._configurations[configuration][1]
-
-    def append(self, name=None):
-        """Add a new system to the database.
-
-        Create a new, empty system by appending to the system table in
-        the database.
-
-        Parameters
-        ----------
-        name : str = None
-            The name for the system, or if None one will be generated.
-
-        Returns:
-        id : int
-            The id of the newly created system.
-        """
-        id = self['system'].append(
-            name=name, version=0, periodicity=0, coordinatesystem='Cartesian'
-        )
-        return id
-
-    def attach(self, other):
-        """Attach another system to this one's database."""
-        if self.is_attached(other.nickname):
-            return
-        self.db.execute(
-            f"ATTACH DATABASE '{other.filename}' AS '{other.nickname}'"
-        )
-        self._attached.append(other.nickname)
-
-    def is_attached(self, name):
-        """Return whether another system is attached to this one."""
-        return name in self._attached
-
-    def detach(self, other):
-        """Detach an attached system."""
-        if self.is_attached(other.name):
-            self.cursor.execute(f'DETACH DATABASE "{other.name}"')
-            self._attached.remove(other.name)
-
-    def clear(self, configuration=None) -> int:
-        """Remove everything from the configuration
-
-        Parameters
-        ----------
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration. Not used if the subset is given.
-
-        Returns
-        -------
-        int
-            Number of atoms
-        """
-        # Delete the atoms
-        self.atoms.remove(configuration=configuration)
-
-        # Delete the template atoms.
-        self.templateatoms.remove(template=self.all_template(configuration))
-
-    def create_table(self, name, cls=Table, other=None):
+    def create_table(self, name, cls=_Table, other=None):
         """Create a new table with the given name.
 
         Parameters
@@ -626,12 +386,12 @@ class _System(
         name : str
             The name of the new table.
 
-        cls : Table subclass
-            The class of the new table, defaults to Table
+        cls : _Table subclass
+            The class of the new table, defaults to _Table
 
         Returns
         -------
-        table : class Table
+        table : class _Table
             The new table
         """
         if name in self:
@@ -651,13 +411,13 @@ class _System(
         other_tables = set(other.list())
 
         added = tables - other_tables
-        removed = other_tables - tables
+        deleted = other_tables - tables
         in_common = tables & other_tables
 
         if len(added) > 0:
-            result['tables added'] = list(added)
-        if len(removed) > 0:
-            result['tables removed'] = list(removed)
+            result['tables added'] = added
+        if len(deleted) > 0:
+            result['tables deleted'] = deleted
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
@@ -671,7 +431,9 @@ class _System(
 
         # Check the tables in both systems
         for table in in_common:
-            tmp = Table(self, table).diff(Table(other, table))
+            table1 = _Table(self, table)
+            table2 = _Table(other, table)
+            tmp = table1.diff(table2)
             if len(tmp) > 0:
                 result[f"table '{table}' diffs"] = tmp
 
@@ -680,60 +442,6 @@ class _System(
             self.detach(other)
 
         return result
-
-    def formula(self, configuration=None):
-        """Return the chemical formula of the configuration.
-
-        Returns a tuple with the formula, empirical formula and number of
-        formula units (Z).
-
-        Parameters
-        ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
-
-        Returns
-        -------
-        formulas : (str, str, int)
-            The chemical formula, empirical formula and Z.
-        """
-        counts = Counter(self.atoms.symbols(configuration))
-
-        # Order the elements ... Merck CH then alphabetical,
-        # or if no C or H, then just alphabetically
-        formula_list = []
-        if 'C' in counts and 'H' in counts:
-            formula_list.append(('C', counts.pop('C')))
-            formula_list.append(('H', counts.pop('H')))
-
-        for element in sorted(counts.keys()):
-            formula_list.append((element, counts[element]))
-
-        counts = []
-        for _, count in formula_list:
-            counts.append(count)
-
-        formula = []
-        for element, count in formula_list:
-            if count > 1:
-                formula.append(f'{element}{count}')
-            else:
-                formula.append(element)
-
-        # And the empirical formula
-        Z = reduce(math.gcd, counts)
-        empirical_formula_list = []
-        for element, count in formula_list:
-            empirical_formula_list.append((element, int(count / Z)))
-
-        empirical_formula = []
-        for element, count in empirical_formula_list:
-            if count > 1:
-                empirical_formula.append(f'{element}{count}')
-            else:
-                empirical_formula.append(element)
-
-        return formula, empirical_formula, Z
 
     def list(self):
         """Return a list of all the tables in the system."""
@@ -746,374 +454,45 @@ class _System(
             result.append(row['name'])
         return result
 
-    def n_atoms(self, subset=None, configuration=None) -> int:
-        """The number of atoms in a subset or configuration
+    def read_cif_file(self, path):
+        """Create new configurations from a CIF file.
+
+        Read a CIF file and create a new configuration from each datablock in
+        the file.
 
         Parameters
         ----------
-        subset : int = None
-            Get the atoms for the subset. Defaults to the 'all/all' subset
-            for the configuration given.
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration. Not used if the subset is given.
+        path : str or Path
+            A string or Path object pointing to the file to be read.
 
         Returns
         -------
-        int
-            Number of atoms
+        [_Configuration]
+            List of the configurations created.
         """
-        return self.atoms.n_atoms(subset=subset, configuration=configuration)
+        lines = []
+        configurations = []
+        in_block = False
+        block_name = ''
+        with open(path, 'r') as fd:
+            for line in fd:
+                if line[0:5] == 'data_':
+                    if not in_block:
+                        in_block = True
+                    else:
+                        configuration = self.create_configuration(
+                            name=block_name
+                        )
+                        configurations.append(configuration)
+                        configuration.from_mmcif_text('\n'.join(lines))
+                    block_name = line[5:].strip()
+                    lines = []
+                lines.append(line)
 
-    def n_bonds(self, subset: int = None, configuration: int = None) -> int:
-        """The number of bonds.
+            if len(lines) > 0:
+                # The last block just ends at the end of the file
+                configuration = self.create_configuration(name=block_name)
+                configurations.append(configuration)
+                configuration.from_mmcif_text('\n'.join(lines))
 
-        Parameters
-        ----------
-        bonds : int = None
-            Get the bonds for the subset. Defaults to the 'all/all' subset
-            for the configuration given.
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration. Not used if the subset is given.
-
-        Returns
-        -------
-        int
-            Number of bonds
-        """
-        return self.bonds.n_bonds(subset=subset, configuration=configuration)
-
-    def to_atnos(self, symbols):
-        """Convert element symbols to atomic numbers.
-
-        Parameters
-        ----------
-        symbols : [str]
-            The atomic symbols
-
-        Returns
-        -------
-        atnos : [int]
-            The corresponding atomic numbers (1..118)
-        """
-        return [self._symbol_to_atno[x] for x in symbols]
-
-    def to_symbols(self, atnos):
-        """Convert atomic numbers to element symbols.
-
-        Parameters
-        ----------
-        atnos : [int]
-            The atomic numbers (1..118)
-
-        Returns
-        -------
-        symbols : [str]
-            The corresponding atomic symbols
-        """
-        return [self._atno_to_symbol[x] for x in atnos]
-
-    def default_masses(self, symbols=None, atnos=None):
-        """Get the atomic mass given atomic symbols or numbers.
-
-        Parameters
-        ----------
-        symbols : [str] = None
-            The atomic symbols
-        atnos : [int] = None
-            The atomic numbers (1..118)
-
-        Returns
-        -------
-        masses : [float]
-            The default atomic masses
-        """
-        if symbols is not None:
-            return [self._symbol_to_mass[x] for x in symbols]
-        if atnos is not None:
-            return [self._atno_to_mass[x] for x in atnos]
-        else:
-            # return all the masses, in order
-            return [self._atno_to_mass[x] for x in range(1, 118)]
-
-    def mass(self, subset=None, configuration=None):
-        """Return the total atomic masses for the subset or configuration
-
-        Parameters
-        ----------
-        subset : int = None
-            Get the atoms for the subset. Defaults to the 'all/all' subset
-            for the configuration given.
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration. Not used if the subset is given.
-
-        Returns
-        -------
-        float
-            The summed atomic masses.
-        """
-        masses = self.atoms.atomic_masses(
-            subset=subset, configuration=configuration
-        )
-        return sum(masses)
-
-    def volume(self, configuration=None):
-        """Return the volume of a configuration
-
-        Parameters
-        ----------
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration.
-
-        Returns
-        -------
-        float
-            The volume of the cell.
-        """
-        if self.periodicity != 3:
-            raise RuntimeError('Density is only defined for 3-D systems.')
-
-        return self.cell.cell(configuration=configuration).volume
-
-    def density(self, configuration=None):
-        """Return the density of the system.
-
-        Parameters
-        ----------
-        configuration : int = None
-            The configuration of interest. Defaults to the current
-            configuration.
-
-        Returns
-        -------
-        float
-            The density of the cell.
-        """
-        if self.periodicity != 3:
-            raise RuntimeError('Density is only defined for 3-D systems.')
-        if configuration is None:
-            configuration = self.current_configuration
-        volume = self.volume(configuration=configuration)
-        mass = self.mass(configuration=configuration)
-
-        # converting from g/mol / Å^3 to g/cm^3
-        return (mass / volume) * (1.0e+24 / 6.02214076E+23)
-
-    def _initialize(self):
-        """Initialize the SQLite database."""
-        if 'element' not in self:
-            self._initialize_elements()
-
-        if 'symmetry' not in self:
-            self._initialize_symmetry()
-
-        if 'cell' not in self:
-            self._initialize_cell()
-
-        if 'system' not in self:
-            self._initialize_system()
-            self.name = self._nickname
-        self._id = 1
-
-        if 'configuration' not in self:
-            self._initialize_configurations()
-        else:
-            # Get all the configurations from the database
-            for row in self.db.execute(
-                "SELECT configuration, subset, template FROM "
-                "       configuration_subset, subset, template"
-                " WHERE template.name = 'all' AND template.type = 'all'"
-                "   AND template.id = template AND subset.id = subset"
-            ):
-                config = row['configuration']
-                self._configurations[config] = (row['subset'], row['template'])
-        if 'atom' not in self:
-            self._initialize_atoms()
-
-        if 'subset' not in self:
-            self._initialize_subsets()
-
-        # If needed, set up the first configuration, and the 'all' subset
-        if self.n_configurations == 0:
-            self.current_configuration = self.add_configuration()
-
-    def _initialize_system(self):
-        """Set up the table for the system."""
-        table = self['system']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute(
-            'name', coltype='str', notnull=True, default='default'
-        )
-        table.add_attribute('version', coltype='int', notnull=True, default=0)
-        table.add_attribute(
-            'periodicity', coltype='int', notnull=True, default=0
-        )
-        table.add_attribute(
-            'coordinatesystem',
-            coltype='str',
-            notnull=True,
-            default='Cartesian'
-        )
-
-        table.append(
-            id=1,
-            name='default',
-            version=0,
-            periodicity=0,
-            coordinatesystem='Cartesian'
-        )
-        self.db.commit()
-
-    def _initialize_atoms(self):
-        """Set up the tables for atoms."""
-        table = Table(self, 'atom')
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('atno', coltype='int', references='element')
-
-        table = self['coordinates']
-        table.add_attribute(
-            'configuration', coltype='int', references='configuration'
-        )
-        table.add_attribute('atom', coltype='int', references='atom')
-        table.add_attribute('x', coltype='float')
-        table.add_attribute('y', coltype='float')
-        table.add_attribute('z', coltype='float')
-
-    def _initialize_cell(self):
-        """Set up the tables for the cell."""
-        table = self['cell']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('a', coltype='float', default=10.0)
-        table.add_attribute('b', coltype='float', default=10.0)
-        table.add_attribute('c', coltype='float', default=10.0)
-        table.add_attribute('alpha', coltype='float', default=90.0)
-        table.add_attribute('beta', coltype='float', default=90.0)
-        table.add_attribute('gamma', coltype='float', default=90.0)
-
-    def _initialize_elements(self):
-        """Set up the table of elements."""
-        table = self['element']
-        table.add_attribute('atno', coltype='int', pk=True)
-        table.add_attribute('symbol', coltype='str', index='unique')
-        table.add_attribute('mass', coltype='float')
-
-        for symbol, data in element_data.items():
-            table.append(
-                symbol=symbol,
-                atno=data['atomic number'],
-                mass=data['atomic weight']
-            )
-            self._symbol_to_atno[symbol] = data['atomic number']
-            self._atno_to_symbol[data['atomic number']] = symbol
-            self._symbol_to_mass[symbol] = data['atomic weight']
-            self._atno_to_mass[data['atomic number']] = data['atomic weight']
-        self.db.commit()
-
-    def _initialize_configurations(self):
-        """Set up the table of configurations."""
-        table = self['configuration']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('system', coltype='int', references='system')
-        table.add_attribute('name', coltype='str')
-        table.add_attribute('symmetry', coltype='int', references='symmetry')
-        table.add_attribute('cell', coltype='int', references='cell')
-        self.db.commit()
-
-    def _initialize_subsets(self):
-        """Set up the tables for handling subsets.
-        """
-        # The definition of the subsets -- templates
-        table = self['template']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('name', coltype='str')
-        table.add_attribute('type', coltype='str', default='general')
-        self.db.execute(
-            "CREATE UNIQUE INDEX 'idx_template_name_type'"
-            '    ON template ("name", "type")'
-        )
-
-        # The subsets
-        table = self['subset']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('template', coltype='int', references='template')
-
-        # The template atoms (if any) for the subset
-        table = Table(self, 'templateatom')
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('template', coltype='int', references='template')
-        table.add_attribute('name', coltype='str')
-        table.add_attribute('atno', coltype='int', references='element')
-
-        # The template coordinates (if any) for the subset
-        table = Table(self, 'templatecoordinates')
-        table.add_attribute(
-            'templateatom', coltype='int', references='templateatom'
-        )
-        table.add_attribute('x', coltype='float')
-        table.add_attribute('y', coltype='float')
-        table.add_attribute('z', coltype='float')
-
-        # And bonding for the template
-        table = self['templatebond']
-        table.add_attribute('i', coltype='int', references='templateatom')
-        table.add_attribute('j', coltype='int', references='templateatom')
-        table.add_attribute('bondorder', coltype='int', default=1)
-
-        # The connection from the subsets to the configurations
-        table = self['configuration_subset']
-        table.add_attribute(
-            'configuration', coltype='int', references='configuration'
-        )
-        table.add_attribute('subset', coltype='int', references='subset')
-
-        # The connection between subsets and the atoms in the system
-        table = self['subset_atom']
-        table.add_attribute('atom', coltype='int', references='atom')
-        table.add_attribute('subset', coltype='int', references='subset')
-        table.add_attribute(
-            'templateatom', coltype='int', references='templateatom'
-        )
-
-    def _initialize_symmetry(self):
-        """Set up the tables for symmetry."""
-        table = self['symmetry']
-        table.add_attribute('id', coltype='int', pk=True)
-        table.add_attribute('group', coltype='str')
-
-        table = self['symmetryoperation']
-        table.add_attribute('symmetry', coltype='int', references='symmetry')
-        table.add_attribute('symop', coltype='str')
-
-    def attributes(self, tablename: str) -> Dict[str, Any]:
-        """The attributes -- columns -- of a given table.
-
-        Parameters
-        ----------
-        tablename : str
-            The name of the table, optionally including the schema followed by
-            a dot.
-
-        Returns
-        -------
-        attributes : Dict[str, Any]
-            A dictionary of dictionaries for the attributes and their
-            descriptors
-        """
-        if '.' in tablename:
-            schema, tablename = tablename.split('.')
-            sql = f"PRAGMA {schema}.table_info('{tablename}')"
-        else:
-            sql = f"PRAGMA table_info('{tablename}')"
-
-        result = {}
-        for line in self.db.execute(sql):
-            result[line['name']] = {
-                'type': line['type'],
-                'notnull': bool(line['notnull']),
-                'default': line['dflt_value'],
-                'primary key': bool(line['pk'])
-            }
-        return result
+        return configurations

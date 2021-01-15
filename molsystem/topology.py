@@ -10,15 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 class TopologyMixin:
-    """A mixin for handling topology."""
+    """A mixin for handling topology in a configuration."""
 
-    def find_molecules(self, configuration=None, as_indices=False):
-        """Find the separate molecules in a system.
+    def find_molecules(self, as_indices=False):
+        """Find the separate molecules.
 
         Parameters
         ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         as_indices : bool = False
             Whether to return 0-based indices (True) or atom ids (False)
 
@@ -28,20 +26,17 @@ class TopologyMixin:
             A list of lists of atom ids or indices for the molecules
         """
 
-        if configuration is None:
-            configuration = self.current_configuration
-
         molecules = []
 
-        atoms = self['atoms']
-        atom_ids = atoms.atom_ids(configuration)
+        atoms = self.atoms
+        atom_ids = atoms.ids
         n_atoms = len(atom_ids)
 
         if n_atoms == 0:
             return molecules
 
         to_index = {j: i for i, j in enumerate(atom_ids)}
-        neighbors = self.bonded_neighbors(configuration)
+        neighbors = self.bonded_neighbors()
         visited = [False] * n_atoms
         while True:
             # Find first atom not yet visited
@@ -67,15 +62,11 @@ class TopologyMixin:
         else:
             return molecules
 
-    def bonded_neighbors(
-        self, configuration=None, as_indices=False, first_index=0
-    ):
+    def bonded_neighbors(self, as_indices=False, first_index=0):
         """The atoms bonded to each atom in the system.
 
         Parameters
         ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         as_indices : bool = False
             Whether to return 0-based indices (True) or atom ids (False)
         first_index : int = 0
@@ -88,9 +79,9 @@ class TopologyMixin:
         """
         neighbors = {}
 
-        atoms = self['atoms']
-        bonds = self['bonds']
-        n_atoms = atoms.n_atoms(configuration)
+        atoms = self.atoms
+        bonds = self.bonds
+        n_atoms = atoms.n_atoms
 
         if n_atoms == 0:
             if as_indices:
@@ -98,11 +89,11 @@ class TopologyMixin:
             else:
                 return neighbors
 
-        atom_ids = atoms.atom_ids(configuration)
+        atom_ids = atoms.ids
         neighbors = {i: [] for i in atom_ids}
 
-        if bonds.n_bonds(configuration) > 0:
-            for bond in bonds.bonds(configuration):
+        if bonds.n_bonds > 0:
+            for bond in bonds.bonds():
                 i = bond['i']
                 j = bond['j']
                 neighbors[i].append(j)
@@ -121,51 +112,34 @@ class TopologyMixin:
 
             return neighbors
 
-    def create_molecule_subsets(self, configuration=None):
+    def create_molecule_subsets(self):
         """Create a subset for each molecule in a configuration.
-
-        By default they all reference an empty template 'all' of type
-        'molecule'.
-
-        Parameters
-        ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
 
         Returns
         -------
         [int]
             The ids of the subsets, one per molecule.
         """
-
-        if configuration is None:
-            configuration = self.current_configuration
-
-        # get the 'all/molecule' template
-        templates = self['template']
-        tid = templates.find('all', 'molecule', create=True)
-
         # Find the molecules and the create the subsets if they don't exist.
-        molecules = self.find_molecules(configuration=configuration)
+        molecules = self.find_molecules()
 
         # Remove any previous subsets for this configuration
         subsets = self['subset']
-        sids = subsets.find(tid, configuration=configuration)
+        tid = 1
+        sids = subsets.find(tid)
         if len(sids) > 0:
             subsets.delete(sids)
 
         # Now create the new set.
         sids = []
         for atom_ids in molecules:
-            sid = subsets.create(
-                tid, configuration=configuration, atoms=atom_ids
-            )
+            sid = subsets.create(tid, atoms=atom_ids)
             sids.append(sid)
 
         return sids
 
     def create_molecule_templates(
-        self, configuration=None, create_subsets=True
+        self, full_templates=True, create_subsets=True
     ):
         """Create a template for each unique molecule in a configuration.
 
@@ -174,8 +148,9 @@ class TopologyMixin:
 
         Parameters
         ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
+        full_templates : bool = True
+            If true, create full templates by creating systems for the
+            molecules.
         create_subsets : bool = True
             If true, create subsets linking the templates to the molecules.
 
@@ -186,11 +161,10 @@ class TopologyMixin:
             a two-element list containing the list of templates and
             list of subsets.
         """
-        if configuration is None:
-            configuration = self.current_configuration
+        templates = self.system_db.templates
 
         # Find the molecules
-        molecules = self.find_molecules(configuration=configuration)
+        molecules = self.find_molecules()
         n_molecules = len(molecules)
 
         # And the molecule each atom is in
@@ -201,7 +175,7 @@ class TopologyMixin:
 
         # The bonds in each molecule
         bonds_per_molecule = [[] for i in range(n_molecules)]
-        for bond in self.bonds.bonds(configuration=configuration):
+        for bond in self.bonds.bonds():
             i = bond['i']
             j = bond['j']
             order = bond['bondorder']
@@ -211,19 +185,21 @@ class TopologyMixin:
         # Get the canonical smiles for each molecule
         to_can = openbabel.OBConversion()
         to_can.SetOutFormat('can')
-        to_smi = openbabel.OBConversion()
-        to_smi.SetOutFormat('smi')
         ob_mol = openbabel.OBMol()
         ob_template = openbabel.OBMol()
-        atnos = self.atoms.atomic_numbers(configuration)
+        atnos = self.atoms.atomic_numbers
+        xyzs = self.atoms.coordinates
+
         start = 0
+        new_subsets = {}
         sids = {}
+        new_templates = []
         tids = []
         for molecule, atoms in enumerate(molecules):
             to_index = {j: i for i, j in enumerate(atoms)}
             n_atoms = len(atoms)
+            # This is not right ... works only if atoms contiguous. Ufff.
             molecule_atnos = atnos[start:start + n_atoms]
-            start += n_atoms
 
             ob_mol.Clear()
             for atom, atno in zip(atoms, molecule_atnos):
@@ -235,31 +211,64 @@ class TopologyMixin:
                 # 1-based indices in ob.
                 ob_mol.AddBond(to_index[i] + 1, to_index[j] + 1, order)
 
-            smiles = to_smi.WriteString(ob_mol).strip()
             canonical = to_can.WriteString(ob_mol).strip()
 
-            # See if a molecule template with the canonical smiles exists
-            if self.templates.exists(canonical, 'molecule'):
-                tid = self.templates.find(canonical, 'molecule')
-            else:
-                tid = self.templates.create(
-                    canonical, 'molecule', atnos=molecule_atnos, bonds=bonds
-                )
-            tids.append(tid)
-            if create_subsets:
-                tatom_ids = self.templateatoms.atom_ids(tid)
-                if smiles != canonical:
-                    # Need to reorder the atoms to match the template atoms
+            if full_templates:
+                # See if a molecule template with the canonical smiles exists
+                if templates.exists(canonical, 'molecule'):
+                    template = templates.get(canonical, category='molecule')
+                else:
+                    # Create a new system & configuration for the template
+                    system_name = 'template system ' + canonical
+                    if self.system_db.system_exists(system_name):
+                        system = self.system_db.get(system_name)
+                        cid = system.get_configuration(canonical)
+                    else:
+                        system = self.system_db.create_system(system_name)
+                        configuration = system.create_configuration(canonical)
+                        cid = configuration.id
 
+                        kwargs = {}
+                        kwargs['atno'] = molecule_atnos
+                        molecule_xyzs = xyzs[start:start + n_atoms]
+                        kwargs['x'] = [x for x, y, z in molecule_xyzs]
+                        kwargs['y'] = [y for x, y, z in molecule_xyzs]
+                        kwargs['z'] = [z for x, y, z in molecule_xyzs]
+
+                        ids = configuration.atoms.append(**kwargs)
+
+                        kwargs = {}
+                        kwargs['i'] = [ids[x] for x, _, _ in bonds]
+                        kwargs['j'] = [ids[x] for _, x, _ in bonds]
+                        kwargs['bondorder'] = [x for _, _, x in bonds]
+
+                        configuration.bonds.append(**kwargs)
+
+                        template = templates.create(
+                            canonical, category='molecule', configuration=cid
+                        )
+            else:
+                if templates.exists(canonical, 'molecule'):
+                    template = templates.get(canonical, category='molecule')
+                else:
+                    template = templates.create(canonical, category='molecule')
+
+            if template.id not in tids:
+                tids.append(template.id)
+                new_templates.append(template)
+
+            if create_subsets:
+                if full_templates:
+                    # Need to reorder the atoms to match the template atoms
                     # Prepare the OB molecule for the template
                     ob_template.Clear()
-                    for atno in self.templateatoms.atomic_numbers(tid):
+                    for atno in template.atoms.atomic_numbers:
                         ob_atom = ob_template.NewAtom()
                         ob_atom.SetAtomicNum(atno)
 
-                    tatom_ids = self.templateatoms.atom_ids(tid)
+                    tatom_ids = template.atoms.ids
                     to_index = {j: i for i, j in enumerate(tatom_ids)}
-                    for row in self.templatebonds.bonds(tid):
+                    for row in template.bonds.bonds():
                         i = to_index[row['i']]
                         j = to_index[row['j']]
                         order = row['bondorder']
@@ -270,14 +279,24 @@ class TopologyMixin:
                     mapper = openbabel.OBIsomorphismMapper.GetInstance(query)
                     mapping = openbabel.vpairUIntUInt()
                     mapper.MapFirst(ob_mol, mapping)
-                    tmp = [atoms[j] for i, j in mapping]
-                    atoms = tmp
-                sid = self.subsets.create(tid, configuration, atoms, tatom_ids)
+                    reordered_atoms = [atoms[j] for i, j in mapping]
+
+                    subset = self.subsets.create(
+                        template, reordered_atoms, tatom_ids
+                    )
+                else:
+                    subset = self.subsets.create(template, atoms)
+
+                tid = template.id
                 if tid not in sids:
                     sids[tid] = []
-                sids[tid].append(sid)
+                    new_subsets[tid] = []
+                sids[tid].append(subset.id)
+                new_subsets[tid].append(subset)
+
+            start += n_atoms
 
         if create_subsets:
-            return tids, sids
+            return new_templates, new_subsets
         else:
-            return tids
+            return new_templates

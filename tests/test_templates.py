@@ -4,7 +4,7 @@
 import pytest  # noqa: F401
 
 import molsystem  # noqa: F401
-"""Tests for `molsystem` package."""
+"""Tests for templates in the `molsystem` package."""
 
 x = [1.0, 2.0, 3.0]
 y = [4.0, 5.0, 6.0]
@@ -12,261 +12,150 @@ z = [7.0, 8.0, 9.0]
 atno = [8, 1, 1]
 
 
-def test_construction(system):
-    """Simplest test that we can make a new template"""
-    templates = system['template']
-    templates.append(name='H2O', type='molecule')
-    assert str(type(templates)) == "<class 'molsystem.template._Template'>"
+def test_construction(db):
+    """Simplest test that we can make a new templates object"""
+    templates = db.templates
+    assert str(type(templates)) == "<class 'molsystem.templates._Templates'>"
 
 
-def test_set_current_template(system):
-    """Test that we can set the current template."""
-    templates = system['template']
-    tid = templates.append(name='H2O', type='molecule')[0]
-    templates.current_template = tid
-    assert templates.n_rows == 2 and templates.current_template == tid
+def test_create(db):
+    """Test that we can make a new template"""
+    templates = db.templates
+    template = templates.create(name='H2O', category='molecule')
+    assert template.id == 1
 
 
-def test_adding_atoms(system):
-    """Test that we can add atoms to a new template."""
-    templates = system['template']
-    tid = templates.append(name='H2O', type='molecule')[0]
-    templates.current_template = tid
-
-    atoms = system['templateatom']
-    atoms.append(atno=atno, x=x, y=y, z=z)
-    assert atoms.n_atoms == 3
-
-
-def test_template_str(templates):
-    """Print the water template."""
-    atom_string = """\
-   template name  atno        x    y         z
-1         2    O     8  0.00000  0.0  0.000000
-2         2   H1     1  0.75695  0.0  0.585882
-3         2   H2     1 -0.75695  0.0  0.585882"""
-
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    atoms = system['templateatoms']
-    if str(atoms) != atom_string:
-        print(atoms)
-    assert str(atoms) == atom_string
+def test_create_many(db):
+    """Test that we can make several templates."""
+    templates = db.templates
+    names = ['H2O', 'H2', 'O2']
+    new = templates.create_many(name=names, category='molecule')
+    assert [x.id for x in new] == [1, 2, 3]
+    assert templates.categories == ['molecule']
+    assert templates.names('molecule') == sorted(names)
 
 
-def test_template_n_atoms(templates):
-    """Get the number of atoms in acetic acid template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    atoms = system['templateatoms']
-    assert atoms.n_atoms == 8
+def test_making_full_templates(amino_acids):
+    """Create full templates."""
+    answer = [
+        'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+        'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'
+    ]
+    templates = amino_acids.templates
+    for system in amino_acids.systems:
+        templates.create(
+            name=system.name,
+            category='amino acid',
+            configuration=system.configuration.id
+        )
+    assert amino_acids.n_templates == 20
+    assert templates.names('amino acid') == answer
 
 
-def test_invalid_key(templates):
-    """Test the error trying to get a non-existant template."""
-    system = templates
-    templates = system['template']
-    with pytest.raises(KeyError) as e:
-        templates.current_template = 99
-    assert str(e.value) == '''"Template '99' does not exist."'''
+def test_get_template(aa_templates):
+    """Test getting a template by index and name."""
+    template = aa_templates.get(8)
+    assert template.name == 'GLY'
+    template = aa_templates.get('GLU', category='amino acid')
+    assert template.id == 6
 
 
-def test_invalid_key_2(templates):
-    """Test the error trying to get a non-existant template."""
-    answer = '''"There is no template 'junk' of type 'molecule'."'''
-    system = templates
-    templates = system['template']
-    with pytest.raises(KeyError) as e:
-        templates.set_current_template('junk', type_='molecule')
-    assert str(e.value) == answer
+def test_template(gly):
+    """Test the gly template."""
+    assert gly.n_atoms == 10
+    assert gly.n_bonds == 9
 
 
-def test_get_column_x(templates):
-    """Test getting a column from the atoms in a template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    atoms = system['templateatom']
-    x = atoms['x']
-    assert x.equal([0.0, 0.75695, -0.75695], 1.0e-05)
+def test_template_coordinate_system(gly):
+    """Test the gly template coordinate system."""
+    assert gly.coordinate_system == 'Cartesian'
 
 
-def test_get_column_atno(templates):
-    """Test getting a column from the atoms in a template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    atoms = system['templateatom']
-    atno = atoms['atno']
-    assert atno == [8, 1, 1]
+def test_template_formula(gly):
+    """Test the gly template formula."""
+    assert gly.formula == ('C2 H5 N O2', 'C2 H5 N O2', 1)
 
 
-def test_get_column_error(templates):
-    """Test getting a column that doesn't exist."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    atoms = system['templateatom']
-    with pytest.raises(KeyError) as e:
-        junk = atoms['junk']  # noqa: F841
-    assert str(e.value) == '''"'junk' not in template atoms"'''
+def test_template_mass(gly):
+    """Test the gly template mass."""
+    assert abs(gly.mass - 75.067) <= 0.001
 
 
-def test_select_atoms(templates):
-    """Select just some atoms in the template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    atoms = system['templateatom']
-    names = []
-    x = []
-    for row in atoms.atoms('atno', '==', 8):
-        names.append(row['name'])
-        x.append(row['x'])
-    assert names == ['O', 'OH']
-    assert x == [-0.1323, 0.9757]
+def test_template_periodicity(gly):
+    """Test the gly template periodicity."""
+    assert gly.periodicity == 0
 
 
-def test_select_atoms_given_template(templates):
-    """Select just some atoms in the given template (H2O)."""
-    system = templates
-    templates = system['template']
-    atoms = system['templateatom']
-    atoms.current_template = 3  # Acetic acid
-    names = []
-    x = []
-    for row in atoms.atoms('atno', '=', 8, template=2):
-        names.append(row['name'])
-        x.append(row['x'])
-    assert names == ['O']
-    assert x == [0.0]
+def test_template_atoms(gly):
+    """Test the atoms for the template."""
+    answer = ['N', 'CA', 'C', 'O', 'OXT', 'H', 'H2', 'HA2', 'HA3', 'HXT']
+    names = gly.atoms.get_column_data('name')
+    if names != answer:
+        print(names)
+    assert names == answer
 
 
-def test_atom_ids(templates):
-    """Test getting the atom ids for the current template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    atoms = system['templateatom']
-    ids = atoms.atom_ids()
-    assert ids == [*range(4, 12)]
+def test_atoms_data(gly):
+    """Test the data for the atoms for the template."""
+    answer = {
+        'id': [127, 128, 129, 130, 131, 132, 133, 134, 135, 136],
+        'atno': [7, 6, 6, 8, 8, 1, 1, 1, 1, 1],
+        'name': ['N', 'CA', 'C', 'O', 'OXT', 'H', 'H2', 'HA2', 'HA3', 'HXT'],
+        'formal_charge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        '_chem_comp_atom.pdbx_align': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '_chem_comp_atom.pdbx_aromatic_flag': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '_chem_comp_atom.pdbx_leaving_atom_flag':
+            [1, 1, 1, 1, 0, 1, 0, 1, 1, 0],
+        '_chem_comp_atom.pdbx_stereo_config': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        '_chem_comp_atom.pdbx_component_atom_id':
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'configuration': [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+        'x':
+            [
+                25.463, 25.329, 26.081, 27.024, 25.702, 25.494, 26.307, 24.27,
+                25.731, 26.236
+            ],
+        'y':
+            [
+                35.609, 37.024, 37.335, 36.627, 38.256, 35.15, 35.421, 37.305,
+                37.59, 38.3
+            ],
+        'z':
+            [
+                47.047, 46.85, 45.572, 45.222, 44.874, 46.159, 47.549, 46.757,
+                47.703, 44.09
+            ]
+    }
+    for column in gly.atoms:
+        result = gly.atoms.get_column_data(column)
+        if result != answer[column]:
+            print(f"'{column}': {result}")
+        assert result == answer[column]
 
 
-def test_coordinate_system(templates):
-    """Test getting and settign the coordinate system."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    atoms = system['templateatom']
-    assert atoms.coordinate_system == 'Cartesian'
-
-    with pytest.raises(RuntimeError) as e:
-        atoms.coordinate_system = 'fractional'
-    assert str(e.value) == 'Templates can only use Cartesian coordinates.'
+def test_template_bonds(gly):
+    """Test the bonds for the template."""
+    answer = [1, 1, 1, 1, 1, 1, 2, 1, 1]
+    bondorders = gly.bonds.get_column_data('bondorder')
+    if bondorders != answer:
+        print(bondorders)
+    assert bondorders == answer
 
 
-def test_append_just_coordinates(templates):
-    """Test appending just the coordinates."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    atoms = system['templateatom']
-    atoms.append(x=[1.0, 2.0, 3.0], y=9.0)
-    assert atoms.n_atoms == 11
-
-
-def test_template_n_bonds(templates):
-    """Get the number of bonds in acetic acid template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    bonds = system['templatebond']
-    assert bonds.n_bonds() == 7
-
-
-def test_template_n_bonds_given_template(templates):
-    """Get the number of bonds in water template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('acetic acid', type_='molecule')
-    bonds = system['templatebond']
-    assert bonds.n_bonds(template=2) == 2
-
-
-def test_append_bonds_error(templates):
-    """Append a bond with an invalid atom id type"""
-    answer = "'i=a' and 'j=2', the atom indices, must be integers"
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    with pytest.raises(TypeError) as e:
-        bonds.append(i=['a'], j=[2])
-    assert str(e.value) == answer
-
-
-def test_append_bonds_scalar(templates):
-    """Get the number of bonds in water template."""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    bonds.append(i=1, j=2)
-    assert bonds.n_bonds() == 3
-
-
-def test_append_bonds_invalid_atom_error(templates):
-    """Append a bond with an invalid atom id"""
-    answer = "Atom i (5) is not in the template."
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    with pytest.raises(ValueError) as e:
-        bonds.append(i=5, j=[2])
-    assert str(e.value) == answer
-
-
-def test_append_bonds_invalid_atom_j_error(templates):
-    """Append a bond with an invalid atom id"""
-    answer = "Atom j (5) is not in the template."
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    with pytest.raises(ValueError) as e:
-        bonds.append(i=1, j=5)
-    assert str(e.value) == answer
-
-
-def test_append_bonds_missing_j_error(templates):
-    """Append a bond missing the second atom"""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    with pytest.raises(KeyError) as e:
-        bonds.append(i=1)
-    assert str(e.value) == "'The atoms i & j are required!'"
-
-
-def test_append_bonds_scalar_i(templates):
-    """Append a bond with one i atom and several j's"""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    bonds.append(i=[1], j=[2, 3])
-    assert bonds.n_bonds() == 4
-
-
-def test_append_bonds_scalar_j(templates):
-    """Append a bond with one j atom and several i's"""
-    system = templates
-    templates = system['template']
-    templates.set_current_template('H2O', type_='molecule')
-    bonds = system['templatebond']
-    bonds.append(i=[2, 3], j=[1])
-    assert bonds.n_bonds() == 4
+def test_print_template_bonds(gly):
+    """Test the string reprentation of the bonds in the template."""
+    answer = """\
+       i    j  bondorder
+120  127  128          1
+121  127  132          1
+122  127  133          1
+123  128  129          1
+124  128  134          1
+125  128  135          1
+126  129  130          2
+127  129  131          1
+128  131  136          1"""
+    result = str(gly.bonds)
+    if result != answer:
+        print(result)
+    assert result == answer
