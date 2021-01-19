@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from .openbabel import OpenBabelMixin
+from .smiles import SMILESMixin
+
 logger = logging.getLogger(__name__)
 
 
-class _Template(object):
+class _Template(SMILESMixin, OpenBabelMixin, object):
     """:meta public:
     A class providing the API for templates.
 

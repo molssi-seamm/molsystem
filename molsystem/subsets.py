@@ -145,6 +145,21 @@ class _Subsets(_Table):
             else:
                 self.db.executemany("DELETE FROM subset WHERE id = ?", ids)
 
+    def generate(self, template):
+        """Generate the subsets matching a full template.
+
+        Parameters
+        ----------
+        template : int or _Template
+           The template.
+
+        Returns
+        -------
+        [_Subset]
+            The subsets.
+        """
+        pass
+
     def get(self, template):
         """Get the subsets given a template.
 
@@ -155,7 +170,7 @@ class _Subsets(_Table):
 
         Returns
         -------
-        [_Template]
+        [_Subset]
             The subsets.
         """
         if isinstance(template, int):

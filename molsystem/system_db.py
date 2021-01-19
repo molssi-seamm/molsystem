@@ -8,6 +8,7 @@ import logging
 import sqlite3
 
 import molsystem
+from .cif import CIFMixin
 from .configuration import _Configuration
 from .system import _System
 from .table import _Table
@@ -16,7 +17,7 @@ from .templates import _Templates
 logger = logging.getLogger(__name__)
 
 
-class SystemDB(collections.abc.MutableMapping):
+class SystemDB(CIFMixin, collections.abc.MutableMapping):
     """A database of systems for SEAMM.
 
     A class based on a SQLite database for describing molecular and
@@ -809,58 +810,6 @@ class SystemDB(collections.abc.MutableMapping):
             )
 
             self.db.commit()
-
-    def read_cif_file(self, path):
-        """Create new systems from a CIF file.
-
-        Read a CIF file and create a new system from each datablock in
-        the file.
-
-        Parameters
-        ----------
-        path : str or Path
-            A string or Path object pointing to the file to be read.
-
-        Returns
-        -------
-        [_System]
-            List of systems created.
-        """
-        lines = []
-        systems = []
-        in_block = False
-        block_name = ''
-        with open(path, 'r') as fd:
-            for line in fd:
-                if line[0:5] == 'data_':
-                    self.logger.debug(f"Found block {line}")
-                    if not in_block:
-                        in_block = True
-                    else:
-                        system = self.create_system(name=block_name)
-                        systems.append(system)
-                        configuration = system.create_configuration(
-                            name=block_name
-                        )
-                        configuration.from_mmcif_text('\n'.join(lines))
-                        self.logger.debug(
-                            f"   added system {self.n_systems}: {block_name}"
-                        )
-                    block_name = line[5:].strip()
-                    lines = []
-                lines.append(line)
-
-            if len(lines) > 0:
-                # The last block just ends at the end of the file
-                system = self.create_system(name=block_name)
-                systems.append(system)
-                configuration = system.create_configuration(name=block_name)
-                system.configuration.from_mmcif_text('\n'.join(lines))
-                self.logger.debug(
-                    f"   added last system {self.n_systems}: {block_name}"
-                )
-
-        return systems
 
     def system_exists(self, id_or_name):
         """See if the given system exists.

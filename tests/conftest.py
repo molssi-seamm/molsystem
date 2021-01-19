@@ -46,11 +46,9 @@ def mk_table(db, name='table1'):
 
 
 @pytest.fixture()
-def db():
-    """Create an empty system db."""
+def empty_db():
+    """Create a system db with no systems."""
     db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
-    system.create_configuration(name='default')
 
     yield db
 
@@ -59,6 +57,15 @@ def db():
         del db
     except:  # noqa: E722
         print('Caught error deleting the database')
+
+
+@pytest.fixture()
+def db(empty_db):
+    """Create an empty system db."""
+    system = empty_db.create_system(name='default')
+    system.create_configuration(name='default')
+
+    return empty_db
 
 
 @pytest.fixture()

@@ -444,7 +444,7 @@ def test_diff(two_tables):
     assert diffs == ref1
 
     diffs = table1.diff(table2)
-    if diffs != ref1:
+    if diffs != ref2:
         pprint.pprint(diffs)
     assert diffs == ref2
 

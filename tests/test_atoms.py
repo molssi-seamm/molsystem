@@ -98,6 +98,17 @@ def test_add_duplicate_attribute(atoms):
     assert str(e.value) == "_Table attribute 'name' is already defined!"
 
 
+def test_add_coordinates_attribute(atoms):
+    """Test adding an attribute"""
+    result = ['atno', 'configuration', 'id', 'spin', 'x', 'y', 'z']
+    with atoms as tmp:
+        tmp.add_attribute('spin', configuration_dependent=True)
+    assert sorted([*atoms.keys()]) == result
+    del atoms['spin']
+    result.remove('spin')
+    assert sorted([*atoms.keys()]) == result
+
+
 def test_add_attribute_with_values(atoms):
     """Test adding several atoms"""
     with atoms as tmp:
@@ -356,6 +367,17 @@ def test_set_coordinates(AceticAcid):
 
     xyz = configuration.atoms.coordinates
     assert np.allclose(xyz, xyz0)
+
+
+def test_selected_atoms(AceticAcid):
+    """Test getting the number of selected atoms."""
+    configuration = AceticAcid
+
+    assert configuration.atoms.get_n_atoms("atno", '==', 6) == 2
+    x = []
+    for row in configuration.atoms.atoms("atno", '==', 6):
+        x.append(row['x'])
+    assert x == [1.0797, 0.5713]
 
 
 def test_periodic_coordinates(vanadium):

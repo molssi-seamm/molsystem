@@ -102,6 +102,8 @@ def test_atoms_data(gly):
         'atno': [7, 6, 6, 8, 8, 1, 1, 1, 1, 1],
         'name': ['N', 'CA', 'C', 'O', 'OXT', 'H', 'H2', 'HA2', 'HA3', 'HXT'],
         'formal_charge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        '_chem_comp_atom.alt_atom_id':
+            ['N', 'CA', 'C', 'O', 'OXT', 'H', 'HN2', 'HA1', 'HA2', 'HXT'],
         '_chem_comp_atom.pdbx_align': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         '_chem_comp_atom.pdbx_aromatic_flag': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         '_chem_comp_atom.pdbx_leaving_atom_flag':
@@ -128,6 +130,9 @@ def test_atoms_data(gly):
     }
     for column in gly.atoms:
         result = gly.atoms.get_column_data(column)
+        if column not in answer:
+            print(f"'{column}': {result}")
+        assert column in answer
         if result != answer[column]:
             print(f"'{column}': {result}")
         assert result == answer[column]
@@ -145,16 +150,16 @@ def test_template_bonds(gly):
 def test_print_template_bonds(gly):
     """Test the string reprentation of the bonds in the template."""
     answer = """\
-       i    j  bondorder
-120  127  128          1
-121  127  132          1
-122  127  133          1
-123  128  129          1
-124  128  134          1
-125  128  135          1
-126  129  130          2
-127  129  131          1
-128  131  136          1"""
+       i    j  bondorder _chem_comp_bond.comp_id
+120  127  128          1                     GLY
+121  127  132          1                     GLY
+122  127  133          1                     GLY
+123  128  129          1                     GLY
+124  128  134          1                     GLY
+125  128  135          1                     GLY
+126  129  130          2                     GLY
+127  129  131          1                     GLY
+128  131  136          1                     GLY"""
     result = str(gly.bonds)
     if result != answer:
         print(result)

@@ -106,3 +106,10 @@ def test_molecule_subsets(disordered):
         print('coords2')
         pprint.pprint(coords2)
     assert c1 == c2
+
+    assert subset1.atoms.get_n_atoms('atno', '==', 6) == 2
+
+    count = 0
+    for row in subset2.atoms.atoms('atno', '==', 6):
+        count += 1
+    assert count == 2

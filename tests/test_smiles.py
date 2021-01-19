@@ -17,8 +17,8 @@ def test_to_smiles(AceticAcid):
 
 def test_to_smiles_with_name(AceticAcid):
     """Create a SMILES string from a system"""
-    correct = ['CC(=O)O', 'acetic acid']
-    smiles = AceticAcid.to_smiles(name=True)
+    correct = 'CC(=O)O'
+    smiles = AceticAcid.smiles
 
     if smiles != correct:
         print(smiles)
@@ -61,9 +61,9 @@ def test_several_molecules_canonical(CH3COOH_3H2O):
 
 def test_from_smiles(configuration):
     """Create a configuration from SMILES"""
-    correct = ['CC(=O)O', 'acetic acid']
+    correct = 'CC(=O)O'
     configuration.from_smiles('OC(=O)C', name='acetic acid')
-    result = configuration.to_smiles(name=True, canonical=True)
+    result = configuration.to_smiles(canonical=True)
 
     if result != correct:
         print(result)

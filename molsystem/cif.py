@@ -38,6 +38,69 @@ to_bond_order = {j: i for i, j in bond_order.items()}
 class CIFMixin:
     """A mixin for handling CIF files."""
 
+    def read_cif_file(self, path):
+        """Create new systems from a CIF file.
+
+        Read a CIF file and create a new system from each datablock in
+        the file.
+
+        If the datablock has an ensemble, as denoted by a section
+        '_pdbx_nmr_ensemble', a configuration will be created for each
+        conformer. If there is a representative conformer, the current
+        configuration will point to it; otherwise to the last conformer.
+
+        Parameters
+        ----------
+        path : str or Path
+            A string or Path object pointing to the file to be read.
+
+        Returns
+        -------
+        [_System]
+            List of systems created.
+        """
+        if 'SystemDB' in str(type(self)):
+            sys_db = self
+        else:
+            sys_db = self.system_db
+
+        lines = []
+        systems = []
+        configurations = {}
+        in_block = False
+        block_name = ''
+        with open(path, 'r') as fd:
+            for line in fd:
+                if line[0:5] == 'data_':
+                    self.logger.debug(f"Found block {line}")
+                    if not in_block:
+                        in_block = True
+                    else:
+                        new_systems, new_configurations = self.from_mmcif_text(
+                            '\n'.join(lines)
+                        )
+                        self.logger.debug(
+                            f"   added system {sys_db.n_systems}: {block_name}"
+                        )
+                        systems.extend(new_systems)
+                        configurations.update(new_configurations)
+                    block_name = line[5:].strip()
+                    lines = []
+                lines.append(line)
+
+            if len(lines) > 0:
+                # The last block just ends at the end of the file
+                new_systems, new_configurations = self.from_mmcif_text(
+                    '\n'.join(lines)
+                )
+                self.logger.debug(
+                    f"   added system {sys_db.n_systems}: {block_name}"
+                )
+                systems.extend(new_systems)
+                configurations.update(new_configurations)
+
+        return systems, configurations
+
     def to_cif_text(self):
         """Create the text of a CIF file from this configuration.
 
@@ -326,69 +389,291 @@ class CIFMixin:
         Returns
         -------
         None
+
+        Notes
+        -----
+        This can be called from a `SystemDB`, `_System` or `_Configuration`
+        object. The behavior and errors differ depending on what type of object
+        is calling it:
+
+            `SystemDB`
+
+            When called from a `_System` object, a new `_System` will be
+            created for each datablock in the CIF data, and a configuration
+            will be created to hold the structure, unless their is an NMR
+            ensemble, in which case each structure in the ensemble will be
+            placed in a different configuration.
+
+            `_System`
+
+            In this case it is an error if there is more than one datablock.
+            A new configuration will be created with the structure in the CIF
+            datablock, unless the CIF data contains an NMR ensemble, in which
+            case a configuration will be added for each conformer.
+
+            `_Configuration`
+
+            It is an error if there is more than one datablock in the CIF data.
+            The configuration will be cleared and the structure from CIF data
+            inserted into it. If there is an NMR ensemble in the datablock, and
+            the representative conformer is identified, it will be loaded into
+            the configuration. Otherwise an error will be raised.
         """
+        # What type of object is this?
+        if 'SystemDB' in str(type(self)):
+            my_class = 'SystemDB'
+        elif '_System' in str(type(self)):
+            my_class = 'System'
+        elif '_Configuration' in str(type(self)):
+            my_class = 'Configuration'
+
         cif = CifFile.ReadCif(io.StringIO(text))
 
-        data_blocks = [*cif.keys()]
-
-        if len(data_blocks) != 1:
+        if my_class != 'SystemDB' and len(cif) != 1:
             raise RuntimeError(
-                f'There are {len(data_blocks)} data blocks in the mmcif file.'
+                f'There are {len(cif)} data blocks in the mmcif file.'
             )
-        data = cif[data_blocks[0]]
 
-        # Reset the system
-        self.clear()
-        self.periodicity = 0
-        self.coordinate_system = 'Cartesian'
+        # Loop over the datablocks, processing as we go.
+        systems = []
+        configurations = {}
+        for name, data in cif.items():
+            # Check the sanity of the input
+            coordinate_system = 'Cartesian'
+            if '_atom_site.id' in data:
+                if '_chem_comp_atom.atom_id' in data:
+                    raise ValueError('Have both atom_site and chem_comp atoms')
 
-        self.name = ''
-        for key in [
-            '_chem_comp.id', '_chem_comp.name', '_chem_comp.three_letter_code'
-        ]:
-            if key in data:
-                self.name = data[key]
-                break
+                # Fractional or Cartesian coordinates?
+                if '_atom_site.fract_x' in data:
+                    coordinate_system = 'fractional'
+                elif '_atom_site.Cartn_x' not in data:
+                    raise KeyError(
+                        "Couldn't find coordinates in atom_site data"
+                    )
+                elif '_chem_comp_atom.atom_id' in data:
+                    if '_chem_comp_atom.model_Cartn_x' not in data:
+                        raise KeyError(
+                            "Couldn't find coordinates in chem_comp_atom data"
+                        )
 
-        # Add the atoms
-        kwargs = {}
-        kwargs['x'] = [float(x) for x in data['_chem_comp_atom.model_Cartn_x']]
-        kwargs['y'] = [float(y) for y in data['_chem_comp_atom.model_Cartn_y']]
-        kwargs['z'] = [float(z) for z in data['_chem_comp_atom.model_Cartn_z']]
-        kwargs['symbol'] = [s for s in data['_chem_comp_atom.type_symbol']]
+            # Get the name of the system/configuration
+            for key in [
+                '_entry.id', '_chem_comp.id', '_chem_comp.name',
+                '_chem_comp.three_letter_code'
+            ]:
+                if key in data:
+                    name = data[key]
+                    break
 
-        for cif_key, key, _type, default in [
-            ('atom_id', 'name', 'str', ''),
-            ('charge', 'formal_charge', 'int', 0),
-            ('pdbx_align', None, 'int', 0),
-            ('pdbx_aromatic_flag', None, 'bool', False),
-            ('pdbx_leaving_atom_flag', None, 'bool', False),
-            ('pdbx_stereo_config', None, 'bool', False),
-            ('pdbx_component_atom_id', None, 'bool', False)
-        ]:
-            cif_key = '_chem_comp_atom.' + cif_key
-            if cif_key in data:
-                if key is None:
-                    key = cif_key
-                if _type == 'bool':
-                    kwargs[key] = [x == 'N' for x in data[cif_key]]
+            key = '_pdbx_nmr_ensemble.conformers_submitted_total_number'
+            ensemble = key in data
+            if ensemble:
+                n_ensemble = int(data[key])
+                key = '_pdbx_nmr_representative.conformer_id'
+                configuration_name = 'model_1'
+                if key in data:
+                    representative = int(data[key])
+                    if representative == 1:
+                        configuration_name == 'representative'
                 else:
-                    kwargs[key] = [x for x in data[cif_key]]
-                if key not in self.atoms:
-                    self.atoms.add_attribute(key, _type, default=default)
+                    representative = None
+            else:
+                configuration_name = name
+            if my_class == 'SystemDB':
+                system = self.create_system(name)
+                systems.append(system)
+                configuration = system.create_configuration(configuration_name)
+                configurations[system.id] = [configuration]
+            elif my_class == 'System':
+                system = self
+                configuration = system.create_configuration(configuration_name)
+                configurations[system.id] = [configuration]
+            else:
+                configuration = self
+                # Reset the configuration
+                configuration.clear()
+                configuration.periodicity = 0
+                configuration.coordinate_system = 'Cartesian'
+                configuration.name = configuration_name
 
-        atom_ids = self.atoms.append(**kwargs)
+            # Add the atoms
+            atoms = configuration.atoms
+            kwargs = {}
 
-        # Prepare for the bonds, which are labeled by atom name (id)
-        atom_id = {name: _id for _id, name in zip(atom_ids, kwargs['name'])}
+            # Get the data from the CIF file, creating columns if needed.
+            for cif_key, key, _type, default in [
+                ('_chem_comp_atom.atom_id', 'name', 'str', ''),
+                ('_chem_comp_atom.alt_atom_id', None, 'str', ''),
+                ('_chem_comp_atom.type_symbol', 'symbol', 'str', ''),
+                ('_chem_comp_atom.model_Cartn_x', 'x', 'float', 0.0),
+                ('_chem_comp_atom.model_Cartn_y', 'y', 'float', 0.0),
+                ('_chem_comp_atom.model_Cartn_z', 'z', 'float', 0.0),
+                ('_chem_comp_atom.charge', 'formal_charge', 'int', 0),
+                ('_chem_comp_atom.pdbx_align', None, 'int', 0),
+                ('_chem_comp_atom.pdbx_aromatic_flag', None, 'bool', False),
+                (
+                    '_chem_comp_atom.pdbx_leaving_atom_flag', None, 'bool',
+                    False
+                ),
+                ('_chem_comp_atom.pdbx_stereo_config', None, 'bool', False),
+                (
+                    '_chem_comp_atom.pdbx_component_atom_id', None, 'bool',
+                    False
+                ),
+                ('_atom_site.group_PDB', None, 'str', 'HETATOM'),
+                ('_atom_site.id', None, 'str', None),
+                ('_atom_site.type_symbol', 'symbol', 'str', None),
+                ('_atom_site.label_atom_id', None, 'str', None),
+                ('_atom_site.label_alt_id', None, 'str', ''),
+                ('_atom_site.label_comp_id', None, 'str', None),
+                ('_atom_site.label_asym_id', None, 'str', None),
+                ('_atom_site.label_entity_id', None, 'str', None),
+                ('_atom_site.label_seq_id', None, 'int', None),
+                ('_atom_site.pdbx_PDB_ins_code', None, 'str', None),
+                ('_atom_site.pdbx_PDB_model_num', 'ignore', 'int', None),
+                ('_atom_site.Cartn_x', 'x', 'float', 0.0),
+                ('_atom_site.Cartn_y', 'y', 'float', 0.0),
+                ('_atom_site.Cartn_z', 'z', 'float', 0.0),
+                ('_atom_site.fract_x', 'x', 'float', 0.0),
+                ('_atom_site.fract_y', 'y', 'float', 0.0),
+                ('_atom_site.fract_z', 'z', 'float', 0.0),
+                ('_atom_site.occupancy', 'occupancy', 'float', 0.0),
+                ('_atom_site.B_iso_or_equiv', None, 'float', 0.0),
+                ('_atom_site.pdbx_formal_charge', 'formal_charge', 'int', 0),
+            ]:
+                if cif_key in data:
+                    if key is None:
+                        key = cif_key
+                    if key == 'ignore':
+                        key = cif_key
+                    elif key not in atoms and key != 'symbol':
+                        atoms.add_attribute(key, _type, default=default)
 
-        # And the bonds
-        kwargs = {}
-        kwargs['i'] = [atom_id[x] for x in data['_chem_comp_bond.atom_id_1']]
-        kwargs['j'] = [atom_id[x] for x in data['_chem_comp_bond.atom_id_2']]
-        if '_chem_comp_bond.value_order' in data:
-            kwargs['bondorder'] = [
-                to_bond_order[x] for x in data['_chem_comp_bond.value_order']
-            ]
+                    if _type == 'bool':
+                        kwargs[key] = [
+                            None if x in '.?' else x == 'N'
+                            for x in data[cif_key]
+                        ]
+                    elif _type == 'int':
+                        kwargs[key] = [
+                            None if x in '.?' else int(x)
+                            for x in data[cif_key]
+                        ]
+                    elif _type == 'float':
+                        kwargs[key] = [
+                            None if x in '.?' else float(x)
+                            for x in data[cif_key]
+                        ]
+                    else:
+                        kwargs[key] = [
+                            None if x in '.?' else x for x in data[cif_key]
+                        ]
 
-        self.bonds.append(**kwargs)
+            if ensemble:
+                if '_atom_site.pdbx_PDB_model_num' not in kwargs:
+                    raise KeyError("Is an ensemble but no model numbers.")
+                model_num = kwargs.pop('_atom_site.pdbx_PDB_model_num')
+                first = 0
+                last = first
+                model = model_num[0]
+                for i in model_num:
+                    if i == model:
+                        last += 1
+                    else:
+                        atoms = configuration.atoms
+                        model_args = {
+                            k: v[first:last] for k, v in kwargs.items()
+                        }
+                        atom_ids = atoms.append(**model_args)
+
+                        # Make the next configuration and reset pointers
+                        model = i
+                        first = last
+                        last += 1
+                        if model == representative:
+                            configuration_name = 'representative'
+                        else:
+                            configuration_name = f"model_{model}"
+                        configuration = system.create_configuration(
+                            configuration_name
+                        )
+                        configurations[system.id].append(configuration)
+                # Put in the last model
+                atoms = configuration.atoms
+                model_args = {k: v[first:last] for k, v in kwargs.items()}
+                atom_ids = atoms.append(**model_args)
+                if model != n_ensemble:
+                    self.logger.warning(
+                        f"The actual number of models ({model}) does not "
+                        f"match the claimed number ({n_ensemble})."
+                    )
+            else:
+                if coordinate_system != 'Cartesian':
+                    raise NotImplementedError("Can't handle fractional coords")
+
+                atom_ids = atoms.append(**kwargs)
+
+                if '_chem_comp_bond.atom_id_1' in data:
+                    # Prepare for the bonds, which are labeled by atom name
+                    atom_id = {
+                        name: i for i, name in zip(atom_ids, kwargs['name'])
+                    }
+
+                    # And the bonds
+                    bonds = configuration.bonds
+                    kwargs = {}
+                    for cif_key, key, _type, default in [
+                        ('_chem_comp_bond.atom_id_1', 'i', 'str', ''),
+                        ('_chem_comp_bond.atom_id_2', 'j', 'str', ''),
+                        ('_chem_comp_bond.value_order', 'bondorder', 'int', 1),
+                        ('_chem_comp_bond.comp_id', None, 'str', None),
+                        ('_chem_comp_bond.aromatic_flag', None, 'bool', False),
+                        ('_chem_comp_bond.stereo_flag', None, 'str', None),
+                        ('_chem_comp_bond.value_dist', None, 'float', None),
+                        (
+                            '_chem_comp_bond.value_dist_esd', None, 'float',
+                            None
+                        )
+                    ]:
+                        if cif_key in data:
+                            if key is None:
+                                key = cif_key
+                            if key == 'ignore':
+                                key = cif_key
+                            elif key not in bonds:
+                                bonds.add_attribute(
+                                    key, _type, default=default
+                                )
+
+                            if key == 'i' or key == 'j':
+                                kwargs[key] = [
+                                    atom_id[x] for x in data[cif_key]
+                                ]
+                            elif key == 'bondorder':
+                                kwargs[key] = [
+                                    to_bond_order[x] for x in data[cif_key]
+                                ]
+                            elif _type == 'bool':
+                                kwargs[key] = [
+                                    None if x in '.?' else x == 'N'
+                                    for x in data[cif_key]
+                                ]
+                            elif _type == 'int':
+                                kwargs[key] = [
+                                    None if x in '.?' else int(x)
+                                    for x in data[cif_key]
+                                ]
+                            elif _type == 'float':
+                                kwargs[key] = [
+                                    None if x in '.?' else float(x)
+                                    for x in data[cif_key]
+                                ]
+                            else:
+                                kwargs[key] = [
+                                    None if x in '.?' else x
+                                    for x in data[cif_key]
+                                ]
+
+                    bonds.append(**kwargs)
+        return systems, configurations

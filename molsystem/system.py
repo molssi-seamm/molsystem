@@ -6,13 +6,14 @@
 from collections.abc import MutableMapping
 import logging
 
+from .cif import CIFMixin
 from .configuration import _Configuration
 from .table import _Table
 
 logger = logging.getLogger(__name__)
 
 
-class _System(MutableMapping):
+class _System(CIFMixin, MutableMapping):
     """A single system -- molecule, crystal, etc. -- in SEAMM.
 
     Based on a SQLite database, this class provides a general
@@ -88,9 +89,10 @@ class _System(MutableMapping):
     :meta public:
     """
 
-    def __init__(self, system_db, _id):
+    def __init__(self, system_db, _id, logger=logger):
         self._system_db = system_db
         self._id = _id
+        self.logger = logger
         self._current_configuration_id = None  # The current configuration
         self._checkpoints = []
         self._items = {}
@@ -218,6 +220,19 @@ class _System(MutableMapping):
         if value not in self.configuration_ids:
             raise KeyError(f"configuration '{value}' does not exist.")
         self._current_configuration_id = value
+
+    @property
+    def configuration_names(self):
+        """Get the names of the configurations.
+
+        Returns
+        -------
+        [str]
+            The names of the configurations.
+        """
+        # The name of the configuration ... find it.
+        sql = "SELECT name FROM configuration WHERE system = ?"
+        return [x[0] for x in self.db.execute(sql, (self.id,))]
 
     @property
     def configurations(self):
@@ -443,6 +458,61 @@ class _System(MutableMapping):
 
         return result
 
+    def get_configuration(self, cid):
+        """Get the specified configuration object.
+
+        Parameters
+        ----------
+        cid : int or str
+            The id (int) or name (str) of the configuration
+
+        Returns
+        -------
+        _Configuration
+            The requested configuration.
+
+        Raises
+        ------
+        ValueError
+            If the configuration does not exist, or more than one have the
+            requested name.
+        """
+        if isinstance(cid, str):
+            # The name of the configuration ... find it.
+            cid = self.get_configuration_id(cid)
+
+        return _Configuration(_id=cid, system_db=self.system_db)
+
+    def get_configuration_id(self, name):
+        """Get the id of the specified configuration.
+
+        Parameters
+        ----------
+        name : str
+            The name of the configuration
+
+        Returns
+        -------
+        int
+            The id of the requested configuration.
+
+        Raises
+        ------
+        ValueError
+            If the configuration does not exist, or more than one have the
+            requested name.
+        """
+        # The name of the configuration ... find it.
+        sql = "SELECT id FROM configuration WHERE system = ? AND name = ?"
+        ids = [x[0] for x in self.db.execute(sql, (self.id, name))]
+        if len(ids) == 0:
+            raise ValueError(f"The configuration '{name}' does not exist.")
+        elif len(ids) > 1:
+            raise ValueError(
+                f"There is more than one configuration named '{name}'"
+            )
+        return ids[0]
+
     def list(self):
         """Return a list of all the tables in the system."""
         result = []
@@ -453,46 +523,3 @@ class _System(MutableMapping):
         ):
             result.append(row['name'])
         return result
-
-    def read_cif_file(self, path):
-        """Create new configurations from a CIF file.
-
-        Read a CIF file and create a new configuration from each datablock in
-        the file.
-
-        Parameters
-        ----------
-        path : str or Path
-            A string or Path object pointing to the file to be read.
-
-        Returns
-        -------
-        [_Configuration]
-            List of the configurations created.
-        """
-        lines = []
-        configurations = []
-        in_block = False
-        block_name = ''
-        with open(path, 'r') as fd:
-            for line in fd:
-                if line[0:5] == 'data_':
-                    if not in_block:
-                        in_block = True
-                    else:
-                        configuration = self.create_configuration(
-                            name=block_name
-                        )
-                        configurations.append(configuration)
-                        configuration.from_mmcif_text('\n'.join(lines))
-                    block_name = line[5:].strip()
-                    lines = []
-                lines.append(line)
-
-            if len(lines) > 0:
-                # The last block just ends at the end of the file
-                configuration = self.create_configuration(name=block_name)
-                configurations.append(configuration)
-                configuration.from_mmcif_text('\n'.join(lines))
-
-        return configurations

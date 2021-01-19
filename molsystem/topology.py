@@ -4,7 +4,14 @@
 
 import logging
 
-from openbabel import openbabel
+try:
+    from openbabel import openbabel
+except ModuleNotFoundError:
+    print(
+        'Please install openbabel using conda:\n'
+        '     conda install -c conda-forge openbabel'
+    )
+    raise
 
 logger = logging.getLogger(__name__)
 

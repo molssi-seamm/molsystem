@@ -200,16 +200,6 @@ class _Atoms(_Table):
         """The system database that we belong to."""
         return self._system_db
 
-    @property
-    def system(self):
-        """The system that we belong to."""
-        if self._system is None:
-            self.cursor.execute(
-                'SELECT system FROM configuration WHERE id = ?', (self.id,)
-            )
-            self._system = self.system_db.get_system(self.cursor.fetchone()[0])
-        return self._system
-
     def add_attribute(
         self,
         name: str,
@@ -1073,8 +1063,6 @@ class _SubsetAtoms(_Atoms):
            AND at.id = sa.atom
            AND sa.subset = ?
         """
-        if self.template.is_full and self.template_order:
-            sql += "ORDER BY sa.templateatom"
 
         parameters = [self.subset_id]
         if len(args) > 0:
@@ -1083,6 +1071,9 @@ class _SubsetAtoms(_Atoms):
                     op = '='
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
+
+        if self.template.is_full and self.template_order:
+            sql += "ORDER BY sa.templateatom"
 
         return self.db.execute(sql, parameters)
 
@@ -1152,8 +1143,6 @@ class _SubsetAtoms(_Atoms):
          WHERE at.id = sa.atom
            AND sa.subset = ?
         """
-        if self.template.is_full and self.template_order:
-            sql += "ORDER BY sa.templateatom"
 
         parameters = [self.subset_id]
         if len(args) > 0:
@@ -1162,6 +1151,9 @@ class _SubsetAtoms(_Atoms):
                     op = '='
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
+
+        if self.template.is_full and self.template_order:
+            sql += "ORDER BY sa.templateatom"
 
         return [x[0] for x in self.db.execute(sql, parameters)]
 

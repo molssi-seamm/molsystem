@@ -10,6 +10,7 @@ from .bonds import _Bonds
 from .cell import _Cell
 from .cif import CIFMixin
 from .molfile import MolFileMixin
+from .openbabel import OpenBabelMixin
 from .pdb import PDBMixin
 from .smiles import SMILESMixin
 from .subsets import _Subsets
@@ -20,7 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class _Configuration(
-    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin, object
+    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin,
+    OpenBabelMixin, object
 ):
     """A configuration (conformer) of a system.
 

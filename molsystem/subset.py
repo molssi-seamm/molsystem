@@ -3,12 +3,14 @@ import logging
 
 from .atoms import _SubsetAtoms
 from .bonds import _SubsetBonds
+from .openbabel import OpenBabelMixin
+from .smiles import SMILESMixin
 from .template import _Template
 
 logger = logging.getLogger(__name__)
 
 
-class _Subset(object):
+class _Subset(SMILESMixin, OpenBabelMixin, object):
     """:meta public:
     A class providing the API for a subset.
 
