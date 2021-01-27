@@ -196,7 +196,12 @@ class PDBMixin:
         symbols = atoms.symbols
         coordinates = atoms.coordinates
         if 'name' in atoms:
-            names = atoms['name']
+            names = []
+            for name, symbol in zip(atoms['name'], symbols):
+                if name is None:
+                    names.append(symbol)
+                else:
+                    names.append(name)
         else:
             names = symbols
 
