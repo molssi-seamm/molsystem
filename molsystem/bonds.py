@@ -492,6 +492,28 @@ class _Bonds(_Table):
 
         return result
 
+    def get_as_dict(self, *args):
+        """Return the bond data as a Python dictionary of lists.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+
+        Returns
+        -------
+        dict(str: [])
+            A dictionary whose keys are the column names and values as lists
+        """
+        rows = self.bonds(*args)
+        columns = [x[0] for x in rows.description]
+        data = {key: [] for key in columns}
+        for row in rows:
+            for key, value in zip(columns, row):
+                data[key].append(value)
+
+        return data
+
     def get_bond(self, i, j=None, force=False):
         """Return the row for a bond.
 
