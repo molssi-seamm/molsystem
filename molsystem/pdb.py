@@ -173,7 +173,7 @@ class PDBMixin:
             chainids = ['A'] * n_atoms
 
         if 'resseq' in atoms:
-            resseqs = atoms['resseq']
+            resseqs = [1 if x is None else x for x in atoms['resseq']]
         else:
             resseqs = [1] * n_atoms
 
@@ -196,12 +196,10 @@ class PDBMixin:
         symbols = atoms.symbols
         coordinates = atoms.coordinates
         if 'name' in atoms:
-            names = []
-            for name, symbol in zip(atoms['name'], symbols):
-                if name is None:
-                    names.append(symbol)
-                else:
-                    names.append(name)
+            names = [
+                symbol if name is None else name
+                for name, symbol in zip(atoms['name'], symbols)
+            ]
         else:
             names = symbols
 
@@ -440,7 +438,7 @@ class PDBMixin:
         else:
             counts = collections.Counter(resseqs)
             if len(counts) > 1 or [*counts.keys()] != ['1']:
-                self.atoms.add_attribute('resseq', coltype='int')
+                self.atoms.add_attribute('resseq', coltype='int', default=1)
                 self.atoms['resseq'][0:] = resseqs
 
         if 'occupancy' in self.atoms:
