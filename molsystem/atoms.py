@@ -541,6 +541,28 @@ class _Atoms(_Table):
 
         return result
 
+    def get_as_dict(self, *args):
+        """Return the atom data as a Python dictionary of lists.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+
+        Returns
+        -------
+        dict(str: [])
+            A dictionary whose keys are the column names and values as lists
+        """
+        rows = self.atoms(*args)
+        columns = [x[0] for x in rows.description]
+        data = {key: [] for key in columns}
+        for row in rows:
+            for key, value in zip(columns, row):
+                data[key].append(value)
+
+        return data
+
     def get_ids(self, *args):
         """The ids of the atoms.
 
@@ -1123,40 +1145,6 @@ class _SubsetAtoms(_Atoms):
         """
         raise NotImplementedError()
 
-    def get_ids(self, *args):
-        """The ids of the atoms.
-
-        Parameters
-        ----------
-        args : [str]
-            Added selection criteria for the SQL, one word at a time.
-
-        Returns
-        -------
-        [int]
-            The ids of the requested atoms.
-        """
-
-        sql = """
-        SELECT at.id
-          FROM atom as at, coordinates as co, subset_atom as sa
-         WHERE at.id = sa.atom
-           AND sa.subset = ?
-        """
-
-        parameters = [self.subset_id]
-        if len(args) > 0:
-            for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
-                sql += f' AND "{col}" {op} ?'
-                parameters.append(value)
-
-        if self.template.is_full and self.template_order:
-            sql += "ORDER BY sa.templateatom"
-
-        return [x[0] for x in self.db.execute(sql, parameters)]
-
     def get_column(self, key: str) -> Any:
         """Get a Column object with the requested data
 
@@ -1228,6 +1216,40 @@ class _SubsetAtoms(_Atoms):
             return [row[0] for row in self.db.execute(sql)]
         else:
             raise KeyError(f"'{key}' not in atoms")
+
+    def get_ids(self, *args):
+        """The ids of the atoms.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+
+        Returns
+        -------
+        [int]
+            The ids of the requested atoms.
+        """
+
+        sql = """
+        SELECT at.id
+          FROM atom as at, coordinates as co, subset_atom as sa
+         WHERE at.id = sa.atom
+           AND sa.subset = ?
+        """
+
+        parameters = [self.subset_id]
+        if len(args) > 0:
+            for col, op, value in grouped(args, 3):
+                if op == '==':
+                    op = '='
+                sql += f' AND "{col}" {op} ?'
+                parameters.append(value)
+
+        if self.template.is_full and self.template_order:
+            sql += "ORDER BY sa.templateatom"
+
+        return [x[0] for x in self.db.execute(sql, parameters)]
 
     def delete(self, atoms) -> int:
         """Delete the atoms listed
