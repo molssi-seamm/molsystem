@@ -269,7 +269,7 @@ class CIFMixin:
             self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
 
     def to_mmcif_text(self):
-        """Create the text of a mmCIF file from this confguration.
+        """Create the text of a mmCIF file from this configuration.
 
         Returns
         -------
@@ -367,12 +367,13 @@ class CIFMixin:
         lines.append(' _chem_comp_bond.atom_id_1')
         lines.append(' _chem_comp_bond.atom_id_2')
         lines.append(' _chem_comp_bond.value_order')
+        index = {j: i for i, j in enumerate(atoms.ids)}
         for row in bonds.bonds():
-            i = row['i']
-            j = row['j']
+            i = index[row['i']]
+            j = index[row['j']]
             order = bond_order[row['bondorder']]
-            nm1 = names[i - 1]
-            nm2 = names[j - 1]
+            nm1 = names[i]
+            nm2 = names[j]
             lines.append(f'MOL1 {nm1} {nm2} {order}')
 
         # And that is it!
