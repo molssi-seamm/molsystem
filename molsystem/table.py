@@ -674,6 +674,28 @@ class _Table(collections.abc.MutableMapping):
 
         return result
 
+    def get_as_dict(self, *args):
+        """Return the table data as a Python dictionary of lists.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+
+        Returns
+        -------
+        dict(str: [])
+            A dictionary whose keys are the column names and values as lists
+        """
+        rows = self.rows(*args)
+        columns = [x[0] for x in rows.description]
+        data = {key: [] for key in columns}
+        for row in rows:
+            for key, value in zip(columns, row):
+                data[key].append(value)
+
+        return data
+
     def get_column(self, column, sql=None, where=''):
         """Return a column of data from the table.
 
