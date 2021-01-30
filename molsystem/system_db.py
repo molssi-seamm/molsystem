@@ -530,6 +530,30 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._items[name] = cls(self, name, other)
         return self._items[name]
 
+    def delete_system(self, system):
+        """Delete an existing system.
+
+        Parameters
+        ----------
+        system : int or _System
+            The system to delete.
+
+        Returns
+        -------
+        None
+        """
+
+        if isinstance(system, _System):
+            sid = system.id
+        else:
+            sid = system
+
+        sql = "DELETE FROM system WHERE id = ?"
+        self.db.execute(sql, (sid,))
+
+        if self._current_system_id == sid:
+            self._current_system_id = None
+
     def detach(self, other):
         """Detach an attached system.
 
