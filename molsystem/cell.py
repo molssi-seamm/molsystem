@@ -612,7 +612,7 @@ class _Cell(Cell):
 
     def _save(self):
         """Save our values in the database."""
-        parameters = self._parameters
+        parameters = list(self._parameters)
         parameters.append(self.id)
         self.cursor.execute(
             "UPDATE cell SET a=?, b=?, c=?, alpha=?, beta=?, gamma=?"
