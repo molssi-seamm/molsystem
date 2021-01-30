@@ -90,6 +90,7 @@ class _Configuration(
                     "UPDATE configuration SET atomset = ? WHERE id = ?",
                     (atomset, self.id)
                 )
+                self.db.commit()
             self._atomset = atomset
         return self._atomset
 
@@ -114,6 +115,7 @@ class _Configuration(
                     "UPDATE configuration SET bondset = ? WHERE id = ?",
                     (bondset, self.id)
                 )
+                self.db.commit()
             self._bondset = bondset
         return self._bondset
 
@@ -145,6 +147,9 @@ class _Configuration(
             self._cell_id = self.cursor.fetchone()[0]
             if self._cell_id is None:
                 self._cell_id = self.system_db['cell'].append(n=1)[0]
+                sql = "UPDATE configuration SET cell = ? WHERE id = ?"
+                self.db.execute(sql, (self._cell_id, self.id))
+                self.db.commit()
         return self._cell_id
 
     @property
@@ -172,6 +177,7 @@ class _Configuration(
                 " WHERE id = ?", (self.id,)
             )
             self._coordinate_system = 'Cartesian'
+        self.db.commit()
 
     @property
     def cursor(self):
@@ -296,6 +302,7 @@ class _Configuration(
         self.db.execute(
             "UPDATE configuration SET name = ? WHERE id = ?", (value, self.id)
         )
+        self.db.commit()
         self._name = value
 
     @property
@@ -328,6 +335,7 @@ class _Configuration(
             "UPDATE configuration SET periodicity = ? WHERE id = ?",
             (value, self.id)
         )
+        self.db.commit()
         self._periodicity = value
 
     @property
@@ -377,8 +385,8 @@ class _Configuration(
     def version(self, value):
         self.cursor.execute(
             'UPDATE configuration SET version = ? WHERE id = ?',
-            (value, self.id,)
-        )  # yapf: disable
+            (value, self.id)
+        )
         self.db.commit()
 
     @property
