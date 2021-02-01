@@ -227,9 +227,7 @@ class TopologyMixin:
                 else:
                     # Create a new system & configuration for the template
                     system_name = 'template system ' + canonical
-                    if self.system_db.system_exists(system_name):
-                        system = self.system_db.get(system_name)
-                    else:
+                    if not self.system_db.system_exists(system_name):
                         system = self.system_db.create_system(system_name)
                         configuration = system.create_configuration(canonical)
                         cid = configuration.id

@@ -572,7 +572,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Differences between this system and another."""
         result = {}
 
-        if self is other:
+        if self.id() == other.id():
             return result
 
         tables = set(self.list())
