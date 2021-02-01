@@ -41,6 +41,10 @@ class _Subsets(_Table):
 
         self._sa_table = self._system_db['subset_atom']
 
+    def __eq__(self, other):
+        """Return a boolean if this object is equal to another"""
+        raise NotImplementedError()
+
     @property
     def n_subsets(self):
         """The number of subsets for a configuration.

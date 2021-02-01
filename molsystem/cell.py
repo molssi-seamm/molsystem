@@ -347,7 +347,7 @@ class _Cell(Cell):
             "SELECT a, b, c, alpha, beta, gamma FROM cell WHERE id = ?",
             (self._id,)
         )
-        self._parameters = [*self.cursor.fetchone()]
+        super().__init__(*self.cursor.fetchone())
 
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
@@ -359,6 +359,11 @@ class _Cell(Cell):
         if etype is None:
             self.configuration.version = self.configuration.version + 1
         return self.system_db["cell"].__exit__(etype, value, traceback)
+
+    def __eq__(self, other):
+        """Return a boolean if this object is equal to another"""
+        # This gets rid if LGTM warning...
+        return self.equal(other, tol=1.0e-12)
 
     def __setitem__(self, key, value):
         """Allow x[key] access to the data"""

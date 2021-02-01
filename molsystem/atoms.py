@@ -5,7 +5,6 @@
 
 from itertools import zip_longest
 import logging
-import pprint  # noqa: F401
 from typing import Any, Dict, TypeVar
 
 import numpy
@@ -972,6 +971,10 @@ class _SubsetAtoms(_Atoms):
         self._template = None
 
         super().__init__(configuration)
+
+    def __eq__(self, other) -> Any:
+        """Return a boolean if this object is equal to another"""
+        raise NotImplementedError('Not implemented for subsets, yet!')
 
     @property
     def subset_id(self):

@@ -276,7 +276,8 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
 
     def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
-        if self is other:
+        # LGTM doesn't like using 'is', but this is equivalent.
+        if self.id() == other.id():
             return True
 
         tables = set(self.list())

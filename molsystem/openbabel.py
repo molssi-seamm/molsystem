@@ -3,7 +3,6 @@
 """Interface to openbabel."""
 
 import logging
-import pprint  # noqa: F401
 
 try:
     from openbabel import openbabel

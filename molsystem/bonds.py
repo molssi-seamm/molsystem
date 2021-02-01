@@ -633,6 +633,10 @@ class _SubsetBonds(_Bonds):
 
         super().__init__(configuration)
 
+    def __eq__(self, other):
+        """Return a boolean if this object is equal to another"""
+        raise NotImplementedError()
+
     @property
     def ids(self):
         """The ids of the bonds in the subset."""
