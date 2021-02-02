@@ -264,7 +264,7 @@ data_CH2O
 _chem_comp.name 'C2 H4 O2'
 _chem_comp.id 'CH2O'
 _chem_comp.formula   'C2 H4 O2'
-_chemical_formula_structural   CH2O
+_chemical_formula_structural   'C H2 O'
 _chemical_formula_sum   'C2 H4 O2'
 loop_
  _chem_comp_atom.comp_id
@@ -348,9 +348,9 @@ V V2  1  0.500 0.500 0.500  1"""
     assert text == correct
 
 
-def test_from_cif_text(system):
-    """Test converting a cif file into a system."""
+def test_from_cif_text(configuration):
+    """Test converting a cif file into a configuration."""
 
-    system.from_cif_text(cif_cu)
+    configuration.from_cif_text(cif_cu)
 
-    assert system.n_atoms() == 4
+    assert configuration.atoms.n_atoms == 4

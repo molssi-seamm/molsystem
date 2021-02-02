@@ -3,8 +3,6 @@
 
 """Tests for the system class."""
 
-import pprint
-
 import pytest  # noqa: F401
 
 
@@ -14,38 +12,26 @@ def test_construction(system):
     del system
 
 
-def test_version_empty(system):
-    """Simplest test that we can make a System object"""
-    assert system.version == 0
-    del system
-
-
 def test_create_table(system):
     """Test that we can create a table in the system."""
-    with system as tmp:
-        table = tmp.create_table('table1')
-        # Create a column so the table exists
-        table.add_attribute('data')
-    assert system.version == 1
+    table = system.create_table('table1')
+    # Create a column so the table exists
+    table.add_attribute('data')
     assert 'table1' in system
 
 
-def test_create_table_(system):
+def test_create_table_element(system):
     """Test that we can create a table using [] syntax."""
-    with system as tmp:
-        table = tmp['table1']
-        # Create a column so the table exists
-        table.add_attribute('data')
-    assert system.version == 1
+    table = system['table1']
+    # Create a column so the table exists
+    table.add_attribute('data')
     assert 'table1' in system
 
 
 def test_delete_table(system_with_two_tables):
     """Test that we can delete a table."""
     system = system_with_two_tables
-    with system as tmp:
-        del tmp['table1']
-    assert system.version == 1
+    del system['table1']
     assert 'table2' in system
     assert 'table1' not in system
 
@@ -56,38 +42,37 @@ def test_elements(system):
     assert table.n_rows == 118
 
 
-def test_formula(AceticAcid):
-    """Test the formula generation."""
-    formula, empirical_formula, Z = AceticAcid.formula()
-    assert ''.join(formula) == 'C2H4O2'
-    assert ''.join(empirical_formula) == 'CH2O'
-    assert Z == 2
+def test_create_new_system(AceticAcid):
+    """Test creating a new, empty system."""
+    system_db = AceticAcid.system_db
+    assert system_db.n_systems == 1
+    system_db.create_system(name='new system')
+    assert system_db.n_systems == 2
+    assert system_db.system_ids == [1, 2]
 
 
-def test_formula_periodic(vanadium):
-    """Test the formula generation."""
-    formula, empirical_formula, Z = vanadium.formula()
+def test_create_new_system_vanadium(AceticAcid):
+    """Test creating a new system, filling it for vanadium."""
+    system_db = AceticAcid.system_db
+    assert system_db.n_systems == 1
+
+    system = system_db.create_system(name='BCC Vanadium')
+    system.create_configuration(name='default')
+    assert system_db.n_systems == 2
+    assert system_db.system_ids == [1, 2]
+
+    system_db.current_system_id = 2
+
+    configuration = system_db.system.configuration
+
+    configuration.periodicity = 3
+    configuration.coordinate_system = 'fractional'
+    configuration.cell.parameters = (3.03, 3.03, 3.03, 90, 90, 90)
+    configuration.atoms.append(
+        x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol='V'
+    )
+
+    formula, empirical_formula, Z = configuration.formula
     assert ''.join(formula) == 'V2'
     assert ''.join(empirical_formula) == 'V'
     assert Z == 2
-
-
-def test_clear(CH3COOH_3H2O):
-    """Test making subsets for the molecules."""
-    result = [2, 3, 4, 5]
-
-    system = CH3COOH_3H2O
-    sids = system.create_molecule_subsets()
-    if sids != result:
-        pprint.pprint(sids)
-    assert sids == result
-
-    system.clear()
-
-    assert system.n_atoms() == 0
-
-
-def test_density(vanadium):
-    """Test the density, and implicitly the mass and volume."""
-
-    assert abs(vanadium.density() - 6.0817308915133) < 1.0e-06

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class _Column(FrozenColumn, collections.abc.MutableSequence):
     """A list-like object for holding a column data
 
-    This is a wrapper around a single colmun in a SQL table. Setting a value
+    This is a wrapper around a single column in a SQL table. Setting a value
     updates the SQL database appropriately.
     """
 

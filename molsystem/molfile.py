@@ -5,21 +5,19 @@
 import logging
 import time
 
+from molsystem import elements
+
 logger = logging.getLogger(__name__)
 
 
 class MolFileMixin:
     """A mixin for handling MDL Molfiles."""
 
-    def to_molfile_text(
-        self, configuration=None, title=None, comment='Exported from SEAMM'
-    ):
+    def to_molfile_text(self, title=None, comment='Exported from SEAMM'):
         """Create the text of the Molfile from the system.
 
         Parameters
         ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         title : str = None
             The title for the structure, by default the system name.
         comment : str = 'Exported from SEAMM'
@@ -36,10 +34,8 @@ class MolFileMixin:
         atoms = self.atoms
         bonds = self.bonds
 
-        if configuration is None:
-            configuration = self.current_configuration
-        n_atoms = atoms.n_atoms(configuration=configuration)
-        n_bonds = bonds.n_bonds(configuration=configuration)
+        n_atoms = atoms.n_atoms
+        n_bonds = bonds.n_bonds
 
         nsgroups = 0
         n3d = 0
@@ -64,17 +60,17 @@ class MolFileMixin:
         lines.append('M  V30 BEGIN ATOM')
         count = 0
         if 'formal charges' in atoms:
-            for row in atoms.atoms(configuration):
+            for row in atoms.atoms():
                 count += 1
-                symbol = self.to_symbols([row['atno']])
+                symbol = elements.to_symbols([row['atno']])[0]
                 lines.append(
                     f"M  V30 {count} {symbol} {row['x']} {row['y']} {row['z']}"
                     " 0 CHG={row['formal charge']}"
                 )
         else:
-            for row in atoms.atoms(configuration=configuration):
+            for row in atoms.atoms():
                 count += 1
-                symbol = self.to_symbols([row['atno']])[0]
+                symbol = elements.to_symbols([row['atno']])[0]
                 lines.append(
                     f"M  V30 {count} {symbol} {row['x']} {row['y']} {row['z']}"
                     " 0"
@@ -82,7 +78,7 @@ class MolFileMixin:
         lines.append('M  V30 END ATOM')
         lines.append('M  V30 BEGIN BOND')
         count = 0
-        for row in bonds.bonds(configuration=configuration):
+        for row in bonds.bonds():
             count += 1
             lines.append(
                 f"M  V30 {count} {row['bondorder']} "
@@ -94,18 +90,16 @@ class MolFileMixin:
 
         return '\n'.join(lines)
 
-    def from_molfile_text(self, data, configuration=None):
+    def from_molfile_text(self, data):
         """Create the system from an MDL Molfile, version 3
 
         Parameters
         ----------
         data : str
             The complete text of the Molfile.
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         """
 
-        self.clear(configuration=configuration)
+        self.clear()
         self.periodicity = 0
 
         n_molecules = 0
@@ -162,7 +156,6 @@ class MolFileMixin:
                                 'formal_charge', coltype='int', default=0
                             )
                             atom_ids = self.atoms.append(
-                                configuration=configuration,
                                 x=xs,
                                 y=ys,
                                 z=zs,
@@ -171,11 +164,7 @@ class MolFileMixin:
                             )
                         else:
                             atom_ids = self.atoms.append(
-                                configuration=configuration,
-                                x=xs,
-                                y=ys,
-                                z=zs,
-                                symbol=symbols
+                                x=xs, y=ys, z=zs, symbol=symbols
                             )
                         break
                     i, symbol, x, y, z, q = line.split()[2:8]
@@ -202,7 +191,6 @@ class MolFileMixin:
                                 i=iatoms,
                                 j=jatoms,
                                 bondorder=bondorders,
-                                configuration=configuration
                             )
                         break
                     bondorder, iatom, jatom = line.split()[3:6]

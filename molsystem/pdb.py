@@ -134,15 +134,11 @@ logger = logging.getLogger(__name__)
 class PDBMixin:
     """A mixin for handling PDB files."""
 
-    def to_pdb_text(
-        self, configuration=None, title=None, comment='Exported from SEAMM'
-    ):
+    def to_pdb_text(self, title=None, comment='Exported from SEAMM'):
         """Create the text of the PDB file from the system.
 
         Parameters
         ----------
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         title : str = None
             The title for the structure, by default the system name.
         comment : str = 'Exported from SEAMM'
@@ -157,10 +153,7 @@ class PDBMixin:
 
         atoms = self.atoms
 
-        if configuration is None:
-            configuration = self.current_configuration
-
-        n_atoms = atoms.n_atoms(configuration=configuration)
+        n_atoms = atoms.n_atoms
 
         date_time = time.strftime('%m%d%y%H%M')
 
@@ -180,7 +173,7 @@ class PDBMixin:
             chainids = ['A'] * n_atoms
 
         if 'resseq' in atoms:
-            resseqs = atoms['resseq']
+            resseqs = [1 if x is None else x for x in atoms['resseq']]
         else:
             resseqs = [1] * n_atoms
 
@@ -200,10 +193,13 @@ class PDBMixin:
             charges = [' '] * n_atoms
 
         count = 0
-        symbols = atoms.symbols(configuration=configuration)
-        coordinates = atoms.coordinates(configuration=configuration)
+        symbols = atoms.symbols
+        coordinates = atoms.coordinates
         if 'name' in atoms:
-            names = atoms['name']
+            names = [
+                symbol if name is None else name
+                for name, symbol in zip(atoms['name'], symbols)
+            ]
         else:
             names = symbols
 
@@ -226,11 +222,7 @@ class PDBMixin:
             )
 
         # bonds
-        for i, js in enumerate(
-            self.bonded_neighbors(
-                configuration=configuration, as_indices=True
-            )
-        ):
+        for i, js in enumerate(self.bonded_neighbors(as_indices=True)):
             lines.append(
                 f'CONECT{i+1:5d}' + ''.join([f'{j+1:5d}' for j in js])
             )
@@ -243,19 +235,17 @@ class PDBMixin:
 
         return '\n'.join(lines)
 
-    def from_pdb_text(self, data, configuration=None):
+    def from_pdb_text(self, data):
         """Create the system from a PDF file.
 
         Parameters
         ----------
         data : str
             The complete text of the Molfile.
-        configuration : int = None
-            The configuration to use, defaults to the current configuration.
         """
         # Initialize the structure
 
-        # self.clear()
+        self.clear()
         self.periodicity = 0
 
         if isinstance(data, list):
@@ -424,12 +414,7 @@ class PDBMixin:
             self.atoms.add_attribute('name', coltype='string')
 
         atom_id = self.atoms.append(
-            configuration=configuration,
-            symbol=symbols,
-            name=names,
-            x=xs,
-            y=ys,
-            z=zs
+            symbol=symbols, name=names, x=xs, y=ys, z=zs
         )
 
         if 'resname' in self.atoms:
@@ -453,7 +438,7 @@ class PDBMixin:
         else:
             counts = collections.Counter(resseqs)
             if len(counts) > 1 or [*counts.keys()] != ['1']:
-                self.atoms.add_attribute('resseq', coltype='int')
+                self.atoms.add_attribute('resseq', coltype='int', default=1)
                 self.atoms['resseq'][0:] = resseqs
 
         if 'occupancy' in self.atoms:
@@ -491,4 +476,4 @@ class PDBMixin:
                         iatom.append(atom_id[i - 1])
                         jatom.append(atom_id[j - 1])
 
-            self.bonds.append(configuration=configuration, i=iatom, j=jatom)
+            self.bonds.append(i=iatom, j=jatom)

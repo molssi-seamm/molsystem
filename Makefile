@@ -1,3 +1,4 @@
+MODULE := molsystem
 .PHONY: clean clean-test clean-pyc clean-build docs help
 .DEFAULT_GOAL := help
 define BROWSER_PYSCRIPT
@@ -48,33 +49,36 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	find . -name '.pytype' -exec rm -fr {} +
 
-lint: ## check style with yapf and flake8
-	yapf --diff --recursive  setup.py molsystem tests
-	flake8 setup.py molsystem tests
+lint: ## check style with flake8
+	flake8 $(MODULE) tests
+	yapf --diff --recursive  $(MODULE) tests
 
-format: ## reformat with with yapf
-	yapf --recursive --in-place setup.py molsystem tests
+format: ## reformat with with yapf and isort
+	yapf --recursive --in-place $(MODULE) tests
 
 typing: ## check typing
-	pytype molsystem
-#	mypy -p molsystem
+	pytype $(MODULE)
 
 test: ## run tests quickly with the default Python
-	pytest -rP
+	py.test -rP
+
+dependencies:
+	pur -r requirements_dev.txt
+	pip install -r requirements_dev.txt
 
 test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source molsystem -m pytest
+	coverage run --source $(MODULE) -m pytest tests
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/molsystem.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ molsystem
+	rm -f docs/developer/$(MODULE).rst
+	rm -f docs/developer/modules.rst
+	sphinx-apidoc -o docs/developer $(MODULE)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
@@ -83,8 +87,8 @@ servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+	python setup.py sdist bdist_wheel
+	python -m twine upload dist/*
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
@@ -95,5 +99,4 @@ install: uninstall ## install the package to the active Python's site-packages
 	python setup.py install
 
 uninstall: clean ## uninstall the package
-	pip uninstall --yes molsystem
-
+	pip uninstall --yes $(MODULE)

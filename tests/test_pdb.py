@@ -206,16 +206,16 @@ END"""  # noqa: E501, W291
     assert tmp_text == tmp_correct
 
 
-def test_from_pdb_text(system):
+def test_from_pdb_text(configuration):
     """Test reading a standard PDB file"""
-    system.from_pdb_text(heme)
-    assert system.n_atoms() == 75
+    configuration.from_pdb_text(heme)
+    assert configuration.n_atoms == 75
 
 
-def test_from_to(system):
+def test_from_to(configuration):
     """Test that getting from then putting to a string works"""
-    system.from_pdb_text(heme)
-    text = system.to_pdb_text()
+    configuration.from_pdb_text(heme)
+    text = configuration.to_pdb_text()
 
     # Strip the first two and next to last line from SEAMM's
     # representation since the PDB example ignores. Also any trailing blanks
