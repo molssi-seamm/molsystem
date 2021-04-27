@@ -60,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MolSystem Step'
+project = u'MolSystem'
 copyright = u"2020, Molecular Sciences Software Institute (MolSSI)"
 
 # The version info for the project you're documenting, acts as replacement
@@ -220,7 +220,7 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'molsystem.tex',
-     u'MolSystem Step Documentation',
+     u'MolSystem Documentation',
      u'Paul Saxe', 'manual'),
 ]
 
@@ -251,7 +251,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'molsystem',
-     u'MolSystem Step Documentation',
+     u'MolSystem Documentation',
      [u'Paul Saxe'], 1)
 ]
 
@@ -266,7 +266,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'molsystem',
-     u'MolSystem Step Documentation',
+     u'MolSystem Documentation',
      u'Paul Saxe',
      'molsystem',
      'One line description of project.',
