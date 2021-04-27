@@ -14,7 +14,6 @@ from molsystem import elements
 from .column import _Column
 from .table import _Table
 
-System_tp = TypeVar("System_tp", "System", None)
 Atoms_tp = TypeVar("Atoms_tp", "_Atoms", str, None)
 
 logger = logging.getLogger(__name__)
