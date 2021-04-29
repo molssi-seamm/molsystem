@@ -45,13 +45,6 @@ jobs:
       run: |
         flake8 molsystem tests
         yapf --diff --recursive molsystem tests
-    - name: Build documentation
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      shell: bash -l {0}
-      run: |
-        docs/buildDocs.sh
-
   test:
     name: Test ${{ matrix.os }} Py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
