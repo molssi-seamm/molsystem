@@ -1,5 +1,4 @@
 {% set data = load_setup_py_data() %}
-{% set name = "molsystem" %}
 
 package:
   name: "{{ data.get('name')|lower }}"
@@ -9,21 +8,29 @@ source:
   path: ../
 
 build:
+  number: 0
   noarch: python
-
+  preserve_egg_dir: True
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  
 requirements:
   build:
-    - openbabel
+    - pip
     - python
     - setuptools
+    - openbabel
     - numpy
     - pandas
     - pathvalidate
     - pycifrw
 
   run:
-    - openbabel
     - python
+    - openbabel
+    - numpy
+    - pandas
+    - pathvalidate
+    - pycifrw
 
 test:
   imports:
