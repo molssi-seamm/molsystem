@@ -1,0 +1,35 @@
+{% set data = load_setup_py_data() %}
+{% set name = "molsystem" %}
+
+package:
+  name: "{{ data.get('name')|lower }}"
+  version: "{{ data.get('version') }}"
+
+source:
+  path: ../
+
+build:
+  noarch: python
+
+requirements:
+  build:
+    - openbabel
+    - python
+    - setuptools
+    - numpy
+    - pandas
+    - pathvalidate
+    - pycifrw
+
+  run:
+    - openbabel
+    - python
+
+test:
+  imports:
+    # - seamm-installer
+
+about:
+  home: {{ data.get('url') }}
+  license:  {{ data.get('license') }}
+  summary:  {{ data.get('description') }}
