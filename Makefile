@@ -100,3 +100,9 @@ install: uninstall ## install the package to the active Python's site-packages
 
 uninstall: clean ## uninstall the package
 	pip uninstall --yes $(MODULE)
+
+conda-local:  ## Create a local conda package
+	conda-build -c conda-forge --no-anaconda-upload conda/
+
+conda-release:  ## Create and upload the conda package
+	conda-build -c conda-forge conda/ --label main
