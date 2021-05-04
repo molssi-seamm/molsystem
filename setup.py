@@ -22,9 +22,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-with open('requirements_install.txt') as fd:
-    requirements = fd.read()
-
 setup(
     name='molsystem',
     author="Paul Saxe",
@@ -51,7 +48,12 @@ setup(
 
     # Required packages, pulls from pip if needed; do not use for Conda
     # deployment
-    install_requires=requirements,
+    install_requires=[
+        "numpy",
+        "pandas",
+        "pathvalidate",
+        "pycifrw",
+    ],
     test_suite='tests',
 
     # Valid platforms your code works on, adjust to your flavor
@@ -60,9 +62,9 @@ setup(
     # Manual control if final package is compressible or not, set False to
     # prevent the .egg from being made
     # zip_safe=False,
-    keywords='molsystem',
+    keywords="molsystem,SEAMM",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         (
             'License :: OSI Approved :: GNU Lesser General Public License v3 '
@@ -72,7 +74,7 @@ setup(
         'Topic :: Scientific/Engineering :: Physics',
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ]
 )
