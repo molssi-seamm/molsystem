@@ -37,9 +37,9 @@ class _Subsets(_Table):
         self._cid = configuration.id
         self._system_db = configuration.system_db
 
-        super().__init__(self._system_db, 'subset')
+        super().__init__(self._system_db, "subset")
 
-        self._sa_table = self._system_db['subset_atom']
+        self._sa_table = self._system_db["subset_atom"]
 
     def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
@@ -86,7 +86,7 @@ class _Subsets(_Table):
         [int]
             The ids of the created rows.
         """
-        kwargs['configuration'] = self._cid
+        kwargs["configuration"] = self._cid
         ids = super().append(n, **kwargs)
 
         return ids
@@ -137,7 +137,7 @@ class _Subsets(_Table):
         -------
         None
         """
-        if ids == 'all':
+        if ids == "all":
             sql = """\
             DELETE FROM subset
              WHERE configuration = ?

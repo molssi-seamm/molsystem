@@ -23,7 +23,7 @@ def test_n_subsets(CH3COOH_3H2O):
 
     db = configuration.system_db
     templates = db.templates
-    tid = templates.create(name='H2O', category='molecule')
+    tid = templates.create(name="H2O", category="molecule")
 
     subset = subsets.create(template=tid)
     assert subsets.n_subsets == 1
@@ -39,10 +39,10 @@ def test_simple_subsets(simple_templates):
 
     db = simple_templates
     templates = db.templates
-    acy = templates.get('acy', 'molecule')
-    hoh = templates.get('hoh', 'molecule')
+    acy = templates.get("acy", "molecule")
+    hoh = templates.get("hoh", "molecule")
 
-    system = db.get_system('acetic acid')
+    system = db.get_system("acetic acid")
     configuration = system.configuration
     subsets = configuration.subsets
 

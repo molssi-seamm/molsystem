@@ -18,7 +18,7 @@ def test_bonded_neighbors(AceticAcid):
         5: [1, 6, 7],
         6: [5],
         7: [5, 8],
-        8: [7]
+        8: [7],
     }
 
     neighbors = AceticAcid.bonded_neighbors()
@@ -39,9 +39,7 @@ def test_molecules(AceticAcid):
 
 def test_multiple_molecules(CH3COOH_3H2O):
     """Test the finding molecules in the system."""
-    result = [
-        [1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11], [12, 13, 14], [15, 16, 17]
-    ]
+    result = [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11], [12, 13, 14], [15, 16, 17]]
 
     molecules = CH3COOH_3H2O.find_molecules()
     if molecules != result:
@@ -57,7 +55,7 @@ def test_molecule_templates(disordered):
     templates = configuration.create_molecule_templates(create_subsets=False)
     tids = [x.id for x in templates]
     if tids != result_tids:
-        print('tids')
+        print("tids")
         pprint.pprint(tids)
     assert tids == result_tids
 
@@ -71,11 +69,11 @@ def test_molecule_subsets(disordered):
     templates, subsets = configuration.create_molecule_templates()
     tids = [x.id for x in templates]
     if tids != result_tids:
-        print('tids')
+        print("tids")
         pprint.pprint(tids)
     sids = {t: [x.id for x in s] for t, s in subsets.items()}
     if sids != result_sids:
-        print('sids')
+        print("sids")
         pprint.pprint(sids)
     assert tids == result_tids
     assert sids == result_sids
@@ -86,8 +84,8 @@ def test_molecule_subsets(disordered):
     atnos1 = subset1.atoms.atomic_numbers
     atnos2 = subset2.atoms.atomic_numbers
     if atnos1 != atnos2:
-        print(f'atnos1 = {atnos1}')
-        print(f'atnos2 = {atnos2}')
+        print(f"atnos1 = {atnos1}")
+        print(f"atnos2 = {atnos2}")
     assert atnos1 == atnos2
 
     coords1 = subset1.atoms.coordinates
@@ -101,15 +99,15 @@ def test_molecule_subsets(disordered):
     del c2[1:4]
 
     if c1 != c2:
-        print('coords1')
+        print("coords1")
         pprint.pprint(coords1)
-        print('coords2')
+        print("coords2")
         pprint.pprint(coords2)
     assert c1 == c2
 
-    assert subset1.atoms.get_n_atoms('atno', '==', 6) == 2
+    assert subset1.atoms.get_n_atoms("atno", "==", 6) == 2
 
     count = 0
-    for row in subset2.atoms.atoms('atno', '==', 6):
+    for row in subset2.atoms.atoms("atno", "==", 6):
         count += 1
     assert count == 2

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest  # noqa: F401
+
 """Tests for handling Molfiles."""
 
 text1 = """\
@@ -122,11 +123,11 @@ def test_to_text(configuration):
     text_sv = configuration.to_molfile_text()
     text = text_sv.splitlines()
     del text[1]
-    text = '\n'.join(text)
+    text = "\n".join(text)
 
     tmp = text2.splitlines()
     del tmp[1]
-    tmp = '\n'.join(tmp)
+    tmp = "\n".join(tmp)
 
     if text != tmp:
         print(text_sv)
@@ -139,11 +140,11 @@ def test_to_text2(AceticAcid):
     text_sv = AceticAcid.to_molfile_text()
     text = text_sv.splitlines()
     del text[1]
-    text = '\n'.join(text)
+    text = "\n".join(text)
 
     tmp = text3.splitlines()
     del tmp[1]
-    tmp = '\n'.join(tmp)
+    tmp = "\n".join(tmp)
 
     if text != tmp:
         print(text_sv)

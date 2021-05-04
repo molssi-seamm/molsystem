@@ -9,12 +9,7 @@ from .column import _Column
 
 logger = logging.getLogger(__name__)
 
-column_types = {
-    'int': 'INTEGER',
-    'float': 'REAL',
-    'str': 'TEXT',
-    'bytes': 'BLOB'
-}
+column_types = {"int": "INTEGER", "float": "REAL", "str": "TEXT", "bytes": "BLOB"}
 
 
 def grouped(iterable, n):
@@ -39,10 +34,10 @@ class _Table(collections.abc.MutableMapping):
     def __init__(self, system_db, table: str, other=None, logger=logger):
         self._system_db = system_db
         self.logger = logger
-        if '.' in table:
-            self._schema, self._table = table.split('.')
+        if "." in table:
+            self._schema, self._table = table.split(".")
         else:
-            self._schema = 'main'
+            self._schema = "main"
             self._table = table
         if other is not None:
             self.copy(other)
@@ -51,10 +46,8 @@ class _Table(collections.abc.MutableMapping):
     def __enter__(self):
         """Copy the table to a backup for a 'with' statement."""
         n = len(self._checkpoints)
-        checkpoint = f'temp.{self._table}_checkpoint_{n}'
-        self.db.execute(
-            f"CREATE TEMP TABLE {checkpoint} AS SELECT * FROM {self.table}"
-        )
+        checkpoint = f"temp.{self._table}_checkpoint_{n}"
+        self.db.execute(f"CREATE TEMP TABLE {checkpoint} AS SELECT * FROM {self.table}")
         self.db.commit()
         self._checkpoints.append(checkpoint)
         return self
@@ -73,12 +66,10 @@ class _Table(collections.abc.MutableMapping):
                 self.logger.debug(diffs)
         else:
             # Delete everything in the table and copy the checkpoint back.
-            self.db.execute('PRAGMA foreign_keys = OFF')
+            self.db.execute("PRAGMA foreign_keys = OFF")
             self.clear()
-            self.db.execute(
-                f"INSERT INTO {self.table} SELECT * FROM {checkpoint}"
-            )
-            self.db.execute('PRAGMA foreign_keys = ON')
+            self.db.execute(f"INSERT INTO {self.table} SELECT * FROM {checkpoint}")
+            self.db.execute("PRAGMA foreign_keys = ON")
             self.db.commit()
 
         # Drop the temporary table
@@ -102,7 +93,7 @@ class _Table(collections.abc.MutableMapping):
 
         columns = set(self.attributes)
         columns.remove(key)
-        column_def = ', '.join(columns)
+        column_def = ", ".join(columns)
 
         # Need the unquoted version!
         table = self._table
@@ -245,7 +236,7 @@ class _Table(collections.abc.MutableMapping):
     @property
     def n_rows(self) -> int:
         """The number of rows in the table."""
-        self.cursor.execute(f'SELECT COUNT(*) FROM {self.table}')
+        self.cursor.execute(f"SELECT COUNT(*) FROM {self.table}")
         result = self.cursor.fetchone()[0]
         return result
 
@@ -258,17 +249,17 @@ class _Table(collections.abc.MutableMapping):
             f"    FROM {self.schema}.pragma_table_info('{self._table}')"
             " ORDER BY 'cid'"
         ):
-            result[row['name']] = {
-                'type': row['type'],
-                'notnull': bool(row['notnull']),
-                'default': row['dflt_value'],
-                'primary key': bool(row['pk'])
+            result[row["name"]] = {
+                "type": row["type"],
+                "notnull": bool(row["notnull"]),
+                "default": row["dflt_value"],
+                "primary key": bool(row["pk"]),
             }
         for row in self.db.execute(f"PRAGMA foreign_key_list('{self.table}')"):
-            if row['to'] is None:
-                result[row['from']]['fk'] = row['table']
+            if row["to"] is None:
+                result[row["from"]]["fk"] = row["table"]
             else:
-                result[row['from']]['fk'] = f"{row['table']}.{row['to']}"
+                result[row["from"]]["fk"] = f"{row['table']}.{row['to']}"
 
         return result
 
@@ -279,15 +270,15 @@ class _Table(collections.abc.MutableMapping):
     def add_attribute(
         self,
         name: str,
-        coltype: str = 'float',
+        coltype: str = "float",
         default=None,
         notnull: bool = False,
         index: bool = False,
         pk: bool = False,
         references: str = None,
-        on_delete: str = 'cascade',
-        on_update: str = 'cascade',
-        values=None
+        on_delete: str = "cascade",
+        on_update: str = "cascade",
+        values=None,
     ) -> None:
         """Adds a new attribute.
 
@@ -327,8 +318,8 @@ class _Table(collections.abc.MutableMapping):
             table_exists = True
             if pk:
                 raise ValueError(
-                    'The primary key can only be set on the first attribute '
-                    'of a table that does not yet exist.'
+                    "The primary key can only be set on the first attribute "
+                    "of a table that does not yet exist."
                 )
         else:
             table_exists = False
@@ -344,7 +335,7 @@ class _Table(collections.abc.MutableMapping):
 
         # not null columns must have defaults
         if not pk and notnull and default is None:
-            raise ValueError(f'Not null attributes must have defaults: {name}')
+            raise ValueError(f"Not null attributes must have defaults: {name}")
 
         # see if the values are given
         if values is not None:
@@ -364,31 +355,29 @@ class _Table(collections.abc.MutableMapping):
             column_type = coltype
         column_def = f'"{name}" {column_type}'
         if default is not None:
-            if coltype == 'str':
+            if coltype == "str":
                 column_def += f" DEFAULT '{default}'"
             else:
-                column_def += f' DEFAULT {default}'
+                column_def += f" DEFAULT {default}"
         if notnull:
-            column_def += ' NOT NULL'
+            column_def += " NOT NULL"
         if references is not None:
-            column_def += f' REFERENCES {references}'
-            if on_delete is not None and on_delete != '':
-                column_def += f' ON DELETE {on_delete}'
-            if on_update is not None and on_update != '':
-                column_def += f' ON UPDATE {on_update}'
+            column_def += f" REFERENCES {references}"
+            if on_delete is not None and on_delete != "":
+                column_def += f" ON DELETE {on_delete}"
+            if on_update is not None and on_update != "":
+                column_def += f" ON UPDATE {on_update}"
 
         if table_exists:
             self.cursor.execute(
-                f'ALTER TABLE {self.table} ADD {column_def}', parameters
+                f"ALTER TABLE {self.table} ADD {column_def}", parameters
             )
         else:
             if pk:
-                column_def += ' PRIMARY KEY'
-            self.cursor.execute(
-                f'CREATE TABLE {self.table} ({column_def})', parameters
-            )
+                column_def += " PRIMARY KEY"
+            self.cursor.execute(f"CREATE TABLE {self.table} ({column_def})", parameters)
 
-        if index == 'unique':
+        if index == "unique":
             self.cursor.execute(
                 f'CREATE UNIQUE INDEX {self.schema}."idx_{name}"'
                 f'  ON "{self._table}"'
@@ -445,16 +434,13 @@ class _Table(collections.abc.MutableMapping):
         # Check that any missing attributes have defaults
         attributes = self.attributes
         for key in attributes:
-            if (
-                not attributes[key]['notnull'] or
-                attributes[key]['primary key']
-            ):
+            if not attributes[key]["notnull"] or attributes[key]["primary key"]:
                 continue
 
             if key not in kwargs:
                 if (
-                    'default' not in attributes[key] or
-                    attributes[key]['default'] is None
+                    "default" not in attributes[key]
+                    or attributes[key]["default"] is None
                 ):
                     raise KeyError(
                         "There is no default for attribute "
@@ -462,13 +448,13 @@ class _Table(collections.abc.MutableMapping):
                     )
 
         # Add id's if needed
-        if 'id' not in kwargs and 'id' in attributes:
+        if "id" not in kwargs and "id" in attributes:
             self.cursor.execute(f"SELECT MAX(id) FROM {self.table}")
             last_id = self.cursor.fetchone()[0]
             if last_id is None:  # Table is empty
                 last_id = 0
-            kwargs['id'] = [*range(last_id + 1, last_id + n_rows + 1)]
-            lengths['id'] = n_rows
+            kwargs["id"] = [*range(last_id + 1, last_id + n_rows + 1)]
+            lengths["id"] = n_rows
 
         # All okay, so proceed.
         values = {}
@@ -488,21 +474,20 @@ class _Table(collections.abc.MutableMapping):
             parameters.append(line)
 
         columns = '"' + '", "'.join(kwargs.keys()) + '"'
-        places = ', '.join(['?'] * len(values.keys()))
+        places = ", ".join(["?"] * len(values.keys()))
 
         self.cursor.executemany(
-            f'INSERT INTO {self.table} ({columns}) VALUES ({places})',
-            parameters
+            f"INSERT INTO {self.table} ({columns}) VALUES ({places})", parameters
         )
 
         self.db.commit()
 
-        if 'id' in kwargs:
-            return kwargs['id']
+        if "id" in kwargs:
+            return kwargs["id"]
 
     def clear(self):
         """Delete all rows from the table."""
-        self.db.execute(f'DELETE FROM {self.table}')
+        self.db.execute(f"DELETE FROM {self.table}")
 
     def diff(self, other):
         """Difference between this table and another
@@ -529,28 +514,22 @@ class _Table(collections.abc.MutableMapping):
         other_columns = set(other_attributes)
 
         if columns == other_columns:
-            column_def = 'rowid, *'
+            column_def = "rowid, *"
         else:
             added = columns - other_columns
             if len(added) > 0:
-                self.logger.debug(
-                    f"      columns added: {', '.join(sorted(added))}"
-                )
-                result['columns added'] = added
-                summary['columns add'] = added
+                self.logger.debug(f"      columns added: {', '.join(sorted(added))}")
+                result["columns added"] = added
+                summary["columns add"] = added
             deleted = other_columns - columns
             if len(deleted) > 0:
-                self.logger.debug(
-                    f"     columns deleted: {', '.join(sorted(deleted))}"
-                )
-                result['columns deleted'] = deleted
-                summary['columns deleted'] = deleted
+                self.logger.debug(f"     columns deleted: {', '.join(sorted(deleted))}")
+                result["columns deleted"] = deleted
+                summary["columns deleted"] = deleted
 
             in_common = other_columns & columns
             if len(in_common) > 0:
-                column_def = 'rowid, ' + ', '.join(
-                    [f'"{x}"' for x in in_common]
-                )
+                column_def = "rowid, " + ", ".join([f'"{x}"' for x in in_common])
             else:
                 # No columns shared
                 return result
@@ -595,13 +574,13 @@ class _Table(collections.abc.MutableMapping):
         for row in self.db.execute(sql):
             if last is None:
                 last = row
-            elif row['rowid'] == last['rowid']:
+            elif row["rowid"] == last["rowid"]:
                 changes = set()
                 for k1, v1, v2 in zip(last.keys(), last, row):
                     if v1 != v2:
                         changed_columns.add(k1)
                         changes.add((k1, v1, v2))
-                changed[row['rowid']] = changes
+                changed[row["rowid"]] = changes
                 last = None
             else:
                 last = row
@@ -609,19 +588,19 @@ class _Table(collections.abc.MutableMapping):
             self.logger.debug(
                 f"    columns changed: {', '.join(sorted(changed_columns))}"
             )
-            result['changed'] = changed
-            summary['columns changed'] = changed_columns
+            result["changed"] = changed
+            summary["columns changed"] = changed_columns
 
         # See about the rows added
         added = {}
-        if 'id' in self:
+        if "id" in self:
             for row in self.db.execute(
                 f"""
                 SELECT * FROM {table}
                 WHERE rowid NOT IN (SELECT rowid FROM {other_table})
                 """
             ):
-                added[row['id']] = row[1:]
+                added[row["id"]] = row[1:]
         else:
             for row in self.db.execute(
                 f"""
@@ -629,24 +608,24 @@ class _Table(collections.abc.MutableMapping):
                 WHERE rowid NOT IN (SELECT rowid FROM {other_table})
                 """
             ):
-                added[row['rowid']] = row[1:]
+                added[row["rowid"]] = row[1:]
 
         if len(added) > 0:
             self.logger.debug(f"         rows added: {len(added)}")
-            result['columns in added rows'] = row.keys()[1:]
-            result['added'] = added
-            summary['rows added'] = len(added)
+            result["columns in added rows"] = row.keys()[1:]
+            result["added"] = added
+            summary["rows added"] = len(added)
 
         # See about the rows deleted
         deleted = {}
-        if 'id' in self:
+        if "id" in self:
             for row in self.db.execute(
                 f"""
                 SELECT * FROM {other_table}
                 WHERE rowid NOT IN (SELECT rowid FROM {table})
                 """
             ):
-                deleted[row['id']] = row[1:]
+                deleted[row["id"]] = row[1:]
         else:
             for row in self.db.execute(
                 f"""
@@ -654,13 +633,13 @@ class _Table(collections.abc.MutableMapping):
                 WHERE rowid NOT IN (SELECT rowid FROM {table})
                 """
             ):
-                deleted[row['rowid']] = row[1:]
+                deleted[row["rowid"]] = row[1:]
 
         if len(deleted) > 0:
             self.logger.debug(f"       rows deleted: {len(deleted)}")
-            result['columns in deleted rows'] = row.keys()[1:]
-            result['deleted'] = deleted
-            summary['rows deleted'] = len(deleted)
+            result["columns in deleted rows"] = row.keys()[1:]
+            result["deleted"] = deleted
+            summary["rows deleted"] = len(deleted)
 
         # Detach the other database if needed
         if detach:
@@ -670,7 +649,7 @@ class _Table(collections.abc.MutableMapping):
             self.logger.debug("    no changes")
             result = None
         else:
-            result['summary'] = summary
+            result["summary"] = summary
 
         return result
 
@@ -696,7 +675,7 @@ class _Table(collections.abc.MutableMapping):
 
         return data
 
-    def get_column(self, column, sql=None, where=''):
+    def get_column(self, column, sql=None, where=""):
         """Return a column of data from the table.
 
         Parameters
@@ -711,7 +690,7 @@ class _Table(collections.abc.MutableMapping):
         """
         return _Column(self, column=column, sql=sql, where=where)
 
-    def get_column_data(self, column, sql=None, where=''):
+    def get_column_data(self, column, sql=None, where=""):
         """Return a column of data from the table as a list.
 
         Parameters
@@ -726,7 +705,7 @@ class _Table(collections.abc.MutableMapping):
         """
         result = []
         if sql is None:
-            sql = f'SELECT {column} FROM {self.table} {where}'
+            sql = f"SELECT {column} FROM {self.table} {where}"
 
         for row in self.db.execute(sql):
             result.append(row[0])
@@ -735,37 +714,37 @@ class _Table(collections.abc.MutableMapping):
     def delete(self, *args):
         """Delete rows matching the selection."""
         if len(args) == 0:
-            return self.db.execute(f'DELETE FROM {self.table}')
+            return self.db.execute(f"DELETE FROM {self.table}")
 
-        sql = f'DELETE FROM {self.table} WHERE'
+        sql = f"DELETE FROM {self.table} WHERE"
 
         parameters = []
         clause = []
         for col, op, value in grouped(args, 3):
-            if op == '==':
-                op = '='
+            if op == "==":
+                op = "="
             clause.append(f'"{col}" {op} ?')
             parameters.append(value)
 
-        sql += ' AND '.join(clause)
+        sql += " AND ".join(clause)
         return self.db.execute(sql, parameters)
 
     def rows(self, *args):
         """Return an iterator over the rows."""
         if len(args) == 0:
-            return self.db.execute(f'SELECT * FROM {self.table}')
+            return self.db.execute(f"SELECT * FROM {self.table}")
 
-        sql = f'SELECT * FROM {self.table} WHERE'
+        sql = f"SELECT * FROM {self.table} WHERE"
 
         parameters = []
         clause = []
         for col, op, value in grouped(args, 3):
-            if op == '==':
-                op = '='
+            if op == "==":
+                op = "="
             clause.append(f'"{col}" {op} ?')
             parameters.append(value)
 
-        sql += ' AND '.join(clause)
+        sql += " AND ".join(clause)
         return self.db.execute(sql, parameters)
 
     def _get_n_rows(self, **kwargs):
@@ -776,8 +755,7 @@ class _Table(collections.abc.MutableMapping):
         for key, value in kwargs.items():
             if key not in self:
                 raise KeyError(
-                    f'"{key}" is not an attribute of the table '
-                    f'{self.table}!'
+                    f'"{key}" is not an attribute of the table ' f"{self.table}!"
                 )
             length = self.length_of_values(value)
             lengths[key] = length
@@ -790,10 +768,10 @@ class _Table(collections.abc.MutableMapping):
                     n_rows = length
                 else:
                     raise IndexError(
-                        'key "{}" has the wrong number of values, '
-                        .format(key) +
-                        '{}. Should be 1 or the number of rows in {} ({}).'
-                        .format(length, self.table, n_rows)
+                        'key "{}" has the wrong number of values, '.format(key)
+                        + "{}. Should be 1 or the number of rows in {} ({}).".format(
+                            length, self.table, n_rows
+                        )
                     )
         return n_rows, lengths
 
@@ -818,9 +796,7 @@ class _Table(collections.abc.MutableMapping):
             other_table = other.table
         table = self.table
 
-        self.cursor.execute(
-            f'CREATE TABLE {table} AS SELECT * FROM {other_table}'
-        )
+        self.cursor.execute(f"CREATE TABLE {table} AS SELECT * FROM {other_table}")
         self.db.commit()
 
         # Detach the other database if needed
@@ -852,10 +828,10 @@ class _Table(collections.abc.MutableMapping):
     def to_dataframe(self):
         """Return the contents of the table as a Pandas Dataframe."""
         data = {}
-        for line in self.cursor.execute(f'SELECT rowid, * FROM {self.table}'):
+        for line in self.cursor.execute(f"SELECT rowid, * FROM {self.table}"):
             data[line[0]] = line[1:]
         columns = [x[0] for x in self.cursor.description[1:]]
 
-        df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
+        df = pandas.DataFrame.from_dict(data, orient="index", columns=columns)
 
         return df

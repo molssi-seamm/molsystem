@@ -137,9 +137,7 @@ class _System(CIFMixin, MutableMapping):
     def __len__(self):
         """The len() command"""
         self.cursor.execute(
-            "SELECT COUNT(*)"
-            "  FROM sqlite_master"
-            " WHERE type = 'table'"
+            "SELECT COUNT(*)" "  FROM sqlite_master" " WHERE type = 'table'"
         )
         return self.cursor.fetchone()[0]
 
@@ -276,9 +274,7 @@ class _System(CIFMixin, MutableMapping):
 
     @name.setter
     def name(self, value):
-        self.db.execute(
-            "UPDATE system SET name = ? WHERE id = ?", (value, self.id)
-        )
+        self.db.execute("UPDATE system SET name = ? WHERE id = ?", (value, self.id))
         self.db.commit()
 
     @property
@@ -315,7 +311,7 @@ class _System(CIFMixin, MutableMapping):
         """
         configuration = self.get_configuration(configuration)
 
-        cid = self['configuration'].append(
+        cid = self["configuration"].append(
             system=self.id,
             name=name,
             periodicity=configuration.periodicity,
@@ -323,7 +319,7 @@ class _System(CIFMixin, MutableMapping):
             symmetry=configuration.symmetry_id,
             cell=configuration.cell_id,
             atomset=configuration.atomset,
-            bondset=configuration.bondset
+            bondset=configuration.bondset,
         )[0]
 
         return cid
@@ -337,7 +333,7 @@ class _System(CIFMixin, MutableMapping):
         cell=None,
         atomset=None,
         bondset=None,
-        make_current=True
+        make_current=True,
     ):
         """Add a new configuration to the system.
 
@@ -368,25 +364,25 @@ class _System(CIFMixin, MutableMapping):
         """
         kwargs = {}
         if name is not None:
-            kwargs['name'] = name
+            kwargs["name"] = name
         if periodicity != 0:
             if coordinatesystem is None:
-                kwargs['coordinatesystem'] = 'fractional'
+                kwargs["coordinatesystem"] = "fractional"
             else:
-                if coordinatesystem.lower()[0] == 'c':
-                    kwargs['coordinatesystem'] = 'Cartesian'
+                if coordinatesystem.lower()[0] == "c":
+                    kwargs["coordinatesystem"] = "Cartesian"
                 else:
-                    kwargs['coordinatesystem'] = 'fractional'
+                    kwargs["coordinatesystem"] = "fractional"
         if symmetry is not None:
-            kwargs['symmetry'] = symmetry
+            kwargs["symmetry"] = symmetry
         if cell is not None:
-            kwargs['cell'] = cell
+            kwargs["cell"] = cell
         if atomset is not None:
-            kwargs['atomset'] = atomset
+            kwargs["atomset"] = atomset
         if bondset is not None:
-            kwargs['bondset'] = bondset
+            kwargs["bondset"] = bondset
 
-        cid = self['configuration'].append(system=self.id, **kwargs)[0]
+        cid = self["configuration"].append(system=self.id, **kwargs)[0]
 
         if make_current:
             self._current_configuration_id = cid
@@ -430,9 +426,9 @@ class _System(CIFMixin, MutableMapping):
         in_common = tables & other_tables
 
         if len(added) > 0:
-            result['tables added'] = added
+            result["tables added"] = added
         if len(deleted) > 0:
-            result['tables deleted'] = deleted
+            result["tables deleted"] = deleted
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
@@ -508,18 +504,14 @@ class _System(CIFMixin, MutableMapping):
         if len(ids) == 0:
             raise ValueError(f"The configuration '{name}' does not exist.")
         elif len(ids) > 1:
-            raise ValueError(
-                f"There is more than one configuration named '{name}'"
-            )
+            raise ValueError(f"There is more than one configuration named '{name}'")
         return ids[0]
 
     def list(self):
         """Return a list of all the tables in the system."""
         result = []
         for row in self.db.execute(
-            "SELECT name"
-            "  FROM sqlite_master"
-            " WHERE type = 'table'"
+            "SELECT name" "  FROM sqlite_master" " WHERE type = 'table'"
         ):
-            result.append(row['name'])
+            result.append(row["name"])
         return result

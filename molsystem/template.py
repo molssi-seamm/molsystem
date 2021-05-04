@@ -63,7 +63,7 @@ class _Template(SMILESMixin, OpenBabelMixin, object):
             The Configuration object.
         """
         if not self.is_full:
-            raise TypeError('Not a full template')
+            raise TypeError("Not a full template")
 
         if self._configuration is None:
             cid = self.configuration_id
@@ -87,7 +87,7 @@ class _Template(SMILESMixin, OpenBabelMixin, object):
             The id of the configuration in the configuration table.
         """
         if not self.is_full:
-            raise TypeError('Not a full template')
+            raise TypeError("Not a full template")
 
         if self._configuration_id is None:
             sql = "SELECT configuration FROM template WHERE id = ?"
@@ -209,8 +209,7 @@ class _Template(SMILESMixin, OpenBabelMixin, object):
 
     @property
     def is_full(self):
-        """Whether this has a template configuration, i.e. is a full template.
-        """
+        """Whether this has a template configuration, i.e. is a full template."""
         if self._is_full is None:
             if self._configuration_id is None:
                 sql = "SELECT configuration FROM template WHERE id = ?"

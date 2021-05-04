@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest  # noqa: F401
+
 """Tests for handling PDB files."""
 
 ruler = """\
@@ -194,11 +195,11 @@ END"""  # noqa: E501, W291
 
     tmp = correct.splitlines()
     del tmp[1]
-    tmp_correct = '\n'.join(tmp)
+    tmp_correct = "\n".join(tmp)
 
     tmp = text.splitlines()
     del tmp[1]
-    tmp_text = '\n'.join(tmp)
+    tmp_text = "\n".join(tmp)
 
     if tmp_text != tmp_correct:
         print(text)
@@ -225,14 +226,14 @@ def test_from_to(configuration):
     tmp2 = []
     for line in tmp:
         tmp2.append(line.rstrip())
-    tmp_text = '\n'.join(tmp2)
+    tmp_text = "\n".join(tmp2)
 
     if tmp_text != heme:
-        print('diffs')
+        print("diffs")
         i = 0
         for old, new in zip(heme.splitlines(), tmp2):
             i += 1
             if old != new:
-                print(f'{i:3} {old}\n    {new}')
+                print(f"{i:3} {old}\n    {new}")
 
     assert tmp_text == heme

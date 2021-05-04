@@ -839,10 +839,10 @@ symbol_to_mass = {}
 atno_to_mass = {}
 
 for symbol, value in data.items():
-    symbol_to_atno[symbol] = value['atomic number']
-    atno_to_symbol[value['atomic number']] = symbol
-    symbol_to_mass[symbol] = value['atomic weight']
-    atno_to_mass[value['atomic number']] = value['atomic weight']
+    symbol_to_atno[symbol] = value["atomic number"]
+    atno_to_symbol[value["atomic number"]] = symbol
+    symbol_to_mass[symbol] = value["atomic weight"]
+    atno_to_mass[value["atomic number"]] = value["atomic weight"]
 
 del symbol
 del value

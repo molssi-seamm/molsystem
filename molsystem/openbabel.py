@@ -8,8 +8,8 @@ try:
     from openbabel import openbabel
 except ModuleNotFoundError:
     print(
-        'Please install openbabel using conda:\n'
-        '     conda install -c conda-forge openbabel'
+        "Please install openbabel using conda:\n"
+        "     conda install -c conda-forge openbabel"
     )
     raise
 
@@ -20,8 +20,7 @@ class OpenBabelMixin:
     """A mixin for handling OpenBabel via its Python interface."""
 
     def to_OBMol(self):
-        """Return an OBMol object for the configuration, template, or subset.
-        """
+        """Return an OBMol object for the configuration, template, or subset."""
         ob_mol = openbabel.OBMol()
         for atno in self.atoms.atomic_numbers:
             ob_atom = ob_mol.NewAtom()
@@ -30,7 +29,7 @@ class OpenBabelMixin:
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
         for row in self.bonds.bonds():
-            ob_mol.AddBond(index[row['i']], index[row['j']], row['bondorder'])
+            ob_mol.AddBond(index[row["i"]], index[row["j"]], row["bondorder"])
 
         return ob_mol
 

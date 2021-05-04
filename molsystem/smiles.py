@@ -8,8 +8,8 @@ try:
     from openbabel import openbabel
 except ModuleNotFoundError:
     print(
-        'Please install openbabel using conda:\n'
-        '     conda install -c conda-forge openbabel'
+        "Please install openbabel using conda:\n"
+        "     conda install -c conda-forge openbabel"
     )
     raise
 
@@ -49,7 +49,7 @@ class SMILESMixin:
         str
             The SMILES string, or (SMILES, name) if the rname is requested
         """
-        logger.info('to_smiles')
+        logger.info("to_smiles")
 
         obConversion = openbabel.OBConversion()
         if canonical:
@@ -60,7 +60,7 @@ class SMILESMixin:
         mol = self.to_OBMol()
 
         if hydrogens:
-            obConversion.AddOption('h')
+            obConversion.AddOption("h")
         smiles = obConversion.WriteString(mol)
 
         logger.info(f"smiles = '{smiles}'")
@@ -86,7 +86,7 @@ class SMILESMixin:
 
         obConversion = openbabel.OBConversion()
         obConversion.SetInAndOutFormats("smi", "mdl")
-        obConversion.AddOption('3')
+        obConversion.AddOption("3")
         mol = openbabel.OBMol()
         obConversion.ReadString(mol, smiles)
 
@@ -126,7 +126,7 @@ class GenSMARTS(object):
     """
 
     def __init__(self, mol_object=None):
-        self.smarts = ''
+        self.smarts = ""
         self._mol_object = None
         self.symbols = []
         self.visited = []
@@ -152,9 +152,9 @@ class GenSMARTS(object):
             # Find the neighbors of each atom for walking the structure
             tmp_neighbors = {i: [] for i in atoms.ids}
             for bond in bonds.bonds():
-                i = bond['i']
-                j = bond['j']
-                bo = bond['bondorder']
+                i = bond["i"]
+                j = bond["j"]
+                bo = bond["bondorder"]
                 tmp_neighbors[i].append((j, bo))
                 tmp_neighbors[j].append((i, bo))
 
@@ -187,26 +187,26 @@ class GenSMARTS(object):
         nX = len(self.neighbors[atom])
         nH = 0
         for neighbor, bondorder in self.neighbors[atom]:
-            if self.symbols[neighbor] == 'H':
+            if self.symbols[neighbor] == "H":
                 nH += 1
 
         # Find any non-hydrogen neighbors that have not been visited,
         # and recurse.
         sub_smarts = []
         for neighbor, bondorder in self.neighbors[atom]:
-            if self.symbols[neighbor] != 'H' and not self.visited[neighbor]:
+            if self.symbols[neighbor] != "H" and not self.visited[neighbor]:
                 if bondorder == 1:
-                    bond = ''
+                    bond = ""
                 elif bondorder == 2:
-                    bond = '='
+                    bond = "="
                 elif bondorder == 3:
-                    bond = '#'
+                    bond = "#"
                 elif bondorder == 5:
                     # Aromatic
                     symbol = symbol.lower()
-                    bond = ':'
+                    bond = ":"
                 else:
-                    bond = '~'
+                    bond = "~"
                 sub_smarts.append(f"{bond}{self._recurse(neighbor)}")
 
         smarts = f"[{symbol}H{nH}X{nX}]"

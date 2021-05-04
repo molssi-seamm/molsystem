@@ -18,7 +18,7 @@ from molsystem import SystemDB
 
 def test_construction():
     """Simplest test that we can make a SystemDB object"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
     assert str(type(db)) == "<class 'molsystem.system_db.SystemDB'>"
     assert db.n_systems == 0
     db.close()
@@ -26,8 +26,8 @@ def test_construction():
 
 def test_system():
     """Test that we can get a System object"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     assert str(type(system)) == "<class 'molsystem.system._System'>"
     assert system.n_configurations == 0
     db.close()
@@ -35,8 +35,8 @@ def test_system():
 
 def test_configuration():
     """Test that we can get a Configuration object"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     configuration = system.create_configuration()
     _type = str(type(configuration))
     assert _type == "<class 'molsystem.configuration._Configuration'>"
@@ -45,8 +45,8 @@ def test_configuration():
 
 def test_atoms():
     """Test that we can get an Atoms object"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     configuration = system.create_configuration()
     atoms = configuration.atoms
     assert str(type(atoms)) == "<class 'molsystem.atoms._Atoms'>"
@@ -55,11 +55,11 @@ def test_atoms():
 
 def test_adding_atoms():
     """Test that we can add atoms"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     configuration = system.create_configuration()
     atoms = configuration.atoms
-    symbol = ['Ar'] * 4
+    symbol = ["Ar"] * 4
     X = [2.0, 0.0, -2.0, 0.0]
     Y = [0.0, 2.0, 0.0, -2.0]
     Z = [0.0] * 4
@@ -71,8 +71,8 @@ def test_adding_atoms():
 
 def test_bonds():
     """Test that we can get an Bonds object"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     configuration = system.create_configuration()
     bonds = configuration.bonds
     assert str(type(bonds)) == "<class 'molsystem.bonds._Bonds'>"
@@ -81,8 +81,8 @@ def test_bonds():
 
 def test_adding_bonds():
     """Test that we can add bonds"""
-    db = SystemDB(filename='file:seamm_db?mode=memory&cache=shared')
-    system = db.create_system(name='default')
+    db = SystemDB(filename="file:seamm_db?mode=memory&cache=shared")
+    system = db.create_system(name="default")
     configuration = system.create_configuration()
 
     # TIP3P
@@ -98,12 +98,12 @@ def test_adding_bonds():
     Z = [0.0, z, z]
 
     atno = [8, 1, 1]
-    name = ['O', 'H1', 'H2']
+    name = ["O", "H1", "H2"]
     i_atom = [0, 0]
     j_atom = [1, 2]
 
     atoms = configuration.atoms
-    atoms.add_attribute('name', 'str', default='')
+    atoms.add_attribute("name", "str", default="")
     atom_ids = atoms.append(atno=atno, x=X, y=Y, z=Z, name=name)
 
     i = [atom_ids[x] for x in i_atom]
@@ -121,8 +121,26 @@ def test_adding_bonds():
 def test_adding_reading_cif_file(amino_acids):
     """Test that we can read a cif file with many systems."""
     answer = [
-        'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLU', 'GLN', 'GLY', 'HIS', 'ILE',
-        'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'
+        "ALA",
+        "ARG",
+        "ASN",
+        "ASP",
+        "CYS",
+        "GLU",
+        "GLN",
+        "GLY",
+        "HIS",
+        "ILE",
+        "LEU",
+        "LYS",
+        "MET",
+        "PHE",
+        "PRO",
+        "SER",
+        "THR",
+        "TRP",
+        "TYR",
+        "VAL",
     ]
     assert amino_acids.n_systems == 20
     names = amino_acids.names
@@ -134,8 +152,26 @@ def test_adding_reading_cif_file(amino_acids):
 def test_accessing_systems(amino_acids):
     """Test that we can access each system."""
     answer = [
-        13, 27, 17, 16, 14, 19, 20, 10, 21, 22, 22, 25, 20, 23, 17, 14, 17, 27,
-        24, 19
+        13,
+        27,
+        17,
+        16,
+        14,
+        19,
+        20,
+        10,
+        21,
+        22,
+        22,
+        25,
+        20,
+        23,
+        17,
+        14,
+        17,
+        27,
+        24,
+        19,
     ]
     assert amino_acids.n_systems == 20
     n_atoms = [x.configuration.n_atoms for x in amino_acids.systems]
