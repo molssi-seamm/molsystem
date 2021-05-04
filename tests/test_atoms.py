@@ -6,6 +6,7 @@ import pprint  # noqa: F401
 import pytest  # noqa: F401
 
 import molsystem  # noqa: F401
+
 """Tests for `molsystem` package."""
 
 x = [1.0, 2.0, 3.0]
@@ -22,7 +23,7 @@ def test_construction(configuration):
 
 def test_keys(atoms):
     """Test the default keys in an Atoms object"""
-    result = ['atno', 'configuration', 'id', 'x', 'y', 'z']
+    result = ["atno", "configuration", "id", "x", "y", "z"]
 
     assert sorted([*atoms.keys()]) == result
 
@@ -50,10 +51,10 @@ def test_append_several_scalar(atoms):
     """Test adding several atoms with some scalar values"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=0.0, atno=6)
-    assert atoms['x'] == x
-    assert atoms['y'] == y
-    assert atoms['z'] == [0.0, 0.0, 0.0]
-    assert atoms['atno'] == [6, 6, 6]
+    assert atoms["x"] == x
+    assert atoms["y"] == y
+    assert atoms["z"] == [0.0, 0.0, 0.0]
+    assert atoms["atno"] == [6, 6, 6]
 
 
 def test_append_using_default(atoms):
@@ -62,7 +63,7 @@ def test_append_using_default(atoms):
         tmp.append(x=x, y=y, z=z)
 
     assert atoms.n_atoms == 3
-    assert atoms['atno'] == [None, None, None]
+    assert atoms["atno"] == [None, None, None]
 
 
 def test_append_error(atoms):
@@ -72,26 +73,26 @@ def test_append_error(atoms):
             tmp.append(x=x, y=y, z=z, atno=atno, bad=99)
     assert atoms.n_atoms == 0
     assert atoms.configuration.version == 0
-    assert (str(e.value) == '\'"bad" is not an attribute of the atoms.\'')
+    assert str(e.value) == "'\"bad\" is not an attribute of the atoms.'"
 
 
 def test_add_attribute(atoms):
     """Test adding an attribute"""
-    result = ['atno', 'configuration', 'id', 'name', 'x', 'y', 'z']
+    result = ["atno", "configuration", "id", "name", "x", "y", "z"]
     with atoms as tmp:
-        tmp.add_attribute('name')
+        tmp.add_attribute("name")
     assert sorted([*atoms.keys()]) == result
 
 
 def test_add_duplicate_attribute(atoms):
     """Test duplicate adding an attribute"""
-    result = ['atno', 'configuration', 'id', 'name', 'x', 'y', 'z']
+    result = ["atno", "configuration", "id", "name", "x", "y", "z"]
     with atoms as tmp:
-        tmp.add_attribute('name')
+        tmp.add_attribute("name")
     with pytest.raises(RuntimeError) as e:
         with atoms as tmp:
             ver = tmp.configuration.version
-            tmp.add_attribute('name')
+            tmp.add_attribute("name")
     assert sorted([*atoms.keys()]) == result
     assert ver == 1
     assert atoms.configuration.version == 1
@@ -100,12 +101,12 @@ def test_add_duplicate_attribute(atoms):
 
 def test_add_coordinates_attribute(atoms):
     """Test adding an attribute"""
-    result = ['atno', 'configuration', 'id', 'spin', 'x', 'y', 'z']
+    result = ["atno", "configuration", "id", "spin", "x", "y", "z"]
     with atoms as tmp:
-        tmp.add_attribute('spin', configuration_dependent=True)
+        tmp.add_attribute("spin", configuration_dependent=True)
     assert sorted([*atoms.keys()]) == result
-    del atoms['spin']
-    result.remove('spin')
+    del atoms["spin"]
+    result.remove("spin")
     assert sorted([*atoms.keys()]) == result
 
 
@@ -113,24 +114,24 @@ def test_add_attribute_with_values(atoms):
     """Test adding several atoms"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-        tmp.add_attribute('name', values=['H1', 'O', 'H2'])
-    assert np.array_equal(atoms['name'], ['H1', 'O', 'H2'])
+        tmp.add_attribute("name", values=["H1", "O", "H2"])
+    assert np.array_equal(atoms["name"], ["H1", "O", "H2"])
 
 
 def test_add_attribute_with_one_value(atoms):
     """Test adding several atoms"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-        tmp.add_attribute('name', values=['H1'])
-    assert np.array_equal(atoms['name'], ['H1', 'H1', 'H1'])
+        tmp.add_attribute("name", values=["H1"])
+    assert np.array_equal(atoms["name"], ["H1", "H1", "H1"])
 
 
 def test_add_attribute_with_one_value_not_list(atoms):
     """Test adding an attribute using a scalar value"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-        tmp.add_attribute('spin', coltype='int', default=0, values=1)
-    assert atoms['spin'] == [1, 1, 1]
+        tmp.add_attribute("spin", coltype="int", default=0, values=1)
+    assert atoms["spin"] == [1, 1, 1]
 
 
 def test_add_attribute_with_wrong_number_of_values(atoms):
@@ -138,7 +139,7 @@ def test_add_attribute_with_wrong_number_of_values(atoms):
     with pytest.raises(IndexError) as e:
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno)
-            tmp.add_attribute('spin', coltype='int', default=0, values=[1, 2])
+            tmp.add_attribute("spin", coltype="int", default=0, values=[1, 2])
     assert atoms.n_atoms == 0
     assert str(e.value) == (
         "The number of values given, "
@@ -150,38 +151,38 @@ def test_get_attribute_by_index(atoms):
     """Get a single value of an attribute by index"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert atoms['atno'][1] == 1
+    assert atoms["atno"][1] == 1
 
 
 def test_get_attribute_by_slice(atoms):
     """Get several values using a slice"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert atoms['atno'][::2] == [8, 1]
+    assert atoms["atno"][::2] == [8, 1]
 
 
 def test_getting_x(atoms):
     """Test getting the x column of coordinates"""
     with atoms as tmp:
         tmp.append(x=x, y=y, z=z, atno=atno)
-    assert atoms['x'] == [1.0, 2.0, 3.0]
+    assert atoms["x"] == [1.0, 2.0, 3.0]
 
 
 def test_contains(atoms):
     """Test the __contains__ or 'in' functionalty"""
-    assert 'x' in atoms
+    assert "x" in atoms
 
 
 def test_not_in(atoms):
     """Test the __contains__ or 'in' functionalty"""
-    assert 'abc' not in atoms
+    assert "abc" not in atoms
 
 
 def test_deleting_column(atoms):
     """Test deleting a column"""
     with atoms as tmp:
-        del tmp['atno']
-    assert sorted([*atoms.keys()]) == ['configuration', 'id', 'x', 'y', 'z']
+        del tmp["atno"]
+    assert sorted([*atoms.keys()]) == ["configuration", "id", "x", "y", "z"]
 
 
 def test_set_column(atoms):
@@ -190,11 +191,11 @@ def test_set_column(atoms):
         tmp.append(x=x, y=y, z=z, atno=atno)
 
     with atoms as tmp:
-        tmp['atno'] = 10
+        tmp["atno"] = 10
 
     assert atoms.n_atoms == 3
     assert atoms.configuration.version == 2
-    assert atoms['atno'] == [10, 10, 10]
+    assert atoms["atno"] == [10, 10, 10]
 
 
 def test_set_column_with_array(atoms):
@@ -205,11 +206,11 @@ def test_set_column_with_array(atoms):
         tmp.append(x=x, y=y, z=z, atno=atno)
 
     with atoms as tmp:
-        tmp['x'] = values
+        tmp["x"] = values
 
     assert atoms.n_atoms == 3
     assert atoms.configuration.version == 2
-    assert atoms['x'] == values
+    assert atoms["x"] == values
 
 
 def test_append_error_no_coordinates(atoms):
@@ -218,7 +219,7 @@ def test_append_error_no_coordinates(atoms):
         tmp.append(y=y, z=z, atno=atno)
 
     assert atoms.n_atoms == 3
-    assert atoms['x'] == [None, None, None]
+    assert atoms["x"] == [None, None, None]
 
 
 def test_append_error_invalid_column(atoms):
@@ -227,7 +228,7 @@ def test_append_error_invalid_column(atoms):
         with atoms as tmp:
             tmp.append(x=x, y=y, z=z, atno=atno, junk=99)
     assert atoms.n_atoms == 0
-    assert str(e.value) == '\'"junk" is not an attribute of the atoms.\''
+    assert str(e.value) == "'\"junk\" is not an attribute of the atoms.'"
 
 
 def test_append_error_invalid_length(atoms):
@@ -238,18 +239,18 @@ def test_append_error_invalid_length(atoms):
     assert atoms.n_atoms == 0
     assert str(e.value) == (
         'key "atno" has the wrong number of values, '
-        '2. Should be 1 or the number of atoms (3).'
+        "2. Should be 1 or the number of atoms (3)."
     )
 
 
 def test_add_attribute_with_no_default(atoms):
     """Test adding an attribute with no default, then several atoms"""
     with atoms as tmp:
-        tmp.add_attribute('new', coltype='float')
+        tmp.add_attribute("new", coltype="float")
         tmp.append(x=x, y=y, z=z, atno=atno, new=[-1, -2, -3])
 
     assert atoms.n_atoms == 3
-    assert atoms['new'] == [-1, -2, -3]
+    assert atoms["new"] == [-1, -2, -3]
 
 
 def test_equality(two_configurations):
@@ -336,7 +337,7 @@ def test_equals_with_change(atoms):
         tmp.append(x=x, y=y, z=z, atno=atno)
 
     atoms2 = atoms
-    atoms2['atno'][0] = 22
+    atoms2["atno"][0] = 22
 
     assert atoms == atoms2
 
@@ -373,10 +374,10 @@ def test_selected_atoms(AceticAcid):
     """Test getting the number of selected atoms."""
     configuration = AceticAcid
 
-    assert configuration.atoms.get_n_atoms("atno", '==', 6) == 2
+    assert configuration.atoms.get_n_atoms("atno", "==", 6) == 2
     x = []
-    for row in configuration.atoms.atoms("atno", '==', 6):
-        x.append(row['x'])
+    for row in configuration.atoms.atoms("atno", "==", 6):
+        x.append(row["x"])
     assert x == [1.0797, 0.5713]
 
 

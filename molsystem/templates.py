@@ -37,7 +37,7 @@ class _Templates(_Table):
 
     def __init__(self, system_db, logger=logger):
         """Initialize the instance."""
-        super().__init__(system_db, table='template', logger=logger)
+        super().__init__(system_db, table="template", logger=logger)
 
     # def __repr__(self):
     #     """The string representation of this object"""
@@ -59,12 +59,7 @@ class _Templates(_Table):
         return self.n_rows
 
     def create(
-        self,
-        name,
-        category='general',
-        configuration=None,
-        smiles=True,
-        **kwargs
+        self, name, category="general", configuration=None, smiles=True, **kwargs
     ):
         """Create one templates.
 
@@ -100,20 +95,13 @@ class _Templates(_Table):
             else:
                 cid = configuration.id
             canonical_smiles = configuration.to_smiles(canonical=True)
-            kwargs['canonical_smiles'] = canonical_smiles
+            kwargs["canonical_smiles"] = canonical_smiles
 
-        tid = self.append(
-            category=category, name=name, configuration=cid, **kwargs
-        )[0]
+        tid = self.append(category=category, name=name, configuration=cid, **kwargs)[0]
         return _Template(self.system_db, tid)
 
     def create_many(
-        self,
-        name,
-        category='general',
-        configuration=None,
-        smiles=True,
-        **kwargs
+        self, name, category="general", configuration=None, smiles=True, **kwargs
     ):
         """Create one or more templates.
 
@@ -145,14 +133,14 @@ class _Templates(_Table):
         else:
             cids = []
             if isinstance(configuration, Sequence):
-                kwargs['canonical_smiles'] = []
+                kwargs["canonical_smiles"] = []
                 if isinstance(configuration, int):
                     cid = configuration
                     configuration = self.system_db.get_configuration(cid)
                 else:
                     cid = configuration.id
                 canonical_smiles = configuration.to_smiles(canonical=True)
-                kwargs['canonical_smiles'].append(canonical_smiles)
+                kwargs["canonical_smiles"].append(canonical_smiles)
                 cids.append[cid]
             else:
                 if isinstance(configuration, int):
@@ -161,14 +149,12 @@ class _Templates(_Table):
                 else:
                     cids = configuration.id
                 canonical_smiles = configuration.to_smiles(canonical=True)
-                kwargs['canonical_smiles'] = canonical_smiles
+                kwargs["canonical_smiles"] = canonical_smiles
 
-        tids = self.append(
-            category=category, name=name, configuration=cids, **kwargs
-        )
+        tids = self.append(category=category, name=name, configuration=cids, **kwargs)
         return [_Template(self.system_db, tid) for tid in tids]
 
-    def exists(self, name, category='general'):
+    def exists(self, name, category="general"):
         """Return whether a given template exists.
 
         Parameters
@@ -189,7 +175,7 @@ class _Templates(_Table):
         self.cursor.execute(sql, (category, name))
         return self.cursor.fetchone()[0]
 
-    def get(self, name, category='general'):
+    def get(self, name, category="general"):
         """Return a template.
 
         Parameters
@@ -217,7 +203,7 @@ class _Templates(_Table):
             tid = name
         return _Template(self.system_db, tid)
 
-    def get_id(self, name, category='general'):
+    def get_id(self, name, category="general"):
         """Return the id of a template.
 
         Parameters

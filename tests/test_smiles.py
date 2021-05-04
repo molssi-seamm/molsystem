@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import pytest  # noqa: F401
+
 """Tests for handling SMILES."""
 
 
 def test_to_smiles(AceticAcid):
     """Create a SMILES string from a system"""
-    correct = 'CC(=O)O'
+    correct = "CC(=O)O"
     smiles = AceticAcid.to_smiles()
 
     if smiles != correct:
@@ -17,7 +18,7 @@ def test_to_smiles(AceticAcid):
 
 def test_to_smiles_with_name(AceticAcid):
     """Create a SMILES string from a system"""
-    correct = 'CC(=O)O'
+    correct = "CC(=O)O"
     smiles = AceticAcid.smiles
 
     if smiles != correct:
@@ -27,7 +28,7 @@ def test_to_smiles_with_name(AceticAcid):
 
 def test_to_canonical_smiles(AceticAcid):
     """Create a SMILES string from a system"""
-    correct = 'CC(=O)O'
+    correct = "CC(=O)O"
     smiles = AceticAcid.to_smiles(canonical=True)
 
     if smiles != correct:
@@ -38,7 +39,7 @@ def test_to_canonical_smiles(AceticAcid):
 def test_several_molecules(CH3COOH_3H2O):
     """System with acetic acid and 3 waters"""
     system = CH3COOH_3H2O
-    correct = 'CC(=O)O.O.O.O'
+    correct = "CC(=O)O.O.O.O"
 
     smiles = system.to_smiles()
 
@@ -50,7 +51,7 @@ def test_several_molecules(CH3COOH_3H2O):
 def test_several_molecules_canonical(CH3COOH_3H2O):
     """System with acetic acid and 3 waters"""
     system = CH3COOH_3H2O
-    correct = 'CC(=O)O.O.O.O'
+    correct = "CC(=O)O.O.O.O"
 
     smiles = system.to_smiles(canonical=True)
 
@@ -61,8 +62,8 @@ def test_several_molecules_canonical(CH3COOH_3H2O):
 
 def test_from_smiles(configuration):
     """Create a configuration from SMILES"""
-    correct = 'CC(=O)O'
-    configuration.from_smiles('OC(=O)C', name='acetic acid')
+    correct = "CC(=O)O"
+    configuration.from_smiles("OC(=O)C", name="acetic acid")
     result = configuration.to_smiles(canonical=True)
 
     if result != correct:

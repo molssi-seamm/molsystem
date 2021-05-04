@@ -33,7 +33,7 @@ class _Bonds(_Table):
 
         self._bondset = self._configuration.bondset
 
-        super().__init__(configuration._system_db, 'bond')
+        super().__init__(configuration._system_db, "bond")
 
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
@@ -60,7 +60,7 @@ class _Bonds(_Table):
     @property
     def bondorders(self):
         """The bond orders."""
-        return self.get_column_data('bondorder')
+        return self.get_column_data("bondorder")
 
     @property
     def bondset(self):
@@ -86,8 +86,7 @@ class _Bonds(_Table):
     def n_bonds(self):
         """The number of bonds."""
         self.cursor.execute(
-            "SELECT COUNT(*) FROM bondset_bond WHERE bondset = ?",
-            (self.bondset,)
+            "SELECT COUNT(*) FROM bondset_bond WHERE bondset = ?", (self.bondset,)
         )
         return self.cursor.fetchone()[0]
 
@@ -101,7 +100,7 @@ class _Bonds(_Table):
         """The system that we belong to."""
         if self._system is None:
             self.cursor.execute(
-                'SELECT system FROM configuration WHERE id = ?', (self.id,)
+                "SELECT system FROM configuration WHERE id = ?", (self.id,)
             )
             self._system = self.system_db.get_system(self.cursor.fetchone()[0])
         return self._system
@@ -128,18 +127,15 @@ class _Bonds(_Table):
         other : [int, float, str] optional
             Other optional attributes of bonds.
         """
-        if 'bonds' in kwargs:
-            bonds = kwargs.pop('bonds')
+        if "bonds" in kwargs:
+            bonds = kwargs.pop("bonds")
             if isinstance(bonds, sqlite3.Row):
                 for item in bonds.keys():
-                    if item != 'id':
+                    if item != "id":
                         kwargs[item] = bonds[item]
-            elif (
-                isinstance(bonds, Sequence) and
-                isinstance(bonds[0], sqlite3.Row)
-            ):
+            elif isinstance(bonds, Sequence) and isinstance(bonds[0], sqlite3.Row):
                 for item in bonds[0].keys():
-                    if item != 'id':
+                    if item != "id":
                         kwargs[item] = [row[item] for row in bonds]
             else:
                 try:
@@ -155,11 +151,11 @@ class _Bonds(_Table):
                     )
 
         # Check keys and lengths of added bonds
-        if 'i' not in kwargs or 'j' not in kwargs:
+        if "i" not in kwargs or "j" not in kwargs:
             raise KeyError("The atoms i & j are required!")
 
-        i = kwargs.pop('i')
-        j = kwargs.pop('j')
+        i = kwargs.pop("i")
+        j = kwargs.pop("j")
         try:
             len_i = len(i)
         except TypeError:
@@ -182,7 +178,7 @@ class _Bonds(_Table):
         elif len_i != len_j:
             raise IndexError(
                 f'key "j" has the wrong number of values, {len_j}. '
-                f'Should be 1 or the number of values in i, {len_i}.'
+                f"Should be 1 or the number of values in i, {len_i}."
             )
         # Ensure that i < j
 
@@ -196,9 +192,7 @@ class _Bonds(_Table):
         for i_, j_ in zip(i, j):
             # will need to handle offsets here at some point
             if not isinstance(i_, int) or not isinstance(j_, int):
-                raise TypeError(
-                    "'i' and 'j', the atom indices, must be integers"
-                )
+                raise TypeError("'i' and 'j', the atom indices, must be integers")
             if i_ < j_:
                 i2.append(i_)
                 j2.append(j_)
@@ -209,7 +203,7 @@ class _Bonds(_Table):
         ids = super().append(i=i2, j=j2, **kwargs)
 
         # And to the bondset
-        table = _Table(self.system_db, 'bondset_bond')
+        table = _Table(self.system_db, "bondset_bond")
         table.append(bondset=self.bondset, bond=ids)
 
         return ids
@@ -277,7 +271,7 @@ class _Bonds(_Table):
 
         if bond_id is None:
             if not force:
-                raise ValueError('The bond did not exist.')
+                raise ValueError("The bond did not exist.")
         else:
             self.cursor.execute("DELETE FROM bond WHERE id = ?", (bond_id,))
 
@@ -333,22 +327,22 @@ class _Bonds(_Table):
         columns = self._columns()
         other_columns = other._columns()
 
-        column_defs = ', '.join(columns)
-        other_column_defs = ', '.join(other_columns)
+        column_defs = ", ".join(columns)
+        other_column_defs = ", ".join(other_columns)
 
         if columns == other_columns:
             column_def = column_defs
         else:
             added = columns - other_columns
             if len(added) > 0:
-                result['columns added'] = list(added)
+                result["columns added"] = list(added)
             deleted = other_columns - columns
             if len(deleted) > 0:
-                result['columns deleted'] = list(deleted)
+                result["columns deleted"] = list(deleted)
 
             in_common = other_columns & columns
             if len(in_common) > 0:
-                column_def = ', '.join(in_common)
+                column_def = ", ".join(in_common)
             else:
                 # No columns shared
                 return result
@@ -423,18 +417,18 @@ class _Bonds(_Table):
         for row in self.db.execute(sql):
             if last is None:
                 last = row
-            elif row['id'] == last['id']:
+            elif row["id"] == last["id"]:
                 # changes = []
                 changes = set()
                 for k1, v1, v2 in zip(last.keys(), last, row):
                     if v1 != v2:
                         changes.add((k1, v1, v2))
-                changed[row['id']] = changes
+                changed[row["id"]] = changes
                 last = None
             else:
                 last = row
         if len(changed) > 0:
-            result['changed'] = changed
+            result["changed"] = changed
 
         # See about the rows added
         added = {}
@@ -455,11 +449,11 @@ class _Bonds(_Table):
                )
         """
         for row in self.db.execute(sql):
-            added[row['id']] = row[1:]
+            added[row["id"]] = row[1:]
 
         if len(added) > 0:
-            result['columns in added rows'] = row.keys()[1:]
-            result['added'] = added
+            result["columns in added rows"] = row.keys()[1:]
+            result["added"] = added
 
         # See about the rows deleted
         deleted = {}
@@ -480,11 +474,11 @@ class _Bonds(_Table):
                )
         """
         for row in self.db.execute(sql):
-            deleted[row['id']] = row[1:]
+            deleted[row["id"]] = row[1:]
 
         if len(deleted) > 0:
-            result['columns in deleted rows'] = row.keys()[1:]
-            result['deleted'] = deleted
+            result["columns in deleted rows"] = row.keys()[1:]
+            result["deleted"] = deleted
 
         # Detach the other database if needed
         if detach:
@@ -541,7 +535,7 @@ class _Bonds(_Table):
             self.cursor.execute(sql, (i, self.bondset))
             row = self.cursor.fetchone()
             if row is None and not force:
-                raise KeyError(f'No bond id = {i} found')
+                raise KeyError(f"No bond id = {i} found")
         else:
             if i > j:
                 j, i = i, j
@@ -553,7 +547,7 @@ class _Bonds(_Table):
             self.cursor.execute(sql, (i, j, self.bondset))
             row = self.cursor.fetchone()
             if row is None and not force:
-                raise KeyError(f'No bond from {i} to {j} found')
+                raise KeyError(f"No bond from {i} to {j} found")
         return row
 
     def get_column(self, key):
@@ -569,7 +563,7 @@ class _Bonds(_Table):
         column : Column
             The column object requested.
         """
-        if key == 'i' or key == 'j' or key == 'id':
+        if key == "i" or key == "j" or key == "id":
             sql = f"""
             SELECT {key}
                FROM bond, bondset_bond
@@ -613,7 +607,7 @@ class _Bonds(_Table):
         data = {row[0]: row[1:] for row in cursor}
         columns = [x[0] for x in cursor.description[1:]]
 
-        df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
+        df = pandas.DataFrame.from_dict(data, orient="index", columns=columns)
 
         return df
 
@@ -740,12 +734,10 @@ class _SubsetBonds(_Bonds):
                AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
                AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
             """
-            self.cursor.execute(
-                sql, (i, self.bondset, self.subset_id, self.subset_id)
-            )
+            self.cursor.execute(sql, (i, self.bondset, self.subset_id, self.subset_id))
             row = self.cursor.fetchone()
             if row is None and not force:
-                raise KeyError(f'No bond id = {i} found')
+                raise KeyError(f"No bond id = {i} found")
         else:
             if i > j:
                 j, i = i, j
@@ -761,7 +753,7 @@ class _SubsetBonds(_Bonds):
             )
             row = self.cursor.fetchone()
             if row is None and not force:
-                raise KeyError(f'No bond from {i} to {j} found')
+                raise KeyError(f"No bond from {i} to {j} found")
         return row
 
     def get_column(self, key):
@@ -777,7 +769,7 @@ class _SubsetBonds(_Bonds):
         column : Column
             The column object requested.
         """
-        if key == 'i' or key == 'j' or key == 'id':
+        if key == "i" or key == "j" or key == "id":
             sql = f"""
             SELECT {key} FROM bond
                AND id IN (

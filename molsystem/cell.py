@@ -118,7 +118,7 @@ class Cell(object):
     @parameters.setter
     def parameters(self, value):
         if len(value) != 6:
-            raise ValueError('parameters must be of length 6')
+            raise ValueError("parameters must be of length 6")
         self._parameters = list(value)
 
     @property
@@ -129,10 +129,9 @@ class Cell(object):
         value = cos(alpha) * cos(beta) * cos(gamma)
         if value < 0.0 and abs(value) < 1.0e-8:
             value = 0.0
-        return (
-            a * b * c * (1 - cos(alpha)**2 - cos(beta)**2 - cos(gamma)**2) +
-            2 * math.sqrt(value)
-        )
+        return a * b * c * (
+            1 - cos(alpha) ** 2 - cos(beta) ** 2 - cos(gamma) ** 2
+        ) + 2 * math.sqrt(value)
 
     def equal(self, other, tol=1.0e-6):
         """Check if we are equal to another iterable to within a tolerance.
@@ -210,28 +209,16 @@ class Cell(object):
         cg = cos(gamma)
         sg = sin(gamma)
 
-        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
         # Transpose of ...
         # [a, b * cg, c * cb],
         # [0, b * sg, c * (ca - cb * cg) / sg],
         # [0, 0, V / (a * b * sg)]
         T = [
-                [
-                    a,
-                    0,
-                    0
-                ],
-                [
-                    b * cg,
-                    b * sg,
-                    0
-                ],
-                [
-                    c * cb,
-                    c * (ca - cb * cg) / sg,
-                    V / (a * b * sg)
-                ]
-            ]  # yapf: disable
+            [a, 0, 0],
+            [b * cg, b * sg, 0],
+            [c * cb, c * (ca - cb * cg) / sg, V / (a * b * sg)],
+        ]  # yapf: disable
 
         if as_array:
             return numpy.array(T)
@@ -290,28 +277,20 @@ class Cell(object):
         cg = cos(gamma)
         sg = sin(gamma)
 
-        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
         # Transpose...
         # [1 / a, -cg / (a * sg), b * c * (ca * cg - cb) / (V * sg)],
         # [0, 1 / (b * sg), a * c * (cb * cg - ca) / (V * sg)],
         # [0, 0, a * b * sg / V]
         T = [
-                [
-                    1 / a,
-                    0,
-                    0
-                ],
-                [
-                    -cg / (a * sg),
-                    1 / (b * sg),
-                    0
-                ],
-                [
-                    b * c * (ca * cg - cb) / (V * sg),
-                    a * c * (cb * cg - ca) / (V * sg),
-                    a * b * sg / V
-                ]
-            ]  # yapf: disable
+            [1 / a, 0, 0],
+            [-cg / (a * sg), 1 / (b * sg), 0],
+            [
+                b * c * (ca * cg - cb) / (V * sg),
+                a * c * (cb * cg - ca) / (V * sg),
+                a * b * sg / V,
+            ],
+        ]  # yapf: disable
 
         if as_array:
             return numpy.array(T)
@@ -344,8 +323,7 @@ class _Cell(Cell):
         self._id = configuration.cell_id
 
         self.cursor.execute(
-            "SELECT a, b, c, alpha, beta, gamma FROM cell WHERE id = ?",
-            (self._id,)
+            "SELECT a, b, c, alpha, beta, gamma FROM cell WHERE id = ?", (self._id,)
         )
         super().__init__(*self.cursor.fetchone())
 
@@ -462,7 +440,7 @@ class _Cell(Cell):
     @parameters.setter
     def parameters(self, value):
         if len(value) != 6:
-            raise ValueError('parameters must be of length 6')
+            raise ValueError("parameters must be of length 6")
         self._parameters = list(value)
         self._save()
         return list(self._parameters)
@@ -496,22 +474,22 @@ class _Cell(Cell):
         columns = self._columns()
         other_columns = other._columns()
 
-        column_defs = ', '.join(columns)
-        other_column_defs = ', '.join(other_columns)
+        column_defs = ", ".join(columns)
+        other_column_defs = ", ".join(other_columns)
 
         if columns == other_columns:
             column_def = column_defs
         else:
             added = columns - other_columns
             if len(added) > 0:
-                result['columns added'] = list(added)
+                result["columns added"] = list(added)
             deleted = other_columns - columns
             if len(deleted) > 0:
-                result['columns deleted'] = list(deleted)
+                result["columns deleted"] = list(deleted)
 
             in_common = other_columns & columns
             if len(in_common) > 0:
-                column_def = ', '.join(in_common)
+                column_def = ", ".join(in_common)
             else:
                 # No columns shared
                 return result
@@ -566,18 +544,18 @@ class _Cell(Cell):
         for row in self.db.execute(sql):
             if last is None:
                 last = row
-            elif row['id'] == last['id']:
+            elif row["id"] == last["id"]:
                 # changes = []
                 changes = set()
                 for k1, v1, v2 in zip(last.keys(), last, row):
                     if v1 != v2:
                         changes.add((k1, v1, v2))
-                changed[row['id']] = changes
+                changed[row["id"]] = changes
                 last = None
             else:
                 last = row
         if len(changed) > 0:
-            result['changed'] = changed
+            result["changed"] = changed
 
         # See about the rows added
         added = {}
@@ -588,11 +566,11 @@ class _Cell(Cell):
            AND id <> {other_id}
         """
         for row in self.db.execute(sql):
-            added[row['id']] = row[1:]
+            added[row["id"]] = row[1:]
 
         if len(added) > 0:
-            result['columns in added rows'] = row.keys()[1:]
-            result['added'] = added
+            result["columns in added rows"] = row.keys()[1:]
+            result["added"] = added
 
         # See about the rows deleted
         deleted = {}
@@ -603,11 +581,11 @@ class _Cell(Cell):
            AND id <> {_id}
         """
         for row in self.db.execute(sql):
-            deleted[row['id']] = row[1:]
+            deleted[row["id"]] = row[1:]
 
         if len(deleted) > 0:
-            result['columns in deleted rows'] = row.keys()[1:]
-            result['deleted'] = deleted
+            result["columns in deleted rows"] = row.keys()[1:]
+            result["deleted"] = deleted
 
         # Detach the other database if needed
         if detach:
@@ -620,7 +598,7 @@ class _Cell(Cell):
         parameters = list(self._parameters)
         parameters.append(self.id)
         self.cursor.execute(
-            "UPDATE cell SET a=?, b=?, c=?, alpha=?, beta=?, gamma=?"
-            "WHERE id = ?", parameters
+            "UPDATE cell SET a=?, b=?, c=?, alpha=?, beta=?, gamma=?" "WHERE id = ?",
+            parameters,
         )
         self.db.commit()

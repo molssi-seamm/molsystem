@@ -1,0 +1,42 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: "{{ data.get('name')|lower }}"
+  version: "{{ data.get('version') }}"
+
+source:
+  path: ../
+
+build:
+  number: 0
+  noarch: python
+  preserve_egg_dir: True
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  
+requirements:
+  build:
+    - pip
+    - python
+    - setuptools
+    - openbabel
+    - numpy
+    - pandas
+    - pathvalidate
+    - pycifrw
+
+  run:
+    - python
+    - openbabel
+    - numpy
+    - pandas
+    - pathvalidate
+    - pycifrw
+
+test:
+  imports:
+    # - seamm-installer
+
+about:
+  home: {{ data.get('url') }}
+  license:  {{ data.get('license') }}
+  summary:  {{ data.get('description') }}

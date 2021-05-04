@@ -49,12 +49,12 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	find . -name '.pytype' -exec rm -fr {} +
 
-lint: ## check style with flake8
+lint: ## check style with black and flake8
+	black --check --diff $(MODULE) tests
 	flake8 $(MODULE) tests
-	yapf --diff --recursive  $(MODULE) tests
 
 format: ## reformat with with yapf and isort
-	yapf --recursive --in-place $(MODULE) tests
+	black $(MODULE) tests
 
 typing: ## check typing
 	pytype $(MODULE)
@@ -100,3 +100,9 @@ install: uninstall ## install the package to the active Python's site-packages
 
 uninstall: clean ## uninstall the package
 	pip uninstall --yes $(MODULE)
+
+conda-local:  ## Create a local conda package
+	conda-build -c conda-forge --no-anaconda-upload conda/
+
+conda-release:  ## Create and upload the conda package
+	conda-build -c conda-forge conda/ --label main

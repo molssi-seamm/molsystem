@@ -21,9 +21,9 @@ def test_iteration(AceticAcid):
     j = []
     order = []
     for bond in bonds.bonds():
-        i.append(bond['i'])
-        j.append(bond['j'])
-        order.append(bond['bondorder'])
+        i.append(bond["i"])
+        j.append(bond["j"])
+        order.append(bond["bondorder"])
 
     assert order == [1, 1, 1, 1, 2, 1, 1]
     assert i == [1, 1, 1, 1, 5, 5, 7]
@@ -116,22 +116,22 @@ def test_adding_attribute(AceticAcid):
     """Test that we can add an attribute."""
     configuration = AceticAcid
     bonds = configuration.bonds
-    bonds.add_attribute('name', coltype='str')
+    bonds.add_attribute("name", coltype="str")
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 5
-    assert bond.keys() == ['id', 'i', 'j', 'bondorder', 'name']
+    assert bond.keys() == ["id", "i", "j", "bondorder", "name"]
 
 
 def test_adding_attribute_with_values(AceticAcid):
     """Test that we can add an attribute."""
-    names = ['C-H', 'C-H', 'C-H', 'C-C', 'C=O', 'C-O', 'O-H']
+    names = ["C-H", "C-H", "C-H", "C-C", "C=O", "C-O", "O-H"]
     configuration = AceticAcid
     bonds = configuration.bonds
-    bonds.add_attribute('name', coltype='str', values=names)
+    bonds.add_attribute("name", coltype="str", values=names)
     bond = bonds.get_bond(5, 7)
     assert len(bond) == 5
-    assert bond.keys() == ['id', 'i', 'j', 'bondorder', 'name']
-    assert bond['name'] == 'C-O'
+    assert bond.keys() == ["id", "i", "j", "bondorder", "name"]
+    assert bond["name"] == "C-O"
 
 
 def test_column(AceticAcid):
@@ -139,7 +139,7 @@ def test_column(AceticAcid):
     answer = [1, 1, 1, 1, 2, 1, 1]
     configuration = AceticAcid
     bonds = configuration.bonds
-    bondorders = bonds.get_column('bondorder')
+    bondorders = bonds.get_column("bondorder")
     if bondorders != answer:
         print(bondorders)
     assert bondorders == answer
@@ -159,7 +159,7 @@ def test_set_column(AceticAcid):
 7  7  8          1"""
     configuration = AceticAcid
     bonds = configuration.bonds
-    bondorders = bonds.get_column('bondorder')
+    bondorders = bonds.get_column("bondorder")
     bondorders[5] = 3
     if bondorders != answer:
         print(bondorders)

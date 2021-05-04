@@ -134,7 +134,7 @@ logger = logging.getLogger(__name__)
 class PDBMixin:
     """A mixin for handling PDB files."""
 
-    def to_pdb_text(self, title=None, comment='Exported from SEAMM'):
+    def to_pdb_text(self, title=None, comment="Exported from SEAMM"):
         """Create the text of the PDB file from the system.
 
         Parameters
@@ -155,85 +155,97 @@ class PDBMixin:
 
         n_atoms = atoms.n_atoms
 
-        date_time = time.strftime('%m%d%y%H%M')
+        date_time = time.strftime("%m%d%y%H%M")
 
-        lines.append('COMPND    UNNAMED')
-        lines.append('AUTHOR    MolSSI SEAMM at ' + date_time)
+        lines.append("COMPND    UNNAMED")
+        lines.append("AUTHOR    MolSSI SEAMM at " + date_time)
 
         # atoms
 
-        if 'resname' in atoms:
-            resnames = atoms['resname']
+        if "resname" in atoms:
+            resnames = atoms["resname"]
         else:
-            resnames = ['UNK'] * n_atoms
+            resnames = ["UNK"] * n_atoms
 
-        if 'chainid' in atoms:
-            chainids = atoms['chainid']
+        if "chainid" in atoms:
+            chainids = atoms["chainid"]
         else:
-            chainids = ['A'] * n_atoms
+            chainids = ["A"] * n_atoms
 
-        if 'resseq' in atoms:
-            resseqs = [1 if x is None else x for x in atoms['resseq']]
+        if "resseq" in atoms:
+            resseqs = [1 if x is None else x for x in atoms["resseq"]]
         else:
             resseqs = [1] * n_atoms
 
-        if 'occupancy' in atoms:
-            occupancies = atoms['occupancy']
+        if "occupancy" in atoms:
+            occupancies = atoms["occupancy"]
         else:
             occupancies = [1.0] * n_atoms
 
-        if 'tempfactor' in atoms:
-            tempfactors = atoms['tempfactor']
+        if "tempfactor" in atoms:
+            tempfactors = atoms["tempfactor"]
         else:
             tempfactors = [0.0] * n_atoms
 
-        if 'formal_charge' in atoms:
-            charges = atoms['formal_charge']
+        if "formal_charge" in atoms:
+            charges = atoms["formal_charge"]
         else:
-            charges = [' '] * n_atoms
+            charges = [" "] * n_atoms
 
         count = 0
         symbols = atoms.symbols
         coordinates = atoms.coordinates
-        if 'name' in atoms:
+        if "name" in atoms:
             names = [
                 symbol if name is None else name
-                for name, symbol in zip(atoms['name'], symbols)
+                for name, symbol in zip(atoms["name"], symbols)
             ]
         else:
             names = symbols
 
         for (
-            element, xyz, name, resname, chainid, resseq, occupancy,
-            tempfactor, charge
+            element,
+            xyz,
+            name,
+            resname,
+            chainid,
+            resseq,
+            occupancy,
+            tempfactor,
+            charge,
         ) in zip(
-            symbols, coordinates, names, resnames, chainids, resseqs,
-            occupancies, tempfactors, charges
+            symbols,
+            coordinates,
+            names,
+            resnames,
+            chainids,
+            resseqs,
+            occupancies,
+            tempfactors,
+            charges,
         ):
             count += 1
             x, y, z = xyz
             if len(element) == 1 and len(name) < 4:
-                name = ' ' + name
+                name = " " + name
             lines.append(
-                f'ATOM  {count:5d} {name:4s} {resname:3s} {chainid:1s}'
-                f'{resseq:4d}    {x:8.3f}{y:8.3f}{z:8.3f}{occupancy:6.2f}'
-                f'{tempfactor:6.2f}          {element.upper():>2s}'
-                f'{charge:2}'
+                f"ATOM  {count:5d} {name:4s} {resname:3s} {chainid:1s}"
+                f"{resseq:4d}    {x:8.3f}{y:8.3f}{z:8.3f}{occupancy:6.2f}"
+                f"{tempfactor:6.2f}          {element.upper():>2s}"
+                f"{charge:2}"
             )
 
         # bonds
         for i, js in enumerate(self.bonded_neighbors(as_indices=True)):
-            lines.append(
-                f'CONECT{i+1:5d}' + ''.join([f'{j+1:5d}' for j in js])
-            )
+            lines.append(f"CONECT{i+1:5d}" + "".join([f"{j+1:5d}" for j in js]))
 
         lines.append(
-            'MASTER        0    0    0    0    0    0    0    0'
-            f'{n_atoms:5d}    0{n_atoms:5d}'
+            "MASTER        0    0    0    0    0    0    0    0"
+            f"{n_atoms:5d}    0{n_atoms:5d}"
         )
-        lines.append('END')
+        lines.append("END")
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def from_pdb_text(self, data):
         """Create the system from a PDF file.
@@ -266,93 +278,93 @@ class PDBMixin:
         connections = None
         for line in lines:
             key = line[0:6].rstrip()
-            if key == 'HEADER':
+            if key == "HEADER":
                 pass
-            elif key == 'OBSLTE':
+            elif key == "OBSLTE":
                 pass
-            elif key == 'TITLE':
+            elif key == "TITLE":
                 pass
-            elif key == 'SPLIT':
+            elif key == "SPLIT":
                 pass
-            elif key == 'CAVEAT':
+            elif key == "CAVEAT":
                 pass
-            elif key == 'COMPND':
+            elif key == "COMPND":
                 pass
-            elif key == 'SOURCE':
+            elif key == "SOURCE":
                 pass
-            elif key == 'KEYWDS':
+            elif key == "KEYWDS":
                 pass
-            elif key == 'EXPDTA':
+            elif key == "EXPDTA":
                 pass
-            elif key == 'NUMMDL':
+            elif key == "NUMMDL":
                 pass
-            elif key == 'MDLTYPE':
+            elif key == "MDLTYPE":
                 pass
-            elif key == 'AUTHOR':
+            elif key == "AUTHOR":
                 pass
-            elif key == 'REVDAT':
+            elif key == "REVDAT":
                 pass
-            elif key == 'SPRSDE':
+            elif key == "SPRSDE":
                 pass
-            elif key == 'JRNL':
+            elif key == "JRNL":
                 pass
-            elif key == 'REMARK':
+            elif key == "REMARK":
                 pass
-            elif key == 'DBREF':
+            elif key == "DBREF":
                 pass
-            elif key == 'DBREF1':
+            elif key == "DBREF1":
                 pass
-            elif key == 'DBREF2':
+            elif key == "DBREF2":
                 pass
-            elif key == 'SEQADV':
+            elif key == "SEQADV":
                 pass
-            elif key == 'SEQRES':
+            elif key == "SEQRES":
                 pass
-            elif key == 'MODRES':
+            elif key == "MODRES":
                 pass
-            elif key == 'HET':
+            elif key == "HET":
                 pass
-            elif key == 'HETNAM':
+            elif key == "HETNAM":
                 pass
-            elif key == 'HETSYN':
+            elif key == "HETSYN":
                 pass
-            elif key == 'FORMUL':
+            elif key == "FORMUL":
                 pass
-            elif key == 'HELIX':
+            elif key == "HELIX":
                 pass
-            elif key == 'SHEET':
+            elif key == "SHEET":
                 pass
-            elif key == 'SSBOND':
+            elif key == "SSBOND":
                 pass
-            elif key == 'LINK':
+            elif key == "LINK":
                 pass
-            elif key == 'CISPEP':
+            elif key == "CISPEP":
                 pass
-            elif key == 'SITE':
+            elif key == "SITE":
                 pass
-            elif key == 'CRYST1':
+            elif key == "CRYST1":
                 pass
-            elif key == 'ORIGX1':
+            elif key == "ORIGX1":
                 pass
-            elif key == 'ORIGX2':
+            elif key == "ORIGX2":
                 pass
-            elif key == 'ORIGX3':
+            elif key == "ORIGX3":
                 pass
-            elif key == 'SCALE1':
+            elif key == "SCALE1":
                 pass
-            elif key == 'SCALE2':
+            elif key == "SCALE2":
                 pass
-            elif key == 'SCALE3':
+            elif key == "SCALE3":
                 pass
-            elif key == 'MTRIX1':
+            elif key == "MTRIX1":
                 pass
-            elif key == 'MTRIX2':
+            elif key == "MTRIX2":
                 pass
-            elif key == 'MTRIX3':
+            elif key == "MTRIX3":
                 pass
-            elif key == 'MODEL':
+            elif key == "MODEL":
                 pass
-            elif key == 'ATOM' or key == 'HETATM':
+            elif key == "ATOM" or key == "HETATM":
                 # serial = int(line[6:11])  # noqa: F841
                 name = line[12:16].strip()
                 # altloc = line[16]  # noqa: F841
@@ -364,9 +376,9 @@ class PDBMixin:
                 y = float(line[38:46])
                 z = float(line[46:54])
                 tmp = line[54:60].strip()
-                occupancy = 1.0 if tmp == '' else float(tmp)
+                occupancy = 1.0 if tmp == "" else float(tmp)
                 tmp = line[60:66].strip()
-                tempfactor = 0.0 if tmp == '' else float(tmp)
+                tempfactor = 0.0 if tmp == "" else float(tmp)
 
                 # Symbol maybe fully capitalized e.g. 'FE', so need to fix
                 symbol = line[75:78].strip().capitalize()
@@ -383,13 +395,13 @@ class PDBMixin:
                 resseqs.append(resseq)
                 occupancies.append(occupancy)
                 tempfactors.append(tempfactor)
-            elif key == 'ANISOU':
+            elif key == "ANISOU":
                 pass
-            elif key == 'TER':
+            elif key == "TER":
                 pass
-            elif key == 'ENDMDL':
+            elif key == "ENDMDL":
                 pass
-            elif key == 'CONECT':
+            elif key == "CONECT":
                 if connections is None:
                     n_atoms = len(symbols)
                     connections = []
@@ -399,67 +411,61 @@ class PDBMixin:
                 atom = int(line[6:11])
                 # should use columns in case they run together.
                 for i in range(11, 31, 5):
-                    tmp = line[i:i + 5].strip()
-                    if tmp == '':
+                    tmp = line[i : i + 5].strip()
+                    if tmp == "":
                         break
                     connections[atom].append(int(tmp))
-            elif key == 'MASTER':
+            elif key == "MASTER":
                 pass
-            elif key == 'END':
+            elif key == "END":
                 break
             else:
-                raise RuntimeError('Illegal line in PDB file\n\t' + line)
+                raise RuntimeError("Illegal line in PDB file\n\t" + line)
 
-        if 'name' not in self.atoms:
-            self.atoms.add_attribute('name', coltype='string')
+        if "name" not in self.atoms:
+            self.atoms.add_attribute("name", coltype="string")
 
-        atom_id = self.atoms.append(
-            symbol=symbols, name=names, x=xs, y=ys, z=zs
-        )
+        atom_id = self.atoms.append(symbol=symbols, name=names, x=xs, y=ys, z=zs)
 
-        if 'resname' in self.atoms:
-            self.atoms['resname'][0:] = resnames
+        if "resname" in self.atoms:
+            self.atoms["resname"][0:] = resnames
         else:
             counts = collections.Counter(resnames)
-            if len(counts) > 1 or [*counts.keys()] != ['UNK']:
-                self.atoms.add_attribute('resname', coltype='string')
-                self.atoms['resname'][0:] = resnames
+            if len(counts) > 1 or [*counts.keys()] != ["UNK"]:
+                self.atoms.add_attribute("resname", coltype="string")
+                self.atoms["resname"][0:] = resnames
 
-        if 'chainid' in self.atoms:
-            self.atoms['chainid'][0:] = chainids
+        if "chainid" in self.atoms:
+            self.atoms["chainid"][0:] = chainids
         else:
             counts = collections.Counter(chainids)
-            if len(counts) > 1 or [*counts.keys()] != ['A']:
-                self.atoms.add_attribute('chainid', coltype='string')
-                self.atoms['chainid'][0:] = chainids
+            if len(counts) > 1 or [*counts.keys()] != ["A"]:
+                self.atoms.add_attribute("chainid", coltype="string")
+                self.atoms["chainid"][0:] = chainids
 
-        if 'resseq' in self.atoms:
-            self.atoms['resseq'][0:] = resseqs
+        if "resseq" in self.atoms:
+            self.atoms["resseq"][0:] = resseqs
         else:
             counts = collections.Counter(resseqs)
-            if len(counts) > 1 or [*counts.keys()] != ['1']:
-                self.atoms.add_attribute('resseq', coltype='int', default=1)
-                self.atoms['resseq'][0:] = resseqs
+            if len(counts) > 1 or [*counts.keys()] != ["1"]:
+                self.atoms.add_attribute("resseq", coltype="int", default=1)
+                self.atoms["resseq"][0:] = resseqs
 
-        if 'occupancy' in self.atoms:
-            self.atoms['occupancy'][0:] = occupancies
+        if "occupancy" in self.atoms:
+            self.atoms["occupancy"][0:] = occupancies
         else:
             counts = collections.Counter(occupancies)
             if len(counts) > 1 or [*counts.keys()] != [1.0]:
-                self.atoms.add_attribute(
-                    'occupancy', coltype='float', default=1.0
-                )
-                self.atoms['occupancy'][0:] = occupancies
+                self.atoms.add_attribute("occupancy", coltype="float", default=1.0)
+                self.atoms["occupancy"][0:] = occupancies
 
-        if 'tempfactor' in self.atoms:
-            self.atoms['tempfactor'][0:] = tempfactors
+        if "tempfactor" in self.atoms:
+            self.atoms["tempfactor"][0:] = tempfactors
         else:
             counts = collections.Counter(tempfactors)
             if len(counts) > 1 or [*counts.keys()] != [0.0]:
-                self.atoms.add_attribute(
-                    'tempfactor', coltype='float', default=1.0
-                )
-                self.atoms['tempfactor'][0:] = tempfactors
+                self.atoms.add_attribute("tempfactor", coltype="float", default=1.0)
+                self.atoms["tempfactor"][0:] = tempfactors
 
         iatom = []
         jatom = []
@@ -467,7 +473,7 @@ class PDBMixin:
             for i in range(1, n_atoms + 1):
                 for j in connections[i]:
                     if i not in connections[j]:
-                        logger.warning(f'Bond {j}-{i} not found in PDB file')
+                        logger.warning(f"Bond {j}-{i} not found in PDB file")
                         # put in the bond since we won't see its partner!
                         iatom.append(atom_id[i - 1])
                         jatom.append(atom_id[j - 1])

@@ -43,10 +43,10 @@ class _Atoms(_Table):
 
         self._atomset = self._configuration.atomset
 
-        self._atom_table = _Table(self.system_db, 'atom')
-        self._coordinates_table = _Table(self.system_db, 'coordinates')
+        self._atom_table = _Table(self.system_db, "atom")
+        self._coordinates_table = _Table(self.system_db, "coordinates")
 
-        super().__init__(self._system_db, 'atom')
+        super().__init__(self._system_db, "atom")
 
     def __enter__(self) -> Any:
         """Copy the tables to a backup for a 'with' statement."""
@@ -113,7 +113,7 @@ class _Atoms(_Table):
         [int]
             The atomic numbers.
         """
-        return self.get_column_data('atno')
+        return self.get_column_data("atno")
 
     @property
     def atomic_masses(self):
@@ -125,8 +125,8 @@ class _Atoms(_Table):
             The atomic numbers.
         """
 
-        if 'mass' in self:
-            result = self.get_column_data('mass')
+        if "mass" in self:
+            result = self.get_column_data("mass")
         else:
             atnos = self.atomic_numbers
             result = elements.masses(atnos)
@@ -147,7 +147,7 @@ class _Atoms(_Table):
         result = self._atom_table.attributes
 
         for key, value in self._coordinates_table.attributes.items():
-            if key != 'atom':  # atom key links the tables together, so ignore
+            if key != "atom":  # atom key links the tables together, so ignore
                 result[key] = value
 
         return result
@@ -176,8 +176,7 @@ class _Atoms(_Table):
     def n_atoms(self) -> int:
         """The number of atoms in this configuration."""
         self.cursor.execute(
-            'SELECT COUNT(*) FROM atomset_atom WHERE atomset = ?',
-            (self.atomset,)
+            "SELECT COUNT(*) FROM atomset_atom WHERE atomset = ?", (self.atomset,)
         )
         result = self.cursor.fetchone()[0]
         return result
@@ -201,16 +200,16 @@ class _Atoms(_Table):
     def add_attribute(
         self,
         name: str,
-        coltype: str = 'float',
+        coltype: str = "float",
         default: Any = None,
         notnull: bool = False,
         index: bool = False,
         pk: bool = False,
         references: str = None,
-        on_delete: str = 'cascade',
-        on_update: str = 'cascade',
+        on_delete: str = "cascade",
+        on_update: str = "cascade",
         values: Any = None,
-        configuration_dependent: bool = False
+        configuration_dependent: bool = False,
     ) -> None:
         """Adds a new attribute.
 
@@ -260,7 +259,7 @@ class _Atoms(_Table):
                 references=references,
                 on_delete=on_delete,
                 on_update=on_update,
-                values=values
+                values=values,
             )
         else:
             self._atom_table.add_attribute(
@@ -273,7 +272,7 @@ class _Atoms(_Table):
                 references=references,
                 on_delete=on_delete,
                 on_update=on_update,
-                values=values
+                values=values,
             )
 
     def append(self, **kwargs: Dict[str, Any]) -> None:
@@ -289,9 +288,9 @@ class _Atoms(_Table):
         # or symbols. By construction the references to elements are identical
         # to their atomic numbers.
 
-        if 'symbol' in kwargs:
-            symbols = kwargs.pop('symbol')
-            kwargs['atno'] = elements.to_atnos(symbols)
+        if "symbol" in kwargs:
+            symbols = kwargs.pop("symbol")
+            kwargs["atno"] = elements.to_atnos(symbols)
 
         # How many new rows there are
         n_rows, lengths = self._get_n_rows(**kwargs)
@@ -299,25 +298,25 @@ class _Atoms(_Table):
         # Fill in the atom table
         data = {}
         for column in self._atom_table.attributes:
-            if column != 'id' and column in kwargs:
+            if column != "id" and column in kwargs:
                 data[column] = kwargs.pop(column)
 
         if len(data) == 0:
-            data['atno'] = [None] * n_rows
+            data["atno"] = [None] * n_rows
 
         ids = self._atom_table.append(n=n_rows, **data)
 
         # Now append to the coordinates table
         configuration = self.configuration.id
-        data = {'configuration': configuration, 'atom': ids}
+        data = {"configuration": configuration, "atom": ids}
         for column in self._coordinates_table.attributes:
-            if column != 'id' and column in kwargs:
+            if column != "id" and column in kwargs:
                 data[column] = kwargs.pop(column)
 
         self._coordinates_table.append(n=n_rows, **data)
 
         # And to the atomset
-        table = _Table(self.system_db, 'atomset_atom')
+        table = _Table(self.system_db, "atomset_atom")
         table.append(atomset=self.atomset, atom=ids)
 
         return ids
@@ -336,7 +335,7 @@ class _Atoms(_Table):
             A cursor that returns sqlite3.Row objects for the atoms.
         """
         columns = self._columns()
-        column_defs = ', '.join(columns)
+        column_defs = ", ".join(columns)
 
         sql = f"""
         SELECT {column_defs}
@@ -348,8 +347,8 @@ class _Atoms(_Table):
         parameters = [self.atomset]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -374,22 +373,22 @@ class _Atoms(_Table):
         columns = self._columns()
         other_columns = other._columns()
 
-        column_defs = ', '.join(columns)
-        other_column_defs = ', '.join(other_columns)
+        column_defs = ", ".join(columns)
+        other_column_defs = ", ".join(other_columns)
 
         if columns == other_columns:
             column_def = column_defs
         else:
             added = columns - other_columns
             if len(added) > 0:
-                result['columns added'] = list(added)
+                result["columns added"] = list(added)
             deleted = other_columns - columns
             if len(deleted) > 0:
-                result['columns deleted'] = list(deleted)
+                result["columns deleted"] = list(deleted)
 
             in_common = other_columns & columns
             if len(in_common) > 0:
-                column_def = ', '.join(in_common)
+                column_def = ", ".join(in_common)
             else:
                 # No columns shared
                 return result
@@ -468,18 +467,18 @@ class _Atoms(_Table):
         for row in self.db.execute(sql):
             if last is None:
                 last = row
-            elif row['id'] == last['id']:
+            elif row["id"] == last["id"]:
                 # changes = []
                 changes = set()
                 for k1, v1, v2 in zip(last.keys(), last, row):
                     if v1 != v2:
                         changes.add((k1, v1, v2))
-                changed[row['id']] = changes
+                changed[row["id"]] = changes
                 last = None
             else:
                 last = row
         if len(changed) > 0:
-            result['changed'] = changed
+            result["changed"] = changed
 
         # See about the rows added
         added = {}
@@ -501,11 +500,11 @@ class _Atoms(_Table):
                )
         """
         for row in self.db.execute(sql):
-            added[row['id']] = row[1:]
+            added[row["id"]] = row[1:]
 
         if len(added) > 0:
-            result['columns in added rows'] = row.keys()[1:]
-            result['added'] = added
+            result["columns in added rows"] = row.keys()[1:]
+            result["added"] = added
 
         # See about the rows deleted
         deleted = {}
@@ -527,11 +526,11 @@ class _Atoms(_Table):
                )
         """
         for row in self.db.execute(sql):
-            deleted[row['id']] = row[1:]
+            deleted[row["id"]] = row[1:]
 
         if len(deleted) > 0:
-            result['columns in deleted rows'] = row.keys()[1:]
-            result['deleted'] = deleted
+            result["columns in deleted rows"] = row.keys()[1:]
+            result["deleted"] = deleted
 
         # Detach the other database if needed
         if detach:
@@ -576,16 +575,16 @@ class _Atoms(_Table):
         """
 
         sql = (
-            'SELECT at.id'
-            '  FROM atom as at, coordinates as co, atomset_atom as aa'
-            ' WHERE at.id == aa.atom AND aa.atomset = ? AND co.atom = at.id'
+            "SELECT at.id"
+            "  FROM atom as at, coordinates as co, atomset_atom as aa"
+            " WHERE at.id == aa.atom AND aa.atomset = ? AND co.atom = at.id"
         )
 
         parameters = [self.atomset]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -612,7 +611,7 @@ class _Atoms(_Table):
         abc : [N][float*3]
             The coordinates, either Cartesian or fractional
         """
-        xyz = [[row['x'], row['y'], row['z']] for row in self.atoms()]
+        xyz = [[row["x"], row["y"], row["z"]] for row in self.atoms()]
 
         periodicity = self.configuration.periodicity
         if periodicity == 0:
@@ -623,9 +622,9 @@ class _Atoms(_Table):
 
         cell = self.configuration.cell
 
-        if isinstance(in_cell, str) and 'molecule' in in_cell:
+        if isinstance(in_cell, str) and "molecule" in in_cell:
             # Need fractionals...
-            if self.configuration.coordinate_system == 'Cartesian':
+            if self.configuration.coordinate_system == "Cartesian":
                 UVW = cell.to_fractionals(xyz, as_array=True)
             elif not isinstance(xyz, numpy.ndarray):
                 UVW = numpy.array(xyz)
@@ -652,7 +651,7 @@ class _Atoms(_Table):
                 return cell.to_cartesians(UVW, as_array=as_array)
         elif in_cell:
             # Need fractionals...
-            if self.configuration.coordinate_system == 'Cartesian':
+            if self.configuration.coordinate_system == "Cartesian":
                 UVW = cell.to_fractionals(xyz, as_array=True)
             elif not isinstance(xyz, numpy.ndarray):
                 UVW = numpy.array(xyz)
@@ -669,14 +668,14 @@ class _Atoms(_Table):
                 return cell.to_cartesians(UVW, as_array=as_array)
         else:
             if fractionals:
-                if self.configuration.coordinate_system == 'Cartesian':
+                if self.configuration.coordinate_system == "Cartesian":
                     return cell.to_fractionals(xyz, as_array=as_array)
                 elif as_array:
                     return numpy.array(xyz)
                 else:
                     return xyz
             else:
-                if self.configuration.coordinate_system == 'fractional':
+                if self.configuration.coordinate_system == "fractional":
                     return cell.to_cartesians(xyz, as_array=as_array)
                 elif as_array:
                     return numpy.array(xyz)
@@ -706,8 +705,8 @@ class _Atoms(_Table):
         parameters = [self.atomset]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -729,9 +728,9 @@ class _Atoms(_Table):
         """
         as_array = isinstance(xyz, numpy.ndarray)
 
-        x_column = self.get_column('x')
-        y_column = self.get_column('y')
-        z_column = self.get_column('z')
+        x_column = self.get_column("x")
+        y_column = self.get_column("y")
+        z_column = self.get_column("z")
 
         xs = []
         ys = []
@@ -740,9 +739,9 @@ class _Atoms(_Table):
         periodicity = self.configuration.periodicity
         coordinate_system = self.configuration.coordinate_system
         if (
-            periodicity == 0 or
-            (coordinate_system == 'Cartesian' and not fractionals) or
-            (coordinate_system == 'fractional' and fractionals)
+            periodicity == 0
+            or (coordinate_system == "Cartesian" and not fractionals)
+            or (coordinate_system == "fractional" and fractionals)
         ):
             if as_array:
                 for x, y, z in xyz.tolist():
@@ -756,7 +755,7 @@ class _Atoms(_Table):
                     zs.append(z)
         else:
             cell = self.configuration.cell
-            if coordinate_system == 'fractional':
+            if coordinate_system == "fractional":
                 # Convert coordinates to fractionals
                 for x, y, z in cell.to_fractionals(xyz):
                     xs.append(x)
@@ -787,18 +786,18 @@ class _Atoms(_Table):
         if key in self._atom_table.attributes:
             sql = (
                 f'SELECT at.rowid, at."{key}"'
-                '   FROM atom as at, atomset_atom as aa'
-                f' WHERE at.id = aa.atom AND aa.atomset = {self.atomset}'
+                "   FROM atom as at, atomset_atom as aa"
+                f" WHERE at.id = aa.atom AND aa.atomset = {self.atomset}"
             )
             return _Column(self._atom_table, key, sql=sql)
         elif key in self._coordinates_table.attributes:
             sql = (
                 f'SELECT co.rowid, co."{key}"'
-                '   FROM atom as at,'
-                '        coordinates as co,'
-                '        atomset_atom as aa'
-                '  WHERE co.atom = at.id AND at.id = aa.atom'
-                f'   AND aa.atomset = {self.atomset}'
+                "   FROM atom as at,"
+                "        coordinates as co,"
+                "        atomset_atom as aa"
+                "  WHERE co.atom = at.id AND at.id = aa.atom"
+                f"   AND aa.atomset = {self.atomset}"
             )
             return _Column(self._coordinates_table, key, sql=sql)
         else:
@@ -820,18 +819,18 @@ class _Atoms(_Table):
         if key in self._atom_table.attributes:
             sql = (
                 f'SELECT at."{key}"'
-                '   FROM atom as at, atomset_atom as aa'
-                f' WHERE at.id = aa.atom AND aa.atomset = {self.atomset}'
+                "   FROM atom as at, atomset_atom as aa"
+                f" WHERE at.id = aa.atom AND aa.atomset = {self.atomset}"
             )
             return [row[0] for row in self.db.execute(sql)]
         elif key in self._coordinates_table.attributes:
             sql = (
                 f'SELECT co."{key}"'
-                '   FROM atom as at,'
-                '        coordinates as co,'
-                '        atomset_atom as aa'
-                '  WHERE co.atom = at.id AND at.id = aa.atom'
-                f'   AND aa.atomset = {self.atomset}'
+                "   FROM atom as at,"
+                "        coordinates as co,"
+                "        atomset_atom as aa"
+                "  WHERE co.atom = at.id AND at.id = aa.atom"
+                f"   AND aa.atomset = {self.atomset}"
             )
             return [row[0] for row in self.db.execute(sql)]
         else:
@@ -856,10 +855,10 @@ class _Atoms(_Table):
                     n_rows = length
                 else:
                     raise IndexError(
-                        'key "{}" has the wrong number of values, '
-                        .format(key) +
-                        '{}. Should be 1 or the number of atoms ({}).'
-                        .format(length, n_rows)
+                        'key "{}" has the wrong number of values, '.format(key)
+                        + "{}. Should be 1 or the number of atoms ({}).".format(
+                            length, n_rows
+                        )
                     )
         return n_rows, lengths
 
@@ -898,7 +897,7 @@ class _Atoms(_Table):
         None
         """
         # Delete the listed atoms, which will cascade to delete coordinates...
-        if atoms == 'all' or atoms == '*':
+        if atoms == "all" or atoms == "*":
             sql = """
             DELETE FROM atom
              WHERE id IN (SELECT atom FROM atomset_atom WHERE atomset = ?)
@@ -923,7 +922,7 @@ class _Atoms(_Table):
 
         columns = [x[0] for x in rows.description[1:]]
 
-        df = pandas.DataFrame.from_dict(data, orient='index', columns=columns)
+        df = pandas.DataFrame.from_dict(data, orient="index", columns=columns)
 
         return df
 
@@ -934,7 +933,7 @@ class _Atoms(_Table):
         """
         atom_columns = [*self._atom_table.attributes]
         coordinates_columns = [*self._coordinates_table.attributes]
-        coordinates_columns.remove('atom')
+        coordinates_columns.remove("atom")
 
         columns = [f'at."{x}"' for x in atom_columns]
         columns += [f'co."{x}"' for x in coordinates_columns]
@@ -973,7 +972,7 @@ class _SubsetAtoms(_Atoms):
 
     def __eq__(self, other) -> Any:
         """Return a boolean if this object is equal to another"""
-        raise NotImplementedError('Not implemented for subsets, yet!')
+        raise NotImplementedError("Not implemented for subsets, yet!")
 
     @property
     def subset_id(self):
@@ -1038,16 +1037,14 @@ class _SubsetAtoms(_Atoms):
         """
         # Check if the template has a template configuration
         if self.template.is_full:
-            raise ValueError(
-                'Cannot add atoms to a subset for a full template.'
-            )
+            raise ValueError("Cannot add atoms to a subset for a full template.")
 
         # Remove any ids already in the subset
         atom_ids = set(self.ids)
         for aid in atom_ids & set(ids):
             ids.remove(aid)
 
-        sa = self.system_db['subset_atom']
+        sa = self.system_db["subset_atom"]
         sa.append(subset=self.subset_id, atom=ids)
 
     def append(self, **kwargs: Dict[str, Any]) -> None:
@@ -1061,7 +1058,7 @@ class _SubsetAtoms(_Atoms):
             Adding atoms to a configuration is not allowed from a subset.
         """
         raise RuntimeError(
-            'Adding atoms to a configuration is not allowed from a subset.'
+            "Adding atoms to a configuration is not allowed from a subset."
         )
 
     def atoms(self, *args):
@@ -1078,7 +1075,7 @@ class _SubsetAtoms(_Atoms):
             A cursor that returns sqlite3.Row objects for the atoms.
         """
         columns = self._columns()
-        column_defs = ', '.join(columns)
+        column_defs = ", ".join(columns)
 
         sql = f"""
         SELECT {column_defs}
@@ -1091,8 +1088,8 @@ class _SubsetAtoms(_Atoms):
         parameters = [self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -1124,8 +1121,8 @@ class _SubsetAtoms(_Atoms):
         parameters = [self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -1243,8 +1240,8 @@ class _SubsetAtoms(_Atoms):
         parameters = [self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
-                if op == '==':
-                    op = '='
+                if op == "==":
+                    op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
 
@@ -1283,9 +1280,7 @@ class _SubsetAtoms(_Atoms):
         """
         # Check if the template has a template configuration
         if self.template.is_full:
-            raise ValueError(
-                'Cannot add atoms to a subset for a full template.'
-            )
+            raise ValueError("Cannot add atoms to a subset for a full template.")
 
         # Check that the atoms are in this configuration!
         atom_ids = self.ids

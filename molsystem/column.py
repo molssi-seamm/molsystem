@@ -16,7 +16,7 @@ class _Column(FrozenColumn, collections.abc.MutableSequence):
     updates the SQL database appropriately.
     """
 
-    def __init__(self, table, column: str, sql=None, where=''):
+    def __init__(self, table, column: str, sql=None, where=""):
         self._rowids = None
         super().__init__(table, column, sql, where)
 
@@ -30,18 +30,18 @@ class _Column(FrozenColumn, collections.abc.MutableSequence):
                 # Scalar
                 db.execute(
                     f"UPDATE {table} SET {self.column} = ? WHERE rowid = ?",
-                    (value, self._rowids[index])
+                    (value, self._rowids[index]),
                 )
                 self._data[index] = value
             elif length == 1:
                 # One-element list
                 db.execute(
                     f"UPDATE {table} SET {self.column} = ? WHERE rowid = ?",
-                    (value[0], self._rowids[index])
+                    (value[0], self._rowids[index]),
                 )
                 self._data[index] = value[0]
             else:
-                raise IndexError('Only 1 value required to update 1 item')
+                raise IndexError("Only 1 value required to update 1 item")
         elif isinstance(index, slice):
             rowids = []
             for rowid in itertools.islice(
@@ -63,18 +63,17 @@ class _Column(FrozenColumn, collections.abc.MutableSequence):
                 self._data[index] = value
             else:
                 raise IndexError(
-                    f'The number of values ({length}) must be 1 or the size '
-                    f'of the slice ({len(rowids)}).'
+                    f"The number of values ({length}) must be 1 or the size "
+                    f"of the slice ({len(rowids)})."
                 )
             db.executemany(
-                f"UPDATE {table} SET {self.column} = ? WHERE rowid = ?",
-                parameters
+                f"UPDATE {table} SET {self.column} = ? WHERE rowid = ?", parameters
             )
         db.commit()
 
     def __delitem__(self, index, value) -> None:
         """Do NOT allow deletion!"""
-        raise RuntimeError('Items may not be removed from a Column')
+        raise RuntimeError("Items may not be removed from a Column")
 
     def __repr__(self) -> str:
         """The string representation of this object"""
@@ -82,7 +81,7 @@ class _Column(FrozenColumn, collections.abc.MutableSequence):
 
     def insert(self, index, value) -> None:
         """Do NOT allow insertion!"""
-        raise RuntimeError('Items may not be inserted into a Column')
+        raise RuntimeError("Items may not be inserted into a Column")
 
     def _initialize(self):
         """Get the column data from the underlying table and cache it."""
@@ -90,8 +89,8 @@ class _Column(FrozenColumn, collections.abc.MutableSequence):
         self._rowids = []
         if self._sql is None:
             sql = (
-                f'SELECT rowid, {self.column}'
-                f'  FROM {self._table.table} {self._where}'
+                f"SELECT rowid, {self.column}"
+                f"  FROM {self._table.table} {self._where}"
             )
         else:
             sql = self._sql

@@ -12,7 +12,7 @@ class _FrozenColumn(collections.abc.Sequence):
     This is a wrapper around a single column in a SQL table.
     """
 
-    def __init__(self, table, column: str, sql=None, where=''):
+    def __init__(self, table, column: str, sql=None, where=""):
         self._table = table
         self._column = column
         self._sql = sql
@@ -50,9 +50,7 @@ class _FrozenColumn(collections.abc.Sequence):
         """Get the column data from the underlying table and cache it."""
         self._data = []
         if self._sql is None:
-            sql = (
-                f'SELECT {self.column} FROM {self._table.table} {self._where}'
-            )
+            sql = f"SELECT {self.column} FROM {self._table.table} {self._where}"
         else:
             sql = sql._sql
 

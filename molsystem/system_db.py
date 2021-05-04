@@ -164,10 +164,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._cursor = None
         self._items = {}
 
-        if 'filename' in kwargs:
-            self.filename = kwargs.pop('filename')
+        if "filename" in kwargs:
+            self.filename = kwargs.pop("filename")
         else:
-            self.filename = 'seamm.db'
+            self.filename = "seamm.db"
 
     def __del__(self):
         """Destructor: need to close the database if any."""
@@ -242,9 +242,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     def __len__(self):
         """The len() command"""
         self.cursor.execute(
-            "SELECT COUNT(*)"
-            "  FROM sqlite_master"
-            " WHERE type = 'table'"
+            "SELECT COUNT(*)" "  FROM sqlite_master" " WHERE type = 'table'"
         )
         return self.cursor.fetchone()[0]
 
@@ -260,11 +258,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Return a boolean indicating if a key exists."""
         # Normal the tablename is used as an identifier, so is quoted with ".
         # Here we need it as a string literal so strip any quotes from it.
-        if '.' in table:
-            schema, table = table.split('.')
+        if "." in table:
+            schema, table = table.split(".")
             schema = schema.strip('"')
         else:
-            schema = 'main'
+            schema = "main"
 
         table = table.strip('"')
         self.cursor.execute(
@@ -347,12 +345,12 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 self._cursor = None
         self._filename = value
         if self._filename is not None:
-            if self._filename[0:5] == 'file:':
+            if self._filename[0:5] == "file:":
                 self._db = sqlite3.connect(self._filename, uri=True)
             else:
                 self._db = sqlite3.connect(self._filename)
             self._db.row_factory = sqlite3.Row
-            self._db.execute('PRAGMA foreign_keys = ON')
+            self._db.execute("PRAGMA foreign_keys = ON")
             self._cursor = self._db.cursor()
             self._initialize()
 
@@ -364,7 +362,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     @property
     def n_systems(self):
         """The number of systems in the database."""
-        return self['system'].n_rows
+        return self["system"].n_rows
 
     @property
     def n_templates(self):
@@ -430,9 +428,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 attached_name = f"db_{n}"
 
             # and attach
-            self.db.execute(
-                f"ATTACH DATABASE '{other.filename}' AS '{attached_name}'"
-            )
+            self.db.execute(f"ATTACH DATABASE '{other.filename}' AS '{attached_name}'")
             self._attached[other.filename] = attached_name
         return self._attached[other.filename]
 
@@ -466,19 +462,19 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             A dictionary of dictionaries for the attributes and their
             descriptors
         """
-        if '.' in tablename:
-            schema, tablename = tablename.split('.')
+        if "." in tablename:
+            schema, tablename = tablename.split(".")
             sql = f"PRAGMA {schema}.table_info('{tablename}')"
         else:
             sql = f"PRAGMA table_info('{tablename}')"
 
         result = {}
         for line in self.db.execute(sql):
-            result[line['name']] = {
-                'type': line['type'],
-                'notnull': bool(line['notnull']),
-                'default': line['dflt_value'],
-                'primary key': bool(line['pk'])
+            result[line["name"]] = {
+                "type": line["type"],
+                "notnull": bool(line["notnull"]),
+                "default": line["dflt_value"],
+                "primary key": bool(line["pk"]),
             }
         return result
 
@@ -502,7 +498,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             The newly created system.
         """
 
-        _id = self['system'].append(name=name)[0]
+        _id = self["system"].append(name=name)[0]
 
         if make_current:
             self._current_system_id = _id
@@ -583,9 +579,9 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         in_common = tables & other_tables
 
         if len(added) > 0:
-            result['tables added'] = added
+            result["tables added"] = added
         if len(deleted) > 0:
-            result['tables deleted'] = deleted
+            result["tables deleted"] = deleted
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
@@ -650,9 +646,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             if len(systems) == 0:
                 raise ValueError(f"The system '{id_or_name}' does not exist.")
             elif len(systems) > 1:
-                raise ValueError(
-                    f"There is more than one system named '{id_or_name}'"
-                )
+                raise ValueError(f"There is more than one system named '{id_or_name}'")
             else:
                 id_or_name = systems[0]
         return _System(self, id_or_name)
@@ -676,11 +670,9 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Return a list of all the tables in the system."""
         result = []
         for row in self.db.execute(
-            "SELECT name"
-            "  FROM sqlite_master"
-            " WHERE type = 'table'"
+            "SELECT name" "  FROM sqlite_master" " WHERE type = 'table'"
         ):
-            result.append(row['name'])
+            result.append(row["name"])
         return result
 
     def _initialize(self):
@@ -695,121 +687,111 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         # If the database is initialized, the metadata table exists.
         # In the future we might need to check the version and upgrade
         # older versions, but now at version 1.0 we are all done!
-        if 'metadata' not in self:
+        if "metadata" not in self:
             # metadata, where we store, get the database version
-            table = self['metadata']
-            table.add_attribute('key', coltype='str', pk=True)
-            table.add_attribute('value', coltype='str')
+            table = self["metadata"]
+            table.add_attribute("key", coltype="str", pk=True)
+            table.add_attribute("value", coltype="str")
 
-            table.append(key='version', value='1.0')
+            table.append(key="version", value="1.0")
             self.db.commit()
 
             # The element table
-            table = self['element']
-            table.add_attribute('atno', coltype='int', pk=True)
-            table.add_attribute('symbol', coltype='str', index='unique')
-            table.add_attribute('mass', coltype='float')
+            table = self["element"]
+            table.add_attribute("atno", coltype="int", pk=True)
+            table.add_attribute("symbol", coltype="str", index="unique")
+            table.add_attribute("mass", coltype="float")
 
             # and fill it from the element data
             for symbol, data in molsystem.elements.data.items():
                 table.append(
                     symbol=symbol,
-                    atno=data['atomic number'],
-                    mass=data['atomic weight']
+                    atno=data["atomic number"],
+                    mass=data["atomic weight"],
                 )
             self.db.commit()
 
             # Symmetry information
-            table = self['symmetry']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('group', coltype='str')
+            table = self["symmetry"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("group", coltype="str")
 
-            table = self['symmetryoperation']
-            table.add_attribute(
-                'symmetry', coltype='int', references='symmetry'
-            )
-            table.add_attribute('symop', coltype='str')
+            table = self["symmetryoperation"]
+            table.add_attribute("symmetry", coltype="int", references="symmetry")
+            table.add_attribute("symop", coltype="str")
 
             # Periodic cell information
-            table = self['cell']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('a', coltype='float', default=10.0)
-            table.add_attribute('b', coltype='float', default=10.0)
-            table.add_attribute('c', coltype='float', default=10.0)
-            table.add_attribute('alpha', coltype='float', default=90.0)
-            table.add_attribute('beta', coltype='float', default=90.0)
-            table.add_attribute('gamma', coltype='float', default=90.0)
+            table = self["cell"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("a", coltype="float", default=10.0)
+            table.add_attribute("b", coltype="float", default=10.0)
+            table.add_attribute("c", coltype="float", default=10.0)
+            table.add_attribute("alpha", coltype="float", default=90.0)
+            table.add_attribute("beta", coltype="float", default=90.0)
+            table.add_attribute("gamma", coltype="float", default=90.0)
 
             # The systems themselves
-            table = self['system']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute(
-                'name', coltype='str', notnull=True, default='default'
-            )
+            table = self["system"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("name", coltype="str", notnull=True, default="default")
 
             # The atoms, and the sets of atoms
-            table = self['atom']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('atno', coltype='int', references='element')
+            table = self["atom"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("atno", coltype="int", references="element")
 
-            table = self['atomset']
-            table.add_attribute('id', coltype='int', pk=True)
+            table = self["atomset"]
+            table.add_attribute("id", coltype="int", pk=True)
 
-            table = self['atomset_atom']
-            table.add_attribute('atomset', coltype='int', references='atomset')
-            table.add_attribute('atom', coltype='int', references='atom')
+            table = self["atomset_atom"]
+            table.add_attribute("atomset", coltype="int", references="atomset")
+            table.add_attribute("atom", coltype="int", references="atom")
 
             # The bonds, and sets of bonds
-            table = self['bond']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('i', coltype='int', references='atom')
-            table.add_attribute('j', coltype='int', references='atom')
-            table.add_attribute('bondorder', coltype='int', default=1)
+            table = self["bond"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("i", coltype="int", references="atom")
+            table.add_attribute("j", coltype="int", references="atom")
+            table.add_attribute("bondorder", coltype="int", default=1)
 
-            table = self['bondset']
-            table.add_attribute('id', coltype='int', pk=True)
+            table = self["bondset"]
+            table.add_attribute("id", coltype="int", pk=True)
 
-            table = self['bondset_bond']
-            table.add_attribute('bondset', coltype='int', references='bondset')
-            table.add_attribute('bond', coltype='int', references='bond')
+            table = self["bondset_bond"]
+            table.add_attribute("bondset", coltype="int", references="bondset")
+            table.add_attribute("bond", coltype="int", references="bond")
 
             # Now we can set up the configurations
-            table = self['configuration']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('name', coltype='str')
-            table.add_attribute('system', coltype='int', references='system')
-            table.add_attribute(
-                'version', coltype='int', notnull=True, default=0
-            )
-            table.add_attribute('periodicity', coltype='int', default=0)
-            table.add_attribute(
-                'coordinate_system', coltype='str', default='Cartesian'
-            )
-            table.add_attribute(
-                'symmetry', coltype='int', references='symmetry'
-            )
-            table.add_attribute('cell', coltype='int', references='cell')
-            table.add_attribute('atomset', coltype='int', references='atomset')
-            table.add_attribute('bondset', coltype='int', references='bondset')
+            table = self["configuration"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("name", coltype="str")
+            table.add_attribute("system", coltype="int", references="system")
+            table.add_attribute("version", coltype="int", notnull=True, default=0)
+            table.add_attribute("periodicity", coltype="int", default=0)
+            table.add_attribute("coordinate_system", coltype="str", default="Cartesian")
+            table.add_attribute("symmetry", coltype="int", references="symmetry")
+            table.add_attribute("cell", coltype="int", references="cell")
+            table.add_attribute("atomset", coltype="int", references="atomset")
+            table.add_attribute("bondset", coltype="int", references="bondset")
 
             # And coordinates, which depend on configurations
-            table = self['coordinates']
+            table = self["coordinates"]
             table.add_attribute(
-                'configuration', coltype='int', references='configuration'
+                "configuration", coltype="int", references="configuration"
             )
-            table.add_attribute('atom', coltype='int', references='atom')
-            table.add_attribute('x', coltype='float')
-            table.add_attribute('y', coltype='float')
-            table.add_attribute('z', coltype='float')
+            table.add_attribute("atom", coltype="int", references="atom")
+            table.add_attribute("x", coltype="float")
+            table.add_attribute("y", coltype="float")
+            table.add_attribute("z", coltype="float")
 
             # The definition of the subsets -- templates
-            table = self['template']
-            table.add_attribute('id', coltype='int', pk=True)
-            table.add_attribute('name', coltype='str')
-            table.add_attribute('canonical_smiles', coltype='str')
-            table.add_attribute('category', coltype='str', default='general')
+            table = self["template"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("name", coltype="str")
+            table.add_attribute("canonical_smiles", coltype="str")
+            table.add_attribute("category", coltype="str", default="general")
             table.add_attribute(
-                'configuration', coltype='int', references='configuration'
+                "configuration", coltype="int", references="configuration"
             )
             self.db.execute(
                 "CREATE UNIQUE INDEX 'idx_template_name_type'"
@@ -817,22 +799,18 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             )
 
             # The subsets
-            table = self['subset']
-            table.add_attribute('id', coltype='int', pk=True)
+            table = self["subset"]
+            table.add_attribute("id", coltype="int", pk=True)
             table.add_attribute(
-                'configuration', coltype='int', references='configuration'
+                "configuration", coltype="int", references="configuration"
             )
-            table.add_attribute(
-                'template', coltype='int', references='template'
-            )
+            table.add_attribute("template", coltype="int", references="template")
 
             # The connection between subsets and the atoms in the system
-            table = self['subset_atom']
-            table.add_attribute('atom', coltype='int', references='atom')
-            table.add_attribute('subset', coltype='int', references='subset')
-            table.add_attribute(
-                'templateatom', coltype='int', references='atom'
-            )
+            table = self["subset_atom"]
+            table.add_attribute("atom", coltype="int", references="atom")
+            table.add_attribute("subset", coltype="int", references="subset")
+            table.add_attribute("templateatom", coltype="int", references="atom")
 
             self.db.commit()
 

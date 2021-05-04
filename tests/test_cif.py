@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest  # noqa: F401
+
 """Tests for handling Molfiles."""
 
 cif_cu = """\

@@ -8,8 +8,8 @@ try:
     from openbabel import openbabel
 except ModuleNotFoundError:
     print(
-        'Please install openbabel using conda:\n'
-        '     conda install -c conda-forge openbabel'
+        "Please install openbabel using conda:\n"
+        "     conda install -c conda-forge openbabel"
     )
     raise
 
@@ -101,8 +101,8 @@ class TopologyMixin:
 
         if bonds.n_bonds > 0:
             for bond in bonds.bonds():
-                i = bond['i']
-                j = bond['j']
+                i = bond["i"]
+                j = bond["j"]
                 neighbors[i].append(j)
                 neighbors[j].append(i)
 
@@ -131,7 +131,7 @@ class TopologyMixin:
         molecules = self.find_molecules()
 
         # Remove any previous subsets for this configuration
-        subsets = self['subset']
+        subsets = self["subset"]
         tid = 1
         sids = subsets.find(tid)
         if len(sids) > 0:
@@ -145,9 +145,7 @@ class TopologyMixin:
 
         return sids
 
-    def create_molecule_templates(
-        self, full_templates=True, create_subsets=True
-    ):
+    def create_molecule_templates(self, full_templates=True, create_subsets=True):
         """Create a template for each unique molecule in a configuration.
 
         By default also create subsets linking each template to the atoms
@@ -183,15 +181,15 @@ class TopologyMixin:
         # The bonds in each molecule
         bonds_per_molecule = [[] for i in range(n_molecules)]
         for bond in self.bonds.bonds():
-            i = bond['i']
-            j = bond['j']
-            order = bond['bondorder']
+            i = bond["i"]
+            j = bond["j"]
+            order = bond["bondorder"]
             molecule = atom_to_molecule[i]
             bonds_per_molecule[molecule].append((i, j, order))
 
         # Get the canonical smiles for each molecule
         to_can = openbabel.OBConversion()
-        to_can.SetOutFormat('can')
+        to_can.SetOutFormat("can")
         ob_mol = openbabel.OBMol()
         ob_template = openbabel.OBMol()
         atnos = self.atoms.atomic_numbers
@@ -206,7 +204,7 @@ class TopologyMixin:
             to_index = {j: i for i, j in enumerate(atoms)}
             n_atoms = len(atoms)
             # This is not right ... works only if atoms contiguous. Ufff.
-            molecule_atnos = atnos[start:start + n_atoms]
+            molecule_atnos = atnos[start : start + n_atoms]
 
             ob_mol.Clear()
             for atom, atno in zip(atoms, molecule_atnos):
@@ -222,40 +220,40 @@ class TopologyMixin:
 
             if full_templates:
                 # See if a molecule template with the canonical smiles exists
-                if templates.exists(canonical, 'molecule'):
-                    template = templates.get(canonical, category='molecule')
+                if templates.exists(canonical, "molecule"):
+                    template = templates.get(canonical, category="molecule")
                 else:
                     # Create a new system & configuration for the template
-                    system_name = 'template system ' + canonical
+                    system_name = "template system " + canonical
                     if not self.system_db.system_exists(system_name):
                         system = self.system_db.create_system(system_name)
                         configuration = system.create_configuration(canonical)
                         cid = configuration.id
 
                         kwargs = {}
-                        kwargs['atno'] = molecule_atnos
-                        molecule_xyzs = xyzs[start:start + n_atoms]
-                        kwargs['x'] = [x for x, y, z in molecule_xyzs]
-                        kwargs['y'] = [y for x, y, z in molecule_xyzs]
-                        kwargs['z'] = [z for x, y, z in molecule_xyzs]
+                        kwargs["atno"] = molecule_atnos
+                        molecule_xyzs = xyzs[start : start + n_atoms]
+                        kwargs["x"] = [x for x, y, z in molecule_xyzs]
+                        kwargs["y"] = [y for x, y, z in molecule_xyzs]
+                        kwargs["z"] = [z for x, y, z in molecule_xyzs]
 
                         ids = configuration.atoms.append(**kwargs)
 
                         kwargs = {}
-                        kwargs['i'] = [ids[x] for x, _, _ in bonds]
-                        kwargs['j'] = [ids[x] for _, x, _ in bonds]
-                        kwargs['bondorder'] = [x for _, _, x in bonds]
+                        kwargs["i"] = [ids[x] for x, _, _ in bonds]
+                        kwargs["j"] = [ids[x] for _, x, _ in bonds]
+                        kwargs["bondorder"] = [x for _, _, x in bonds]
 
                         configuration.bonds.append(**kwargs)
 
                         template = templates.create(
-                            canonical, category='molecule', configuration=cid
+                            canonical, category="molecule", configuration=cid
                         )
             else:
-                if templates.exists(canonical, 'molecule'):
-                    template = templates.get(canonical, category='molecule')
+                if templates.exists(canonical, "molecule"):
+                    template = templates.get(canonical, category="molecule")
                 else:
-                    template = templates.create(canonical, category='molecule')
+                    template = templates.create(canonical, category="molecule")
 
             if template.id not in tids:
                 tids.append(template.id)
@@ -273,9 +271,9 @@ class TopologyMixin:
                     tatom_ids = template.atoms.ids
                     to_index = {j: i for i, j in enumerate(tatom_ids)}
                     for row in template.bonds.bonds():
-                        i = to_index[row['i']]
-                        j = to_index[row['j']]
-                        order = row['bondorder']
+                        i = to_index[row["i"]]
+                        j = to_index[row["j"]]
+                        order = row["bondorder"]
                         ob_template.AddBond(i + 1, j + 1, order)
 
                     # Get the mapping from template to molecule
@@ -285,9 +283,7 @@ class TopologyMixin:
                     mapper.MapFirst(ob_mol, mapping)
                     reordered_atoms = [atoms[j] for i, j in mapping]
 
-                    subset = self.subsets.create(
-                        template, reordered_atoms, tatom_ids
-                    )
+                    subset = self.subsets.create(template, reordered_atoms, tatom_ids)
                 else:
                     subset = self.subsets.create(template, atoms)
 

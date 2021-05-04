@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class _Configuration(
-    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin,
-    OpenBabelMixin, object
+    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin, OpenBabelMixin, object
 ):
     """A configuration (conformer) of a system.
 
@@ -45,7 +44,7 @@ class _Configuration(
 
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
-        self.system_db['configuration'].__enter__()
+        self.system_db["configuration"].__enter__()
         self.atoms.__enter__()
         self.bonds.__enter__()
         # Avoid periodicity check
@@ -57,7 +56,7 @@ class _Configuration(
         # Save the version, beacuse all of the subitems will update it.
         version = self.version
 
-        self.system_db['configuration'].__exit__(etype, value, traceback)
+        self.system_db["configuration"].__exit__(etype, value, traceback)
         self.atoms.__exit__(etype, value, traceback)
         self.bonds.__exit__(etype, value, traceback)
         _Cell(self).__exit__(etype, value, traceback)
@@ -78,17 +77,17 @@ class _Configuration(
         if self._atomset is None:
             # Cache the atomset for this configuration
             self.cursor.execute(
-                'SELECT atomset FROM configuration WHERE id = ?', (self.id,)
+                "SELECT atomset FROM configuration WHERE id = ?", (self.id,)
             )
             tmp = self.cursor.fetchone()
             # atomset = self.cursor.fetchone()[0]
             atomset = tmp[0]
             if atomset is None:
                 # No atomset, so create one and update this configuration
-                atomset = self.system_db['atomset'].append(n=1)[0]
+                atomset = self.system_db["atomset"].append(n=1)[0]
                 self.db.execute(
                     "UPDATE configuration SET atomset = ? WHERE id = ?",
-                    (atomset, self.id)
+                    (atomset, self.id),
                 )
                 self.db.commit()
             self._atomset = atomset
@@ -105,15 +104,15 @@ class _Configuration(
         if self._bondset is None:
             # Cache the bondset for this configuration
             self.cursor.execute(
-                'SELECT bondset FROM configuration WHERE id = ?', (self.id,)
+                "SELECT bondset FROM configuration WHERE id = ?", (self.id,)
             )
             bondset = self.cursor.fetchone()[0]
             if bondset is None:
                 # No bondset, so create one and update this configuration
-                bondset = self.system_db['bondset'].append(n=1)[0]
+                bondset = self.system_db["bondset"].append(n=1)[0]
                 self.db.execute(
                     "UPDATE configuration SET bondset = ? WHERE id = ?",
-                    (bondset, self.id)
+                    (bondset, self.id),
                 )
                 self.db.commit()
             self._bondset = bondset
@@ -134,7 +133,7 @@ class _Configuration(
             The Cell object for this configuration.
         """
         if self.periodicity == 0:
-            raise TypeError('The configuration is not periodic!')
+            raise TypeError("The configuration is not periodic!")
         return _Cell(self)
 
     @property
@@ -142,11 +141,11 @@ class _Configuration(
         """The id of the cell in the cell table."""
         if self._cell_id is None:
             self.cursor.execute(
-                'SELECT cell FROM configuration WHERE id = ?', (self.id,)
+                "SELECT cell FROM configuration WHERE id = ?", (self.id,)
             )
             self._cell_id = self.cursor.fetchone()[0]
             if self._cell_id is None:
-                self._cell_id = self.system_db['cell'].append(n=1)[0]
+                self._cell_id = self.system_db["cell"].append(n=1)[0]
                 sql = "UPDATE configuration SET cell = ? WHERE id = ?"
                 self.db.execute(sql, (self._cell_id, self.id))
                 self.db.commit()
@@ -157,26 +156,27 @@ class _Configuration(
         """The coordinate system for this configuration."""
         if self._coordinate_system is None:
             self.cursor.execute(
-                'SELECT coordinate_system FROM configuration WHERE id = ?',
-                (self.id,)
+                "SELECT coordinate_system FROM configuration WHERE id = ?", (self.id,)
             )
             self._coordinate_system = self.cursor.fetchone()[0]
         return self._coordinate_system
 
     @coordinate_system.setter
     def coordinate_system(self, value):
-        if value.lower()[0] == 'f':
+        if value.lower()[0] == "f":
             self.cursor.execute(
                 "UPDATE configuration SET coordinate_system = 'fractional'"
-                " WHERE id = ?", (self.id,)
+                " WHERE id = ?",
+                (self.id,),
             )
-            self._coordinate_system = 'fractional'
+            self._coordinate_system = "fractional"
         else:
             self.cursor.execute(
                 "UPDATE configuration SET coordinate_system = 'Cartesian'"
-                " WHERE id = ?", (self.id,)
+                " WHERE id = ?",
+                (self.id,),
             )
-            self._coordinate_system = 'Cartesian'
+            self._coordinate_system = "Cartesian"
         self.db.commit()
 
     @property
@@ -199,13 +199,13 @@ class _Configuration(
             The density of the cell.
         """
         if self.periodicity != 3:
-            raise RuntimeError('Density is only defined for 3-D systems.')
+            raise RuntimeError("Density is only defined for 3-D systems.")
 
         volume = self.volume
         mass = self.mass
 
         # converting from g/mol / Å^3 to g/cm^3
-        return (mass / volume) * (1.0e+24 / 6.02214076E+23)
+        return (mass / volume) * (1.0e24 / 6.02214076e23)
 
     @property
     def formula(self):
@@ -224,10 +224,10 @@ class _Configuration(
         # Order the elements ... Hill order if C, CH then alphabetical,
         # or if no C, then just alphabetically
         formula_list = []
-        if 'C' in counts:
-            formula_list.append(('C', counts.pop('C')))
-            if 'H' in counts:
-                formula_list.append(('H', counts.pop('H')))
+        if "C" in counts:
+            formula_list.append(("C", counts.pop("C")))
+            if "H" in counts:
+                formula_list.append(("H", counts.pop("H")))
 
         for element in sorted(counts.keys()):
             formula_list.append((element, counts[element]))
@@ -239,7 +239,7 @@ class _Configuration(
         formula = []
         for element, count in formula_list:
             if count > 1:
-                formula.append(f'{element}{count}')
+                formula.append(f"{element}{count}")
             else:
                 formula.append(element)
 
@@ -252,11 +252,11 @@ class _Configuration(
         empirical_formula = []
         for element, count in empirical_formula_list:
             if count > 1:
-                empirical_formula.append(f'{element}{count}')
+                empirical_formula.append(f"{element}{count}")
             else:
                 empirical_formula.append(element)
 
-        return ' '.join(formula), ' '.join(empirical_formula), Z
+        return " ".join(formula), " ".join(empirical_formula), Z
 
     @property
     def id(self):
@@ -292,7 +292,7 @@ class _Configuration(
         """The name of the configuration."""
         if self._name is None:
             self.cursor.execute(
-                'SELECT name FROM configuration WHERE id = ?', (self.id,)
+                "SELECT name FROM configuration WHERE id = ?", (self.id,)
             )
             self._name = self.cursor.fetchone()[0]
         return self._name
@@ -321,8 +321,7 @@ class _Configuration(
         """The periodicity of the system, 0, 1, 2 or 3"""
         if self._periodicity is None:
             self.cursor.execute(
-                'SELECT periodicity FROM configuration WHERE id = ?',
-                (self.id,)
+                "SELECT periodicity FROM configuration WHERE id = ?", (self.id,)
             )
             self._periodicity = self.cursor.fetchone()[0]
         return self._periodicity
@@ -330,10 +329,9 @@ class _Configuration(
     @periodicity.setter
     def periodicity(self, value):
         if value < 0 or value > 3:
-            raise ValueError('The periodicity must be between 0 and 3.')
+            raise ValueError("The periodicity must be between 0 and 3.")
         self.cursor.execute(
-            "UPDATE configuration SET periodicity = ? WHERE id = ?",
-            (value, self.id)
+            "UPDATE configuration SET periodicity = ? WHERE id = ?", (value, self.id)
         )
         self.db.commit()
         self._periodicity = value
@@ -353,7 +351,7 @@ class _Configuration(
         """The id of the symmetry in the symmetry table."""
         if self._symmetry_id is None:
             self.cursor.execute(
-                'SELECT symmetry FROM configuration WHERE id = ?', (self.id,)
+                "SELECT symmetry FROM configuration WHERE id = ?", (self.id,)
             )
             self._symmetry_id = self.cursor.fetchone()[0]
         return self._symmetry_id
@@ -363,7 +361,7 @@ class _Configuration(
         """The system that we belong to."""
         if self._system is None:
             self.cursor.execute(
-                'SELECT system FROM configuration WHERE id = ?', (self.id,)
+                "SELECT system FROM configuration WHERE id = ?", (self.id,)
             )
             self._system = self.system_db.get_system(self.cursor.fetchone()[0])
         return self._system
@@ -377,15 +375,14 @@ class _Configuration(
     def version(self):
         """The version of the system, incrementing from 0"""
         self.cursor.execute(
-            'SELECT version FROM configuration WHERE id = ?', (self.id,)
+            "SELECT version FROM configuration WHERE id = ?", (self.id,)
         )
         return int(self.cursor.fetchone()[0])
 
     @version.setter
     def version(self, value):
         self.cursor.execute(
-            'UPDATE configuration SET version = ? WHERE id = ?',
-            (value, self.id)
+            "UPDATE configuration SET version = ? WHERE id = ?", (value, self.id)
         )
         self.db.commit()
 
@@ -399,11 +396,11 @@ class _Configuration(
             The volume of the cell.
         """
         if self.periodicity != 3:
-            raise RuntimeError('Density is only defined for 3-D systems.')
+            raise RuntimeError("Density is only defined for 3-D systems.")
 
         return self.cell.volume
 
     def clear(self) -> int:
         """Delete everything from the configuration."""
         # Delete the atoms
-        self.atoms.delete('all')
+        self.atoms.delete("all")
