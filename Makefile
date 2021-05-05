@@ -94,6 +94,7 @@ dist: clean ## builds source and wheel package
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
+	openssl sha256 dist/molsystem*.tar.gz
 
 install: uninstall ## install the package to the active Python's site-packages
 	python setup.py install
