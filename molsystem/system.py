@@ -205,6 +205,8 @@ class _System(CIFMixin, MutableMapping):
     @property
     def configuration(self):
         """The configuration object for the current configuration."""
+        if self.n_configurations == 0:
+            return None
         if self._current_configuration_id is None:
             self._current_configuration_id = self.configuration_ids[-1]
         return _Configuration(
