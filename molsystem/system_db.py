@@ -484,7 +484,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Close the database."""
         self.filename = None
 
-    def create_system(self, name=None, make_current=True):
+    def create_system(self, name="", make_current=True):
         """Add a new system.
 
         Parameters

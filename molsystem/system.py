@@ -328,7 +328,7 @@ class _System(CIFMixin, MutableMapping):
 
     def create_configuration(
         self,
-        name=None,
+        name="",
         periodicity=0,
         coordinatesystem=None,
         symmetry=None,
