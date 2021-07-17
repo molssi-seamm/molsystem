@@ -33,6 +33,42 @@ class OpenBabelMixin:
 
         return ob_mol
 
+    def from_OBMol(self, ob_mol):
+        """Transform an Open Babel molecule into the current object."""
+        atnos = []
+        Xs = []
+        Ys = []
+        Zs = []
+        for ob_atom in openbabel.OBMolAtomIter(ob_mol):
+            atno = ob_atom.GetAtomicNum()
+            atnos.append(atno)
+            Xs.append(ob_atom.x())
+            Ys.append(ob_atom.z())
+            Zs.append(ob_atom.z())
+            logger.debug(f"atom {atno} {ob_atom.x()} {ob_atom.z()} {ob_atom.z()}")
+
+        Is = []
+        Js = []
+        BondOrders = []
+        for ob_bond in openbabel.OBMolBondIter(ob_mol):
+            ob_i = ob_bond.GetBeginAtom()
+            ob_j = ob_bond.GetEndAtom()
+            i = ob_i.GetIdx()
+            j = ob_j.GetIdx()
+            bondorder = ob_bond.GetBondOrder()
+            Is.append(i)
+            Js.append(j)
+            BondOrders.append(bondorder)
+            logger.debug(f"bond {i} - {j} {bondorder}")
+
+        self.clear()
+        ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+        i = [ids[x - 1] for x in Is]
+        j = [ids[x - 1] for x in Js]
+        self.bonds.append(i=i, j=j, bondorder=BondOrders)
+
+        return self
+
     def find_substructures(self, template):
         """Find the substructures matching the template.
 
