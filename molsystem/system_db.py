@@ -377,6 +377,8 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     @property
     def system(self):
         """The current system object."""
+        if self.n_systems == 0:
+            return None
         if self._current_system_id is None:
             self._current_system_id = self.system_ids[-1]
         return _System(self, self._current_system_id)
@@ -482,7 +484,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Close the database."""
         self.filename = None
 
-    def create_system(self, name=None, make_current=True):
+    def create_system(self, name="", make_current=True):
         """Add a new system.
 
         Parameters
