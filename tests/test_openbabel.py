@@ -363,6 +363,7 @@ known_input_formats["Linux"] = (
     "xyz -- XYZ cartesian coordinates format",
     "yob -- YASARA.org YOB format",
 )
+known_input_formats["Windows"] = known_input_formats["Darwin"]
 
 
 def test_substructure(CH3COOH_3H2O):
