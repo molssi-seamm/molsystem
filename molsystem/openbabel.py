@@ -22,9 +22,10 @@ class OpenBabelMixin:
     def to_OBMol(self):
         """Return an OBMol object for the configuration, template, or subset."""
         ob_mol = openbabel.OBMol()
-        for atno in self.atoms.atomic_numbers:
+        for atno, xyz in zip(self.atoms.atomic_numbers, self.atoms.coordinates):
             ob_atom = ob_mol.NewAtom()
             ob_atom.SetAtomicNum(atno)
+            ob_atom.SetVector(*xyz)
 
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
@@ -43,7 +44,7 @@ class OpenBabelMixin:
             atno = ob_atom.GetAtomicNum()
             atnos.append(atno)
             Xs.append(ob_atom.x())
-            Ys.append(ob_atom.z())
+            Ys.append(ob_atom.y())
             Zs.append(ob_atom.z())
             logger.debug(f"atom {atno} {ob_atom.x()} {ob_atom.z()} {ob_atom.z()}")
 
