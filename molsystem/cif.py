@@ -219,6 +219,18 @@ class CIFMixin:
         # Add the atoms
         # TEMPORARILY lower the symmetry to P1
         delta = 1.0e-04
+
+        # Where is the symmetry info?
+        if "_space_group_symop_operation_xyz" in data_block:
+            symdata = "_space_group_symop_operation_xyz"
+        elif "_symmetry_equiv_pos_as_xyz" in data_block:
+            symdata = "_symmetry_equiv_pos_as_xyz"
+        else:
+            raise RuntimeError(
+                "CIF file does not contain required symmetry information. Neither "
+                "'_symmetry_equiv_pos_as_xyz' or '_space_group_symop_operation_xyz' "
+                "is present."
+            )
         for x, y, z, symbol in zip(
             data_block["_atom_site_fract_x"],
             data_block["_atom_site_fract_y"],
@@ -233,7 +245,7 @@ class CIFMixin:
             x = float(x)
             y = float(y)
             z = float(z)
-            for symop in data_block["_space_group_symop_operation_xyz"]:
+            for symop in data_block[symdata]:
                 x_eq, y_eq, z_eq = symop.split(",")
                 x_new = eval(x_eq)
                 y_new = eval(y_eq)
