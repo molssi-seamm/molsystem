@@ -231,16 +231,16 @@ class CIFMixin:
                 "'_symmetry_equiv_pos_as_xyz' or '_space_group_symop_operation_xyz' "
                 "is present."
             )
+        xs = []
+        ys = []
+        zs = []
+        symbols = []
         for x, y, z, symbol in zip(
             data_block["_atom_site_fract_x"],
             data_block["_atom_site_fract_y"],
             data_block["_atom_site_fract_z"],
             data_block["_atom_site_type_symbol"],
         ):  # yapf: disable
-            xs = []
-            ys = []
-            zs = []
-            symbols = []
             # These variables *are* used in the eval below.
             x = float(x)
             y = float(y)
@@ -275,7 +275,7 @@ class CIFMixin:
                     ys.append(y_new)
                     zs.append(z_new)
                     symbols.append(symbol)
-            self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
+        self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
 
     def to_mmcif_text(self):
         """Create the text of a mmCIF file from this configuration.
