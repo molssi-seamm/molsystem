@@ -607,6 +607,46 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
 
         return result
 
+    def find_configurations(self, atomset=None, bondset=None):
+        """Return the configurations that have given atom- or bondsets
+
+        Parameters
+        ----------
+        atomset : int = None
+            The id of the atomset.
+        bondset : int = None
+            The id of the bondset.
+
+        Returns
+        -------
+        [_Configuration]
+        """
+
+        if atomset is not None:
+            if bondset is not None:
+                self.cursor.execute(
+                    "SELECT id FROM configuration WHERE atomset = ? AND bondset = ?",
+                    (atomset, bondset),
+                )
+            else:
+                self.cursor.execute(
+                    "SELECT id FROM configuration WHERE atomset = ?", (atomset,)
+                )
+            return [
+                _Configuration(_id=cid, system_db=self)
+                for cid in self.cursor.fetchall()
+            ]
+        elif bondset is not None:
+            self.cursor.execute(
+                "SELECT id FROM configuration WHERE bondset = ?", (bondset,)
+            )
+            return [
+                _Configuration(_id=cid, system_db=self)
+                for cid in self.cursor.fetchall()
+            ]
+        else:
+            raise RuntimeError("Must give atomset or bondset.")
+
     def get_configuration(self, cid):
         """Return the specified configuration.
 
