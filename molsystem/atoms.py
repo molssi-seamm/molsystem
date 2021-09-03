@@ -5,6 +5,7 @@
 
 from itertools import zip_longest
 import logging
+import pprint  # noqa: F401
 from typing import Any, Dict, TypeVar
 
 import numpy
@@ -634,7 +635,7 @@ class _Atoms(_Table):
             molecules = self.configuration.find_molecules(as_indices=True)
 
             for indices in molecules:
-                indices = numpy.array([i - 1 for i in indices])
+                indices = numpy.array(indices)
                 uvw_mol = numpy.take(UVW, indices, axis=0)
                 center = numpy.average(uvw_mol, axis=0)
                 delta = numpy.floor(center)
