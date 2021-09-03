@@ -309,23 +309,23 @@ class CIFMixin:
             cell = self.cell
             a, b, c, alpha, beta, gamma = cell.parameters
             volume = cell.volume
-            lines.append("_symmetry_space_group_name_H-M   'P 1'")
-            lines.append(f"_cell_length_a   {a}")
-            lines.append(f"_cell_length_b   {b}")
-            lines.append(f"_cell_length_c   {c}")
-            lines.append(f"_cell_angle_alpha   {alpha}")
-            lines.append(f"_cell_angle_beta    {beta}")
-            lines.append(f"_cell_angle_gamma   {gamma}")
-            lines.append("_symmetry_Int_Tables_number   1")
-            lines.append(f"_cell_volume   {volume}")
-            lines.append(f"_cell_formula_units_Z   {Z}")
-            lines.append("loop_")
-            lines.append(" _symmetry_equiv_pos_site_id")
-            lines.append(" _symmetry_equiv_pos_as_xyz")
-            lines.append("  1  'x, y, z'")
+            # lines.append("_symmetry_space_group_name_H-M   'P 1'")
+            lines.append(f"_cell.length_a   {a}")
+            lines.append(f"_cell.length_b   {b}")
+            lines.append(f"_cell.length_c   {c}")
+            lines.append(f"_cell.angle_alpha   {alpha}")
+            lines.append(f"_cell.angle_beta    {beta}")
+            lines.append(f"_cell.angle_gamma   {gamma}")
+            # lines.append("_symmetry_Int_Tables_number   1")
+            lines.append(f"_cell.volume   {volume}")
+            lines.append(f"_cell.formula_units_Z   {Z}")
+            # lines.append("loop_")
+            # lines.append(" _symmetry_equiv_pos_site_id")
+            # lines.append(" _symmetry_equiv_pos_as_xyz")
+            # lines.append("  1  'x, y, z'")
 
-        lines.append(f"_chemical_formula_structural   '{empirical_formula}'")
-        lines.append(f"_chemical_formula_sum   '{formula}'")
+        # lines.append(f"_chemical_formula_structural   '{empirical_formula}'")
+        lines.append(f"_chemical_formula.sum   '{formula}'")
 
         # The atoms
         lines.append("loop_")
@@ -357,8 +357,9 @@ class CIFMixin:
                 tmp[name] = 1
                 names.append(name)
 
-        XYZ = atoms.get_coordinates(in_cell="molecule")
+        XYZ = atoms.get_coordinates(in_cell="molecule", fractionals=False)
         XYZa = atoms.get_coordinates(fractionals=False)
+        XYZa = XYZ
 
         symbols = atoms.symbols
         for element, name, xyza, xyz in zip(symbols, names, XYZa, XYZ):
