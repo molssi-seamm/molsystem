@@ -79,19 +79,39 @@ class _Configuration(
             self.cursor.execute(
                 "SELECT atomset FROM configuration WHERE id = ?", (self.id,)
             )
-            tmp = self.cursor.fetchone()
-            # atomset = self.cursor.fetchone()[0]
-            atomset = tmp[0]
-            if atomset is None:
-                # No atomset, so create one and update this configuration
-                atomset = self.system_db["atomset"].append(n=1)[0]
-                self.db.execute(
-                    "UPDATE configuration SET atomset = ? WHERE id = ?",
-                    (atomset, self.id),
-                )
-                self.db.commit()
-            self._atomset = atomset
+            self._atomset = self.cursor.fetchone()[0]
+        if self._atomset is None:
+            # No atomset, so create one and update this configuration
+            self._atomset = self.system_db["atomset"].append(n=1)[0]
+            self.db.execute(
+                "UPDATE configuration SET atomset = ? WHERE id = ?",
+                (self._atomset, self.id),
+            )
+            self.db.commit()
         return self._atomset
+
+    @atomset.setter
+    def atomset(self, value):
+        if self._atomset is None:
+            # Cache the atomset for this configuration
+            self.cursor.execute(
+                "SELECT atomset FROM configuration WHERE id = ?", (self.id,)
+            )
+            tmp = self.cursor.fetchone()
+            self._atomset = tmp[0]
+        if self._atomset is None:
+            # No atomset, so update this configuration
+            self.db.execute(
+                "UPDATE configuration SET atomset = ? WHERE id = ?",
+                (value, self.id),
+            )
+            self.db.commit()
+            self._atomset = value
+        elif value == self._atomset:
+            # Do nothing
+            pass
+        else:
+            raise RuntimeError("The atomset is already set!")
 
     @property
     def bonds(self):
@@ -106,17 +126,38 @@ class _Configuration(
             self.cursor.execute(
                 "SELECT bondset FROM configuration WHERE id = ?", (self.id,)
             )
-            bondset = self.cursor.fetchone()[0]
-            if bondset is None:
-                # No bondset, so create one and update this configuration
-                bondset = self.system_db["bondset"].append(n=1)[0]
-                self.db.execute(
-                    "UPDATE configuration SET bondset = ? WHERE id = ?",
-                    (bondset, self.id),
-                )
-                self.db.commit()
-            self._bondset = bondset
+            self._bondset = self.cursor.fetchone()[0]
+        if self._bondset is None:
+            # No bondset, so create one and update this configuration
+            self._bondset = self.system_db["bondset"].append(n=1)[0]
+            self.db.execute(
+                "UPDATE configuration SET bondset = ? WHERE id = ?",
+                (self._bondset, self.id),
+            )
+            self.db.commit()
         return self._bondset
+
+    @bondset.setter
+    def bondset(self, value):
+        if self._bondset is None:
+            # Cache the bondset for this configuration
+            self.cursor.execute(
+                "SELECT bondset FROM configuration WHERE id = ?", (self.id,)
+            )
+            self._bondset = self.cursor.fetchone()[0]
+        if self._bondset is None:
+            # No bondset, so update this configuration
+            self.db.execute(
+                "UPDATE configuration SET bondset = ? WHERE id = ?",
+                (value, self.id),
+            )
+            self.db.commit()
+            self._bondset = value
+        elif value == self._bondset:
+            # No change
+            pass
+        else:
+            raise RuntimeError("The bondset is already set!")
 
     @property
     def cell(self):
