@@ -332,7 +332,7 @@ class _System(CIFMixin, MutableMapping):
         periodicity=0,
         coordinatesystem=None,
         symmetry=None,
-        cell=None,
+        cell_id=None,
         atomset=None,
         bondset=None,
         make_current=True,
@@ -350,8 +350,8 @@ class _System(CIFMixin, MutableMapping):
             Defaults to Cartesian for molecules and fractional for crystals.
         symmetry : int or str = None
             The id or name of the point or space group (optional)
-        cell : Cell or 6-vector = None
-            The cell parameters, default to last ones.
+        cell_id : int = None
+            The id of the _Cell object
         atomset : int = None
             The set of atoms in this configurationn
         bondset : int = None
@@ -377,8 +377,8 @@ class _System(CIFMixin, MutableMapping):
                     kwargs["coordinatesystem"] = "fractional"
         if symmetry is not None:
             kwargs["symmetry"] = symmetry
-        if cell is not None:
-            kwargs["cell"] = cell
+        if cell_id is not None:
+            kwargs["cell"] = cell_id
         if atomset is not None:
             kwargs["atomset"] = atomset
         if bondset is not None:
