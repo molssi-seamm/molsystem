@@ -265,8 +265,7 @@ data_CH2O
 _chem_comp.name 'C2 H4 O2'
 _chem_comp.id 'CH2O'
 _chem_comp.formula   'C2 H4 O2'
-_chemical_formula_structural   'C H2 O'
-_chemical_formula_sum   'C2 H4 O2'
+_chemical_formula.sum   'C2 H4 O2'
 loop_
  _chem_comp_atom.comp_id
  _chem_comp_atom.atom_id
