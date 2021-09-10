@@ -341,11 +341,11 @@ class _Atoms(_Table):
         sql = f"""
         SELECT {column_defs}
           FROM atom as at, coordinates as co
-         WHERE co.atom = at.id
+         WHERE co.atom = at.id AND co.configuration = ?
            AND at.id IN (SELECT atom FROM atomset_atom WHERE atomset = ?)
         """
 
-        parameters = [self.atomset]
+        parameters = [self.configuration.id, self.atomset]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
@@ -562,12 +562,21 @@ class _Atoms(_Table):
         return data
 
     def get_ids(self, *args):
-        """The ids of the atoms.
+        """The ids of the selected atoms.
+
+        Any extra arguments are triplets of column, operator, and value force
+        additional selection criteria. The table names must be used in the column
+        specification and are 'at' for the atom table and 'co' for the coordinate
+        table.
+
+        For example, if there are three arguments "at.atno", "=", "6" only the ids
+        of the carbon atoms in the configuration will be returned.
 
         Parameters
         ----------
         args : [str]
-            Added selection criteria for the SQL, one word at a time.
+            Further selection arguments, in sets of three:
+            column, operator, and value, e.g. "at.atno = 6"
 
         Returns
         -------
@@ -575,19 +584,40 @@ class _Atoms(_Table):
             The ids of the requested atoms.
         """
 
-        sql = (
-            "SELECT at.id"
-            "  FROM atom as at, coordinates as co, atomset_atom as aa"
-            " WHERE at.id == aa.atom AND aa.atomset = ? AND co.atom = at.id"
-        )
+        # What tables are requested in the extra arguments?
+        tables = set()
+        if len(args) > 0:
+            for col, op, value in grouped(args, 3):
+                tables.add(col.split(".")[0])
 
+        # Build the query based on the tables needed
+        sql = "SELECT aa.atom FROM atomset_atom AS aa"
+        if "at" in tables or "co" in tables:
+            sql += ", atoms AS at"
+        if "co" in tables:
+            sql += ", coordinates AS co"
+
+        # The WHERE clauses bringing joining the tables
+        sql += " WHERE aa.atomset = ?"
         parameters = [self.atomset]
+        if "at" in tables or "co" in tables:
+            sql += " AND at.id = aa.atom"
+        if "co" in tables:
+            sql += " AND co.atom = at.id AND co.configuration = ?"
+            parameters.append(self.configuration.id)
+
+        # And any extra selection criteria
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
                     op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
+
+        logger.debug("get_id query:")
+        logger.debug(sql)
+        logger.debug(parameters)
+        logger.debug("---")
 
         return [x[0] for x in self.db.execute(sql, parameters)]
 
@@ -699,11 +729,11 @@ class _Atoms(_Table):
         sql = """
         SELECT COUNT(*)
           FROM atom as at, coordinates as co
-         WHERE co.atom = at.id
+         WHERE co.atom = at.id AND co.configuration = ?
            AND at.id IN (SELECT atom FROM atomset_atom WHERE atomset = ?)
         """
 
-        parameters = [self.atomset]
+        parameters = [self.configuration.id, self.atomset]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
@@ -797,7 +827,9 @@ class _Atoms(_Table):
                 "   FROM atom as at,"
                 "        coordinates as co,"
                 "        atomset_atom as aa"
-                "  WHERE co.atom = at.id AND at.id = aa.atom"
+                "  WHERE co.atom = at.id"
+                f"   AND co.configuration = {self.configuration.id}"
+                "    AND at.id = aa.atom"
                 f"   AND aa.atomset = {self.atomset}"
             )
             return _Column(self._coordinates_table, key, sql=sql)
@@ -830,7 +862,9 @@ class _Atoms(_Table):
                 "   FROM atom as at,"
                 "        coordinates as co,"
                 "        atomset_atom as aa"
-                "  WHERE co.atom = at.id AND at.id = aa.atom"
+                "  WHERE co.atom = at.id"
+                f"   AND co.configuration = {self.configuration.id}"
+                "    AND at.id = aa.atom"
                 f"   AND aa.atomset = {self.atomset}"
             )
             return [row[0] for row in self.db.execute(sql)]
@@ -1082,11 +1116,12 @@ class _SubsetAtoms(_Atoms):
         SELECT {column_defs}
           FROM atom as at, coordinates as co, subset_atom as sa
          WHERE co.atom = at.id
+           AND co.configuration = ?
            AND at.id = sa.atom
            AND sa.subset = ?
         """
 
-        parameters = [self.subset_id]
+        parameters = [self.configuration.id, self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
@@ -1116,10 +1151,11 @@ class _SubsetAtoms(_Atoms):
         SELECT COUNT(*)
           FROM atom as at, coordinates as co, subset_atom as sa
          WHERE co.atom = at.id
+           AND co.configuration = ?
            AND at.id = sa.atom
            AND sa.subset = ?
         """
-        parameters = [self.subset_id]
+        parameters = [self.configuration.id, self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
@@ -1173,6 +1209,7 @@ class _SubsetAtoms(_Atoms):
             SELECT co.rowid, co."{key}"
               FROM coordinates as co, subset_atom as sa
              WHERE co.atom = sa.atom
+               AND co.configuration = {self.configuration.id}
                AND sa.subset = {self.subset_id}
             """
             if self.template.is_full and self.template_order:
@@ -1209,6 +1246,7 @@ class _SubsetAtoms(_Atoms):
             SELECT co."{key}"
               FROM coordinates as co, subset_atom as sa
              WHERE co.atom = sa.atom
+               AND co.configuration = {self.configuration.id}
                AND sa.subset = {self.subset_id}
             """
             if self.template.is_full and self.template_order:
@@ -1235,10 +1273,11 @@ class _SubsetAtoms(_Atoms):
         SELECT at.id
           FROM atom as at, coordinates as co, subset_atom as sa
          WHERE at.id = sa.atom
+           AND co.configuration = ?
            AND sa.subset = ?
         """
 
-        parameters = [self.subset_id]
+        parameters = [self.configuration.id, self.subset_id]
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
