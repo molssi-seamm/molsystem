@@ -788,6 +788,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table = self["atomset_atom"]
             table.add_attribute("atomset", coltype="int", references="atomset")
             table.add_attribute("atom", coltype="int", references="atom")
+            self.db.execute(
+                "CREATE INDEX 'idx_atomset_atom_atomset_atom' "
+                'ON atomset_atom ("atomset", "atom")'
+            )
 
             # The bonds, and sets of bonds
             table = self["bond"]
@@ -795,6 +799,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("i", coltype="int", references="atom")
             table.add_attribute("j", coltype="int", references="atom")
             table.add_attribute("bondorder", coltype="int", default=1)
+            # Only need for infinite networked systems. Think about later!
+            # table.add_attribute("offset1", coltype="int", default=0)
+            # table.add_attribute("offset2", coltype="int", default=0)
+            # table.add_attribute("offset3", coltype="int", default=0)
 
             table = self["bondset"]
             table.add_attribute("id", coltype="int", pk=True)
@@ -802,6 +810,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table = self["bondset_bond"]
             table.add_attribute("bondset", coltype="int", references="bondset")
             table.add_attribute("bond", coltype="int", references="bond")
+            self.db.execute(
+                "CREATE INDEX 'idx_bondset_bond_bondset_bond' "
+                'ON bondset_bond ("bondset", "bond")'
+            )
 
             # Now we can set up the configurations
             table = self["configuration"]
@@ -825,7 +837,13 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("x", coltype="float")
             table.add_attribute("y", coltype="float")
             table.add_attribute("z", coltype="float")
-
+            self.db.execute(
+                "CREATE INDEX 'idx_coordinates_atom' ON coordinates (\"atom\")"
+            )
+            self.db.execute(
+                "CREATE INDEX idx_coordinates_atom_configuration "
+                "    ON coordinates(atom, configuration)"
+            )
             # The definition of the subsets -- templates
             table = self["template"]
             table.add_attribute("id", coltype="int", pk=True)
@@ -847,12 +865,20 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "configuration", coltype="int", references="configuration"
             )
             table.add_attribute("template", coltype="int", references="template")
+            self.db.execute(
+                "CREATE INDEX subset_idx_template_configuration "
+                "ON subset(template, configuration)"
+            )
 
             # The connection between subsets and the atoms in the system
             table = self["subset_atom"]
             table.add_attribute("atom", coltype="int", references="atom")
             table.add_attribute("subset", coltype="int", references="subset")
             table.add_attribute("templateatom", coltype="int", references="atom")
+            self.db.execute(
+                "CREATE INDEX 'idx_subset_atom_subset_atom' "
+                'ON subset_atom ("subset", "atom")'
+            )
 
             self.db.commit()
 
