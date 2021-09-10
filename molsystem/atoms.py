@@ -338,20 +338,43 @@ class _Atoms(_Table):
         columns = self._columns()
         column_defs = ", ".join(columns)
 
-        sql = f"""
-        SELECT {column_defs}
-          FROM atom as at, coordinates as co
-         WHERE co.atom = at.id AND co.configuration = ?
-           AND at.id IN (SELECT atom FROM atomset_atom WHERE atomset = ?)
-        """
+        # What tables are requested in the extra arguments?
+        tables = set()
+        if len(args) > 0:
+            atom_columns = [*self._atom_table.attributes]
+            coordinates_columns = [*self._coordinates_table.attributes]
+            for col, op, value in grouped(args, 3):
+                if "." in col:
+                    tables.add(col.split(".")[0])
+                elif col in atom_columns:
+                    tables.add("at")
+                elif col in coordinates_columns:
+                    tables.add("co")
+                else:
+                    raise ValueError(f"Column '{col}' is not available")
 
-        parameters = [self.configuration.id, self.atomset]
+        # Build the query based on the tables needed
+        sql = (
+            f"SELECT {column_defs}"
+            " FROM atomset_atom AS aa, atom AS at, coordinates AS co "
+            "WHERE aa.atomset = ?"
+            "  AND at.id = aa.atom"
+            "  AND co.atom = at.id AND co.configuration = ?"
+        )
+        parameters = [self.atomset, self.configuration.id]
+
+        # And any extra selection criteria
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
                     op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
+
+        logger.debug("atoms query:")
+        logger.debug(sql)
+        logger.debug(parameters)
+        logger.debug("---")
 
         return self.db.execute(sql, parameters)
 
@@ -587,13 +610,22 @@ class _Atoms(_Table):
         # What tables are requested in the extra arguments?
         tables = set()
         if len(args) > 0:
+            atom_columns = [*self._atom_table.attributes]
+            coordinates_columns = [*self._coordinates_table.attributes]
             for col, op, value in grouped(args, 3):
-                tables.add(col.split(".")[0])
+                if "." in col:
+                    tables.add(col.split(".")[0])
+                elif col in atom_columns:
+                    tables.add("at")
+                elif col in coordinates_columns:
+                    tables.add("co")
+                else:
+                    raise ValueError(f"Column '{col}' is not available")
 
         # Build the query based on the tables needed
         sql = "SELECT aa.atom FROM atomset_atom AS aa"
         if "at" in tables or "co" in tables:
-            sql += ", atoms AS at"
+            sql += ", atom AS at"
         if "co" in tables:
             sql += ", coordinates AS co"
 
@@ -726,20 +758,49 @@ class _Atoms(_Table):
         int
             The number of atoms matching the criteria.
         """
-        sql = """
-        SELECT COUNT(*)
-          FROM atom as at, coordinates as co
-         WHERE co.atom = at.id AND co.configuration = ?
-           AND at.id IN (SELECT atom FROM atomset_atom WHERE atomset = ?)
-        """
+        # What tables are requested in the extra arguments?
+        tables = set()
+        if len(args) > 0:
+            atom_columns = [*self._atom_table.attributes]
+            coordinates_columns = [*self._coordinates_table.attributes]
+            for col, op, value in grouped(args, 3):
+                if "." in col:
+                    tables.add(col.split(".")[0])
+                elif col in atom_columns:
+                    tables.add("at")
+                elif col in coordinates_columns:
+                    tables.add("co")
+                else:
+                    raise ValueError(f"Column '{col}' is not available")
 
-        parameters = [self.configuration.id, self.atomset]
+        # Build the query based on the tables needed
+        sql = "SELECT COUNT(*) FROM atomset_atom AS aa"
+        if "at" in tables or "co" in tables:
+            sql += ", atom AS at"
+        if "co" in tables:
+            sql += ", coordinates AS co"
+
+        # The WHERE clauses bringing joining the tables
+        sql += " WHERE aa.atomset = ?"
+        parameters = [self.atomset]
+        if "at" in tables or "co" in tables:
+            sql += " AND at.id = aa.atom"
+        if "co" in tables:
+            sql += " AND co.atom = at.id AND co.configuration = ?"
+            parameters.append(self.configuration.id)
+
+        # And any extra selection criteria
         if len(args) > 0:
             for col, op, value in grouped(args, 3):
                 if op == "==":
                     op = "="
                 sql += f' AND "{col}" {op} ?'
                 parameters.append(value)
+
+        logger.debug("get_n_atoms query:")
+        logger.debug(sql)
+        logger.debug(parameters)
+        logger.debug("---")
 
         self.cursor.execute(sql, parameters)
         return self.cursor.fetchone()[0]
