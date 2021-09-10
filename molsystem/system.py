@@ -5,6 +5,7 @@
 
 from collections.abc import MutableMapping
 import logging
+import pprint  # noqa: F401
 
 from .cif import CIFMixin
 from .configuration import _Configuration
@@ -385,11 +386,23 @@ class _System(CIFMixin, MutableMapping):
             kwargs["bondset"] = bondset
 
         cid = self["configuration"].append(system=self.id, **kwargs)[0]
+        configuration = _Configuration(_id=cid, system_db=self.system_db)
+
+        # If the atomset was given, need to create dummy coordinates
+        if atomset is not None:
+            n_atoms = configuration.n_atoms
+            data = {"configuration": configuration.id}
+            data["atom"] = configuration.atoms.ids
+            data["x"] = [0.0] * n_atoms
+            data["y"] = [0.0] * n_atoms
+            data["z"] = [0.0] * n_atoms
+            table = _Table(self.system_db, "coordinates")
+            table.append(n=n_atoms, **data)
 
         if make_current:
             self._current_configuration_id = cid
 
-        return _Configuration(_id=cid, system_db=self.system_db)
+        return configuration
 
     def create_table(self, name, cls=_Table, other=None):
         """Create a new table with the given name.
