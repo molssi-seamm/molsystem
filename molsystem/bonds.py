@@ -6,6 +6,7 @@ Based on tables in an SQLite database.
 """
 
 from collections.abc import Sequence
+from itertools import zip_longest
 import logging
 import sqlite3
 
@@ -17,6 +18,11 @@ from .table import _Table
 from .frozencolumn import _FrozenColumn
 
 logger = logging.getLogger(__name__)
+
+
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,...s3n-1), ..."
+    return zip_longest(*[iter(iterable)] * n)
 
 
 class _Bonds(_Table):
@@ -53,9 +59,9 @@ class _Bonds(_Table):
         raise NotImplementedError()
 
     @property
-    def bond_ids(self):
+    def ids(self):
         """The ids of the bonds."""
-        return self.get_bond_ids()
+        return self.get_ids()
 
     @property
     def bondorders(self):
@@ -600,6 +606,47 @@ class _Bonds(_Table):
            AND bondset_bond.bondset = {self.bondset}
         """
         return [row[0] for row in self.db.execute(sql)]
+
+    def get_ids(self, *args):
+        """The ids of the bonds.
+
+        Parameters
+        ----------
+        args : [str]
+            Added selection criteria for the SQL, one word at a time.
+
+        Returns
+        -------
+        [int]
+            The ids of the requested bonds.
+        """
+
+        sql = (
+            "SELECT bond.id FROM bond, bondset_bond"
+            " WHERE bond.id = bondset_bond.bond"
+            "   AND bondset_bond.bondset = ?"
+        )
+
+        parameters = [self.bondset]
+        if len(args) > 0:
+            for col, op, value in grouped(args, 3):
+                if op == "==":
+                    op = "="
+                sql += f' AND "{col}" {op} ?'
+                parameters.append(value)
+
+        return [x[0] for x in self.db.execute(sql, parameters)]
+
+    def import_bonds(self, ids):
+        """Import existing bonds into this configuration.
+
+        Parameters
+        ----------
+        ids : iterable(int)
+            The ids of the bonds to import.
+        """
+        table = _Table(self.system_db, "bondset_bond")
+        table.append(bondset=self.bondset, bond=ids)
 
     def to_dataframe(self):
         """Return the bonds as a Pandas Dataframe."""

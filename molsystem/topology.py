@@ -3,6 +3,8 @@
 """Topological methods for the system"""
 
 import logging
+from math import floor
+import pprint  # noqa: F401
 
 try:
     from openbabel import openbabel
@@ -193,18 +195,17 @@ class TopologyMixin:
         ob_mol = openbabel.OBMol()
         ob_template = openbabel.OBMol()
         atnos = self.atoms.atomic_numbers
-        xyzs = self.atoms.coordinates
+        xyzs = self.atoms.get_coordinates(fractionals=False)
 
-        start = 0
+        atom_index = {j: i for i, j in enumerate(self.atoms.ids)}
+
         new_subsets = {}
         sids = {}
         new_templates = []
         tids = []
         for molecule, atoms in enumerate(molecules):
             to_index = {j: i for i, j in enumerate(atoms)}
-            n_atoms = len(atoms)
-            # This is not right ... works only if atoms contiguous. Ufff.
-            molecule_atnos = atnos[start : start + n_atoms]
+            molecule_atnos = [atnos[atom_index[i]] for i in atoms]
 
             ob_mol.Clear()
             for atom, atno in zip(atoms, molecule_atnos):
@@ -226,13 +227,17 @@ class TopologyMixin:
                     # Create a new system & configuration for the template
                     system_name = "template system " + canonical
                     if not self.system_db.system_exists(system_name):
-                        system = self.system_db.create_system(system_name)
-                        configuration = system.create_configuration(canonical)
+                        system = self.system_db.create_system(
+                            system_name, make_current=False
+                        )
+                        configuration = system.create_configuration(
+                            canonical, make_current=False
+                        )
                         cid = configuration.id
 
                         kwargs = {}
                         kwargs["atno"] = molecule_atnos
-                        molecule_xyzs = xyzs[start : start + n_atoms]
+                        molecule_xyzs = [xyzs[atom_index[i]] for i in atoms]
                         kwargs["x"] = [x for x, y, z in molecule_xyzs]
                         kwargs["y"] = [y for x, y, z in molecule_xyzs]
                         kwargs["z"] = [z for x, y, z in molecule_xyzs]
@@ -294,9 +299,216 @@ class TopologyMixin:
                 sids[tid].append(subset.id)
                 new_subsets[tid].append(subset)
 
-            start += n_atoms
-
         if create_subsets:
             return new_templates, new_subsets
         else:
             return new_templates
+
+    def reimage_bonded_atoms(self, reimage_molecules=True):
+        """Ensure that the atoms in a molecule are "near" each other.
+
+        In a periodic system atoms can be translated by a unit cell without changing
+        anything. However the bonds in a molecule need to account for such translations
+        of atoms otherwise a bond may appear to be very long.
+
+        It is often convenient physically move atoms by the correct cell translations
+        to bring the atoms of a molecule close to each other. That is what this method
+        does, moving all the atoms close to the first. Optionally the molecule is
+        also moved to bring its geometric center into the primary unit cell, i.e. with
+        fractional coordinates in the range [0..1).
+
+        Parameters
+        ----------
+        reimage_molecules : bool = True
+            Whether to move molecules into the primary unit cell.
+
+        Returns
+        -------
+        bool
+            True if the coordinates were changed.
+        """
+        if self.periodicity == 0:
+            # Nothing to do.
+            return False
+
+        logger.log(0, f"Configuration {self.id} {self}")
+        logger.log(0, self.atoms)
+        logger.log(0, 10 * "+")
+        # The bonds from each atom
+        bonds = self.bonded_neighbors(as_indices=True)
+
+        logger.debug("Bonds:")
+        logger.debug(pprint.pformat(bonds))
+        logger.debug("")
+
+        # And coordinates as fractionals
+        tmp = self.atoms.get_coordinates(fractionals=True)
+        xyz = [[x, y, z] for x, y, z in tmp]
+
+        visited = [False] * len(xyz)
+
+        # Find the molecules
+        molecules = self.find_molecules(as_indices=True)
+
+        # Work through the atoms, see if bonded atoms need to be moved
+        changed = False
+        for atoms in molecules:
+            logger.debug("")
+            logger.debug(f"{atoms=}")
+            # if len(atoms) > 1:
+            #     atom = sorted(atoms)[0]
+            #     logger.debug(f" --> {atom}")
+            #     if self._image_helper(bonds, xyz, atom):
+            #         changed = True
+
+            changed = self._image_helper2(bonds, xyz, visited, atoms[0], changed)
+        # Check temporarily.
+        for iatom, jatoms in enumerate(bonds):
+            xyzi = xyz[iatom]
+            for jatom in jatoms:
+                xyzj = xyz[jatom]
+                for vi, vj in zip(xyzi, xyzj):
+                    delta = floor(vj - vi + 0.5)
+                    if delta != 0:
+                        print(
+                            f"Warning: {iatom} - {jatom} delta = {vj:.3f} - {vi:.3f} = "
+                            f"{delta}"
+                        )
+
+        # Move the center of molecules into the primary cell, if requested.
+        if reimage_molecules:
+            for atoms in molecules:
+                cx = cy = cz = 0.0
+                for atom in atoms:
+                    x, y, z = xyz[atom]
+                    cx += x
+                    cy += y
+                    cz += z
+                n = len(atoms)
+                dx = int(cx / n)
+                dy = int(cy / n)
+                dz = int(cz / n)
+                if dx != 0 or dy != 0 or dz != 0:
+                    changed = True
+                    for atom in atoms:
+                        x, y, z = xyz[atom]
+                        xyz[atom] = [x - dx, y - dy, z - dz]
+        if changed:
+            self.atoms.set_coordinates(xyz, fractionals=True)
+
+        return changed
+
+    def _image_helper(self, bonds, xyz, atom):
+        """Translate all the bonded neighbors with larger index.
+
+        Parameters
+        ----------
+        bonds : [[int]]
+            The bonded neighbors for each atom.
+        xyz : [[float * 3]]
+            The fractional coordinates of the atoms.
+        """
+        logger.debug(f"       helper {atom}: {bonds[atom]}")
+        changed = False
+        xyzi = xyz[atom]
+        for jatom in bonds[atom]:
+            logger.debug(f"\t\t{atom=} {jatom}")
+            if jatom < atom:
+                continue
+            xyzj = xyz[jatom]
+            new_xyz = []
+            shift = False
+            for vi, vj in zip(xyzi, xyzj):
+                delta = floor(vj - vi + 0.5)
+                if delta == 0:
+                    new_xyz.append(vj)
+                else:
+                    new_xyz.append(vj - delta)
+                    shift = True
+                logger.log(
+                    0, f"{atom:3d} - {jatom:3d}: {xyzi} {xyzj} --> {new_xyz} {shift}"
+                )
+            if shift:
+                changed = True
+                logger.debug(
+                    f"{atom:3d} - {jatom:3d}: {xyzi} {xyzj} --> {new_xyz} {shift}"
+                )
+                xyz[jatom] = new_xyz
+
+        for jatom in bonds[atom]:
+            if jatom < atom:
+                continue
+            if self._image_helper(bonds, xyz, jatom):
+                changed = True
+
+        return changed
+
+    def reimage_molecules(self):
+        """Reimage molecules into the primary unit cell.
+
+        The molecules are moved to bring their geometric center into the primary unit
+        cell, i.e. with fractional coordinates in the range [0..1).
+
+        Returns
+        -------
+        bool
+            True if the coordinates were changed.
+        """
+        if self.periodicity == 0:
+            # Nothing to do.
+            return False
+
+        # And coordinates as fractionals
+        xyz = self.atoms.get_coordinates(fractionals=True)
+
+        # Find the molecules
+        molecules = self.find_molecules(as_indices=True)
+
+        # Move the centor of molecules into the primary cell, if requested.
+        changed = False
+        for atoms in molecules:
+            cx = cy = cz = 0.0
+            for atom in atoms:
+                x, y, z = xyz[atom]
+                cx += x
+                cy += y
+                cz += z
+            n = len(atoms)
+            dx = int(cx / n)
+            dy = int(cy / n)
+            dz = int(cz / n)
+            if dx != 0 or dy != 0 or dz != 0:
+                changed = True
+                for atom in atoms:
+                    x, y, z = xyz[atom]
+                    xyz[atom] = [x - dx, y - dy, z - dz]
+        if changed:
+            self.atoms.set_coordinates(xyz, fractionals=True)
+
+        return changed
+
+    def _image_helper2(self, bonds, xyz, visited, iatom, changed):
+        visited[iatom] = True
+        xyzi = xyz[iatom]
+        for jatom in bonds[iatom]:
+            logger.debug(f"\t\t{iatom=} {jatom}")
+            if visited[jatom]:
+                continue
+            new_xyz = []
+            xyzj = xyz[jatom]
+            shift = False
+            for vi, vj in zip(xyzi, xyzj):
+                delta = floor(vj - vi + 0.5)
+                if delta == 0:
+                    new_xyz.append(vj)
+                else:
+                    new_xyz.append(vj - delta)
+                    changed = True
+                    shift = True
+            if shift:
+                logger.debug(
+                    f"{iatom:3d} - {jatom:3d}: {xyzi} {xyzj} --> {new_xyz} {shift}"
+                )
+            xyz[jatom] = new_xyz
+            changed = self._image_helper2(bonds, xyz, visited, jatom, changed)
+        return changed

@@ -208,3 +208,28 @@ class _Subsets(_Table):
            AND configuration = ?
         """
         return [x[0] for x in self.db.execute(sql, (tid, self._cid))]
+
+    def get_counts(self, configuration="all"):
+        """Get the counts of subsets per template for configurations.
+
+        Parameters
+        ----------
+        configuration : int or MolSystem._Configuration or "all"
+            The configuration, as an object or its id, or "all" for all
+            configurations. Default is "all".
+
+        Returns
+        -------
+        [[configuration_id, name, count]]
+        """
+
+        if configuration == "all":
+            sql = (
+                "SELECT subset.configuration, name, count(1) FROM subset, template "
+                " WHERE template = template.id "
+                " GROUP BY subset.configuration, name "
+                " ORDER BY subset.configuration"
+            )
+            return [[*x] for x in self.db.execute(sql)]
+        else:
+            raise NotImplementedError("get_counts only take 'all' configurations")
