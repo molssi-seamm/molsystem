@@ -26,13 +26,13 @@ class RDKitMixin:
             _ = rdk_mol.AddAtom(rdkit.Chem.rdchem.Atom(atno))
 
         bond_types = {1: rdkit.Chem.rdchem.BondType.SINGLE, 2: rdkit.Chem.rdchem.BondType.DOUBLE, 3: rdkit.Chem.rdchem.BondType.TRIPLE}
-        index = {j: i for i, j in enumerate(self.atoms.ids)}
+        index = {j: i for i, j in enumerate(self.atoms.ids), start=1}
         for row in self.bonds.bonds():
             rdk_mol.AddBond(index[row["i"]], index[row["j"]], bond_types[row["bondorder"]])
         
         natom = len(self.atoms.atomic_numbers)
         conf = rdkit.Chem.Conformer(natom)
-        for atm_idx, xyz in self.atoms.coordinates:
+        for atm_idx, xyz in enumerate(self.atoms.coordinates, start=1):
             conf.SetAtomPosition(atm_idx, xyz)
         
         rdk_mol.AddConformer(conf)
