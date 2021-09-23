@@ -15,7 +15,6 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
-
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 
@@ -40,29 +39,31 @@ class RDKitMixin:
 
         return rdk_mol
 
-    def from_OBMol(self, rdk_mol):
-        """Transform an Open Babel molecule into the current object."""
+    def from_RDKMol(self, rdk_mol):
+        """Transform an RDKit molecule into the current object."""
         atnos = []
+        for rdk_atom in rdk_mol.GetAtoms():
+            atnos.append(rdk_atom.GetAtomicNum())
+            logger.debug(f"atom {atnos}")
+
         Xs = []
         Ys = []
         Zs = []
-        for ob_atom in rdkit.OBMolAtomIter(rdk_mol):
-            atno = ob_atom.GetAtomicNum()
-            atnos.append(atno)
-            Xs.append(ob_atom.x())
-            Ys.append(ob_atom.y())
-            Zs.append(ob_atom.z())
-            logger.debug(f"atom {atno} {ob_atom.x()} {ob_atom.z()} {ob_atom.z()}")
+        for rdk_conf in rdkit.GetConformers():
+            for atom_idx in rdk_conf:
+                Xs.append(atom_idx[0])
+                Ys.append(atom_idx[1])
+                Zs.append(atom_idx[2])
+                logger.debug(f"{atom_idx[0]} {atom_idx[1]} {atom_idx[2]}")
 
         Is = []
         Js = []
         BondOrders = []
-        for ob_bond in rdkit.OBMolBondIter(rdk_mol):
-            ob_i = ob_bond.GetBeginAtom()
-            ob_j = ob_bond.GetEndAtom()
-            i = ob_i.GetIdx()
-            j = ob_j.GetIdx()
-            bondorder = ob_bond.GetBondOrder()
+        bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: "single", rdkit.Chem.rdchem.BondType.DOUBLE: "double", rdkit.Chem.rdchem.BondType.TRIPLE: "triple"}
+        for rdk_bond in rdkit.GetBonds():
+            i = rdk_bond.GetBeginAtom().GetIdx()
+            j = rdk_bond.GetEndAtom().GetIdx()
+            bondorder = bond_types[rdk_bond.GetBondType()]
             Is.append(i)
             Js.append(j)
             BondOrders.append(bondorder)
