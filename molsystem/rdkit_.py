@@ -18,39 +18,41 @@ logger = logging.getLogger(__name__)
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 
-    def to_RDKMol(self):
-        """Return an RDKMol object for the configuration, template, or subset."""
-        rdk_mol = rdkit.Chem.rdchem.RWMol()
-        for atno in self.atoms.atomic_numbers:
-            _ = rdk_mol.AddAtom(rdkit.Chem.rdchem.Atom(atno))
+    # def to_RDKMol(self):
+    #     """Return an RDKMol object for the configuration, template, or subset."""
+    #     rdk_mol = rdkit.Chem.rdchem.RWMol()
+    #     for atno in self.atoms.atomic_numbers:
+    #         _ = rdk_mol.AddAtom(rdkit.Chem.rdchem.Atom(atno))
 
-        bond_types = {1: rdkit.Chem.rdchem.BondType.SINGLE, 2: rdkit.Chem.rdchem.BondType.DOUBLE, 3: rdkit.Chem.rdchem.BondType.TRIPLE}
-        index = {j: i for i, j in enumerate(self.atoms.ids), start=1}
-        for row in self.bonds.bonds():
-            rdk_mol.AddBond(index[row["i"]], index[row["j"]], bond_types[row["bondorder"]])
+    #     bond_types = {1: rdkit.Chem.rdchem.BondType.SINGLE, 2: rdkit.Chem.rdchem.BondType.DOUBLE, 3: rdkit.Chem.rdchem.BondType.TRIPLE}
+    #     index = {j: i for i, j in enumerate(self.atoms.ids, start=1)
+    #     for row in self.bonds.bonds():
+    #         rdk_mol.AddBond(index[row["i"]], index[row["j"]], bond_types[row["bondorder"]])
         
-        natom = len(self.atoms.atomic_numbers)
-        conf = rdkit.Chem.Conformer(natom)
-        for atm_idx, xyz in enumerate(self.atoms.coordinates, start=1):
-            conf.SetAtomPosition(atm_idx, xyz)
+    #     natom = len(self.atoms.atomic_numbers)
+    #     conf = rdkit.Chem.Conformer(natom)
+    #     for atm_idx, xyz in enumerate(self.atoms.coordinates, start=1):
+    #         conf.SetAtomPosition(atm_idx, xyz)
         
-        rdk_mol.AddConformer(conf)
-        rdkit.Chem.rdmolops.SanitizeMol(rdk_mol)
+    #     rdk_mol.AddConformer(conf)
+    #     rdkit.Chem.rdmolops.SanitizeMol(rdk_mol)
 
-        return rdk_mol
+    #     return rdk_mol
 
     def from_RDKMol(self, rdk_mol):
         """Transform an RDKit molecule into the current object."""
+        
         atnos = []
         for rdk_atom in rdk_mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
             logger.debug(f"atom {atnos}")
 
+        # TODO: Generalize to handling multiple conformers in a rdk_mol object, if necessary
         Xs = []
         Ys = []
         Zs = []
-        for rdk_conf in rdkit.GetConformers():
-            for atom_idx in rdk_conf:
+        for rdk_conf in rdk_mol.GetConformers():
+            for atom_idx in rdk_conf.GetPositions():
                 Xs.append(atom_idx[0])
                 Ys.append(atom_idx[1])
                 Zs.append(atom_idx[2])
@@ -59,8 +61,8 @@ class RDKitMixin:
         Is = []
         Js = []
         BondOrders = []
-        bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: "single", rdkit.Chem.rdchem.BondType.DOUBLE: "double", rdkit.Chem.rdchem.BondType.TRIPLE: "triple"}
-        for rdk_bond in rdkit.GetBonds():
+        bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: 1, rdkit.Chem.rdchem.BondType.DOUBLE: 2, rdkit.Chem.rdchem.BondType.TRIPLE: 3}
+        for rdk_bond in rdk_mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
             j = rdk_bond.GetEndAtom().GetIdx()
             bondorder = bond_types[rdk_bond.GetBondType()]
