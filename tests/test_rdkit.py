@@ -11,17 +11,17 @@ import platform
 
 import pytest  # noqa: F401
 
-# H-Asp-Arg-Val-Tyr-Ile-His-Pro-Phe-OH
-SMILES = (
-    "[NH2][C@@H](CC(=O)O)C(=O)"
-    "[NH][C@@H](CCCNC(=[NH2])N)C(=O)"
-    "[NH][C@@H](C(C)C)C(=O)"
-    "[NH][C@@H](Cc1ccc(cc1)O)C(=O)"
-    "[NH][C@@H]([C@@H](CC)C)C(=O)"
-    "[NH][C@@H](CC1=CNC=[NH]1)C(=O)"
-    "[N]1[C@@H](CCC1)C(=O)"
-    "[NH][C@@H](Cc1ccccc1)C(=O)O"
-)
+# # H-Asp-Arg-Val-Tyr-Ile-His-Pro-Phe-OH
+# SMILES = (
+#     "[NH2][C@@H](CC(=O)O)C(=O)"
+#     "[NH][C@@H](CCCNC(=[NH2])N)C(=O)"
+#     "[NH][C@@H](C(C)C)C(=O)"
+#     "[NH][C@@H](Cc1ccc(cc1)O)C(=O)"
+#     "[NH][C@@H]([C@@H](CC)C)C(=O)"
+#     "[NH][C@@H](CC1=CNC=[NH]1)C(=O)"
+#     "[N]1[C@@H](CCC1)C(=O)"
+#     "[NH][C@@H](Cc1ccccc1)C(=O)O"
+# )
 # sidechains = {
 #     "ALA_LL": "[CH3X4]",
 #     "ARG_LL": "[CH2X4][CH2X4][CH2X4][NH1X3][CH0X3]([NH2X3])=[NH2X3]",
@@ -499,7 +499,6 @@ def test_to_RDKMol(configuration):
     bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: 1, rdkit.Chem.rdchem.BondType.DOUBLE: 2, rdkit.Chem.rdchem.BondType.TRIPLE: 3}
     bond_list = [bond_types[bt.GetBondType()] for bt in mol.GetBonds()]
     
-    
     assert configuration.n_atoms == mol.GetNumAtoms() 
     assert configuration.bonds.bondorders == bond_list
 
@@ -514,7 +513,6 @@ def test_from_RDKMol(configuration):
 
     assert configuration.n_atoms == 7
     assert configuration.bonds.bondorders == [1, 2, 1, 1, 1, 1]
-
 
 #def test_input_formats():
 #    """Check the list of input formats Open Babel handles"""
