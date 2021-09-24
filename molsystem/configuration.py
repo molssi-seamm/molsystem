@@ -22,7 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 class _Configuration(
-    PDBMixin, MolFileMixin, CIFMixin, SMILESMixin, TopologyMixin, OpenBabelMixin, RDKitMixin, object
+    PDBMixin,
+    MolFileMixin,
+    CIFMixin,
+    SMILESMixin,
+    TopologyMixin,
+    OpenBabelMixin,
+    RDKitMixin,
+    object,
 ):
     """A configuration (conformer) of a system.
 

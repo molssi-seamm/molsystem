@@ -368,7 +368,7 @@ import pytest  # noqa: F401
 # known_input_formats["Windows"] = known_input_formats["Darwin"]
 
 
-#def test_substructure(CH3COOH_3H2O):
+# def test_substructure(CH3COOH_3H2O):
 #    """Test the finding substructures in the configuration."""
 #    answer1 = [(5, 6, 7)]
 #    answer2 = [(5, 6, 7, 8)]
@@ -409,7 +409,7 @@ import pytest  # noqa: F401
 #    assert result == answer5
 #
 #
-#def test_substructure_ordering(disordered):
+# def test_substructure_ordering(disordered):
 #    """Test the ordering of atoms in subsets."""
 #    answer1 = "CC(=O)O"
 #    answer2 = [(1, 5, 6, 7), (16, 12, 11, 10)]
@@ -442,7 +442,7 @@ import pytest  # noqa: F401
 #    assert result == answer4
 #
 #
-#def test_all_residue_search(configuration):
+# def test_all_residue_search(configuration):
 #    """Testing locating residues in a peptide."""
 #    residues = {
 #        "ARG_LL": [(9, 10, 11, 12, 13, 14, 15, 17, 16, 18, 19)],
@@ -492,15 +492,21 @@ import pytest  # noqa: F401
 #                print(f"'{name}': {result},")
 #            assert result == c_terminal[name]
 
+
 def test_to_RDKMol(configuration):
     """Test creating a RDKMol object from a structure."""
     mol = configuration.to_RDKMol()
 
-    bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: 1, rdkit.Chem.rdchem.BondType.DOUBLE: 2, rdkit.Chem.rdchem.BondType.TRIPLE: 3}
+    bond_types = {
+        rdkit.Chem.rdchem.BondType.SINGLE: 1,
+        rdkit.Chem.rdchem.BondType.DOUBLE: 2,
+        rdkit.Chem.rdchem.BondType.TRIPLE: 3,
+    }
     bond_list = [bond_types[bt.GetBondType()] for bt in mol.GetBonds()]
-    
-    assert configuration.n_atoms == mol.GetNumAtoms() 
+
+    assert configuration.n_atoms == mol.GetNumAtoms()
     assert configuration.bonds.bondorders == bond_list
+
 
 def test_from_RDKMol(configuration):
     """Test creating a structure from an RDKMol object."""
@@ -514,7 +520,8 @@ def test_from_RDKMol(configuration):
     assert configuration.n_atoms == 7
     assert configuration.bonds.bondorders == [1, 2, 1, 1, 1, 1]
 
-#def test_input_formats():
+
+# def test_input_formats():
 #    """Check the list of input formats Open Babel handles"""
 #    obConversion = openbabel.OBConversion()
 #    formats = obConversion.GetSupportedInputFormat()

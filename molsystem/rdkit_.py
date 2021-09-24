@@ -8,12 +8,12 @@ try:
     import rdkit
 except ModuleNotFoundError:
     print(
-        "Please install rdkit using conda:\n"
-        "     conda install -c conda-forge rdkit"
+        "Please install rdkit using conda:\n" "     conda install -c conda-forge rdkit"
     )
     raise
 
 logger = logging.getLogger(__name__)
+
 
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
@@ -24,16 +24,22 @@ class RDKitMixin:
         for atno in self.atoms.atomic_numbers:
             rdk_mol.AddAtom(rdkit.Chem.rdchem.Atom(atno))
 
-        bond_types = {1: rdkit.Chem.rdchem.BondType.SINGLE, 2: rdkit.Chem.rdchem.BondType.DOUBLE, 3: rdkit.Chem.rdchem.BondType.TRIPLE}
+        bond_types = {
+            1: rdkit.Chem.rdchem.BondType.SINGLE,
+            2: rdkit.Chem.rdchem.BondType.DOUBLE,
+            3: rdkit.Chem.rdchem.BondType.TRIPLE,
+        }
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
         for row in self.bonds.bonds():
-            rdk_mol.AddBond(index[row["i"]], index[row["j"]], bond_types[row["bondorder"]])
-        
+            rdk_mol.AddBond(
+                index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
+            )
+
         natom = len(self.atoms.atomic_numbers)
         conf = rdkit.Chem.Conformer(natom)
         for atm_idx, xyz in enumerate(self.atoms.coordinates, start=1):
             conf.SetAtomPosition(atm_idx, xyz)
-        
+
         rdk_mol.AddConformer(conf)
         rdkit.Chem.rdmolops.SanitizeMol(rdk_mol)
 
@@ -41,7 +47,7 @@ class RDKitMixin:
 
     def from_RDKMol(self, rdk_mol):
         """Transform an RDKit molecule into the current object."""
-        
+
         atnos = []
         for rdk_atom in rdk_mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
@@ -61,7 +67,11 @@ class RDKitMixin:
         Is = []
         Js = []
         BondOrders = []
-        bond_types = {rdkit.Chem.rdchem.BondType.SINGLE: 1, rdkit.Chem.rdchem.BondType.DOUBLE: 2, rdkit.Chem.rdchem.BondType.TRIPLE: 3}
+        bond_types = {
+            rdkit.Chem.rdchem.BondType.SINGLE: 1,
+            rdkit.Chem.rdchem.BondType.DOUBLE: 2,
+            rdkit.Chem.rdchem.BondType.TRIPLE: 3,
+        }
         for rdk_bond in rdk_mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
             j = rdk_bond.GetEndAtom().GetIdx()

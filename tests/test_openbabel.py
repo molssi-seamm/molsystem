@@ -490,6 +490,7 @@ def test_all_residue_search(configuration):
                 print(f"'{name}': {result},")
             assert result == c_terminal[name]
 
+
 def test_to_OBMol(configuration):
     """Test creating an OBMol object from a structure."""
     mol = configuration.to_OBMol()
@@ -497,7 +498,7 @@ def test_to_OBMol(configuration):
     bondorder_list = []
     for bond in openbabel.OBMolBondIter(mol):
         bondorder_list.append(bond.GetBondOrder())
-    
+
     atno_list = []
     for atno in openbabel.OBMolAtomIter(mol):
         atno_list.append(mol.GetAtmoicNum())
