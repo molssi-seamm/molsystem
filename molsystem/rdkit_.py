@@ -89,29 +89,29 @@ class RDKitMixin:
 
         return self
 
-    def find_substructures(self, template):
-        """Find the substructures matching the template.
-
-        Parameters
-        ----------
-        template : str, _Configuration, _Template, or _Subset
-            The template, which may be a SMARTS string, or a molecular object.
-
-        Returns
-        -------
-        [[int]]
-            Lists of atom ids for matches.
-        """
-        if isinstance(template, str):
-            smarts = template
-        else:
-            smarts = self.smiles
-
-        rdk_mol = self.to_OBMol()
-
-        pattern = rdkit.OBSmartsPattern()
-        pattern.Init(smarts)
-        pattern.Match(rdk_mol)
-        maplist = pattern.GetUMapList()
-
-        return [x for x in maplist]
+#    def find_substructures(self, template):
+#        """Find the substructures matching the template.
+#
+#        Parameters
+#        ----------
+#        template : str, _Configuration, _Template, or _Subset
+#            The template, which may be a SMARTS string, or a molecular object.
+#
+#        Returns
+#        -------
+#        [[int]]
+#            Lists of atom ids for matches.
+#        """
+#        if isinstance(template, str):
+#            smarts = template
+#        else:
+#            smarts = self.smiles
+#
+#        rdk_mol = self.to_OBMol()
+#
+#        pattern = rdkit.OBSmartsPattern()
+#        pattern.Init(smarts)
+#        pattern.Match(rdk_mol)
+#        maplist = pattern.GetUMapList()
+#
+#        return [x for x in maplist]
