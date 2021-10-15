@@ -417,3 +417,32 @@ def full_templates(CH3COOH_3H2O):
     templates.create(name="hoh", category="molecule", configuration=hoh_cid)
 
     return db
+
+
+@pytest.fixture()
+def properties(system):
+    """Lots of configurations with many properties."""
+    properties = system.system_db.properties
+
+    # Create systems
+    cids = []
+    for i in range(1000):
+        configuration = system.create_configuration(name=str(i))
+        cids.append(configuration.id)
+
+    # And properties
+    for i in range(10):
+        fid = properties.add(f"float_{i}", "float")
+        iid = properties.add(f"int_{i}", "int")
+        sid = properties.add(f"str_{i}", "str")
+
+        fval = -10.0 + i
+        ival = -500 + 100 * i
+        for cid in cids:
+            properties.put(cid, fid, fval)
+            properties.put(cid, iid, ival)
+            properties.put(cid, sid, f"string {ival}")
+            fval += 0.01
+            ival += 1
+
+    return properties

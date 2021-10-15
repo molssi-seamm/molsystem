@@ -10,6 +10,7 @@ import sqlite3
 import molsystem
 from .cif import CIFMixin
 from .configuration import _Configuration
+from .properties import _Properties
 from .system import _System
 from .table import _Table
 from .templates import _Templates
@@ -373,6 +374,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     def parent(self):
         """The parent of this, i.e. a Systems object."""
         return self._parent
+
+    @property
+    def properties(self):
+        """The class to handle the properties."""
+        return _Properties(self)
 
     @property
     def system(self):
@@ -879,6 +885,13 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "CREATE INDEX 'idx_subset_atom_subset_atom' "
                 'ON subset_atom ("subset", "atom")'
             )
+
+            #####################################################
+            # The star schema for storing properties and features
+            #####################################################
+
+            properties = self.properties
+            properties.create_schema()
 
             self.db.commit()
 

@@ -9,6 +9,7 @@ from .atoms import _Atoms
 from .bonds import _Bonds
 from .cell import _Cell
 from .cif import CIFMixin
+from .configuration_properties import _ConfigurationProperties
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
 from .rdkit_ import RDKitMixin
@@ -384,6 +385,11 @@ class _Configuration(
         )
         self.db.commit()
         self._periodicity = value
+
+    @property
+    def properties(self):
+        """The class to handle the properties for this configuration."""
+        return _ConfigurationProperties(self)
 
     @property
     def subsets(self):
