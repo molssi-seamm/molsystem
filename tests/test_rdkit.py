@@ -9,6 +9,7 @@ import platform
 
 import pytest  # noqa: F401
 
+
 def test_to_RDKMol(configuration):
     """Test creating a RDKMol object from a structure."""
     mol = configuration.to_RDKMol()

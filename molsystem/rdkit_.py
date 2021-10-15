@@ -89,6 +89,7 @@ class RDKitMixin:
 
         return self
 
+
 #    def find_substructures(self, template):
 #        """Find the substructures matching the template.
 #
