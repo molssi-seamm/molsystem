@@ -5,8 +5,6 @@
 
 import pprint  # noqa: F401
 import rdkit
-import platform
-
 import pytest  # noqa: F401
 
 
