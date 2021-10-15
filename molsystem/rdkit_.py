@@ -53,7 +53,8 @@ class RDKitMixin:
             atnos.append(rdk_atom.GetAtomicNum())
             logger.debug(f"atom {atnos}")
 
-        # TODO: Generalize to handling multiple conformers in a rdk_mol object, if necessary
+        # TODO: Generalize to handling multiple conformers
+        # in a rdk_mol object, if necessary
         Xs = []
         Ys = []
         Zs = []
