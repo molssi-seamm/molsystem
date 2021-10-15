@@ -11,6 +11,7 @@ except ModuleNotFoundError:
         "Please install rdkit using conda:\n" "     conda install -c conda-forge rdkit"
     )
     raise
+import rdkit.Chem
 
 logger = logging.getLogger(__name__)
 

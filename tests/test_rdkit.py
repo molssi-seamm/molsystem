@@ -5,6 +5,8 @@
 
 import pprint  # noqa: F401
 import rdkit
+import rdkit.Chem
+import rdkit.Chem.AllChem
 import pytest  # noqa: F401
 
 
