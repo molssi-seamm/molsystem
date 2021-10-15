@@ -12,6 +12,7 @@ dependencies:
 
   # molsystem requires, and only available via Conda.
   - openbabel
+  - rdkit
 
   # Testing
   - black
