@@ -12,6 +12,7 @@ from .cif import CIFMixin
 from .configuration_properties import _ConfigurationProperties
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
+from .rdkit_ import RDKitMixin
 from .pdb import PDBMixin
 from .smiles import SMILESMixin
 from .subsets import _Subsets
@@ -28,6 +29,7 @@ class _Configuration(
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
+    RDKitMixin,
     object,
 ):
     """A configuration (conformer) of a system.
