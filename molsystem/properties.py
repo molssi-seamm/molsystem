@@ -26,6 +26,25 @@ class _Properties(object):
 
     @property
     def standard_properties(self):
+        """The standard properties recognized by SEAMM.
+
+        These are officially defined properties that can be used anywhere in SEAMM, as
+        long as the type and definition correspond to the standard.
+
+        You can create other properties on te fly, but they must be prefixed by a unique
+        name followed by a dot ('.') so that they do not conflict with either the
+        standard properties or other properties defined on-the-fly. Typically the unique
+        name should  that of the program generating the property, which implicitly
+        defines details of the property.
+
+        For example, the standard property "enthalpy of formation" refers to the
+        experimental heat of formation, or a calculated value comparable to experimental
+        values. If you are not sure what the heat of formation in e.g. MOPAC is, you
+        could create a new property "MOPAC.enthalpy of formation", which is clearly
+        similar to the standard "enthalpy of formation". If the community decides that
+        it is indeed the same, it can be replaced by the standard form, and also aliased
+        to it for backwards compatibility.
+        """
         if self._standard_properties is None:
             self._standard_properties = {}
             path = Path(pkg_resources.resource_filename(__name__, "data/"))
@@ -62,7 +81,8 @@ class _Properties(object):
         return self._system_db
 
     def add(self, name, _type="float", units=None, description="", noerror=False):
-        """Add a property to the database. It is an error if it already exists!
+        """Add a property to the database. By default, it is an error if it already
+        exists!
 
         Parameters
         ----------
@@ -235,7 +255,7 @@ class _Properties(object):
             )
         return result[0]
 
-    def list(self):
+    def known_properties(self):
         """List the known properties."""
         self.cursor.execute("SELECT name FROM property")
         return [row[0] for row in self.cursor.fetchall()]

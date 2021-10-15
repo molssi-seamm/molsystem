@@ -103,7 +103,7 @@ def properties(disk_db):
 
         t1 = time.perf_counter()
         print(f"  db creation took {t1-t0:.3f} s")
-            
+
     yield properties
 
     db.close()

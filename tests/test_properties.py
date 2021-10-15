@@ -8,7 +8,7 @@ import pytest  # noqa: F401
 
 def test_empty(empty_db):
     """Test empty properties db."""
-    assert empty_db.properties.list() == []
+    assert empty_db.properties.known_properties() == []
 
 
 def test_add(empty_db):
@@ -16,7 +16,7 @@ def test_add(empty_db):
     properties = empty_db.properties
     assert not properties.exists("dipole moment")
     properties.add("dipole moment")
-    assert properties.list() == ["dipole moment"]
+    assert properties.known_properties() == ["dipole moment"]
     assert properties.exists("dipole moment")
 
 
@@ -50,19 +50,19 @@ def test_query2(properties):
         what=["float_8", "str_9"],
     )
     assert result["str_9"] == [
-        'string 400',
-        'string 401',
-        'string 402',
-        'string 403',
-        'string 404',
-        'string 405',
-        'string 406',
-        'string 407',
-        'string 408',
-        'string 409',
-        'string 410',
-    ]        
-    assert result['float_8'] == [
+        "string 400",
+        "string 401",
+        "string 402",
+        "string 403",
+        "string 404",
+        "string 405",
+        "string 406",
+        "string 407",
+        "string 408",
+        "string 409",
+        "string 410",
+    ]
+    assert result["float_8"] == [
         -2.0,
         -1.99,
         -1.98,
