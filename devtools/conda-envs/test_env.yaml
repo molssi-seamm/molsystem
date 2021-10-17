@@ -12,6 +12,8 @@ dependencies:
 
   # molsystem requires, and only available via Conda.
   - openbabel
+  - pathvalidate
+  - pycifrw
   - rdkit
 
   # Testing
@@ -23,9 +25,6 @@ dependencies:
 
   # Pip-only installs
   - pip:
-    - pathvalidate
-    - pycifrw
-
     # Documentation
     - rinohtype
     - pygments
