@@ -833,6 +833,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("cell", coltype="int", references="cell")
             table.add_attribute("atomset", coltype="int", references="atomset")
             table.add_attribute("bondset", coltype="int", references="bondset")
+            table.add_attribute("charge", coltype="int", notnull=True, default=0)
+            table.add_attribute("spin_multiplicity", coltype="int")
+            table.add_attribute("n_active_electrons", coltype="int", default=0)
+            table.add_attribute("n_active_orbitals", coltype="int", default=0)
+            table.add_attribute("state", coltype="str", default="1")
 
             # And coordinates, which depend on configurations
             table = self["coordinates"]
