@@ -47,7 +47,9 @@ class _Configuration(
         self._atomset = None
         self._bondset = None
         self._cell_id = None
+        self._charge = None
         self._coordinate_system = None
+        self._spin_multiplicity = 0
         self._periodicity = None
         self._symmetry_id = None
 
@@ -202,6 +204,24 @@ class _Configuration(
         return self._cell_id
 
     @property
+    def charge(self):
+        """The charge of the system, 0, ±1, ±2, ±3, ..."""
+        if self._charge is None:
+            self.cursor.execute(
+                "SELECT charge FROM configuration WHERE id = ?", (self.id,)
+            )
+            self._charge = self.cursor.fetchone()[0]
+        return self._charge
+
+    @charge.setter
+    def charge(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET charge = ? WHERE id = ?", (value, self.id)
+        )
+        self.db.commit()
+        self._charge = value
+
+    @property
     def coordinate_system(self):
         """The coordinate system for this configuration."""
         if self._coordinate_system is None:
@@ -327,6 +347,25 @@ class _Configuration(
         return sum(masses)
 
     @property
+    def spin_multiplicity(self):
+        """The spin_multiplicity of the system, 0, 1, 2, 3, ..."""
+        if self._spin_multiplicity == 0:
+            self.cursor.execute(
+                "SELECT spin_multiplicity FROM configuration WHERE id = ?", (self.id,)
+            )
+            self._spin_multiplicity = self.cursor.fetchone()[0]
+        return self._spin_multiplicity
+
+    @spin_multiplicity.setter
+    def spin_multiplicity(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET spin_multiplicity = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
+        self._spin_multiplicity = value
+
+    @property
     def n_atoms(self) -> int:
         """The number of atoms.
 
@@ -367,6 +406,38 @@ class _Configuration(
         return self.bonds.n_bonds
 
     @property
+    def n_active_electrons(self):
+        """The number of active electrons in the configuration"""
+        self.cursor.execute(
+            "SELECT n_active_electrons FROM configuration WHERE id = ?", (self.id,)
+        )
+        return self.cursor.fetchone()[0]
+
+    @n_active_electrons.setter
+    def n_active_electrons(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET n_active_electrons = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
+
+    @property
+    def n_active_orbitals(self):
+        """The number of active orbitals in the configuration"""
+        self.cursor.execute(
+            "SELECT n_active_orbitals FROM configuration WHERE id = ?", (self.id,)
+        )
+        return self.cursor.fetchone()[0]
+
+    @n_active_orbitals.setter
+    def n_active_orbitals(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET n_active_orbitals = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
+
+    @property
     def periodicity(self):
         """The periodicity of the system, 0, 1, 2 or 3"""
         if self._periodicity is None:
@@ -395,6 +466,21 @@ class _Configuration(
     def subsets(self):
         """The subsets"""
         return _Subsets(self)
+
+    @property
+    def state(self):
+        """The electronic state of the configuration. Either a number or e.g. 2T1g
+        for the second T1g state."""
+        self.cursor.execute("SELECT state FROM configuration WHERE id = ?", (self.id,))
+        return self.cursor.fetchone()[0]
+
+    @state.setter
+    def state(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET state = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
 
     @property
     def symmetry(self):
