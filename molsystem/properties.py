@@ -31,8 +31,8 @@ class _Properties(object):
         These are officially defined properties that can be used anywhere in SEAMM, as
         long as the type and definition correspond to the standard.
 
-        You can create other properties on te fly, but they must be prefixed by a unique
-        name followed by a dot ('.') so that they do not conflict with either the
+        You can create other properties on the fly, but they must be prefixed by a
+        unique name followed by a dot ('.') so that they do not conflict with either the
         standard properties or other properties defined on-the-fly. Typically the unique
         name should  that of the program generating the property, which implicitly
         defines details of the property.
@@ -326,10 +326,12 @@ class _Properties(object):
             The value to store.
         """
         if isinstance(_property, str):
-            if self.exists(_property):
-                pid = self.property_id(_property)
-            else:
-                raise ValueError(f"Property '{_property}' does not exist.")
+            if not self.exists(_property):
+                if _property in self.standard_properties:
+                    self.add(_property)
+                else:
+                    raise ValueError(f"Property '{_property}' does not exist.")
+            pid = self.property_id(_property)
         else:
             pid = _property
 
@@ -420,6 +422,8 @@ class _Properties(object):
                         tables[table][pid] = f"t{n_tables}"
                         n_tables += 1
                     alias = tables[table][pid]
+                    if where[level] != "" and where[level] != "( ":
+                        where[level] += " AND"
                     where[level] += f" {alias}.property == {pid}"
                 elif isinstance(item, int):
                     pid = item
@@ -432,6 +436,8 @@ class _Properties(object):
                         tables[table][pid] = f"t{n_tables}"
                         n_tables += 1
                     alias = tables[table][pid]
+                    if where[level] != "" and where[level] != "( ":
+                        where[level] += " AND"
                     where[level] += f" {alias}.property == {pid}"
 
                 operator = next(items)
@@ -473,21 +479,29 @@ class _Properties(object):
                     tmp.append(f"{alias}.configuration = t0.configuration")
         sql += " AND ".join(tmp)
 
-        if len(tmp) == 0:
-            sql += " "
-        else:
-            sql += " AND "
-        sql += " AND ".join(criteria)
+        if len(criteria) > 0:
+            if len(tmp) > 0:
+                sql += " AND "
+            sql += " AND ".join(criteria)
 
         # The user criteria, if any
         if where[0] != "":
-            sql += " AND"
+            if len(tmp) > 0:
+                sql += " AND"
             sql += where[0]
 
-        print(sql)
+        logger.info(sql)
 
         result = {item: [] for item in results}
-        self.cursor.execute(sql)
+        try:
+            self.cursor.execute(sql)
+        except Exception:
+            print("")
+            print(f"{tmp=}")
+            print(f"{criteria=}")
+            print(f"{where[0]=}")
+            raise
+
         for row in self.cursor:
             for item, value in zip(results, row):
                 result[item].append(value)
