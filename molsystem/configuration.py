@@ -353,7 +353,16 @@ class _Configuration(
             self.cursor.execute(
                 "SELECT spin_multiplicity FROM configuration WHERE id = ?", (self.id,)
             )
-            self._spin_multiplicity = self.cursor.fetchone()[0]
+            multiplicity = self.cursor.fetchone()[0]
+            if multiplicity is None or multiplicity == 0:
+                n_electrons = sum(self.atoms.atomic_numbers) - self.charge
+                if n_electrons % 2 == 0:
+                    multiplicity = 1
+                else:
+                    multiplicity = 2
+                self.spin_multiplicity = multiplicity
+            else:
+                self._spin_multiplicity = multiplicity
         return self._spin_multiplicity
 
     @spin_multiplicity.setter
