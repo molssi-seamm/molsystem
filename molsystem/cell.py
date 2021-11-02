@@ -16,6 +16,13 @@ def sin(value):
     return math.sin(math.radians(value))
 
 
+def dot(va, vb):
+    sum = 0.0
+    for a, b in zip(va, vb):
+        sum += a * b
+    return sum
+
+
 class Cell(object):
     """A class to handle cell parameters and their transformations."""
 
@@ -157,6 +164,62 @@ class Cell(object):
 
         return True
 
+    def reciprocal_lengths(self):
+        """The length of the reciprocal space lattice vectors, physics definition
+
+        Returns
+        -------
+        [float*3]
+            The 3 vector lengths
+        """
+        v = self.reciprocal_vectors()
+        return [
+            math.sqrt(dot(v[0], v[0])),
+            math.sqrt(dot(v[1], v[1])),
+            math.sqrt(dot(v[2], v[2])),
+        ]
+
+    def reciprocal_vectors(self, as_array=False):
+        """The reciprocal space lattice vectors. Physics definition with 2 pi
+
+        Parameters
+        ----------
+        as_array : bool = False
+            Whether to return a numpy array or Python lists
+
+        Returns
+        -------
+        transform : [N][float*3] or ndarray
+            The transformation matrix
+        """
+        a, b, c, alpha, beta, gamma = self.parameters
+
+        ca = cos(alpha)
+        cb = cos(beta)
+        cg = cos(gamma)
+        sg = sin(gamma)
+
+        twopi = 2 * math.pi
+        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        # Transpose...
+        # [1 / a, -cg / (a * sg), b * c * (ca * cg - cb) / (V * sg)],
+        # [0, 1 / (b * sg), a * c * (cb * cg - ca) / (V * sg)],
+        # [0, 0, a * b * sg / V]
+        T = [
+            [twopi / a, 0, 0],
+            [-twopi * cg / (a * sg), twopi / (b * sg), 0],
+            [
+                twopi * b * c * (ca * cg - cb) / (V * sg),
+                twopi * a * c * (cb * cg - ca) / (V * sg),
+                twopi * a * b * sg / V,
+            ],
+        ]  # yapf: disable
+
+        if as_array:
+            return numpy.array(T)
+        else:
+            return T
+
     def to_cartesians(self, uvw, as_array=False):
         """Convert fraction coordinates to Cartesians
 
@@ -296,6 +359,21 @@ class Cell(object):
             return numpy.array(T)
         else:
             return T
+
+    def vectors(self, as_array=False):
+        """The cell or lattice vectors.
+
+        Parameters
+        ----------
+        as_array : bool = False
+            Whether to return a numpy array or Python lists
+
+        Returns
+        -------
+        transform : [N][float*3] or ndarray
+            The transformation matrix
+        """
+        return self.to_cartesians_transform(as_array=as_array)
 
 
 class _Cell(Cell):
