@@ -5,13 +5,12 @@
 import logging
 
 try:
-    import rdkit
+    from rdkit import Chem
 except ModuleNotFoundError:
     print(
         "Please install rdkit using conda:\n" "     conda install -c conda-forge rdkit"
     )
     raise
-import rdkit.Chem
 
 logger = logging.getLogger(__name__)
 
@@ -21,28 +20,31 @@ class RDKitMixin:
 
     def to_RDKMol(self):
         """Return an RDKMol object for the configuration, template, or subset."""
-        rdk_mol = rdkit.Chem.rdchem.RWMol()
-        for atno in self.atoms.atomic_numbers:
-            rdk_mol.AddAtom(rdkit.Chem.rdchem.Atom(atno))
+        index = {}
+        indices = []
+        rdk_mol = Chem.RWMol()
+        for atno, _id in zip(self.atoms.atomic_numbers, self.atoms.ids):
+            idx = rdk_mol.AddAtom(Chem.Atom(atno))
+            index[_id] = idx
+            indices.append(idx)
 
         bond_types = {
-            1: rdkit.Chem.rdchem.BondType.SINGLE,
-            2: rdkit.Chem.rdchem.BondType.DOUBLE,
-            3: rdkit.Chem.rdchem.BondType.TRIPLE,
+            1: Chem.BondType.SINGLE,
+            2: Chem.BondType.DOUBLE,
+            3: Chem.BondType.TRIPLE,
         }
-        index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
         for row in self.bonds.bonds():
             rdk_mol.AddBond(
                 index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
             )
 
-        natom = len(self.atoms.atomic_numbers)
-        conf = rdkit.Chem.Conformer(natom)
-        for atm_idx, xyz in enumerate(self.atoms.coordinates, start=1):
-            conf.SetAtomPosition(atm_idx, xyz)
+        natom = self.atoms.n_atoms
+        conf = Chem.Conformer(natom)
+        for idx, xyz in zip(indices, self.atoms.coordinates):
+            conf.SetAtomPosition(idx, xyz)
 
         rdk_mol.AddConformer(conf)
-        rdkit.Chem.rdmolops.SanitizeMol(rdk_mol)
+        Chem.rdmolops.SanitizeMol(rdk_mol)
 
         return rdk_mol
 
@@ -70,9 +72,9 @@ class RDKitMixin:
         Js = []
         BondOrders = []
         bond_types = {
-            rdkit.Chem.rdchem.BondType.SINGLE: 1,
-            rdkit.Chem.rdchem.BondType.DOUBLE: 2,
-            rdkit.Chem.rdchem.BondType.TRIPLE: 3,
+            Chem.BondType.SINGLE: 1,
+            Chem.BondType.DOUBLE: 2,
+            Chem.BondType.TRIPLE: 3,
         }
         for rdk_bond in rdk_mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
@@ -90,31 +92,3 @@ class RDKitMixin:
         self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
         return self
-
-
-#    def find_substructures(self, template):
-#        """Find the substructures matching the template.
-#
-#        Parameters
-#        ----------
-#        template : str, _Configuration, _Template, or _Subset
-#            The template, which may be a SMARTS string, or a molecular object.
-#
-#        Returns
-#        -------
-#        [[int]]
-#            Lists of atom ids for matches.
-#        """
-#        if isinstance(template, str):
-#            smarts = template
-#        else:
-#            smarts = self.smiles
-#
-#        rdk_mol = self.to_OBMol()
-#
-#        pattern = rdkit.OBSmartsPattern()
-#        pattern.Init(smarts)
-#        pattern.Match(rdk_mol)
-#        maplist = pattern.GetUMapList()
-#
-#        return [x for x in maplist]
