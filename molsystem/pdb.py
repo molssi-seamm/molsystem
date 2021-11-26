@@ -237,7 +237,8 @@ class PDBMixin:
 
         # bonds
         for i, js in enumerate(self.bonded_neighbors(as_indices=True)):
-            lines.append(f"CONECT{i+1:5d}" + "".join([f"{j+1:5d}" for j in js]))
+            if len(js) > 0:
+                lines.append(f"CONECT{i+1:5d}" + "".join([f"{j+1:5d}" for j in js]))
 
         lines.append(
             "MASTER        0    0    0    0    0    0    0    0"
