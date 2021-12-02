@@ -143,7 +143,7 @@ class MolFileMixin:
                 for lineno, line in lines:
                     if "M  V30 END ATOM" in line:
                         logger.debug(f"Saving {len(xs)} atoms to system")
-                        if have_formal_charges and "formal_charges" not in self.atoms:
+                        if have_formal_charges and "formal_charge" not in self.atoms:
                             logger.debug("   with formal charges")
                             self.atoms.add_attribute(
                                 "formal_charge", coltype="int", default=0
