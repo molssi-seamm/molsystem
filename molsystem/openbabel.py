@@ -75,7 +75,7 @@ class OpenBabelMixin:
 
         self.clear()
 
-        if self.__class__.__name__ == " _Configuration":
+        if self.__class__.__name__ == "_Configuration":
             self.charge = ob_mol.GetTotalCharge()
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
 
