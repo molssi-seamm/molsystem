@@ -97,8 +97,11 @@ class SMILESMixin:
         builder = openbabel.OBBuilder()
         builder.Build(mol)
 
-        molfile = obConversion.WriteString(mol)
-        self.from_molfile_text(molfile)
+        # molfile = obConversion.WriteString(mol)
+        # self.from_molfile_text(molfile)
+
+        self.from_OBMol(mol)
+
         if name is not None:
             self.name = name
         else:
