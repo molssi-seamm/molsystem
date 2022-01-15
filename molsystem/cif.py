@@ -235,12 +235,27 @@ class CIFMixin:
         ys = []
         zs = []
         symbols = []
+        # May have type symbols or labels, or both. Use type symbols by preference
+        if "_atom_site_type_symbol" in data_block:
+            type_section = "_atom_site_type_symbol"
+        elif "_atom_site_label" in data_block:
+            type_section = "_atom_site_label"
+        else:
+            raise KeyError(
+                "Neither _atom_site_type_label or _atom_site_label are in file"
+            )
         for x, y, z, symbol in zip(
             data_block["_atom_site_fract_x"],
             data_block["_atom_site_fract_y"],
             data_block["_atom_site_fract_z"],
-            data_block["_atom_site_type_symbol"],
+            data_block[type_section],
         ):  # yapf: disable
+            if type_section == "_atom_site_label":
+                if len(symbol) > 1:
+                    if symbol[1].isalpha():
+                        symbol = symbol[0:1]
+                    else:
+                        symbol = symbol[0]
             # These variables *are* used in the eval below.
             x = float(x)
             y = float(y)
