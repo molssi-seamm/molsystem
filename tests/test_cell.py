@@ -5,6 +5,8 @@
 
 import pytest  # noqa: F401
 
+from molsystem import Cell
+
 
 def test_construction(configuration):
     """Simplest test that we can make a Cell object"""
@@ -48,3 +50,15 @@ def test_cell_object(vanadium):
     cell = vanadium.cell
     assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
     assert cell == [3.03, 3.03, 3.03, 90.0, 90.0, 90.0]
+
+
+def test_cell_vectors():
+    """Test the simple Cell objects handling of vectors."""
+    cell1 = Cell(2.456, 2.456, 6.696, 90.0, 90.0, 120.0)
+    vectors = cell1.vectors()
+    cell2 = Cell(1, 1, 1, 90, 90, 90)
+    cell2.from_vectors(vectors)
+    if cell1 != cell2:
+        print(f"{cell1=}")
+        print(f"{cell2=}")
+    assert cell1 == cell2

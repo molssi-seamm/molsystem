@@ -375,6 +375,26 @@ class Cell(object):
         """
         return self.to_cartesians_transform(as_array=as_array)
 
+    def from_vectors(self, vectors):
+        """Set the cell parameters from the lattice vectors.
+
+        Parameters
+        ----------
+        vectors : [[float*3]*3]
+            The lattice vectors as a list [a, b, c]
+        """
+        va = vectors[0]
+        vb = vectors[1]
+        vc = vectors[2]
+        a = math.hypot(*va)
+        b = math.hypot(*vb)
+        c = math.hypot(*vc)
+        alpha = math.degrees(math.acos(dot(vb, vc) / (b * c)))
+        beta = math.degrees(math.acos(dot(va, vc) / (a * c)))
+        gamma = math.degrees(math.acos(dot(va, vb) / (a * b)))
+
+        self.parameters = [a, b, c, alpha, beta, gamma]
+
 
 class _Cell(Cell):
     """A class for handling cell parameters as part of MolSystem.
