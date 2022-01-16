@@ -318,7 +318,7 @@ class _System(CIFMixin, MutableMapping):
             system=self.id,
             name=name,
             periodicity=configuration.periodicity,
-            coordinatesystem=configuration.coordinatesystem,
+            coordinate_system=configuration.coordinate_system,
             symmetry=configuration.symmetry_id,
             cell=configuration.cell_id,
             atomset=configuration.atomset,
@@ -331,7 +331,7 @@ class _System(CIFMixin, MutableMapping):
         self,
         name="",
         periodicity=0,
-        coordinatesystem=None,
+        coordinate_system=None,
         symmetry=None,
         cell_id=None,
         atomset=None,
@@ -346,7 +346,7 @@ class _System(CIFMixin, MutableMapping):
             A textual name for the configuration (optional)
         periodicity : int = 0
             The periodicity, 0, or 3 for 0-D or 3-D at the moment
-        coordinatesystem : str = None
+        coordinate_system : str = None
             The coordinate system, 'Cartesian' or 'fractional', to use.
             Defaults to Cartesian for molecules and fractional for crystals.
         symmetry : int or str = None
@@ -369,13 +369,13 @@ class _System(CIFMixin, MutableMapping):
         if name is not None:
             kwargs["name"] = name
         if periodicity != 0:
-            if coordinatesystem is None:
-                kwargs["coordinatesystem"] = "fractional"
+            if coordinate_system is None:
+                kwargs["coordinate_system"] = "fractional"
             else:
-                if coordinatesystem.lower()[0] == "c":
-                    kwargs["coordinatesystem"] = "Cartesian"
+                if coordinate_system.lower()[0] == "c":
+                    kwargs["coordinate_system"] = "Cartesian"
                 else:
-                    kwargs["coordinatesystem"] = "fractional"
+                    kwargs["coordinate_system"] = "fractional"
         if symmetry is not None:
             kwargs["symmetry"] = symmetry
         if cell_id is not None:
@@ -385,7 +385,9 @@ class _System(CIFMixin, MutableMapping):
         if bondset is not None:
             kwargs["bondset"] = bondset
 
-        cid = self["configuration"].append(system=self.id, **kwargs)[0]
+        cid = self["configuration"].append(
+            system=self.id, periodicity=periodicity, **kwargs
+        )[0]
         configuration = _Configuration(_id=cid, system_db=self.system_db)
 
         # If the atomset was given, need to create dummy coordinates
