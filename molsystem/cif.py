@@ -250,12 +250,12 @@ class CIFMixin:
             data_block["_atom_site_fract_z"],
             data_block[type_section],
         ):  # yapf: disable
-            if type_section == "_atom_site_label":
-                if len(symbol) > 1:
-                    if symbol[1].isalpha():
-                        symbol = symbol[0:2]
-                    else:
-                        symbol = symbol[0]
+            # Atom symbols may be followed by number, etc.
+            if len(symbol) > 1:
+                if symbol[1].isalpha():
+                    symbol = symbol[0:2]
+                else:
+                    symbol = symbol[0]
             # These variables *are* used in the eval below.
             x = float(x)
             y = float(y)
