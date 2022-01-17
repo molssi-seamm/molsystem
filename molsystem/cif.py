@@ -253,7 +253,7 @@ class CIFMixin:
             if type_section == "_atom_site_label":
                 if len(symbol) > 1:
                     if symbol[1].isalpha():
-                        symbol = symbol[0:1]
+                        symbol = symbol[0:2]
                     else:
                         symbol = symbol[0]
             # These variables *are* used in the eval below.
