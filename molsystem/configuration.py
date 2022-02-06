@@ -5,6 +5,9 @@ from functools import reduce
 import logging
 import math
 
+import seekpath
+import spglib
+
 from .atoms import _Atoms
 from .bonds import _Bonds
 from .cell import _Cell
@@ -17,6 +20,7 @@ from .pdb import PDBMixin
 from .smiles import SMILESMixin
 from .subsets import _Subsets
 from .symmetry import _Symmetry
+from .table import _Table
 from .topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
@@ -494,7 +498,7 @@ class _Configuration(
     @property
     def symmetry(self):
         """The periodic (unit) symmetry for this configuration."""
-        return _Symmetry(self.system_db, self.symmetry_id)
+        return _Symmetry(self)
 
     @property
     def symmetry_id(self):
@@ -504,6 +508,14 @@ class _Configuration(
                 "SELECT symmetry FROM configuration WHERE id = ?", (self.id,)
             )
             self._symmetry_id = self.cursor.fetchone()[0]
+            if self._symmetry_id is None:
+                table = _Table(self.system_db, "symmetry")
+                self._symmetry_id = table.append()[0]
+                self.cursor.execute(
+                    "UPDATE configuration SET symmetry = ? WHERE id = ?",
+                    (self._symmetry_id, self.id),
+                )
+                self.db.commit()
         return self._symmetry_id
 
     @property
@@ -554,3 +566,248 @@ class _Configuration(
         """Delete everything from the configuration."""
         # Delete the atoms
         self.atoms.delete("all")
+
+    def primitive_cell(self, symprec=1.0e-05, spg=False):
+        """Find the symmetry of periodic systems and transform to conventional cell.
+
+        Parameters
+        ----------
+        symprec : float
+            Distance tolerance in Cartesian coordinates to find crystal symmetry.
+
+            For atomic positions, roughly speaking, two position vectors x and x’ in
+            Cartesian coordinates are considered to be the same if |x' - x| <
+            symprec. For more details, see the spglib paper, Sec. II-A.
+
+            The angle distortion between basis vectors is converted to a length and
+            compared with this distance tolerance. For more details, see the spglib
+            paper, Sec. IV-A. It is possible to specify angle tolerance explicitly, see
+            angle_tolerance.
+
+        spg : bool = False
+            Whether to use ``spglib`` or ``seekpath`` (the default)
+
+        Returns
+        -------
+        ([[float*3]*3], [[float*3]*natoms], [int*natoms])
+            A tuple with the cell vectors, fractional coordinates and atomic numbers.
+        """
+        lattice_in = self.cell.vectors()
+        fractionals_in = self.atoms.get_coordinates(fractionals=True)
+        atomic_numbers_in = self.atoms.atomic_numbers
+        cell_in = (lattice_in, fractionals_in, atomic_numbers_in)
+
+        if spg:
+            lattice, fractionals, atomic_numbers = spglib.standardize_cell(
+                cell_in, to_primitive=True, no_idealize=True, symprec=symprec
+            )
+        else:
+            dataset = seekpath.get_path(cell_in, symprec=symprec)
+            lattice = dataset["primitive_lattice"].tolist()
+            fractionals = dataset["primitive_positions"].tolist()
+            atomic_numbers = dataset["primitive_types"].tolist()
+
+        return lattice, fractionals, atomic_numbers
+
+    def symmetrize(self, symprec=1.0e-05, angle_tolerance=None, spg=False):
+        """Find the symmetry of periodic systems and transform to conventional cell.
+
+        Parameters
+        ----------
+        symprec : float
+            Distance tolerance in Cartesian coordinates to find crystal symmetry.
+
+            For atomic positions, roughly speaking, two position vectors x and x’ in
+            Cartesian coordinates are considered to be the same if |x' - x| <
+            symprec. For more details, see the spglib paper, Sec. II-A.
+
+            The angle distortion between basis vectors is converted to a length and
+            compared with this distance tolerance. For more details, see the spglib
+            paper, Sec. IV-A. It is possible to specify angle tolerance explicitly, see
+            angle_tolerance.
+
+        angle_tolerance : float = None
+            Tolerance of angle between basis vectors in degrees to be tolerated in the
+            symmetry finding. If None, then the ``symprec`` above is used. This is the
+            recommended approach!
+
+        spg : bool = False
+            Whether to use ``spglib`` or ``seekpath`` (the default)
+        """
+        if self.periodicity == 3:
+            lattice_in = self.cell.vectors()
+            fractionals_in = self.atoms.get_coordinates(fractionals=True)
+            atomic_numbers_in = self.atoms.atomic_numbers
+            cell_in = (lattice_in, fractionals_in, atomic_numbers_in)
+
+            logger.debug("Lattice input to symmetrize")
+            for vector in lattice_in:
+                logger.debug(
+                    f"   {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}"
+                )
+            logger.debug("")
+            logger.debug("Fractionals")
+            for vector, atno in zip(fractionals_in, atomic_numbers_in):
+                logger.debug(
+                    f"   {atno:2} {vector[0]:7.3f}   {vector[1]:7.3f}   "
+                    f"{vector[2]:7.3f}"
+                )
+
+            if spg:
+                if angle_tolerance is not None:
+                    dataset = spglib.get_symmetry_dataset(
+                        cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                    )
+                else:
+                    dataset = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+
+                lattice = dataset["std_lattice"].tolist()
+                fractionals = dataset["std_positions"].tolist()
+                atomic_numbers = dataset["std_types"].tolist()
+                space_group = dataset["international"].strip("'")
+            else:
+                if angle_tolerance is not None:
+                    dataset = seekpath.get_path(
+                        cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                    )
+                else:
+                    dataset = seekpath.get_path(cell_in, symprec=symprec)
+
+                lattice = dataset["conv_lattice"].tolist()
+                fractionals = dataset["conv_positions"].tolist()
+                atomic_numbers = dataset["conv_types"].tolist()
+                space_group = dataset["spacegroup_international"].strip("'")
+
+            logger.debug("")
+            logger.debug("Lattice after symmetrize")
+            for vector in lattice:
+                logger.debug(
+                    f"   {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}"
+                )
+            logger.debug("")
+            logger.debug("Fractionals")
+            for vector, atno in zip(fractionals, atomic_numbers):
+                logger.debug(
+                    f"   {atno:2} {vector[0]:7.3f}   {vector[1]:7.3f}   "
+                    f"{vector[2]:7.3f}"
+                )
+
+            self.cell.from_vectors(lattice)
+
+            self.atoms.delete("all")
+
+            xs = [f[0] for f in fractionals]
+            ys = [f[1] for f in fractionals]
+            zs = [f[2] for f in fractionals]
+
+            self.coordinate_system = "fractional"
+            self.atoms.append(atno=atomic_numbers, x=xs, y=ys, z=zs)
+            self.symmetry.group = space_group
+
+    def update(
+        self,
+        coordinates,
+        fractionals=True,
+        atomic_numbers=None,
+        lattice=None,
+        space_group=None,
+        symprec=1.0e-05,
+        angle_tolerance=None,
+        spg=False,
+    ):
+        """Update the system, checking symmetry.
+
+        Parameters
+        ----------
+        coordinates : [[3*float]*natoms]
+            The coordinates.
+
+        fractionals : bool = True
+            Whether fractional or Cartesian coordinates.
+
+        atomic_numbers : [float*natoms]
+            The atomic numbers of the atoms
+
+        lattice : [[float*3]*3] = None
+            The cell vectors
+
+        space_group : str = None
+            The original space group.
+
+        symprec : float
+            Distance tolerance in Cartesian coordinates to find crystal symmetry.
+
+            For atomic positions, roughly speaking, two position vectors x and x’ in
+            Cartesian coordinates are considered to be the same if |x' - x| <
+            symprec. For more details, see the spglib paper, Sec. II-A.
+
+            The angle distortion between basis vectors is converted to a length and
+            compared with this distance tolerance. For more details, see the spglib
+            paper, Sec. IV-A. It is possible to specify angle tolerance explicitly, see
+            angle_tolerance.
+
+        angle_tolerance : float = None
+            Tolerance of angle between basis vectors in degrees to be tolerated in the
+            symmetry finding. If None, then the ``symprec`` above is used. This is the
+            recommended approach!
+
+        spg : bool = False
+            Whether to use ``spglib`` or ``seekpath`` (the default)
+        """
+        text = ""
+
+        cell_in = (lattice, coordinates, atomic_numbers)
+
+        if spg:
+            if angle_tolerance is not None:
+                dataset = spglib.get_symmetry_dataset(
+                    cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                )
+            else:
+                dataset = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+
+            lattice_out = dataset["std_lattice"].tolist()
+            fractionals_out = dataset["std_positions"].tolist()
+            atomic_numbers_out = dataset["std_types"].tolist()
+            space_group_out = dataset["international"].strip("'")
+        else:
+            if angle_tolerance is not None:
+                dataset = seekpath.get_path(
+                    cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                )
+            else:
+                dataset = seekpath.get_path(cell_in, symprec=symprec)
+
+            lattice_out = dataset["conv_lattice"].tolist()
+            fractionals_out = dataset["conv_positions"].tolist()
+            atomic_numbers_out = dataset["conv_types"].tolist()
+            space_group_out = dataset["spacegroup_international"].strip("'")
+
+        logger.debug("Lattice")
+        for vector in lattice_out:
+            logger.debug(f"   {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}")
+        logger.debug("")
+        logger.debug("Fractionals")
+        for vector, atno in zip(fractionals_out, atomic_numbers_out):
+            logger.debug(
+                f"   {atno:2} {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}"
+            )
+        logger.debug(f"{space_group_out}")
+
+        if space_group != space_group_out:
+            text = f"The space group changed from {space_group} to {space_group_out}."
+            logger.debug(text)
+
+        self.cell.from_vectors(lattice_out)
+
+        self.atoms.delete("all")
+
+        xs = [f[0] for f in fractionals_out]
+        ys = [f[1] for f in fractionals_out]
+        zs = [f[2] for f in fractionals_out]
+
+        self.coordinate_system = "fractional"
+        self.atoms.append(atno=atomic_numbers_out, x=xs, y=ys, z=zs)
+        self.symmetry.group = space_group_out
+
+        return text

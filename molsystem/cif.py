@@ -260,6 +260,7 @@ class CIFMixin:
             x = float(x)
             y = float(y)
             z = float(z)
+            logger.debug(f"xyz = {x:7.3f} {y:7.3f} {z:7.3f}")
             for symop in data_block[symdata]:
                 x_eq, y_eq, z_eq = symop.split(",")
                 x_new = eval(x_eq)
@@ -277,6 +278,7 @@ class CIFMixin:
                 if abs(1 - z_new) < delta:
                     z_new = 0.0
                 found = False
+                logger.debug(f"-->   {x_new:7.3f} {y_new:7.3f} {z_new:7.3f}")
                 for x0, y0, z0 in zip(xs, ys, zs):
                     if (
                         abs(x_new - x0) < delta
@@ -284,6 +286,7 @@ class CIFMixin:
                         and abs(z_new - z0) < delta
                     ):
                         found = True
+                        logger.debug("         found!")
                         break
                 if not found:
                     xs.append(x_new)
@@ -291,6 +294,9 @@ class CIFMixin:
                     zs.append(z_new)
                     symbols.append(symbol)
         self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
+
+        # Find the symmetry and set to the conventional cell.
+        self.symmetrize(symprec=0.0001)
 
     def to_mmcif_text(self):
         """Create the text of a mmCIF file from this configuration.

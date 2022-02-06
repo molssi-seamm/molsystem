@@ -762,7 +762,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             # Symmetry information
             table = self["symmetry"]
             table.add_attribute("id", coltype="int", pk=True)
-            table.add_attribute("group", coltype="str")
+            table.add_attribute("group", coltype="str", default="")
 
             table = self["symmetryoperation"]
             table.add_attribute("symmetry", coltype="int", references="symmetry")
