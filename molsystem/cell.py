@@ -132,13 +132,11 @@ class Cell(object):
     def volume(self):
         """The volume of the cell."""
         a, b, c, alpha, beta, gamma = self.parameters
-        # Roundoff errors!
-        value = cos(alpha) * cos(beta) * cos(gamma)
-        if value < 0.0 and abs(value) < 1.0e-8:
-            value = 0.0
-        return a * b * c * (
-            1 - cos(alpha) ** 2 - cos(beta) ** 2 - cos(gamma) ** 2
-        ) + 2 * math.sqrt(value)
+        ca = cos(alpha)
+        cb = cos(beta)
+        cg = cos(gamma)
+        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        return V
 
     def equal(self, other, tol=1.0e-6):
         """Check if we are equal to another iterable to within a tolerance.
@@ -696,7 +694,7 @@ class _Cell(Cell):
         parameters = list(self._parameters)
         parameters.append(self.id)
         self.cursor.execute(
-            "UPDATE cell SET a=?, b=?, c=?, alpha=?, beta=?, gamma=?" "WHERE id = ?",
+            "UPDATE cell SET a=?, b=?, c=?, alpha=?, beta=?, gamma=? WHERE id = ?",
             parameters,
         )
         self.db.commit()
