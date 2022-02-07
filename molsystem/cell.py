@@ -135,7 +135,7 @@ class Cell(object):
         ca = cos(alpha)
         cb = cos(beta)
         cg = cos(gamma)
-        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
         return V
 
     def equal(self, other, tol=1.0e-6):
@@ -198,7 +198,7 @@ class Cell(object):
         sg = sin(gamma)
 
         twopi = 2 * math.pi
-        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
         # Transpose...
         # [1 / a, -cg / (a * sg), b * c * (ca * cg - cb) / (V * sg)],
         # [0, 1 / (b * sg), a * c * (cb * cg - ca) / (V * sg)],
@@ -270,7 +270,7 @@ class Cell(object):
         cg = cos(gamma)
         sg = sin(gamma)
 
-        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
         # Transpose of ...
         # [a, b * cg, c * cb],
         # [0, b * sg, c * (ca - cb * cg) / sg],
@@ -338,7 +338,7 @@ class Cell(object):
         cg = cos(gamma)
         sg = sin(gamma)
 
-        V = a * b * c * math.sqrt(1 - ca ** 2 - cb ** 2 - cg ** 2 + 2 * ca * cb * cg)
+        V = a * b * c * math.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)
         # Transpose...
         # [1 / a, -cg / (a * sg), b * c * (ca * cg - cb) / (V * sg)],
         # [0, 1 / (b * sg), a * c * (cb * cg - ca) / (V * sg)],
