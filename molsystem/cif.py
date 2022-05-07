@@ -15,6 +15,7 @@ Bond Orders
 """
 
 import io
+import json
 import logging
 import math
 
@@ -202,52 +203,70 @@ class CIFMixin:
             )
         data_block = cif[data_blocks[0]]
 
+        # print(json.dumps({**data_block}, indent=4, sort_keys=True))
+        logger.debug(json.dumps({**data_block}, indent=4, sort_keys=True))
+
         # Reset the system
         self.clear()
-        self.periodicity = 3
-        self.coordinate_system = "fractional"
 
         # The cell
-        a = data_block["_cell_length_a"]
-        b = data_block["_cell_length_b"]
-        c = data_block["_cell_length_c"]
-        alpha = data_block["_cell_angle_alpha"]
-        beta = data_block["_cell_angle_beta"]
-        gamma = data_block["_cell_angle_gamma"]
-        self.cell.parameters = (a, b, c, alpha, beta, gamma)
+        dot = "."
+        if "_cell_length_a" in data_block:
+            dot = "_"
+        a = data_block["_cell" + dot + "length_a"]
+        b = data_block["_cell" + dot + "length_b"]
+        c = data_block["_cell" + dot + "length_c"]
+        alpha = data_block["_cell" + dot + "angle_alpha"]
+        beta = data_block["_cell" + dot + "angle_beta"]
+        gamma = data_block["_cell" + dot + "angle_gamma"]
+        if float(a) != 1 and float(b) != 1 and float(c) != 1:
+            print(f"{a=} {b=} {c=}")
+            self.periodicity = 3
+            self.coordinate_system = "fractional"
+            self.cell.parameters = (a, b, c, alpha, beta, gamma)
 
-        # Add the atoms
-        # TEMPORARILY lower the symmetry to P1
-        delta = 1.0e-04
+            # Add the atoms
+            # TEMPORARILY lower the symmetry to P1
+            delta = 1.0e-04
 
-        # Where is the symmetry info?
-        if "_space_group_symop_operation_xyz" in data_block:
-            symdata = "_space_group_symop_operation_xyz"
-        elif "_symmetry_equiv_pos_as_xyz" in data_block:
-            symdata = "_symmetry_equiv_pos_as_xyz"
+            # Where is the symmetry info?
+            if "_space_group_symop" + dot + "operation_xyz" in data_block:
+                symdata = "_space_group_symop" + dot + "operation_xyz"
+            elif "_symmetry_equiv" + dot + "pos_as_xyz" in data_block:
+                symdata = "_symmetry_equiv" + dot + "pos_as_xyz"
+            else:
+                raise RuntimeError(
+                    "CIF file does not contain required symmetry information. Neither "
+                    "'_symmetry_equiv" + dot + "pos_as_xyz' or "
+                    "'_space_group_symop" + dot + "operation_xyz' "
+                    "is present."
+                )
+
+            x_label = "_atom_site" + dot + "fract_x"
+            y_label = "_atom_site" + dot + "fract_y"
+            z_label = "_atom_site" + dot + "fract_z"
         else:
-            raise RuntimeError(
-                "CIF file does not contain required symmetry information. Neither "
-                "'_symmetry_equiv_pos_as_xyz' or '_space_group_symop_operation_xyz' "
-                "is present."
-            )
+            x_label = "_atom_site" + dot + "Cartn_x"
+            y_label = "_atom_site" + dot + "Cartn_y"
+            z_label = "_atom_site" + dot + "Cartn_z"
+
         xs = []
         ys = []
         zs = []
         symbols = []
         # May have type symbols or labels, or both. Use type symbols by preference
-        if "_atom_site_type_symbol" in data_block:
-            type_section = "_atom_site_type_symbol"
-        elif "_atom_site_label" in data_block:
-            type_section = "_atom_site_label"
+        if "_atom_site" + dot + "type_symbol" in data_block:
+            type_section = "_atom_site" + dot + "type_symbol"
+        elif "_atom_site" + dot + "label" in data_block:
+            type_section = "_atom_site" + dot + "label"
         else:
             raise KeyError(
-                "Neither _atom_site_type_label or _atom_site_label are in file"
+                f"Neither _atom_site{dot}type_label or _atom_site{dot}label are in file"
             )
         for x, y, z, symbol in zip(
-            data_block["_atom_site_fract_x"],
-            data_block["_atom_site_fract_y"],
-            data_block["_atom_site_fract_z"],
+            data_block[x_label],
+            data_block[y_label],
+            data_block[z_label],
             data_block[type_section],
         ):  # yapf: disable
             # Atom symbols may be followed by number, etc.
@@ -261,42 +280,49 @@ class CIFMixin:
             y = float(y)
             z = float(z)
             logger.debug(f"xyz = {x:7.3f} {y:7.3f} {z:7.3f}")
-            for symop in data_block[symdata]:
-                x_eq, y_eq, z_eq = symop.split(",")
-                x_new = eval(x_eq)
-                y_new = eval(y_eq)
-                z_new = eval(z_eq)
-                # Translate into cell.
-                x_new = x_new - math.floor(x_new)
-                y_new = y_new - math.floor(y_new)
-                z_new = z_new - math.floor(z_new)
-                # check for almost 1, should be 0
-                if abs(1 - x_new) < delta:
-                    x_new = 0.0
-                if abs(1 - y_new) < delta:
-                    y_new = 0.0
-                if abs(1 - z_new) < delta:
-                    z_new = 0.0
-                found = False
-                logger.debug(f"-->   {x_new:7.3f} {y_new:7.3f} {z_new:7.3f}")
-                for x0, y0, z0 in zip(xs, ys, zs):
-                    if (
-                        abs(x_new - x0) < delta
-                        and abs(y_new - y0) < delta
-                        and abs(z_new - z0) < delta
-                    ):
-                        found = True
-                        logger.debug("         found!")
-                        break
-                if not found:
-                    xs.append(x_new)
-                    ys.append(y_new)
-                    zs.append(z_new)
-                    symbols.append(symbol)
+            if self.periodicity == 3:
+                for symop in data_block[symdata]:
+                    x_eq, y_eq, z_eq = symop.split(",")
+                    x_new = eval(x_eq)
+                    y_new = eval(y_eq)
+                    z_new = eval(z_eq)
+                    # Translate into cell.
+                    x_new = x_new - math.floor(x_new)
+                    y_new = y_new - math.floor(y_new)
+                    z_new = z_new - math.floor(z_new)
+                    # check for almost 1, should be 0
+                    if abs(1 - x_new) < delta:
+                        x_new = 0.0
+                    if abs(1 - y_new) < delta:
+                        y_new = 0.0
+                    if abs(1 - z_new) < delta:
+                        z_new = 0.0
+                    found = False
+                    logger.debug(f"-->   {x_new:7.3f} {y_new:7.3f} {z_new:7.3f}")
+                    for x0, y0, z0 in zip(xs, ys, zs):
+                        if (
+                            abs(x_new - x0) < delta
+                            and abs(y_new - y0) < delta
+                            and abs(z_new - z0) < delta
+                        ):
+                            found = True
+                            logger.debug("         found!")
+                            break
+                    if not found:
+                        xs.append(x_new)
+                        ys.append(y_new)
+                        zs.append(z_new)
+                        symbols.append(symbol)
+            else:
+                xs.append(x)
+                ys.append(y)
+                zs.append(z)
+                symbols.append(symbol)
         self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
 
-        # Find the symmetry and set to the conventional cell.
-        self.symmetrize(symprec=0.0001)
+        if self.periodicity == 3:
+            # Find the symmetry and set to the conventional cell.
+            self.symmetrize(symprec=0.0001)
 
     def to_mmcif_text(self):
         """Create the text of a mmCIF file from this configuration.
