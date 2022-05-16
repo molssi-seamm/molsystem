@@ -220,7 +220,6 @@ class CIFMixin:
         beta = data_block["_cell" + dot + "angle_beta"]
         gamma = data_block["_cell" + dot + "angle_gamma"]
         if float(a) != 1 and float(b) != 1 and float(c) != 1:
-            print(f"{a=} {b=} {c=}")
             self.periodicity = 3
             self.coordinate_system = "fractional"
             self.cell.parameters = (a, b, c, alpha, beta, gamma)
@@ -418,20 +417,21 @@ class CIFMixin:
             )
 
         # The bonds
-        lines.append("#")
-        lines.append("loop_")
-        lines.append(" _chem_comp_bond.comp_id")
-        lines.append(" _chem_comp_bond.atom_id_1")
-        lines.append(" _chem_comp_bond.atom_id_2")
-        lines.append(" _chem_comp_bond.value_order")
-        index = {j: i for i, j in enumerate(atoms.ids)}
-        for row in bonds.bonds():
-            i = index[row["i"]]
-            j = index[row["j"]]
-            order = bond_order[row["bondorder"]]
-            nm1 = names[i]
-            nm2 = names[j]
-            lines.append(f"MOL1 {nm1} {nm2} {order}")
+        if bonds.n_bonds > 0:
+            lines.append("#")
+            lines.append("loop_")
+            lines.append(" _chem_comp_bond.comp_id")
+            lines.append(" _chem_comp_bond.atom_id_1")
+            lines.append(" _chem_comp_bond.atom_id_2")
+            lines.append(" _chem_comp_bond.value_order")
+            index = {j: i for i, j in enumerate(atoms.ids)}
+            for row in bonds.bonds():
+                i = index[row["i"]]
+                j = index[row["j"]]
+                order = bond_order[row["bondorder"]]
+                nm1 = names[i]
+                nm2 = names[j]
+                lines.append(f"MOL1 {nm1} {nm2} {order}")
 
         # And that is it!
         return "\n".join(lines)
@@ -505,11 +505,9 @@ class CIFMixin:
                     coordinate_system = "fractional"
                 elif "_atom_site.Cartn_x" not in data:
                     raise KeyError("Couldn't find coordinates in atom_site data")
-                elif "_chem_comp_atom.atom_id" in data:
-                    if "_chem_comp_atom.model_Cartn_x" not in data:
-                        raise KeyError(
-                            "Couldn't find coordinates in chem_comp_atom data"
-                        )
+            elif "_chem_comp_atom.atom_id" in data:
+                if "_chem_comp_atom.model_Cartn_x" not in data:
+                    raise KeyError("Couldn't find coordinates in chem_comp_atom data")
 
             # Get the name of the system/configuration
             for key in [
