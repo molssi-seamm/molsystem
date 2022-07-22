@@ -597,6 +597,15 @@ class _Configuration(
         atomic_numbers_in = self.atoms.atomic_numbers
         cell_in = (lattice_in, fractionals_in, atomic_numbers_in)
 
+        # Need this to get the mapping to the primitive cell...uff!
+        tmp = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+        mapping_to_primitive = [*tmp["mapping_to_primitive"]]
+        n_max = max(mapping_to_primitive)
+        mapping_from_primitive = [None for i in range(n_max + 1)]
+        for at, prim in zip(range(len(mapping_to_primitive)), mapping_to_primitive):
+            if mapping_from_primitive[prim] is None:
+                mapping_from_primitive[prim] = at
+
         if spg:
             lattice, fractionals, atomic_numbers = spglib.standardize_cell(
                 cell_in, to_primitive=True, no_idealize=True, symprec=symprec
@@ -607,7 +616,13 @@ class _Configuration(
             fractionals = dataset["primitive_positions"].tolist()
             atomic_numbers = dataset["primitive_types"].tolist()
 
-        return lattice, fractionals, atomic_numbers
+        return (
+            lattice,
+            fractionals,
+            atomic_numbers,
+            mapping_from_primitive,
+            mapping_to_primitive,
+        )
 
     def symmetrize(self, symprec=1.0e-05, angle_tolerance=None, spg=False):
         """Find the symmetry of periodic systems and transform to conventional cell.
