@@ -319,8 +319,13 @@ class CIFMixin:
                                 data[alt]["count"] += 1
 
                     if len(alt_data) > 0:
+                        key = "_entry" + dot + "id"
+                        if key in data_block:
+                            result += f"Entry {data_block[key]} "
+                        else:
+                            result += "An entry "
                         result += (
-                            "The structure in the CIF file has multiple alternates. "
+                            "in the CIF file has multiple alternates. "
                             "Picking those with the largest occupancy:\n\n"
                         )
                     use_alt_id = {}
@@ -337,7 +342,7 @@ class CIFMixin:
                         comp = alt_data[label][val]["res"]
                         chain, mol, entity = label
                         line = (
-                            f"\t{mol} {chain} {comp}{entity} alt_id={val} selected from"
+                            f"  {mol} {chain} {comp}{entity} alt_id={val} selected from"
                         )
                         for alt, tmp in alt_data[label].items():
                             line += f" | {alt} {tmp['res']} {tmp['occ']:.2f} "
