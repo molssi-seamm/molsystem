@@ -21,6 +21,8 @@ import math
 
 import CifFile
 
+from .symmetry import _Symmetry
+
 logger = logging.getLogger(__name__)
 
 bond_order = {
@@ -193,6 +195,7 @@ class CIFMixin:
         None
         """
 
+        result = ""
         cif = CifFile.ReadCif(io.StringIO(text))
 
         data_blocks = [*cif.keys()]
@@ -229,25 +232,126 @@ class CIFMixin:
             delta = 1.0e-04
 
             # Where is the symmetry info?
+            spgname = None
             if "_space_group_symop" + dot + "operation_xyz" in data_block:
                 symdata = "_space_group_symop" + dot + "operation_xyz"
+                operators = data_block[symdata]
             elif "_symmetry_equiv" + dot + "pos_as_xyz" in data_block:
                 symdata = "_symmetry_equiv" + dot + "pos_as_xyz"
+                operators = data_block[symdata]
+            elif "_symmetry" + dot + "space_group_name_H-M" in data_block:
+                spgname = data_block["_symmetry" + dot + "space_group_name_H-M"]
+                operators = _Symmetry.symops_as_strings(spgname)
             else:
                 raise RuntimeError(
                     "CIF file does not contain required symmetry information. Neither "
                     "'_symmetry_equiv" + dot + "pos_as_xyz' or "
-                    "'_space_group_symop" + dot + "operation_xyz' "
+                    "'_space_group_symop" + dot + "operation_xyz' or "
+                    "_symmetry" + dot + "space_group_name_H-M "
                     "is present."
                 )
 
             x_label = "_atom_site" + dot + "fract_x"
-            y_label = "_atom_site" + dot + "fract_y"
-            z_label = "_atom_site" + dot + "fract_z"
+            if x_label in data_block:
+                have_fractionals = True
+                y_label = "_atom_site" + dot + "fract_y"
+                z_label = "_atom_site" + dot + "fract_z"
+            else:
+                have_fractionals = False
+                x_label = "_atom_site" + dot + "Cartn_x"
+                y_label = "_atom_site" + dot + "Cartn_y"
+                z_label = "_atom_site" + dot + "Cartn_z"
         else:
             x_label = "_atom_site" + dot + "Cartn_x"
             y_label = "_atom_site" + dot + "Cartn_y"
             z_label = "_atom_site" + dot + "Cartn_z"
+
+        n_atoms = len(data_block[x_label])
+
+        # Check for alternate sites, warn and take highest occupation
+        use_alt_id = None
+        labels = []
+        alt_ids = None
+        if "_atom_site" + dot + "label_alt_id" in data_block:
+            key = "_atom_site" + dot + "label_alt_id"
+            if any(x != "." for x in data_block[key]):
+                comp_id = "_atom_site" + dot + "label_comp_id"
+                asym_id = "_atom_site" + dot + "label_asym_id"
+                entity_id = "_atom_site" + dot + "label_entity_id"
+                seq_id = "_atom_site" + dot + "label_seq_id"
+                if (
+                    comp_id in data_block
+                    and asym_id in data_block
+                    and entity_id in data_block
+                    and seq_id in data_block
+                ):
+                    alt_ids = data_block[key]
+                    comp_ids = data_block[comp_id]
+                    asym_ids = data_block[asym_id]
+                    entity_ids = data_block[entity_id]
+                    seq_ids = data_block[seq_id]
+
+                    occupancy = "_atom_site" + dot + "occupancy"
+                    if occupancy in data_block:
+                        occs = data_block[occupancy]
+                    else:
+                        result += (
+                            "Warning: No occupancy information in CIF file with alt "
+                            "ids.\n\n"
+                        )
+                        occs = [1] * n_atoms
+
+                    label = ""
+                    alt_data = {}
+                    for alt, comp, asym, entity, seq, occ in zip(
+                        alt_ids, comp_ids, asym_ids, entity_ids, seq_ids, occs
+                    ):
+                        label = (asym, entity, seq)
+                        labels.append(label)
+                        if alt != ".":
+                            if label not in alt_data:
+                                alt_data[label] = {}
+                            data = alt_data[label]
+                            if alt not in data:
+                                data[alt] = {"occ": float(occ), "count": 1, "res": comp}
+                            else:
+                                data[alt]["occ"] += float(occ)
+                                data[alt]["count"] += 1
+
+                    if len(alt_data) > 0:
+                        key = "_entry" + dot + "id"
+                        if key in data_block:
+                            result += f"Entry {data_block[key]} "
+                        else:
+                            result += "An entry "
+                        result += (
+                            "in the CIF file has multiple alternates. "
+                            "Picking those with the largest occupancy:\n\n"
+                        )
+                    use_alt_id = {}
+                    for label, data in alt_data.items():
+                        max_occ = -1.0
+                        for alt, tmp in data.items():
+                            occ = tmp["occ"] / tmp["count"]
+                            tmp["occ"] = occ
+                            if occ > max_occ:
+                                use_alt_id[label] = alt
+                                max_occ = occ
+
+                    for label, val in use_alt_id.items():
+                        comp = alt_data[label][val]["res"]
+                        chain, mol, entity = label
+                        line = (
+                            f"  {mol} {chain} {comp}{entity} alt_id={val} selected from"
+                        )
+                        for alt, tmp in alt_data[label].items():
+                            line += f" | {alt} {tmp['res']} {tmp['occ']:.2f} "
+                        result += line
+                        result += "\n"
+
+        if alt_ids is None:
+            alt_ids = ["."] * n_atoms
+            labels = [""] * n_atoms
 
         xs = []
         ys = []
@@ -262,66 +366,92 @@ class CIFMixin:
             raise KeyError(
                 f"Neither _atom_site{dot}type_label or _atom_site{dot}label are in file"
             )
-        for x, y, z, symbol in zip(
+        tmp_count = 0
+        for x, y, z, symbol, label, alt in zip(
             data_block[x_label],
             data_block[y_label],
             data_block[z_label],
             data_block[type_section],
+            labels,
+            alt_ids,
         ):  # yapf: disable
             # Atom symbols may be followed by number, etc.
+            if alt != "." and label in use_alt_id and alt != use_alt_id[label]:
+                logger.debug(f"   Skipping alternate configuration {label} -- {alt}")
+                continue
+
             if len(symbol) > 1:
                 if symbol[1].isalpha():
                     symbol = symbol[0:2]
                 else:
                     symbol = symbol[0]
+            if symbol == "D":
+                symbol = "H"
             # These variables *are* used in the eval below.
             x = float(x)
             y = float(y)
             z = float(z)
             logger.debug(f"xyz = {x:7.3f} {y:7.3f} {z:7.3f}")
             if self.periodicity == 3:
-                for symop in data_block[symdata]:
-                    x_eq, y_eq, z_eq = symop.split(",")
-                    x_new = eval(x_eq)
-                    y_new = eval(y_eq)
-                    z_new = eval(z_eq)
-                    # Translate into cell.
-                    x_new = x_new - math.floor(x_new)
-                    y_new = y_new - math.floor(y_new)
-                    z_new = z_new - math.floor(z_new)
-                    # check for almost 1, should be 0
-                    if abs(1 - x_new) < delta:
-                        x_new = 0.0
-                    if abs(1 - y_new) < delta:
-                        y_new = 0.0
-                    if abs(1 - z_new) < delta:
-                        z_new = 0.0
-                    found = False
-                    logger.debug(f"-->   {x_new:7.3f} {y_new:7.3f} {z_new:7.3f}")
-                    for x0, y0, z0 in zip(xs, ys, zs):
-                        if (
-                            abs(x_new - x0) < delta
-                            and abs(y_new - y0) < delta
-                            and abs(z_new - z0) < delta
-                        ):
-                            found = True
-                            logger.debug("         found!")
-                            break
-                    if not found:
-                        xs.append(x_new)
-                        ys.append(y_new)
-                        zs.append(z_new)
-                        symbols.append(symbol)
+                if not have_fractionals:
+                    # Convert Cartesians to fractionals
+                    x, y, z = self.cell.to_fractionals([[x, y, z]])[0]
+
+                if len(operators) > 1:
+                    # Only do this if there are symmetry operators!
+                    for symop in operators:
+                        x_eq, y_eq, z_eq = symop.split(",")
+                        x_new = eval(x_eq)
+                        y_new = eval(y_eq)
+                        z_new = eval(z_eq)
+                        # Translate into cell.
+                        x_new = x_new - math.floor(x_new)
+                        y_new = y_new - math.floor(y_new)
+                        z_new = z_new - math.floor(z_new)
+                        # check for almost 1, should be 0
+                        if abs(1 - x_new) < delta:
+                            x_new = 0.0
+                        if abs(1 - y_new) < delta:
+                            y_new = 0.0
+                        if abs(1 - z_new) < delta:
+                            z_new = 0.0
+                        found = False
+                        logger.debug(f"-->   {x_new:7.3f} {y_new:7.3f} {z_new:7.3f}")
+                        for x0, y0, z0 in zip(xs, ys, zs):
+                            if (
+                                abs(x_new - x0) < delta
+                                and abs(y_new - y0) < delta
+                                and abs(z_new - z0) < delta
+                            ):
+                                found = True
+                                logger.debug("         found!")
+                                break
+                        if not found:
+                            xs.append(x_new)
+                            ys.append(y_new)
+                            zs.append(z_new)
+                            symbols.append(symbol)
+                            tmp_count += 1
+                            # logger.info(f"{tmp_count:4} {name} {comp} {label}")
+                else:
+                    xs.append(x)
+                    ys.append(y)
+                    zs.append(z)
+                    symbols.append(symbol)
+                    tmp_count += 1
             else:
                 xs.append(x)
                 ys.append(y)
                 zs.append(z)
                 symbols.append(symbol)
+                tmp_count += 1
         self.atoms.append(x=xs, y=ys, z=zs, symbol=symbols)
 
         if self.periodicity == 3:
             # Find the symmetry and set to the conventional cell.
             self.symmetrize(symprec=0.0001)
+
+        return result
 
     def to_mmcif_text(self):
         """Create the text of a mmCIF file from this configuration.
