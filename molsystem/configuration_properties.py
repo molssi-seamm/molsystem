@@ -59,19 +59,15 @@ class _ConfigurationProperties(object):
         if _property == "all":
             sql = "SELECT name, type, value"
             sql += "  FROM property, float_data"
-            sql += " WHERE float_data.property = property.id and property.id IN ("
-            sql += "     SELECT property FROM float_data WHERE configuration = ?"
-            sql += ") UNION "
+            sql += " WHERE float_data.property = property.id AND configuration = ?"
+            sql += " UNION "
             sql += "SELECT name, type, value"
             sql += "  FROM property, int_data"
-            sql += " WHERE int_data.property = property.id and property.id IN ("
-            sql += "     SELECT property FROM int_data WHERE configuration = ?"
-            sql += ") UNION "
+            sql += " WHERE int_data.property = property.id AND configuration = ?"
+            sql += " UNION "
             sql += "SELECT name, type, value"
             sql += "  FROM property, str_data"
-            sql += " WHERE str_data.property = property.id and property.id IN ("
-            sql += "     SELECT property FROM str_data WHERE configuration = ?"
-            sql += ")"
+            sql += " WHERE str_data.property = property.id AND configuration = ?"
 
             self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
 
