@@ -218,6 +218,10 @@ class _System(CIFMixin, MutableMapping):
     def configuration(self, value):
         if isinstance(value, _Configuration):
             value = value.id
+        elif isinstance(value, str):
+            # Find id by name
+            value = self.get_configuration_id(value)
+
         if value not in self.configuration_ids:
             raise KeyError(f"configuration '{value}' does not exist.")
         self._current_configuration_id = value
@@ -496,7 +500,7 @@ class _System(CIFMixin, MutableMapping):
 
         return _Configuration(_id=cid, system_db=self.system_db)
 
-    def get_configuration_id(self, name):
+    def get_configuration_id(self, name, errors=True):
         """Get the id of the specified configuration.
 
         Parameters
@@ -519,9 +523,13 @@ class _System(CIFMixin, MutableMapping):
         sql = "SELECT id FROM configuration WHERE system = ? AND name = ?"
         ids = [x[0] for x in self.db.execute(sql, (self.id, name))]
         if len(ids) == 0:
-            raise ValueError(f"The configuration '{name}' does not exist.")
+            if errors:
+                raise ValueError(f"The configuration '{name}' does not exist.")
+            return None
         elif len(ids) > 1:
-            raise ValueError(f"There is more than one configuration named '{name}'")
+            if errors:
+                raise ValueError(f"There is more than one configuration named '{name}'")
+            return None
         return ids[0]
 
     def list(self):

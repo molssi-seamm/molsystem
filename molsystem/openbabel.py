@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class OpenBabelMixin:
     """A mixin for handling OpenBabel via its Python interface."""
 
-    def to_OBMol(self):
+    def to_OBMol(self, properties=None):
         """Return an OBMol object for the configuration, template, or subset."""
         ob_mol = openbabel.OBMol()
         for atno, xyz in zip(self.atoms.atomic_numbers, self.atoms.coordinates):
@@ -43,9 +43,17 @@ class OpenBabelMixin:
                 self.spin_multiplicity = multiplicity
                 ob_mol.SetTotalSpinMultiplicity(self.spin_multiplicity)
 
+        if properties == "all":
+            data = self.properties.get("all")
+            pair = openbabel.OBPairData()
+            for key, value in data.items():
+                pair.SetAttribute(key)
+                pair.SetValue(str(value))
+                ob_mol.CloneData(pair)
+
         return ob_mol
 
-    def from_OBMol(self, ob_mol):
+    def from_OBMol(self, ob_mol, properties="all"):
         """Transform an Open Babel molecule into the current object."""
         atnos = []
         Xs = []
@@ -84,6 +92,28 @@ class OpenBabelMixin:
         j = [ids[x - 1] for x in Js]
         self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
+        # Record any properties in the database if desired
+        if properties == "all":
+            data = ob_mol.GetData()
+            for item in data:
+                attribute = item.GetAttribute()
+                value = item.GetValue()
+                if not self.properties.exists(attribute):
+                    try:
+                        int(value)
+                        _type = "int"
+                    except Exception:
+                        try:
+                            float(value)
+                            _type = "float"
+                        except Exception:
+                            _type = "str"
+                    self.properties.add(
+                        attribute,
+                        _type,
+                        description="Imported from SDF file",
+                    )
+                self.properties.put(attribute, value)
         return self
 
     def find_substructures(self, template):
