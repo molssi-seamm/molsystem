@@ -121,6 +121,8 @@ class _Symmetry(object):
                     if r == 0:
                         pass
                     elif r == 1:
+                        if line != "":
+                            line += "+"
                         line += xyz
                     elif r == -1:
                         line += "-" + xyz
