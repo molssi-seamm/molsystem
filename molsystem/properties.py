@@ -7,6 +7,67 @@ import pkg_resources
 import pprint  # noqa: F401
 
 logger = logging.getLogger(__name__)
+standard_properties = {}
+
+
+def add_properties_from_file(path):
+    """The standard properties recognized by SEAMM.
+
+    These are officially defined properties that can be used anywhere in SEAMM, as
+    long as the type and definition correspond to the standard.
+
+    Each property is defined by a string with up to three parts:
+
+        <property name>#<code or 'experiment'>#<technique or model chemistry>
+
+    The property name is required. In most cases this is followed by either 'experiment'
+    or the name of the code, e.g. 'MOPAC', 'Gaussian', or 'VASP'. The final part,
+    if present, is either the experimental technique used to measure the property, or
+    the model chemistry, such as 'MP2/6-31G**', 'PM7', or a forcefield name such as
+    'AMBER/ff19SB'.
+
+    You can create other properties on the fly, but they follow the above convention
+    and should have an appropriate code and, if necessary, model chemistry, so that
+    they full name is unique and does not conflict with any other defined name.
+
+    For example, the standard property "enthalpy of formation" refers to the
+    experimental heat of formation, or a calculated value comparable to experimental
+    values. If you are not sure what the heat of formation in e.g. MOPAC is, you could
+    create a new property "enthalpy of formation#MOPAC#<parameterization>", which is
+    clearly similar to the standard "enthalpy of formation". If the community decides
+    that it is indeed the same, it can be replaced by the standard form, and also
+    aliased to it for backwards compatibility.
+    """
+    global standard_properties
+    with open(path, newline="", encoding="utf-8-sig") as fd:
+        data = csv.reader(fd)
+        line = 0
+        for row in data:
+            line += 1
+            if line == 1:
+                # Headers
+                headers = [*row]
+                if headers != [
+                    "Property",
+                    "Type",
+                    "Units",
+                    "Description",
+                    "URL",
+                ]:
+                    raise ValueError(
+                        "Header of standard properties file not valid: "
+                        + ", ".join(headers)
+                    )
+            else:
+                property = row[0]
+                data = standard_properties[property] = {}
+                for key, value in zip(headers[1:], row[1:]):
+                    data[key] = value
+
+
+path = Path(pkg_resources.resource_filename(__name__, "data/"))
+csv_file = path / "standard_properties.csv"
+add_properties_from_file(csv_file)
 
 
 class _Properties(object):
@@ -26,54 +87,8 @@ class _Properties(object):
 
     @property
     def standard_properties(self):
-        """The standard properties recognized by SEAMM.
-
-        These are officially defined properties that can be used anywhere in SEAMM, as
-        long as the type and definition correspond to the standard.
-
-        You can create other properties on the fly, but they must be prefixed by a
-        unique name followed by a dot ('.') so that they do not conflict with either the
-        standard properties or other properties defined on-the-fly. Typically the unique
-        name should  that of the program generating the property, which implicitly
-        defines details of the property.
-
-        For example, the standard property "enthalpy of formation" refers to the
-        experimental heat of formation, or a calculated value comparable to experimental
-        values. If you are not sure what the heat of formation in e.g. MOPAC is, you
-        could create a new property "MOPAC.enthalpy of formation", which is clearly
-        similar to the standard "enthalpy of formation". If the community decides that
-        it is indeed the same, it can be replaced by the standard form, and also aliased
-        to it for backwards compatibility.
-        """
-        if self._standard_properties is None:
-            self._standard_properties = {}
-            path = Path(pkg_resources.resource_filename(__name__, "data/"))
-            csv_file = path / "standard_properties.csv"
-            with open(csv_file, newline="", encoding="utf-8-sig") as fd:
-                data = csv.reader(fd)
-                line = 0
-                for row in data:
-                    line += 1
-                    if line == 1:
-                        # Headers
-                        headers = [*row]
-                        if headers != [
-                            "Property",
-                            "Type",
-                            "Units",
-                            "Description",
-                            "URL",
-                        ]:
-                            raise ValueError(
-                                "Header of standard properties file not valid: "
-                                + ", ".join(headers)
-                            )
-                    else:
-                        property = row[0]
-                        data = self._standard_properties[property] = {}
-                        for key, value in zip(headers[1:], row[1:]):
-                            data[key] = value
-        return self._standard_properties
+        global standard_properties
+        return standard_properties
 
     @property
     def system_db(self):
@@ -202,6 +217,21 @@ class _Properties(object):
             "    ON str_data(configuration, property)"
         )
 
+    def description(self, _property):
+        """The description of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The description of the property.
+        """
+        return self.metadata(_property)[2]
+
     def exists(self, name):
         """Whether the named property exists.
 
@@ -255,12 +285,7 @@ class _Properties(object):
             )
         return result[0]
 
-    def known_properties(self):
-        """List the known properties."""
-        self.cursor.execute("SELECT name FROM property")
-        return [row[0] for row in self.cursor.fetchall()]
-
-    def property_id(self, name):
+    def id(self, name):
         """The id for a property
 
         Parameters
@@ -274,9 +299,51 @@ class _Properties(object):
             The database id for the property.
         """
         self.cursor.execute("SELECT id FROM property WHERE name = ?", (name,))
-        return self.cursor.fetchone()[0]
+        tmp = self.cursor.fetchone()
+        if tmp is None:
+            raise KeyError(f"Property '{name}' is not known.")
+        else:
+            return tmp[0]
 
-    def property_name(self, pid):
+    def known_properties(self):
+        """List the known properties."""
+        self.cursor.execute("SELECT name FROM property")
+        return [row[0] for row in self.cursor.fetchall()]
+
+    def metadata(self, _property):
+        """The metadata for a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str, str, str
+            The type, units, and description of the property
+        """
+        if isinstance(_property, str):
+            self.cursor.execute(
+                "SELECT type, units, description FROM property WHERE name = ?",
+                (_property,),
+            )
+        else:
+            self.cursor.execute(
+                "SELECT type, units, description FROM property WHERE id = ?",
+                (_property,),
+            )
+        tmp = self.cursor.fetchone()
+        if tmp is not None:
+            return tmp
+
+        if _property in self.standard_properties:
+            data = self.standard_properties[_property]
+            return data["Type"], data["Units"], data["Description"]
+
+        raise KeyError(f"Property '{_property}' is not known.")
+
+    def name(self, pid):
         """The name of a property
 
         Parameters
@@ -290,28 +357,23 @@ class _Properties(object):
             The name of the property.
         """
         self.cursor.execute("SELECT name FROM property WHERE id = ?", (pid,))
-        return self.cursor.fetchone()[0]
+        tmp = self.cursor.fetchone()
+        if tmp is None:
+            raise KeyError(f"Property id = '{pid}' is not known.")
+        else:
+            return tmp[0]
+
+    def property_id(self, name):
+        "Obsolete routine kept for compatibility"
+        return self.id(name)
+
+    def property_name(self, pid):
+        "Obsolete routine kept for compatibility"
+        return self.name(pid)
 
     def property_type(self, _property):
-        """The type of a property
-
-        Parameters
-        ----------
-        _property : int or str
-            The id or name of the property.
-
-        Returns
-        -------
-        str
-            The type of the property.
-        """
-        if isinstance(_property, str):
-            self.cursor.execute(
-                "SELECT type FROM property WHERE name = ?", (_property,)
-            )
-        else:
-            self.cursor.execute("SELECT type FROM property WHERE id = ?", (_property,))
-        return self.cursor.fetchone()[0]
+        "Obsolete routine kept for compatibility"
+        return self.type(_property)
 
     def put(self, configuration_id, _property, value):
         """Store the given property value for the configuration.
@@ -506,3 +568,33 @@ class _Properties(object):
             for item, value in zip(results, row):
                 result[item].append(value)
         return result
+
+    def type(self, _property):
+        """The type of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The type of the property.
+        """
+        return self.metadata(_property)[0]
+
+    def units(self, _property):
+        """The unit string of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The units string for the property.
+        """
+        return self.metadata(_property)[1]
