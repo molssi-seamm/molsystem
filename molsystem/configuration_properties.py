@@ -39,6 +39,21 @@ class _ConfigurationProperties(object):
             name, _type=_type, units=units, description=description, noerror=noerror
         )
 
+    def description(self, _property):
+        """The description of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The description of the property.
+        """
+        return self.properties.description(_property)
+
     def exists(self, name):
         """A thin wrapper of the _Properties method."""
         return self.properties.exists(name)
@@ -84,6 +99,21 @@ class _ConfigurationProperties(object):
         else:
             return self.properties.get(self._cid, _property)
 
+    def id(self, name):
+        """The id for a property
+
+        Parameters
+        ----------
+        name : str
+            The name of the property.
+
+        Returns
+        -------
+        int
+            The database id for the property.
+        """
+        return self.properties.id(name)
+
     def known_properties(self):
         """List the known properties."""
         return self.properties.known_properties()
@@ -118,22 +148,22 @@ class _ConfigurationProperties(object):
         self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
         return [row[0] for row in self.properties.cursor]
 
-    def property_id(self, name):
-        """The id for a property
+    def metadata(self, _property):
+        """The metadata for a property
 
         Parameters
         ----------
-        name : str
-            The name of the property.
+        _property : int or str
+            The id or name of the property.
 
         Returns
         -------
-        int
-            The database id for the property.
+        str, str, str, str
+            The name, type, units, and description of the property
         """
-        return self.properties.property_id(name)
+        return self.properties.metadata(_property)
 
-    def property_name(self, pid):
+    def name(self, pid):
         """The name of a property
 
         Parameters
@@ -146,22 +176,19 @@ class _ConfigurationProperties(object):
         str
             The name of the property.
         """
-        return self.properties.property_name(pid)
+        return self.property.name(pid)
+
+    def property_id(self, name):
+        "Obsolete routine kept for compatibility"
+        return self.id(name)
+
+    def property_name(self, pid):
+        "Obsolete routine kept for compatibility"
+        return self.name(pid)
 
     def property_type(self, _property):
-        """The type of a property
-
-        Parameters
-        ----------
-        _property : int or str
-            The id or name of the property.
-
-        Returns
-        -------
-        str
-            The type of the property.
-        """
-        return self.properties.property_type(_property)
+        "Obsolete routine kept for compatibility"
+        return self.type(_property)
 
     def put(self, _property, value):
         """Store the given property value for this configuration.
@@ -174,3 +201,33 @@ class _ConfigurationProperties(object):
             The value to store.
         """
         self.properties.put(self._cid, _property, value)
+
+    def type(self, _property):
+        """The type of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The type of the property.
+        """
+        return self.properties.type(_property)
+
+    def units(self, _property):
+        """The unit string of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The units string for the property.
+        """
+        return self.properties.units(_property)
