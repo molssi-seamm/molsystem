@@ -217,6 +217,21 @@ class _Properties(object):
             "    ON str_data(configuration, property)"
         )
 
+    def description(self, _property):
+        """The description of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The description of the property.
+        """
+        return self.metadata(_property)[2]
+
     def exists(self, name):
         """Whether the named property exists.
 
@@ -270,12 +285,7 @@ class _Properties(object):
             )
         return result[0]
 
-    def known_properties(self):
-        """List the known properties."""
-        self.cursor.execute("SELECT name FROM property")
-        return [row[0] for row in self.cursor.fetchall()]
-
-    def property_id(self, name):
+    def id(self, name):
         """The id for a property
 
         Parameters
@@ -289,9 +299,51 @@ class _Properties(object):
             The database id for the property.
         """
         self.cursor.execute("SELECT id FROM property WHERE name = ?", (name,))
-        return self.cursor.fetchone()[0]
+        tmp = self.cursor.fetchone()
+        if tmp is None:
+            raise KeyError(f"Property '{name}' is not known.")
+        else:
+            return tmp[0]
 
-    def property_name(self, pid):
+    def known_properties(self):
+        """List the known properties."""
+        self.cursor.execute("SELECT name FROM property")
+        return [row[0] for row in self.cursor.fetchall()]
+
+    def metadata(self, _property):
+        """The metadata for a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str, str, str
+            The type, units, and description of the property
+        """
+        if isinstance(_property, str):
+            self.cursor.execute(
+                "SELECT type, units, description FROM property WHERE name = ?",
+                (_property,),
+            )
+        else:
+            self.cursor.execute(
+                "SELECT type, units, description FROM property WHERE id = ?",
+                (_property,),
+            )
+        tmp = self.cursor.fetchone()
+        if tmp is not None:
+            return tmp
+
+        if _property in self.standard_properties:
+            data = self.standard_properties[_property]
+            return data["Type"], data["Units"], data["Description"]
+
+        raise KeyError(f"Property '{_property}' is not known.")
+
+    def name(self, pid):
         """The name of a property
 
         Parameters
@@ -305,28 +357,23 @@ class _Properties(object):
             The name of the property.
         """
         self.cursor.execute("SELECT name FROM property WHERE id = ?", (pid,))
-        return self.cursor.fetchone()[0]
+        tmp = self.cursor.fetchone()
+        if tmp is None:
+            raise KeyError(f"Property id = '{pid}' is not known.")
+        else:
+            return tmp[0]
+
+    def property_id(self, name):
+        "Obsolete routine kept for compatibility"
+        return self.id(name)
+
+    def property_name(self, pid):
+        "Obsolete routine kept for compatibility"
+        return self.name(pid)
 
     def property_type(self, _property):
-        """The type of a property
-
-        Parameters
-        ----------
-        _property : int or str
-            The id or name of the property.
-
-        Returns
-        -------
-        str
-            The type of the property.
-        """
-        if isinstance(_property, str):
-            self.cursor.execute(
-                "SELECT type FROM property WHERE name = ?", (_property,)
-            )
-        else:
-            self.cursor.execute("SELECT type FROM property WHERE id = ?", (_property,))
-        return self.cursor.fetchone()[0]
+        "Obsolete routine kept for compatibility"
+        return self.type(_property)
 
     def put(self, configuration_id, _property, value):
         """Store the given property value for the configuration.
@@ -521,3 +568,33 @@ class _Properties(object):
             for item, value in zip(results, row):
                 result[item].append(value)
         return result
+
+    def type(self, _property):
+        """The type of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The type of the property.
+        """
+        return self.metadata(_property)[0]
+
+    def units(self, _property):
+        """The unit string of a property
+
+        Parameters
+        ----------
+        _property : int or str
+            The id or name of the property.
+
+        Returns
+        -------
+        str
+            The units string for the property.
+        """
+        return self.metadata(_property)[1]
