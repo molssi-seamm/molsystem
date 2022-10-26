@@ -352,6 +352,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 self._db = sqlite3.connect(self._filename)
             self._db.row_factory = sqlite3.Row
             self._db.execute("PRAGMA foreign_keys = ON")
+            self._db.execute("PRAGMA journal_mode = WAL")
+            self._db.execute("PRAGMA synchronous = normal")
+            self._db.execute("PRAGMA temp_store = memory")
+            self._db.execute("PRAGMA mmap_size = 30000000000")
             self._cursor = self._db.cursor()
             self._initialize()
 
