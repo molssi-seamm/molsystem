@@ -9,6 +9,7 @@ import pprint  # noqa: F401
 
 from .cif import CIFMixin
 from .configuration import _Configuration
+from .system_properties import _SystemProperties
 from .table import _Table
 
 logger = logging.getLogger(__name__)
@@ -290,6 +291,11 @@ class _System(CIFMixin, MutableMapping):
         sql = "SELECT COUNT(*) FROM configuration WHERE system = ?"
         self.cursor.execute(sql, (self.id,))
         return self.cursor.fetchone()[0]
+
+    @property
+    def properties(self):
+        """The class to handle the properties for this system."""
+        return _SystemProperties(self)
 
     @property
     def system_db(self):

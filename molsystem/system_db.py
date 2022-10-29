@@ -352,10 +352,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 self._db = sqlite3.connect(self._filename)
             self._db.row_factory = sqlite3.Row
             self._db.execute("PRAGMA foreign_keys = ON")
-            self._db.execute("PRAGMA journal_mode = WAL")
             self._db.execute("PRAGMA synchronous = normal")
             self._db.execute("PRAGMA temp_store = memory")
             self._db.execute("PRAGMA mmap_size = 30000000000")
+            if "mode=ro" not in self._filename:
+                self._db.execute("PRAGMA journal_mode = WAL")
             self._cursor = self._db.cursor()
             self._initialize()
 
@@ -363,6 +364,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     def names(self):
         """The names of the system."""
         return [row[0] for row in self.db.execute("SELECT name FROM system")]
+
+    @property
+    def n_configurations(self):
+        """The number of configurations in the database."""
+        return self["configuration"].n_rows
 
     @property
     def n_systems(self):
@@ -842,6 +848,9 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("n_active_electrons", coltype="int", default=0)
             table.add_attribute("n_active_orbitals", coltype="int", default=0)
             table.add_attribute("state", coltype="str", default="1")
+            self.db.execute(
+                "CREATE INDEX 'idx_configuration_system' ON configuration(system)"
+            )
 
             # And coordinates, which depend on configurations
             table = self["coordinates"]
@@ -893,6 +902,40 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             self.db.execute(
                 "CREATE INDEX 'idx_subset_atom_subset_atom' "
                 'ON subset_atom ("subset", "atom")'
+            )
+
+            # Collections of systems
+            table = self["system_collection"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("name", coltype="str")
+
+            table = self["system_collection_system"]
+            table.add_attribute(
+                "system_collection", coltype="int", references="system_collection"
+            )
+            table.add_attribute("system", coltype="int", references="system")
+            self.db.execute(
+                "CREATE INDEX 'idx_system_collection_system' "
+                'ON atomset_atom ("system_collection", "system")'
+            )
+
+            # Collections of configurations
+            table = self["configuration_collection"]
+            table.add_attribute("id", coltype="int", pk=True)
+            table.add_attribute("name", coltype="str")
+
+            table = self["configuration_collection_configuration"]
+            table.add_attribute(
+                "configuration_collection",
+                coltype="int",
+                references="configuration_collection",
+            )
+            table.add_attribute(
+                "configuration", coltype="int", references="configuration"
+            )
+            self.db.execute(
+                "CREATE INDEX 'idx_configuration_collection_configuration' "
+                'ON atomset_atom ("configuration_collection", "configuration")'
             )
 
             #####################################################

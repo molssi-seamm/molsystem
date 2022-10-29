@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Property methods for configurations."""
+"""Property methods for systems."""
 
 import logging
 import pprint  # noqa: F401
@@ -8,24 +8,24 @@ import pprint  # noqa: F401
 logger = logging.getLogger(__name__)
 
 
-class _ConfigurationProperties(object):
-    """A class for handling the properties of a configuration in the star schema."""
+class _SystemProperties(object):
+    """A class for handling the properties of a system in the star schema."""
 
-    def __init__(self, configuration):
-        self._configuration = configuration
-        self._cid = configuration.id
+    def __init__(self, system):
+        self._system = system
+        self._sid = system.id
         self._properties = None
 
     @property
-    def configuration(self):
-        """The configuration these properties are connected with."""
-        return self._configuration
+    def system(self):
+        """The system these properties are connected with."""
+        return self._system
 
     @property
     def properties(self):
         """The general properties object."""
         if self._properties is None:
-            self._properties = self.configuration.system_db.properties
+            self._properties = self.system.system_db.properties
         return self._properties
 
     @property
@@ -59,7 +59,7 @@ class _ConfigurationProperties(object):
         return self.properties.exists(name)
 
     def get(self, _property="all"):
-        """Get the given property value for this configuration.
+        """Get the given property value for this system.
 
         Parameters
         ----------
@@ -71,7 +71,7 @@ class _ConfigurationProperties(object):
         int, float, or str
             The value of the property.
         """
-        return self.properties.get(self._cid, _property)
+        return self.properties.get_for_system(self._sid, _property)
 
     def id(self, name):
         """The id for a property
@@ -93,33 +93,33 @@ class _ConfigurationProperties(object):
         return self.properties.known_properties()
 
     def list(self):
-        """Return all of the property names for the current configuration.
+        """Return all of the property names for the current system.
         Returns
         -------
         [str]
-            The names of the properties for the configuration.
+            The names of the properties for the system.
         """
         sql = "SELECT name FROM property WHERE id IN ("
-        sql += "SELECT property FROM float_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM int_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM str_data WHERE configuration = ?"
+        sql += "SELECT property FROM float_data WHERE system = ?"
+        sql += "UNION SELECT property FROM int_data WHERE system = ?"
+        sql += "UNION SELECT property FROM str_data WHERE system = ?"
         sql += ")"
 
-        self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
+        self.properties.cursor.execute(sql, (self._sid, self._sid, self._sid))
         return [row[0] for row in self.properties.cursor]
 
     def list_ids(self):
-        """Return all of the property ids for the current configuration.
+        """Return all of the property ids for the current system.
         Returns
         -------
         [int]
-            The names of the properties for the configuration.
+            The names of the properties for the system.
         """
-        sql = "SELECT property FROM float_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM int_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM str_data WHERE configuration = ?"
+        sql = "SELECT property FROM float_data WHERE system = ?"
+        sql += "UNION SELECT property FROM int_data WHERE system = ?"
+        sql += "UNION SELECT property FROM str_data WHERE system = ?"
 
-        self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
+        self.properties.cursor.execute(sql, (self._sid, self._sid, self._sid))
         return [row[0] for row in self.properties.cursor]
 
     def metadata(self, _property):
@@ -152,20 +152,8 @@ class _ConfigurationProperties(object):
         """
         return self.property.name(pid)
 
-    def property_id(self, name):
-        "Obsolete routine kept for compatibility"
-        return self.id(name)
-
-    def property_name(self, pid):
-        "Obsolete routine kept for compatibility"
-        return self.name(pid)
-
-    def property_type(self, _property):
-        "Obsolete routine kept for compatibility"
-        return self.type(_property)
-
     def put(self, _property, value):
-        """Store the given property value for this configuration.
+        """Store the given property value for this system.
 
         Parameters
         ----------
@@ -174,7 +162,7 @@ class _ConfigurationProperties(object):
         value : int, float, or str
             The value to store.
         """
-        self.properties.put(self._cid, _property, value)
+        self.properties.put_for_system(self._sid, _property, value)
 
     def type(self, _property):
         """The type of a property
