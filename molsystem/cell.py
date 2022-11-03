@@ -218,6 +218,36 @@ class Cell(object):
         else:
             return T
 
+    def strain(self, *args):
+        """Strain the cell.
+
+        Parameters
+        ----------
+        args : 6 * [float] or 6 floats
+            The strain in Voigt notation, either a 6-vector or six floats.
+        """
+        if len(args) == 6:
+            vector = args
+        elif len(args) == 1:
+            vector = args[0]
+            if len(vector) != 6:
+                raise ValueError("The strains must be a 6-vector.")
+        else:
+            raise ValueError("The strains must be a 6-vector.")
+
+        xx, yy, zz, yz, xz, xy = vector
+        strain = numpy.array(
+            [
+                [1.0 + xx, xy / 2, xz / 2],
+                [xy / 2, 1.0 + yy, yz / 2],
+                [xz / 2, yz / 2, 1.0 + zz],
+            ]
+        )
+
+        current = self.vectors(as_array=True)
+        new = current @ strain
+        self.from_vectors(new)
+
     def to_cartesians(self, uvw, as_array=False):
         """Convert fraction coordinates to Cartesians
 
@@ -381,6 +411,9 @@ class Cell(object):
         vectors : [[float*3]*3]
             The lattice vectors as a list [a, b, c]
         """
+        if isinstance(vectors, numpy.ndarray):
+            vectors = vectors.tolist()
+
         va = vectors[0]
         vb = vectors[1]
         vc = vectors[2]
