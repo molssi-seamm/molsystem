@@ -624,6 +624,38 @@ class _Configuration(
             mapping_to_primitive,
         )
 
+    def strain(self, *args, stretch="affine"):
+        """Strain the cell.
+
+        Parameters
+        ----------
+        args : 6 * [float] or 6 floats
+            The strain in Voigt notation, either a 6-vector or six floats.
+        stretch : enum
+            How to move atoms, one of "affine", or ... more options in the future.
+        """
+        if self.periodicity == 0:
+            raise RuntimeError("Can't strain a non-periodic system.")
+
+        if len(args) == 6:
+            vector = args
+        elif len(args) == 1:
+            vector = args[0]
+            if len(vector) != 6:
+                raise ValueError("The strains must be a 6-vector.")
+        else:
+            raise ValueError("The strains must be a 6-vector.")
+
+        if stretch == "affine":
+            if self.coordinate_system == "fractional":
+                self.cell.strain(vector)
+            else:
+                fractionals = self.atoms.get_coordinates(fractionals=True)
+                self.cell.strain(vector)
+                self.atoms.set_coordinates(fractionals)
+        else:
+            raise NotImplementedError("Only affine transformations so far.")
+
     def symmetrize(self, symprec=1.0e-05, angle_tolerance=None, spg=False):
         """Find the symmetry of periodic systems and transform to conventional cell.
 

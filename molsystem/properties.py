@@ -161,12 +161,17 @@ class _Properties(object):
         table = self.system_db["float_data"]
         table.add_attribute("id", coltype="int", pk=True)
         table.add_attribute("configuration", coltype="int", references="configuration")
+        table.add_attribute("system", coltype="int", references="system")
         table.add_attribute("property", coltype="int", references="property")
         table.add_attribute("value", coltype="float")
 
         self.db.execute(
             "CREATE INDEX float_data_idx_configuration_property_value"
             "    ON float_data(configuration, property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX float_data_idx_system_property_value"
+            "    ON float_data(system, property, value)"
         )
         self.db.execute(
             "CREATE INDEX float_data_idx_property_value"
@@ -176,17 +181,30 @@ class _Properties(object):
             "CREATE INDEX float_data_idx_configuration_property"
             "    ON float_data(configuration, property)"
         )
+        self.db.execute(
+            "CREATE INDEX float_data_idx_system_property"
+            "    ON float_data(system, property)"
+        )
+        self.db.execute(
+            "CREATE INDEX float_data_idx_configuration ON float_data(configuration)"
+        )
+        self.db.execute("CREATE INDEX float_data_idx_system ON float_data(system)")
 
         # Integer facts
         table = self.system_db["int_data"]
         table.add_attribute("id", coltype="int", pk=True)
         table.add_attribute("configuration", coltype="int", references="configuration")
+        table.add_attribute("system", coltype="int", references="system")
         table.add_attribute("property", coltype="int", references="property")
         table.add_attribute("value", coltype="int")
 
         self.db.execute(
             "CREATE INDEX int_data_idx_configuration_property_value"
             "    ON int_data(configuration, property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX int_data_idx_system_property_value"
+            "    ON int_data(system, property, value)"
         )
         self.db.execute(
             "CREATE INDEX int_data_idx_property_value"
@@ -196,17 +214,29 @@ class _Properties(object):
             "CREATE INDEX int_data_idx_configuration_property"
             "    ON int_data(configuration, property)"
         )
+        self.db.execute(
+            "CREATE INDEX int_data_idx_system_property ON int_data(system, property)"
+        )
+        self.db.execute(
+            "CREATE INDEX int_data_idx_configuration ON int_data(configuration)"
+        )
+        self.db.execute("CREATE INDEX int_data_idx_system ON int_data(system)")
 
         # String facts
         table = self.system_db["str_data"]
         table.add_attribute("id", coltype="int", pk=True)
         table.add_attribute("configuration", coltype="int", references="configuration")
+        table.add_attribute("system", coltype="int", references="system")
         table.add_attribute("property", coltype="int", references="property")
         table.add_attribute("value", coltype="str")
 
         self.db.execute(
             "CREATE INDEX str_data_idx_configuration_property_value"
             "    ON str_data(configuration, property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX str_data_idx_system_property_value"
+            "    ON str_data(system, property, value)"
         )
         self.db.execute(
             "CREATE INDEX str_data_idx_property_value"
@@ -216,6 +246,13 @@ class _Properties(object):
             "CREATE INDEX str_data_idx_configuration_property"
             "    ON str_data(configuration, property)"
         )
+        self.db.execute(
+            "CREATE INDEX str_data_idx_system_property  ON str_data(system, property)"
+        )
+        self.db.execute(
+            "CREATE INDEX str_data_idx_configuration ON str_data(configuration)"
+        )
+        self.db.execute("CREATE INDEX str_data_idx_system ON str_data(system)")
 
     def description(self, _property):
         """The description of a property
@@ -248,42 +285,126 @@ class _Properties(object):
         self.cursor.execute("SELECT COUNT(*) FROM property WHERE name = ?", (name,))
         return self.cursor.fetchone()[0] != 0
 
-    def get(self, configuration_id, _property):
+    def get(self, configuration_id, _property="all"):
         """Get the given property value for the configuration.
 
         Parameters
         ----------
         configuration_id : int
             The id of the configuration.
-        _property : int or str
-            The id or name of the property.
+        _property : int or str, or "all"
+            The id or name of the property, or all properties if "all".
 
         Returns
         -------
         int, float, or str
             The value of the property.
         """
-        if isinstance(_property, str):
-            if self.exists(_property):
-                pid = self.property_id(_property)
-            else:
-                raise ValueError(f"Property '{_property}' does not exist.")
-        else:
-            pid = _property
+        if _property == "all":
+            sql = "SELECT name, type, value"
+            sql += "  FROM property, float_data"
+            sql += " WHERE float_data.property = property.id AND configuration = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, int_data"
+            sql += " WHERE int_data.property = property.id AND configuration = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, str_data"
+            sql += " WHERE str_data.property = property.id AND configuration = ?"
 
-        ptype = self.property_type(pid)
-        sql = (
-            f"SELECT value FROM {ptype}_data"
-            "  WHERE configuration = ? AND property = ?"
-        )
-        self.cursor.execute(sql, (configuration_id, pid))
-        result = self.cursor.fetchone()
-        if result is None:
-            raise ValueError(
-                f"Property {_property} does not exist for configuration "
-                f"{configuration_id}"
+            self.cursor.execute(
+                sql, (configuration_id, configuration_id, configuration_id)
             )
-        return result[0]
+
+            result = {}
+            for row in self.cursor:
+                name, _type, value = row
+                if _type == "float":
+                    result[name] = float(value)
+                elif _type == "int":
+                    result[name] = int(value)
+                else:
+                    result[name] = value
+            return result
+        else:
+            if isinstance(_property, str):
+                if self.exists(_property):
+                    pid = self.property_id(_property)
+                else:
+                    raise ValueError(f"Property '{_property}' does not exist.")
+            else:
+                pid = _property
+
+            ptype = self.property_type(pid)
+            sql = (
+                f"SELECT value FROM {ptype}_data"
+                "  WHERE configuration = ? AND property = ?"
+            )
+            self.cursor.execute(sql, (configuration_id, pid))
+            result = self.cursor.fetchone()
+            if result is None:
+                raise ValueError(
+                    f"Property {_property} does not exist for configuration "
+                    f"{configuration_id}"
+                )
+            return result[0]
+
+    def get_for_system(self, system_id, _property="all"):
+        """Get the given property value(s) for the system.
+
+        Parameters
+        ----------
+        system_id : int
+            The id of the system.
+        _property : int or str of "all"
+            The id or name of the property, or "all" for all properties.
+
+        Returns
+        -------
+        [int, float, or str]
+            The value(s) of the property.
+        """
+        if _property == "all":
+            sql = "SELECT name, type, value"
+            sql += "  FROM property, float_data"
+            sql += " WHERE float_data.property = property.id AND system = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, int_data"
+            sql += " WHERE int_data.property = property.id AND system = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, str_data"
+            sql += " WHERE str_data.property = property.id AND system = ?"
+
+            self.cursor.execute(sql, (system_id, system_id, system_id))
+
+            result = {}
+            for row in self.cursor:
+                name, _type, value = row
+                if _type == "float":
+                    result[name] = float(value)
+                elif _type == "int":
+                    result[name] = int(value)
+                else:
+                    result[name] = value
+        else:
+            if isinstance(_property, str):
+                if self.exists(_property):
+                    pid = self.property_id(_property)
+                else:
+                    raise ValueError(f"Property '{_property}' does not exist.")
+            else:
+                pid = _property
+            ptype = self.property_type(pid)
+
+            sql = f"SELECT value FROM {ptype}_data WHERE system = ? AND property = ?"
+            result = []
+            for row in self.db.execute(sql, (system_id, pid)):
+                result.append(row[0])
+
+        return result
 
     def id(self, name):
         """The id for a property
@@ -387,6 +508,7 @@ class _Properties(object):
         value : int, float, or str
             The value to store.
         """
+        # Get the property id and type
         if isinstance(_property, str):
             if not self.exists(_property):
                 if _property in self.standard_properties:
@@ -396,13 +518,49 @@ class _Properties(object):
             pid = self.property_id(_property)
         else:
             pid = _property
-
         ptype = self.property_type(pid)
+
+        # Get the system id
+        self.cursor.execute(
+            "SELECT system FROM configuration WHERE id = ?", (configuration_id,)
+        )
+        system_id = self.cursor.fetchone()[0]
+
         sql = (
-            f"INSERT INTO {ptype}_data (configuration, property, value)"
+            f"INSERT INTO {ptype}_data (configuration, system, property, value)"
+            "      VALUES(?, ?, ?, ?)"
+        )
+        self.db.execute(sql, (configuration_id, system_id, pid, value))
+
+    def put_for_system(self, system_id, _property, value):
+        """Store the given property value for the system.
+
+        Parameters
+        ----------
+        system_id : int
+            The id of the system.
+        _property : int or str
+            The id or name of the property.
+        value : int, float, or str
+            The value to store.
+        """
+        # Get the property id and type
+        if isinstance(_property, str):
+            if not self.exists(_property):
+                if _property in self.standard_properties:
+                    self.add(_property)
+                else:
+                    raise ValueError(f"Property '{_property}' does not exist.")
+            pid = self.property_id(_property)
+        else:
+            pid = _property
+        ptype = self.property_type(pid)
+
+        sql = (
+            f"INSERT INTO {ptype}_data (system, property, value)"
             "      VALUES(?, ?, ?)"
         )
-        self.db.execute(sql, (configuration_id, pid, value))
+        self.db.execute(sql, (system_id, pid, value))
 
     def query(self, *args, what=["configuration"]):
         """Find configurations that match the query defined by the args.

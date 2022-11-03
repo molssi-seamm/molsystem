@@ -4,6 +4,7 @@
 """Tests for `cell` in the `molsystem` package."""
 
 import pytest  # noqa: F401
+import numpy as np
 
 from molsystem import Cell
 
@@ -50,6 +51,25 @@ def test_cell_object(vanadium):
     cell = vanadium.cell
     assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
     assert cell == [3.03, 3.03, 3.03, 90.0, 90.0, 90.0]
+
+
+def test_cell_strain_yy(vanadium):
+    """Test straining the cell in the yy direction."""
+    cell = vanadium.cell
+    assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
+    cell.strain(0, 0.01, 0, 0, 0, 0)
+    assert cell == [3.03, 3.0603, 3.03, 90.0, 90.0, 90.0]
+
+
+def test_cell_strain_xz(vanadium):
+    """Test getting the cell as a Cell object."""
+    cell = vanadium.cell
+    assert str(type(cell)) == "<class 'molsystem.cell._Cell'>"
+    cell.strain([0, 0, 0, 0, 0.01, 0])
+    answer = [3.030037874763284, 3.03, 3.030037874763284, 90.0, 89.42704697944585, 90.0]
+    if not np.allclose(cell.parameters, answer):
+        print(cell)
+    assert np.allclose(cell.parameters, answer)
 
 
 def test_cell_vectors():
