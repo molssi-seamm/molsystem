@@ -32,7 +32,7 @@ class OpenBabelMixin:
         for row in self.bonds.bonds():
             ob_mol.AddBond(index[row["i"]], index[row["j"]], row["bondorder"])
 
-        if self.__class__.__name__ == " _Configuration":
+        if self.__class__.__name__ == "_Configuration":
             ob_mol.SetTotalCharge(self.charge)
             if self.spin_multiplicity is None:
                 n_electrons = sum(self.atoms.atomic_numbers) - self.charge
@@ -41,7 +41,10 @@ class OpenBabelMixin:
                 else:
                     multiplicity = 2
                 self.spin_multiplicity = multiplicity
-                ob_mol.SetTotalSpinMultiplicity(self.spin_multiplicity)
+            ob_mol.SetTotalSpinMultiplicity(self.spin_multiplicity)
+
+        # Set local radical character
+        ob_mol.AssignSpinMultiplicity(True)
 
         if properties == "all":
             data = self.properties.get("all")
