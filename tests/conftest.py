@@ -214,6 +214,40 @@ def old_templates(system):
     return system
 
 
+@pytest.fixture
+def H2O(configuration):
+    """A configuration of  water."""
+    # TIP3P
+    r0 = 0.9572
+    theta0 = 104.52
+
+    # H locations are ±x, 0, z
+    x = r0 * math.sin(math.radians(theta0 / 2))
+    z = r0 * math.cos(math.radians(theta0 / 2))
+
+    X = [0.0, x, -x]
+    Y = [0.0, 0.0, 0.0]
+    Z = [0.0, z, z]
+
+    atno = [8, 1, 1]
+    name = ["O", "H1", "H2"]
+    i_atom = [0, 0]
+    j_atom = [1, 2]
+
+    configuration.system.name = "water"
+    configuration.name = "TIP3P"
+    configuration.atoms.add_attribute("name", "str", default="")
+
+    ids = configuration.atoms.append(x=X, y=Y, z=Z, atno=atno, name=name)
+
+    i = [ids[x] for x in i_atom]
+    j = [ids[x] for x in j_atom]
+
+    configuration.bonds.append(i=i, j=j, bondorder=1)
+
+    return configuration
+
+
 @pytest.fixture()
 def AceticAcid(configuration):
     """An configuration object for an acetic acid molecule"""
