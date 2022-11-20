@@ -163,6 +163,11 @@ class _Atoms(_Table):
         """The coordinates as list of lists."""
         return self.get_coordinates()
 
+    @coordinates.setter
+    def coordinates(self, xyz):
+        """The coordinates as list of lists."""
+        return self.set_coordinates(xyz)
+
     @property
     def cursor(self):
         """The database connection."""
