@@ -254,6 +254,15 @@ class _Configuration(
         self.db.commit()
 
     @property
+    def coordinates(self):
+        """The coordinates as list of lists."""
+        return self.atoms.coordinates
+
+    @coordinates.setter
+    def coordinates(self, xyz):
+        self.atoms.coordinates = xyz
+
+    @property
     def cursor(self):
         """The database connection."""
         return self.system_db.cursor
