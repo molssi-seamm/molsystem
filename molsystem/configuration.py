@@ -17,6 +17,7 @@ from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
 from .rdkit_ import RDKitMixin
 from .pdb import PDBMixin
+from .qcschema import QCSchemaMixin
 from .smiles import SMILESMixin
 from .subsets import _Subsets
 from .symmetry import _Symmetry
@@ -34,6 +35,7 @@ class _Configuration(
     TopologyMixin,
     OpenBabelMixin,
     RDKitMixin,
+    QCSchemaMixin,
     object,
 ):
     """A configuration (conformer) of a system.
