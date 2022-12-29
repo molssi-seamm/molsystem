@@ -282,6 +282,7 @@ class _System(CIFMixin, MutableMapping):
 
     @name.setter
     def name(self, value):
+        value = str(value)
         self.db.execute("UPDATE system SET name = ? WHERE id = ?", (value, self.id))
         self.db.commit()
 

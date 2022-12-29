@@ -412,6 +412,7 @@ class _Configuration(
 
     @name.setter
     def name(self, value):
+        value = str(value)
         self.db.execute(
             "UPDATE configuration SET name = ? WHERE id = ?", (value, self.id)
         )
