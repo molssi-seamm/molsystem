@@ -12,6 +12,7 @@ from .atoms import _Atoms
 from .bonds import _Bonds
 from .cell import _Cell
 from .cif import CIFMixin
+from .cms_schema import CMSSchemaMixin
 from .configuration_properties import _ConfigurationProperties
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
@@ -31,6 +32,7 @@ class _Configuration(
     PDBMixin,
     MolFileMixin,
     CIFMixin,
+    CMSSchemaMixin,
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
@@ -44,7 +46,6 @@ class _Configuration(
     """
 
     def __init__(self, _id, system_db):
-
         self._id = _id
         self._system_db = system_db
 
@@ -226,6 +227,9 @@ class _Configuration(
         )
         self.db.commit()
         self._charge = value
+
+        # Update multiplicity
+        self.spin_multiplicity = 0
 
     @property
     def coordinate_system(self):
