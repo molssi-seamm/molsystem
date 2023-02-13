@@ -36,7 +36,6 @@ class _Atoms(_Table):
     """
 
     def __init__(self, configuration) -> None:
-
         self._configuration = configuration
 
         self._system_db = self._configuration.system_db
@@ -1061,7 +1060,6 @@ class _SubsetAtoms(_Atoms):
     """
 
     def __init__(self, configuration, subset_id) -> None:
-
         self._sid = subset_id
         self.template_order = True
 
