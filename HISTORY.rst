@@ -2,6 +2,8 @@
 History
 =======
 
+2023.2.13 -- Fixed issue with valence in RDkit for cations like NH4+
+
 2022.11.20 -- Added a method to copy a configuration.
   Added a new method to the `system` class, `copy_configuration`, that creates a copy of
   the configuration using the same atomset and bonset, but new coordinates and cell so
