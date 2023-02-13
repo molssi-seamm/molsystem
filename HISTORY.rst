@@ -2,6 +2,14 @@
 History
 =======
 
+2023.2.13 -- Fixed issue with valence in RDkit for cations like NH4+
+
+2022.11.20 -- Added a method to copy a configuration.
+  Added a new method to the `system` class, `copy_configuration`, that creates a copy of
+  the configuration using the same atomset and bonset, but new coordinates and cell so
+  that any changes to coordinates and cell are not shared between the configurations. By
+  default it copies the current configuration.
+
 2022.11.18 -- Fixed bug with handling for Open Babel
   The total charge and multiplicity were not correctly set when creating an Open Babel
   molecule.

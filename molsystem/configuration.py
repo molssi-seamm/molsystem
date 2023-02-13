@@ -12,11 +12,13 @@ from .atoms import _Atoms
 from .bonds import _Bonds
 from .cell import _Cell
 from .cif import CIFMixin
+from .cms_schema import CMSSchemaMixin
 from .configuration_properties import _ConfigurationProperties
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
 from .rdkit_ import RDKitMixin
 from .pdb import PDBMixin
+from .qcschema import QCSchemaMixin
 from .smiles import SMILESMixin
 from .subsets import _Subsets
 from .symmetry import _Symmetry
@@ -30,10 +32,12 @@ class _Configuration(
     PDBMixin,
     MolFileMixin,
     CIFMixin,
+    CMSSchemaMixin,
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
     RDKitMixin,
+    QCSchemaMixin,
     object,
 ):
     """A configuration (conformer) of a system.
@@ -42,7 +46,6 @@ class _Configuration(
     """
 
     def __init__(self, _id, system_db):
-
         self._id = _id
         self._system_db = system_db
 
@@ -225,6 +228,9 @@ class _Configuration(
         self.db.commit()
         self._charge = value
 
+        # Update multiplicity
+        self.spin_multiplicity = 0
+
     @property
     def coordinate_system(self):
         """The coordinate system for this configuration."""
@@ -252,6 +258,15 @@ class _Configuration(
             )
             self._coordinate_system = "Cartesian"
         self.db.commit()
+
+    @property
+    def coordinates(self):
+        """The coordinates as list of lists."""
+        return self.atoms.coordinates
+
+    @coordinates.setter
+    def coordinates(self, xyz):
+        self.atoms.coordinates = xyz
 
     @property
     def cursor(self):
@@ -401,6 +416,7 @@ class _Configuration(
 
     @name.setter
     def name(self, value):
+        value = str(value)
         self.db.execute(
             "UPDATE configuration SET name = ? WHERE id = ?", (value, self.id)
         )

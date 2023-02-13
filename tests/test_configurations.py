@@ -26,3 +26,33 @@ def test_density(vanadium):
     """Test the density, and implicitly the mass and volume."""
 
     assert abs(vanadium.density - 6.0817308915133) < 1.0e-06
+
+
+def test_copy(H2O):
+    """Test copying and changing a configuration."""
+    original = H2O
+    coordinates = [
+        [0.0, 0.0, 0.0],
+        [0.0, 0.8, -0.8],
+        [0.0, -0.8, -0.8],
+    ]
+    copy = original.system.copy_configuration(original, name="Copy")
+
+    assert original.coordinates == copy.coordinates
+
+    copy.coordinates = coordinates
+
+    assert original.coordinates != copy.coordinates
+
+
+def test_copy_periodic(vanadium):
+    """Test copying and changing a configuration."""
+    original = vanadium
+
+    copy = original.system.copy_configuration(original, name="Copy")
+
+    assert original.cell.parameters == copy.cell.parameters
+
+    copy.cell.parameters = [3.03, 3.03, 3.03, 90, 90, 91]
+
+    assert original.cell.parameters != copy.cell.parameters

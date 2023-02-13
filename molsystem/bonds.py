@@ -32,7 +32,6 @@ class _Bonds(_Table):
     """
 
     def __init__(self, configuration):
-
         self._configuration = configuration
 
         self._system = None

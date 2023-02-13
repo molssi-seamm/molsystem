@@ -36,7 +36,6 @@ class _Atoms(_Table):
     """
 
     def __init__(self, configuration) -> None:
-
         self._configuration = configuration
 
         self._system_db = self._configuration.system_db
@@ -162,6 +161,11 @@ class _Atoms(_Table):
     def coordinates(self):
         """The coordinates as list of lists."""
         return self.get_coordinates()
+
+    @coordinates.setter
+    def coordinates(self, xyz):
+        """The coordinates as list of lists."""
+        return self.set_coordinates(xyz)
 
     @property
     def cursor(self):
@@ -1056,7 +1060,6 @@ class _SubsetAtoms(_Atoms):
     """
 
     def __init__(self, configuration, subset_id) -> None:
-
         self._sid = subset_id
         self.template_order = True
 

@@ -282,6 +282,7 @@ class _System(CIFMixin, MutableMapping):
 
     @name.setter
     def name(self, value):
+        value = str(value)
         self.db.execute("UPDATE system SET name = ? WHERE id = ?", (value, self.id))
         self.db.commit()
 
@@ -306,44 +307,71 @@ class _System(CIFMixin, MutableMapping):
         self,
         configuration=None,
         name=None,
+        make_current=False,
     ):
         """Add a new configuration by copying another configuration.
 
+        The cell (if periodic) and coordinates will be duplicated so that
+        changing them does not affect the other system.
+
         Parameters
         ----------
-        configuration : int = None
+        configuration : _Configuration or int = None
             The configuration to copy. Defaults to the current configuration.
         name : str = None
             A textual name for the configuration (optional)
+        make_current : bool = False
+            Make the current configuration
 
         Returns
         -------
-        cid : int
-            The id of the new configuration.
+        configuration : _Configuration
+            The new configuration.
 
         """
-        configuration = self.get_configuration(configuration)
+        if configuration is None:
+            previous = self.configuration
+        elif isinstance(configuration, _Configuration):
+            previous = configuration
+        else:
+            previous = self.get_configuration(configuration)
 
-        cid = self["configuration"].append(
-            system=self.id,
+        coordinates = previous.atoms.get_coordinates()
+
+        if previous.periodicity != 0:
+            cell_parameters = previous.cell.parameters
+        else:
+            cell_parameters = None
+
+        new = self.create_configuration(
             name=name,
             periodicity=configuration.periodicity,
             coordinate_system=configuration.coordinate_system,
+            coordinates=coordinates,
             symmetry=configuration.symmetry_id,
-            cell=configuration.cell_id,
+            cell_parameters=cell_parameters,
             atomset=configuration.atomset,
             bondset=configuration.bondset,
-        )[0]
+            make_current=make_current,
+        )
 
-        return cid
+        # Finally, copy over the charge multiplicity, etc.
+        new.charge = previous.charge
+        new.spin_multiplicity = previous.spin_multiplicity
+        new.n_active_electrons = previous.n_active_electrons
+        new.n_active_orbitals = previous.n_active_orbitals
+
+        return new
 
     def create_configuration(
         self,
         name="",
         periodicity=0,
         coordinate_system=None,
+        coordinates=None,
         symmetry=None,
         cell_id=None,
+        cell_parameters=None,
         atomset=None,
         bondset=None,
         make_current=True,
@@ -359,10 +387,14 @@ class _System(CIFMixin, MutableMapping):
         coordinate_system : str = None
             The coordinate system, 'Cartesian' or 'fractional', to use.
             Defaults to Cartesian for molecules and fractional for crystals.
+        coordinates : [3 * [double]] = None
+            The coordinates, defaults to None
         symmetry : int or str = None
             The id or name of the point or space group (optional)
         cell_id : int = None
             The id of the _Cell object
+        cell_parameters : 6 * [float] = None
+            The cell parameters.
         atomset : int = None
             The set of atoms in this configurationn
         bondset : int = None
@@ -410,6 +442,12 @@ class _System(CIFMixin, MutableMapping):
             data["z"] = [0.0] * n_atoms
             table = _Table(self.system_db, "coordinates")
             table.append(n=n_atoms, **data)
+
+        if coordinates is not None:
+            configuration.atoms.set_coordinates(coordinates)
+
+        if periodicity != 0 and cell_parameters is not None:
+            configuration.cell.parameters = cell_parameters
 
         if make_current:
             self._current_configuration_id = cid
