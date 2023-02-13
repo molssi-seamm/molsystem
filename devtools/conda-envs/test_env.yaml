@@ -11,6 +11,8 @@ dependencies:
   - pandas
 
   # molsystem requires, and only available via Conda.
+  - seamm_util
+  
   - openbabel
   - pathvalidate
   - pycifrw
