@@ -14,6 +14,29 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
+# Valence
+valence = {
+    1: 1,
+    2: 0,
+    3: 1,
+    4: 2,
+    5: 3,
+    6: 4,
+    7: 3,
+    8: 2,
+    9: 1,
+    10: 0,
+    11: 1,
+    12: 2,
+    13: 3,
+    14: 4,
+    15: 3,
+    16: 2,
+    17: 1,
+    18: 0,
+    92: 2,
+}
+
 
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
@@ -37,6 +60,15 @@ class RDKitMixin:
             rdk_mol.AddBond(
                 index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
             )
+
+        # Check for NH4+ type groups and set their charge
+        rdk_mol.UpdatePropertyCache(strict=False)
+        for at in rdk_mol.GetAtoms():
+            atno = at.GetAtomicNum()
+            if atno in valence:
+                charge = at.GetExplicitValence() - valence[atno]
+                if charge != 0 and at.GetFormalCharge() == 0:
+                    at.SetFormalCharge(charge)
 
         natom = self.atoms.n_atoms
         conf = Chem.Conformer(natom)
