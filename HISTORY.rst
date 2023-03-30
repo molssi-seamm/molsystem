@@ -2,6 +2,10 @@
 History
 =======
 
+2023.3.30 -- Enhancements to QCSchema support
+    * Improved naming of molecule in QCSchema
+    * Added creation of configurations from QCSchema objects.
+
 2023.2.13 -- Fixed issue with valence in RDkit for cations like NH4+
 
 2022.11.20 -- Added a method to copy a configuration.

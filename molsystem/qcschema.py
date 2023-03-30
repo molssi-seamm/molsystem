@@ -2,6 +2,7 @@
 
 """Interface to qcschema."""
 
+import json
 import logging
 
 from seamm_util import Q_
@@ -42,8 +43,54 @@ class QCSchemaMixin:
         # Molecules (fragments in QCSchema speak)
         result["fragments"] = self.find_molecules(as_indices=True)
 
-        result["name"] = self.name
+        result["name"] = f"{self.system.name} / {self.name}"
         if "name" in self.atoms:
             result["atom_labels"] = self.atoms.get_column_data("name")
 
         return result
+
+    def to_qcschema_json(self):
+        """Create the QCSchema JSON for the molecule."""
+        data = self.to_qcschema_dict()
+        return json.dumps(data)
+
+    def from_qcschema_dict(self, data):
+        """Reset the molecule from the QCSchema data."""
+        self.clear()
+        self.periodicity = 0
+
+        symbols = data["symbols"]
+        factor = Q_(1.0, "a_0").m_as("Å")
+        Xs = []
+        Ys = []
+        Zs = []
+        for x, y, z in zip(*[iter(data["geometry"])] * 3):
+            Xs.append(x * factor)
+            Ys.append(y * factor)
+            Zs.append(z * factor)
+
+        ids = self.atoms.append(x=Xs, y=Ys, z=Zs, symbol=symbols)
+
+        if "atom_labels" in data:
+            if "name" not in self.atoms:
+                self.atoms.add_attribute("name", values=data["atom_labels"])
+            else:
+                self.atoms["name"] = data["atom_labels"]
+
+        if "connectivity" in data and len(data["connectivity"]) > 0:
+            Is = []
+            Js = []
+            orders = []
+            for i, j, order in data["connectivity"]:
+                Is.append(i)
+                Js.append(j)
+                orders.append(order)
+
+            i = [ids[x - 1] for x in Is]
+            j = [ids[x - 1] for x in Js]
+            self.bonds.append(i=i, j=j, bondorder=orders)
+
+    def from_qcschema_json(self, json_data):
+        """Reset the molecule from the QCSchema JSON."""
+        data = json.loads(json_data)
+        self.from_qcschema_dict(data)
