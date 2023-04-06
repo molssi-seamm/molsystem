@@ -216,12 +216,12 @@ class CIFMixin:
         dot = "."
         if "_cell_length_a" in data_block:
             dot = "_"
-        a = data_block["_cell" + dot + "length_a"]
-        b = data_block["_cell" + dot + "length_b"]
-        c = data_block["_cell" + dot + "length_c"]
-        alpha = data_block["_cell" + dot + "angle_alpha"]
-        beta = data_block["_cell" + dot + "angle_beta"]
-        gamma = data_block["_cell" + dot + "angle_gamma"]
+        a = data_block["_cell" + dot + "length_a"].split("(")[0]
+        b = data_block["_cell" + dot + "length_b"].split("(")[0]
+        c = data_block["_cell" + dot + "length_c"].split("(")[0]
+        alpha = data_block["_cell" + dot + "angle_alpha"].split("(")[0]
+        beta = data_block["_cell" + dot + "angle_beta"].split("(")[0]
+        gamma = data_block["_cell" + dot + "angle_gamma"].split("(")[0]
         if float(a) != 1 and float(b) != 1 and float(c) != 1:
             self.periodicity = 3
             self.coordinate_system = "fractional"
@@ -388,9 +388,9 @@ class CIFMixin:
             if symbol == "D":
                 symbol = "H"
             # These variables *are* used in the eval below.
-            x = float(x)
-            y = float(y)
-            z = float(z)
+            x = float(x.split("(")[0])
+            y = float(y.split("(")[0])
+            z = float(z.split("(")[0])
             logger.debug(f"xyz = {x:7.3f} {y:7.3f} {z:7.3f}")
             if self.periodicity == 3:
                 if not have_fractionals:
