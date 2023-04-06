@@ -2,6 +2,9 @@
 History
 =======
 
+2023.4.6 -- Enhancements for CIF files
+    * Handle uncertainties in CIF files expressed as '(x)' at end of value.
+
 2023.3.30 -- Enhancements to QCSchema support
     * Improved naming of molecule in QCSchema
     * Added creation of configurations from QCSchema objects.
