@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Documentation &mdash; MolSystem 2023.4.6+1.g740653a documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
+<!-- End Google Tag Manager -->
+
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Overview" href="../user/overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQXXTJ2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MolSystem
+          </a>
+              <div class="version">
+                2023.4.6+1.g740653a
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">User Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html">molsystem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://molssi-seamm.github.io">Main SEAMM documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MolSystem</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developer Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/developer/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="developer-documentation">
+<h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this heading"></a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#stable-release">Stable release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#from-sources">From sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">molsystem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="molsystem.html">molsystem package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.atoms">molsystem.atoms module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.atoms._Atoms"><code class="docutils literal notranslate"><span class="pre">_Atoms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.atoms._SubsetAtoms"><code class="docutils literal notranslate"><span class="pre">_SubsetAtoms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.atoms.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.bonds">molsystem.bonds module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.bonds._Bonds"><code class="docutils literal notranslate"><span class="pre">_Bonds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.bonds._SubsetBonds"><code class="docutils literal notranslate"><span class="pre">_SubsetBonds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.bonds.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.cell">molsystem.cell module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cell.Cell"><code class="docutils literal notranslate"><span class="pre">Cell</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cell._Cell"><code class="docutils literal notranslate"><span class="pre">_Cell</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cell.cos"><code class="docutils literal notranslate"><span class="pre">cos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cell.dot"><code class="docutils literal notranslate"><span class="pre">dot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cell.sin"><code class="docutils literal notranslate"><span class="pre">sin()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.cif">molsystem.cif module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#bond-orders">Bond Orders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cif.CIFMixin"><code class="docutils literal notranslate"><span class="pre">CIFMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.cms_schema">molsystem.cms_schema module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.cms_schema.CMSSchemaMixin"><code class="docutils literal notranslate"><span class="pre">CMSSchemaMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.column">molsystem.column module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.configuration">molsystem.configuration module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.configuration._Configuration"><code class="docutils literal notranslate"><span class="pre">_Configuration</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.configuration_properties">molsystem.configuration_properties module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.elements">molsystem.elements module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.elements.masses"><code class="docutils literal notranslate"><span class="pre">masses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.elements.to_atnos"><code class="docutils literal notranslate"><span class="pre">to_atnos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.elements.to_symbols"><code class="docutils literal notranslate"><span class="pre">to_symbols()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.frozencolumn">molsystem.frozencolumn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.molfile">molsystem.molfile module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.molfile.MolFileMixin"><code class="docutils literal notranslate"><span class="pre">MolFileMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.openbabel">molsystem.openbabel module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.openbabel.OpenBabelMixin"><code class="docutils literal notranslate"><span class="pre">OpenBabelMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.pdb">molsystem.pdb module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#to-do">To Do</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#file-format">File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.pdb.PDBMixin"><code class="docutils literal notranslate"><span class="pre">PDBMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.properties">molsystem.properties module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.properties.add_properties_from_file"><code class="docutils literal notranslate"><span class="pre">add_properties_from_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.qcschema">molsystem.qcschema module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.qcschema.QCSchemaMixin"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.rdkit_">molsystem.rdkit_ module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin"><code class="docutils literal notranslate"><span class="pre">RDKitMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.smiles">molsystem.smiles module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.GenSMARTS"><code class="docutils literal notranslate"><span class="pre">GenSMARTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin"><code class="docutils literal notranslate"><span class="pre">SMILESMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.subset">molsystem.subset module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.subset._Subset"><code class="docutils literal notranslate"><span class="pre">_Subset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.subsets">molsystem.subsets module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.subsets._Subsets"><code class="docutils literal notranslate"><span class="pre">_Subsets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.subsets.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.symmetry">molsystem.symmetry module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.symmetry._Symmetry"><code class="docutils literal notranslate"><span class="pre">_Symmetry</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.system">molsystem.system module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system._System"><code class="docutils literal notranslate"><span class="pre">_System</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.system_db">molsystem.system_db module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB"><code class="docutils literal notranslate"><span class="pre">SystemDB</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.system_properties">molsystem.system_properties module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.table">molsystem.table module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.table._Table"><code class="docutils literal notranslate"><span class="pre">_Table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.table.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.template">molsystem.template module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.template._Template"><code class="docutils literal notranslate"><span class="pre">_Template</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.templates">molsystem.templates module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.templates._Templates"><code class="docutils literal notranslate"><span class="pre">_Templates</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem.topology">molsystem.topology module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.topology.TopologyMixin"><code class="docutils literal notranslate"><span class="pre">TopologyMixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#module-molsystem">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#report-bugs">Report Bugs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#fix-bugs">Fix Bugs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#implement-features">Implement Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#write-documentation">Write Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#submit-feedback">Submit Feedback</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="../search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user/overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  
+
+<p>
+<div class="row">
+  <div class="column_left">
+    <a href="https://molssi.org/" target="_blank" title="Go to MolSSI in a new tab">
+      <img src="/_images/MolSSI.jpg" alt="The MolSSI" style="border:0;">
+    </a>
+  </div>
+  <div class="column">
+    &copy; Copyright 2019-2021, the Molecular Sciences Software Institute,
+    which receives funding from the National Science Foundation under awards OAC-1547580
+    and CHE-2136142.
+  </div>
+  <div class="column_right">
+    <a href="https://nsf.gov/" target="_blank" title="Go to the NSF in a new tab">
+      <img src="/_images/NSF_4-Color_bitmap_Logo.png" alt="The NSF" style="border:0;">
+    </a>
+  </div>
+</div>
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
