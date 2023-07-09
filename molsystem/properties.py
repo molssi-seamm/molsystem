@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import csv
+import json
 import logging
 from pathlib import Path
 import pkg_resources
-import pprint  # noqa: F401
 
 logger = logging.getLogger(__name__)
 standard_properties = {}
@@ -125,7 +125,7 @@ class _Properties(object):
         """
         if self.exists(name):
             if noerror:
-                return self.property_id(name)
+                return self.id(name)
             else:
                 raise ValueError(f"Property '{name}' already exists.")
 
@@ -254,6 +254,38 @@ class _Properties(object):
         )
         self.db.execute("CREATE INDEX str_data_idx_system ON str_data(system)")
 
+        # Integer facts
+        table = self.system_db["json_data"]
+        table.add_attribute("id", coltype="int", pk=True)
+        table.add_attribute("configuration", coltype="int", references="configuration")
+        table.add_attribute("system", coltype="int", references="system")
+        table.add_attribute("property", coltype="int", references="property")
+        table.add_attribute("value", coltype="str")
+
+        self.db.execute(
+            "CREATE INDEX json_data_idx_configuration_property_value"
+            "    ON json_data(configuration, property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX json_data_idx_system_property_value"
+            "    ON json_data(system, property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX json_data_idx_property_value"
+            "    ON json_data(property, value)"
+        )
+        self.db.execute(
+            "CREATE INDEX json_data_idx_configuration_property"
+            "    ON json_data(configuration, property)"
+        )
+        self.db.execute(
+            "CREATE INDEX json_data_idx_system_property ON json_data(system, property)"
+        )
+        self.db.execute(
+            "CREATE INDEX json_data_idx_configuration ON json_data(configuration)"
+        )
+        self.db.execute("CREATE INDEX json_data_idx_system ON json_data(system)")
+
     def description(self, _property):
         """The description of a property
 
@@ -312,9 +344,19 @@ class _Properties(object):
             sql += "SELECT name, type, value"
             sql += "  FROM property, str_data"
             sql += " WHERE str_data.property = property.id AND configuration = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, json_data"
+            sql += " WHERE json_data.property = property.id AND configuration = ?"
 
             self.cursor.execute(
-                sql, (configuration_id, configuration_id, configuration_id)
+                sql,
+                (
+                    configuration_id,
+                    configuration_id,
+                    configuration_id,
+                    configuration_id,
+                ),
             )
 
             result = {}
@@ -324,19 +366,21 @@ class _Properties(object):
                     result[name] = float(value)
                 elif _type == "int":
                     result[name] = int(value)
+                elif _type == "json":
+                    result[name] = json.loads(value)
                 else:
                     result[name] = value
             return result
         else:
             if isinstance(_property, str):
                 if self.exists(_property):
-                    pid = self.property_id(_property)
+                    pid = self.id(_property)
                 else:
                     raise ValueError(f"Property '{_property}' does not exist.")
             else:
                 pid = _property
 
-            ptype = self.property_type(pid)
+            ptype = self.type(pid)
             sql = (
                 f"SELECT value FROM {ptype}_data"
                 "  WHERE configuration = ? AND property = ?"
@@ -348,7 +392,10 @@ class _Properties(object):
                     f"Property {_property} does not exist for configuration "
                     f"{configuration_id}"
                 )
-            return result[0]
+            if ptype == "json":
+                return json.loads(result[0])
+            else:
+                return result[0]
 
     def get_for_system(self, system_id, _property="all"):
         """Get the given property value(s) for the system.
@@ -377,8 +424,12 @@ class _Properties(object):
             sql += "SELECT name, type, value"
             sql += "  FROM property, str_data"
             sql += " WHERE str_data.property = property.id AND system = ?"
+            sql += " UNION "
+            sql += "SELECT name, type, value"
+            sql += "  FROM property, json_data"
+            sql += " WHERE json_data.property = property.id AND system = ?"
 
-            self.cursor.execute(sql, (system_id, system_id, system_id))
+            self.cursor.execute(sql, (system_id, system_id, system_id, system_id))
 
             result = {}
             for row in self.cursor:
@@ -387,22 +438,27 @@ class _Properties(object):
                     result[name] = float(value)
                 elif _type == "int":
                     result[name] = int(value)
+                elif _type == "json":
+                    result[name] = json.loads(value)
                 else:
                     result[name] = value
         else:
             if isinstance(_property, str):
                 if self.exists(_property):
-                    pid = self.property_id(_property)
+                    pid = self.id(_property)
                 else:
                     raise ValueError(f"Property '{_property}' does not exist.")
             else:
                 pid = _property
-            ptype = self.property_type(pid)
+            ptype = self.type(pid)
 
             sql = f"SELECT value FROM {ptype}_data WHERE system = ? AND property = ?"
             result = []
             for row in self.db.execute(sql, (system_id, pid)):
-                result.append(row[0])
+                if ptype == "json":
+                    result.append(json.loads(row[0]))
+                else:
+                    result.append(row[0])
 
         return result
 
@@ -515,10 +571,13 @@ class _Properties(object):
                     self.add(_property)
                 else:
                     raise ValueError(f"Property '{_property}' does not exist.")
-            pid = self.property_id(_property)
+            pid = self.id(_property)
         else:
             pid = _property
-        ptype = self.property_type(pid)
+        ptype = self.type(pid)
+
+        if ptype == "json":
+            value = json.dumps(value, separators=(",", ":"))
 
         # Get the system id
         self.cursor.execute(
@@ -551,10 +610,13 @@ class _Properties(object):
                     self.add(_property)
                 else:
                     raise ValueError(f"Property '{_property}' does not exist.")
-            pid = self.property_id(_property)
+            pid = self.id(_property)
         else:
             pid = _property
-        ptype = self.property_type(pid)
+        ptype = self.type(pid)
+
+        if ptype == "json":
+            value = json.dumps(value, separators=(",", ":"))
 
         sql = (
             f"INSERT INTO {ptype}_data (system, property, value)"
@@ -579,6 +641,7 @@ class _Properties(object):
         criteria = []
         tables = {}
         results = []
+        types = []
         n_tables = 0
         for i, item in enumerate(what):
             if i > 0:
@@ -587,9 +650,10 @@ class _Properties(object):
                 if item == "configuration":
                     sql += " t0.configuration"
                     results.append("configuration_id")
+                    types.append["configuration"]
                 else:
-                    pid = self.property_id(item)
-                    ptype = self.property_type(pid)
+                    pid = self.id(item)
+                    ptype = self.type(pid)
                     table = ptype + "_data"
                     if table not in tables:
                         tables[table] = {pid: f"t{n_tables}"}
@@ -601,9 +665,10 @@ class _Properties(object):
                     sql += f" {alias}.value"
                     criteria.append(f"{alias}.property == {pid}")
                     results.append(item)
+                    types.append(ptype)
             elif isinstance(item, int):
                 pid = item
-                ptype = self.property_type(pid)
+                ptype = self.type(pid)
                 table = ptype + "_data"
                 if table not in tables:
                     tables[table] = {pid: f"t{n_tables}"}
@@ -614,7 +679,8 @@ class _Properties(object):
                 alias = tables[table][pid]
                 sql += f" {alias}.value"
                 criteria.append(f"{alias}.property == {pid}")
-                results.append(self.property_name(pid))
+                results.append(self.name(pid))
+                types.append(ptype)
 
         # And the WHERE clause ...
         where = {0: ""}
@@ -632,33 +698,21 @@ class _Properties(object):
             else:
                 # Configuration or Property name or id
                 if isinstance(item, str):
-                    pid = self.property_id(item)
-                    ptype = self.property_type(pid)
-                    table = ptype + "_data"
-                    if table not in tables:
-                        tables[table] = {pid: f"t{n_tables}"}
-                        n_tables += 1
-                    elif pid not in tables[table]:
-                        tables[table][pid] = f"t{n_tables}"
-                        n_tables += 1
-                    alias = tables[table][pid]
-                    if where[level] != "" and where[level] != "( ":
-                        where[level] += " AND"
-                    where[level] += f" {alias}.property == {pid}"
-                elif isinstance(item, int):
+                    pid = self.id(item)
+                else:
                     pid = item
-                    ptype = self.property_type(pid)
-                    table = ptype + "_data"
-                    if table not in tables:
-                        tables[table] = {pid: f"t{n_tables}"}
-                        n_tables += 1
-                    elif pid not in tables[table]:
-                        tables[table][pid] = f"t{n_tables}"
-                        n_tables += 1
-                    alias = tables[table][pid]
-                    if where[level] != "" and where[level] != "( ":
-                        where[level] += " AND"
-                    where[level] += f" {alias}.property == {pid}"
+                ptype = self.type(pid)
+                table = ptype + "_data"
+                if table not in tables:
+                    tables[table] = {pid: f"t{n_tables}"}
+                    n_tables += 1
+                elif pid not in tables[table]:
+                    tables[table][pid] = f"t{n_tables}"
+                    n_tables += 1
+                alias = tables[table][pid]
+                if where[level] != "" and where[level] != "( ":
+                    where[level] += " AND"
+                where[level] += f" {alias}.property == {pid}"
 
                 operator = next(items)
                 if operator.lower() == "between":
@@ -667,6 +721,12 @@ class _Properties(object):
                             f' AND {alias}.value BETWEEN "{next(items)}"'
                             f' AND "{next(items)}"'
                         )
+                    if ptype == "json":
+                        value1 = json.dumps(next(items), separator=(",", ":"))
+                        value2 = json.dumps(next(items), separator=(",", ":"))
+                        where[
+                            level
+                        ] += f' AND {alias}.value BETWEEN "{value1}" AND "{value2}"'
                     else:
                         where[level] += (
                             f" AND {alias}.value BETWEEN {next(items)}"
@@ -675,6 +735,9 @@ class _Properties(object):
                 else:
                     if ptype == "str":
                         where[level] += f' AND {alias}.value {operator} "{next(items)}"'
+                    elif ptype == "json":
+                        value = json.dumps(next(items), separator=(",", ":"))
+                        where[level] += f' AND {alias}.value {operator} "{value}"'
                     else:
                         where[level] += f" AND {alias}.value {operator} {next(items)}"
 
@@ -723,8 +786,11 @@ class _Properties(object):
             raise
 
         for row in self.cursor:
-            for item, value in zip(results, row):
-                result[item].append(value)
+            for item, ptype, value in zip(results, types, row):
+                if ptype == "json":
+                    result[item].append(json.loads(value))
+                else:
+                    result[item].append(value)
         return result
 
     def type(self, _property):

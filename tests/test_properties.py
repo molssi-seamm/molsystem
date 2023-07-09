@@ -75,3 +75,23 @@ def test_query2(properties):
         -1.91,
         -1.9,
     ]
+
+
+def test_put_json(AceticAcid):
+    """Test putting some properties and values in."""
+    cid = AceticAcid.id
+    properties = AceticAcid.system_db.properties
+    properties.add("dipole", "json")
+    properties.put(cid, "dipole", [0.0, 1.0, 2.0])
+    result = properties.get(cid, "dipole")
+    assert result == [0.0, 1.0, 2.0]
+
+
+def test_query_json(AceticAcid):
+    """Test a simple query"""
+    cid = AceticAcid.id
+    properties = AceticAcid.system_db.properties
+    properties.add("dipole", "json")
+    properties.put(cid, "dipole", [0.0, 1.0, 2.0])
+
+    assert properties.query(what=["dipole"]) == {"dipole": [[0.0, 1.0, 2.0]]}
