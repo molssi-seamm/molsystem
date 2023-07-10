@@ -26,8 +26,7 @@ def grouped(iterable, n):
 
 
 class _Bonds(_Table):
-    """The Bonds class describes the bonds in the system.
-    """
+    """The Bonds class describes the bonds in the system."""
 
     def __init__(self, configuration):
         self._configuration = configuration
@@ -657,8 +656,7 @@ class _Bonds(_Table):
 
 
 class _SubsetBonds(_Bonds):
-    """The Bonds class describes the bonds in a subset
-    """
+    """The Bonds class describes the bonds in a subset"""
 
     def __init__(self, configuration, subset_id):
         self._sid = subset_id
