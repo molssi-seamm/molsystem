@@ -1,0 +1,2325 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>molsystem package &#8212; MolSystem 2023.7.9 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
+<!-- End Google Tag Manager -->
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/molsystem';</script>
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Credits" href="../authors.html" />
+    <link rel="prev" title="molsystem" href="modules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/SEAMM logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/SEAMM Inverted 288x181.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">LAMMPS Step</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../developer_guide/index.html">
+                        Developer Documentation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        API Documentation
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../authors.html">
+                        Credits
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../history.html">
+                        History
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://molssi-seamm.github.io">
+                    SEAMM Documentation
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://molssi.org">
+                    MolSSI
+                  </a>
+                </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/molssi-seamm/molsystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/MolSSI_NSF" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../developer_guide/index.html">
+                        Developer Documentation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        API Documentation
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../authors.html">
+                        Credits
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../history.html">
+                        History
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://molssi-seamm.github.io">
+                    SEAMM Documentation
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://molssi.org">
+                    MolSSI
+                  </a>
+                </li>
+                
+                </div>
+            </div>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/molssi-seamm/molsystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/MolSSI_NSF" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="modules.html">molsystem</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">molsystem package</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">API Documentation</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">molsystem</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">molsystem package</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="molsystem-package">
+<h1>molsystem package<a class="headerlink" href="#molsystem-package" title="Permalink to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.atoms">
+<span id="molsystem-atoms-module"></span><h2>molsystem.atoms module<a class="headerlink" href="#module-molsystem.atoms" title="Permalink to this heading">#</a></h2>
+<p>A dictionary-like object for holding atoms.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.atoms.grouped">
+<span class="sig-prename descclassname"><span class="pre">molsystem.atoms.</span></span><span class="sig-name descname"><span class="pre">grouped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/atoms.html#grouped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.atoms.grouped" title="Permalink to this definition">#</a></dt>
+<dd><p>s -&gt; (s0,s1,s2,…sn-1), (sn,sn+1,sn+2,…s2n-1), (s2n,…s3n-1), …</p>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.bonds">
+<span id="molsystem-bonds-module"></span><h2>molsystem.bonds module<a class="headerlink" href="#module-molsystem.bonds" title="Permalink to this heading">#</a></h2>
+<p>A dictionary-like object for holding bonds</p>
+<p>Based on tables in an SQLite database.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.bonds.grouped">
+<span class="sig-prename descclassname"><span class="pre">molsystem.bonds.</span></span><span class="sig-name descname"><span class="pre">grouped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/bonds.html#grouped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.bonds.grouped" title="Permalink to this definition">#</a></dt>
+<dd><p>s -&gt; (s0,s1,s2,…sn-1), (sn,sn+1,sn+2,…s2n-1), (s2n,…s3n-1), …</p>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.cell">
+<span id="molsystem-cell-module"></span><h2>molsystem.cell module<a class="headerlink" href="#module-molsystem.cell" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.cell.Cell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to handle cell parameters and their transformations.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.a">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#molsystem.cell.Cell.a" title="Permalink to this definition">#</a></dt>
+<dd><p>The length of the first cell vector.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.alpha">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#molsystem.cell.Cell.alpha" title="Permalink to this definition">#</a></dt>
+<dd><p>The angle between b and c.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.b">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#molsystem.cell.Cell.b" title="Permalink to this definition">#</a></dt>
+<dd><p>The length of the second cell vector.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.beta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#molsystem.cell.Cell.beta" title="Permalink to this definition">#</a></dt>
+<dd><p>The angle between a and c.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.c">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c</span></span><a class="headerlink" href="#molsystem.cell.Cell.c" title="Permalink to this definition">#</a></dt>
+<dd><p>The length of the third cell vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.equal">
+<span class="sig-name descname"><span class="pre">equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.equal" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if we are equal to another iterable to within a tolerance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<em>iterable</em>) – The other object to check against</p></li>
+<li><p><strong>tol</strong> (<em>float = 1.0e-06</em>) – The tolerance for comparing floating point numbers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>equals</strong> – Boolean indicating whether the two are equal.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.from_vectors">
+<span class="sig-name descname"><span class="pre">from_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.from_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.from_vectors" title="Permalink to this definition">#</a></dt>
+<dd><p>Set the cell parameters from the lattice vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vectors</strong> (<em>[</em><em>[</em><em>float*3</em><em>]</em><em>*3</em><em>]</em>) – The lattice vectors as a list [a, b, c]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.gamma">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gamma</span></span><a class="headerlink" href="#molsystem.cell.Cell.gamma" title="Permalink to this definition">#</a></dt>
+<dd><p>The angle between a and b.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#molsystem.cell.Cell.parameters" title="Permalink to this definition">#</a></dt>
+<dd><p>The cell parameters as a list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.reciprocal_lengths">
+<span class="sig-name descname"><span class="pre">reciprocal_lengths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.reciprocal_lengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.reciprocal_lengths" title="Permalink to this definition">#</a></dt>
+<dd><p>The length of the reciprocal space lattice vectors, physics definition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The 3 vector lengths</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>[float*3]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.reciprocal_vectors">
+<span class="sig-name descname"><span class="pre">reciprocal_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.reciprocal_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.reciprocal_vectors" title="Permalink to this definition">#</a></dt>
+<dd><p>The reciprocal space lattice vectors. Physics definition with 2 pi</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_array</strong> (<em>bool = False</em>) – Whether to return a numpy array or Python lists</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>transform</strong> – The transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.strain">
+<span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.strain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.strain" title="Permalink to this definition">#</a></dt>
+<dd><p>Strain the cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>6 *</em><em> [</em><em>float</em><em>] or </em><em>6 floats</em>) – The strain in Voigt notation, either a 6-vector or six floats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.to_cartesians">
+<span class="sig-name descname"><span class="pre">to_cartesians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.to_cartesians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.to_cartesians" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert fraction coordinates to Cartesians</p>
+<p>see <a class="reference external" href="https://en.wikipedia.org/wiki/Fractional_coordinates">https://en.wikipedia.org/wiki/Fractional_coordinates</a> for a
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>uvw</strong> (<em>[</em><em>N</em><em>]</em><em>[</em><em>3*float</em><em>] or </em><em>ndarray</em>) – The fractional coordinates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>xyz</strong> – The Cartesian coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.to_cartesians_transform">
+<span class="sig-name descname"><span class="pre">to_cartesians_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.to_cartesians_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.to_cartesians_transform" title="Permalink to this definition">#</a></dt>
+<dd><p>Matrix to convert fractional coordinates to Cartesian.</p>
+<p>see <a class="reference external" href="https://en.wikipedia.org/wiki/Fractional_coordinates">https://en.wikipedia.org/wiki/Fractional_coordinates</a> for a
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_array</strong> (<em>bool = False</em>) – Whether to return a numpy array or Python lists</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>transform</strong> – The transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.to_fractionals">
+<span class="sig-name descname"><span class="pre">to_fractionals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.to_fractionals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.to_fractionals" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert Cartesian coordinates to fractional.</p>
+<p>see <a class="reference external" href="https://en.wikipedia.org/wiki/Fractional_coordinates">https://en.wikipedia.org/wiki/Fractional_coordinates</a> for a
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xyz</strong> (<em>[</em><em>N</em><em>]</em><em>[</em><em>3*float</em><em>] or </em><em>ndarray</em>) – The Cartesian coordinates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>uvw</strong> – The ractional coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.to_fractionals_transform">
+<span class="sig-name descname"><span class="pre">to_fractionals_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.to_fractionals_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.to_fractionals_transform" title="Permalink to this definition">#</a></dt>
+<dd><p>Matrix to convert Cartesian coordinates to fractional.</p>
+<p>see <a class="reference external" href="https://en.wikipedia.org/wiki/Fractional_coordinates">https://en.wikipedia.org/wiki/Fractional_coordinates</a> for a
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_array</strong> (<em>bool = False</em>) – Whether to return a numpy array or Python lists</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>transform</strong> – The transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.vectors">
+<span class="sig-name descname"><span class="pre">vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell.vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell.vectors" title="Permalink to this definition">#</a></dt>
+<dd><p>The cell or lattice vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_array</strong> (<em>bool = False</em>) – Whether to return a numpy array or Python lists</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>transform</strong> – The transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[N][float*3] or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.cell.Cell.volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#molsystem.cell.Cell.volume" title="Permalink to this definition">#</a></dt>
+<dd><p>The volume of the cell.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.cell.cos">
+<span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.cos" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.cell.dot">
+<span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">va</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.dot" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.cell.sin">
+<span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.sin" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-molsystem.cif">
+<span id="molsystem-cif-module"></span><h2>molsystem.cif module<a class="headerlink" href="#module-molsystem.cif" title="Permalink to this heading">#</a></h2>
+<p>Functions for handling CIF files</p>
+<section id="bond-orders">
+<h3>Bond Orders<a class="headerlink" href="#bond-orders" title="Permalink to this heading">#</a></h3>
+<p>1 sing  single bond
+2 doub  double bond
+3 trip  triple bond
+4 quad  quadruple bond
+5 arom  aromatic bond
+6 delo  delocalized double bond
+7 pi    pi bond
+8 poly  polymeric bond</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cif.</span></span><span class="sig-name descname"><span class="pre">CIFMixin</span></span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling CIF files.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin.from_cif_text">
+<span class="sig-name descname"><span class="pre">from_cif_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin.from_cif_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin.from_cif_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create this configuration from a CIF file..</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The text from the CIF file</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin.from_mmcif_text">
+<span class="sig-name descname"><span class="pre">from_mmcif_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin.from_mmcif_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin.from_mmcif_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create this configuration from an MMCIF file..</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The text from the MMCIF file</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This can be called from a <cite>SystemDB</cite>, <cite>_System</cite> or <cite>_Configuration</cite>
+object. The behavior and errors differ depending on what type of object
+is calling it:</p>
+<blockquote>
+<div><p><cite>SystemDB</cite></p>
+<p>When called from a <cite>_System</cite> object, a new <cite>_System</cite> will be
+created for each datablock in the CIF data, and a configuration
+will be created to hold the structure, unless their is an NMR
+ensemble, in which case each structure in the ensemble will be
+placed in a different configuration.</p>
+<p><cite>_System</cite></p>
+<p>In this case it is an error if there is more than one datablock.
+A new configuration will be created with the structure in the CIF
+datablock, unless the CIF data contains an NMR ensemble, in which
+case a configuration will be added for each conformer.</p>
+<p><cite>_Configuration</cite></p>
+<p>It is an error if there is more than one datablock in the CIF data.
+The configuration will be cleared and the structure from CIF data
+inserted into it. If there is an NMR ensemble in the datablock, and
+the representative conformer is identified, it will be loaded into
+the configuration. Otherwise an error will be raised.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin.read_cif_file">
+<span class="sig-name descname"><span class="pre">read_cif_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin.read_cif_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin.read_cif_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Create new systems from a CIF file.</p>
+<p>Read a CIF file and create a new system from each datablock in
+the file.</p>
+<p>If the datablock has an ensemble, as denoted by a section
+‘_pdbx_nmr_ensemble’, a configuration will be created for each
+conformer. If there is a representative conformer, the current
+configuration will point to it; otherwise to the last conformer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em> or </em><em>Path</em>) – A string or Path object pointing to the file to be read.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of systems created.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[_System]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin.to_cif_text">
+<span class="sig-name descname"><span class="pre">to_cif_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin.to_cif_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin.to_cif_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the text of a CIF file from this configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> – The text of the file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cif.CIFMixin.to_mmcif_text">
+<span class="sig-name descname"><span class="pre">to_mmcif_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin.to_mmcif_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin.to_mmcif_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the text of a mmCIF file from this configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> – The text of the file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.cms_schema">
+<span id="molsystem-cms-schema-module"></span><h2>molsystem.cms_schema module<a class="headerlink" href="#module-molsystem.cms_schema" title="Permalink to this heading">#</a></h2>
+<p>Interface to the CMS schema.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.cms_schema.CMSSchemaMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cms_schema.</span></span><span class="sig-name descname"><span class="pre">CMSSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/cms_schema.html#CMSSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cms_schema.CMSSchemaMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling CMS Schema.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.cms_schema.CMSSchemaMixin.to_cms_schema">
+<span class="sig-name descname"><span class="pre">to_cms_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cms_schema.html#CMSSchemaMixin.to_cms_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cms_schema.CMSSchemaMixin.to_cms_schema" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a dictionary compliant with CMS Schema.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.column">
+<span id="molsystem-column-module"></span><h2>molsystem.column module<a class="headerlink" href="#module-molsystem.column" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.configuration">
+<span id="molsystem-configuration-module"></span><h2>molsystem.configuration module<a class="headerlink" href="#module-molsystem.configuration" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.configuration_properties">
+<span id="molsystem-configuration-properties-module"></span><h2>molsystem.configuration_properties module<a class="headerlink" href="#module-molsystem.configuration_properties" title="Permalink to this heading">#</a></h2>
+<p>Property methods for configurations.</p>
+</section>
+<section id="module-molsystem.elements">
+<span id="molsystem-elements-module"></span><h2>molsystem.elements module<a class="headerlink" href="#module-molsystem.elements" title="Permalink to this heading">#</a></h2>
+<p>Tabulated data about the elements.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.elements.masses">
+<span class="sig-prename descclassname"><span class="pre">molsystem.elements.</span></span><span class="sig-name descname"><span class="pre">masses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atno_or_symbols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/elements.html#masses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.elements.masses" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the atomic mass given atomic symbols or numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atno_or_symbols</strong> (<em>[</em><em>int</em><em> or </em><em>str</em><em>]</em>) – The atomic numbers or symbols</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>masses</strong> – The atomic masses</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.elements.to_atnos">
+<span class="sig-prename descclassname"><span class="pre">molsystem.elements.</span></span><span class="sig-name descname"><span class="pre">to_atnos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/elements.html#to_atnos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.elements.to_atnos" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert element symbols to atomic numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>symbols</strong> (<em>[</em><em>str</em><em>]</em>) – The atomic symbols</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>atnos</strong> – The corresponding atomic numbers (1..118)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.elements.to_symbols">
+<span class="sig-prename descclassname"><span class="pre">molsystem.elements.</span></span><span class="sig-name descname"><span class="pre">to_symbols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atnos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/elements.html#to_symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.elements.to_symbols" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert atomic numbers to element symbols.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atnos</strong> (<em>[</em><em>int</em><em>]</em>) – The atomic numbers (1..118)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>symbols</strong> – The corresponding atomic symbols</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.frozencolumn">
+<span id="molsystem-frozencolumn-module"></span><h2>molsystem.frozencolumn module<a class="headerlink" href="#module-molsystem.frozencolumn" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.molfile">
+<span id="molsystem-molfile-module"></span><h2>molsystem.molfile module<a class="headerlink" href="#module-molsystem.molfile" title="Permalink to this heading">#</a></h2>
+<p>Functions for handling MDL molfiles</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.molfile.MolFileMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.molfile.</span></span><span class="sig-name descname"><span class="pre">MolFileMixin</span></span><a class="reference internal" href="../_modules/molsystem/molfile.html#MolFileMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.molfile.MolFileMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling MDL Molfiles.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.molfile.MolFileMixin.from_molfile_text">
+<span class="sig-name descname"><span class="pre">from_molfile_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/molfile.html#MolFileMixin.from_molfile_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.molfile.MolFileMixin.from_molfile_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the system from an MDL Molfile, version 3</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>str</em>) – The complete text of the Molfile.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.molfile.MolFileMixin.to_molfile_text">
+<span class="sig-name descname"><span class="pre">to_molfile_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Exported</span> <span class="pre">from</span> <span class="pre">SEAMM'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/molfile.html#MolFileMixin.to_molfile_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.molfile.MolFileMixin.to_molfile_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the text of the Molfile from the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str = None</em>) – The title for the structure, by default the system name.</p></li>
+<li><p><strong>comment</strong> (<em>str = 'Exported from SEAMM'</em>) – Comment line</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>text</strong> – The text of the file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.openbabel">
+<span id="molsystem-openbabel-module"></span><h2>molsystem.openbabel module<a class="headerlink" href="#module-molsystem.openbabel" title="Permalink to this heading">#</a></h2>
+<p>Interface to openbabel.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.openbabel.</span></span><span class="sig-name descname"><span class="pre">OpenBabelMixin</span></span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling OpenBabel via its Python interface.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.find_substructures">
+<span class="sig-name descname"><span class="pre">find_substructures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.find_substructures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.find_substructures" title="Permalink to this definition">#</a></dt>
+<dd><p>Find the substructures matching the template.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>template</strong> (<em>str</em><em>, </em><em>_Configuration</em><em>, </em><em>_Template</em><em>, or </em><em>_Subset</em>) – The template, which may be a SMARTS string, or a molecular object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Lists of atom ids for matches.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[[int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.from_OBMol">
+<span class="sig-name descname"><span class="pre">from_OBMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob_mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.from_OBMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.from_OBMol" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform an Open Babel molecule into the current object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.to_OBMol">
+<span class="sig-name descname"><span class="pre">to_OBMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_OBMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_OBMol" title="Permalink to this definition">#</a></dt>
+<dd><p>Return an OBMol object for the configuration, template, or subset.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.pdb">
+<span id="molsystem-pdb-module"></span><h2>molsystem.pdb module<a class="headerlink" href="#module-molsystem.pdb" title="Permalink to this heading">#</a></h2>
+<p>Functions for handling PDB files</p>
+<section id="to-do">
+<h3>To Do<a class="headerlink" href="#to-do" title="Permalink to this heading">#</a></h3>
+<p>Need to understand more fully the PDB/mmcif format and the how to
+carry the information about residues, chains, hetero groups, waters, etc.
+At the moment this is ignoring much of the information, and putting residue,
+chain, etc information directly on atoms.</p>
+<p>I think we should use templates and subsets, but am not (yet) sure.</p>
+<p>Presumably this metadata is most useful for setting up complicated
+simulations.</p>
+</section>
+<section id="file-format">
+<h3>File Format<a class="headerlink" href="#file-format" title="Permalink to this heading">#</a></h3>
+<p>For complete documentation, see
+<a class="reference external" href="http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html">http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html</a></p>
+<p>Order of records:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RECORD</span> <span class="n">TYPE</span>             <span class="n">EXISTENCE</span>           <span class="n">CONDITIONS</span> <span class="n">IF</span>  <span class="n">OPTIONAL</span>
+<span class="o">--------------------------------------------------------------------------------------</span>
+<span class="n">HEADER</span>                  <span class="n">Mandatory</span>
+<span class="n">OBSLTE</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="ow">in</span>  <span class="n">entries</span> <span class="n">that</span> <span class="n">have</span> <span class="n">been</span>
+                                            <span class="n">replaced</span> <span class="n">by</span> <span class="n">a</span> <span class="n">newer</span> <span class="n">entry</span><span class="o">.</span>
+<span class="n">TITLE</span>                   <span class="n">Mandatory</span>
+<span class="n">SPLIT</span>                   <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="n">when</span>  <span class="n">large</span> <span class="n">macromolecular</span>
+                                            <span class="n">complexes</span>  <span class="n">are</span> <span class="n">split</span> <span class="n">into</span> <span class="n">multiple</span> <span class="n">PDB</span>
+                                            <span class="n">entries</span><span class="o">.</span>
+<span class="n">CAVEAT</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="n">when</span> <span class="n">there</span> <span class="n">are</span> <span class="n">outstanding</span>  <span class="n">errors</span>
+                                            <span class="n">such</span>  <span class="k">as</span> <span class="n">chirality</span><span class="o">.</span>
+<span class="n">COMPND</span>                  <span class="n">Mandatory</span>
+<span class="n">SOURCE</span>                  <span class="n">Mandatory</span>
+<span class="n">KEYWDS</span>                  <span class="n">Mandatory</span>
+<span class="n">EXPDTA</span>                  <span class="n">Mandatory</span>
+<span class="n">NUMMDL</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span>  <span class="n">NMR</span> <span class="n">ensemble</span> <span class="n">entries</span><span class="o">.</span>
+<span class="n">MDLTYP</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span>  <span class="n">NMR</span> <span class="n">minimized</span> <span class="n">average</span>
+                                            <span class="n">Structures</span> <span class="ow">or</span> <span class="n">when</span> <span class="n">the</span> <span class="n">entire</span>  <span class="n">polymer</span>
+                                            <span class="n">chain</span> <span class="n">contains</span> <span class="n">C</span> <span class="n">alpha</span> <span class="ow">or</span> <span class="n">P</span> <span class="n">atoms</span> <span class="n">only</span><span class="o">.</span>
+<span class="n">AUTHOR</span>                  <span class="n">Mandatory</span>
+<span class="n">REVDAT</span>                  <span class="n">Mandatory</span>
+<span class="n">SPRSDE</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span> <span class="n">a</span> <span class="n">replacement</span> <span class="n">entry</span><span class="o">.</span>
+<span class="n">JRNL</span>                    <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span> <span class="n">a</span> <span class="n">publication</span> <span class="n">describes</span>
+                                            <span class="n">the</span> <span class="n">experiment</span><span class="o">.</span>
+<span class="n">REMARK</span> <span class="mi">0</span>                <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span> <span class="n">a</span> <span class="n">re</span><span class="o">-</span><span class="n">refined</span> <span class="n">structure</span>
+<span class="n">REMARK</span> <span class="mi">1</span>                <span class="n">Optional</span>
+<span class="n">REMARK</span> <span class="mi">2</span>                <span class="n">Mandatory</span>
+<span class="n">REMARK</span> <span class="mi">3</span>                <span class="n">Mandatory</span>
+<span class="n">REMARK</span> <span class="n">N</span>                <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="n">under</span> <span class="n">certain</span> <span class="n">conditions</span><span class="o">.</span>
+<span class="n">DBREF</span>                   <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">polymers</span><span class="o">.</span>
+<span class="n">DBREF1</span><span class="o">/</span><span class="n">DBREF2</span>           <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="n">when</span> <span class="n">certain</span> <span class="n">sequence</span>  <span class="n">database</span>
+                                            <span class="n">accession</span>  <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">sequence</span> <span class="n">numbering</span>
+                                            <span class="n">does</span>  <span class="ow">not</span> <span class="n">fit</span> <span class="n">preceding</span> <span class="n">DBREF</span> <span class="nb">format</span><span class="o">.</span>
+<span class="n">SEQADV</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">sequence</span>  <span class="n">conflict</span> <span class="n">exists</span><span class="o">.</span>
+<span class="n">SEQRES</span>                  <span class="n">Mandatory</span>           <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">ATOM</span> <span class="n">records</span> <span class="n">exist</span><span class="o">.</span>
+<span class="n">MODRES</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">modified</span> <span class="n">group</span> <span class="n">exists</span>  <span class="ow">in</span> <span class="n">the</span>
+                                            <span class="n">coordinates</span><span class="o">.</span>
+<span class="n">HET</span>                     <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">group</span> <span class="n">other</span>
+                                            <span class="n">than</span> <span class="n">water</span> <span class="n">appears</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinates</span><span class="o">.</span>
+<span class="n">HETNAM</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">group</span> <span class="n">other</span>
+                                            <span class="n">than</span>  <span class="n">water</span> <span class="n">appears</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinates</span><span class="o">.</span>
+<span class="n">HETSYN</span>                  <span class="n">Optional</span>
+<span class="n">FORMUL</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">group</span> <span class="ow">or</span>
+                                            <span class="n">water</span> <span class="n">appears</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinates</span><span class="o">.</span>
+<span class="n">HELIX</span>                   <span class="n">Optional</span>
+<span class="n">SHEET</span>                   <span class="n">Optional</span>
+<span class="n">SSBOND</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">a</span>  <span class="n">disulfide</span> <span class="n">bond</span> <span class="ow">is</span> <span class="n">present</span><span class="o">.</span>
+<span class="n">LINK</span>                    <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span>  <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">residues</span> <span class="n">appear</span>
+                                            <span class="ow">in</span> <span class="n">a</span>  <span class="n">polymer</span>
+<span class="n">CISPEP</span>                  <span class="n">Optional</span>
+<span class="n">SITE</span>                    <span class="n">Optional</span>
+<span class="n">CRYST1</span>                  <span class="n">Mandatory</span>
+<span class="n">ORIGX1</span> <span class="n">ORIGX2</span> <span class="n">ORIGX3</span>    <span class="n">Mandatory</span>
+<span class="n">SCALE1</span> <span class="n">SCALE2</span> <span class="n">SCALE3</span>    <span class="n">Mandatory</span>
+<span class="n">MTRIX1</span> <span class="n">MTRIX2</span> <span class="n">MTRIX3</span>    <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span>  <span class="n">the</span> <span class="n">complete</span> <span class="n">asymmetric</span> <span class="n">unit</span>
+                                            <span class="n">must</span>  <span class="n">be</span> <span class="n">generated</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">given</span> <span class="n">coordinates</span>
+                                            <span class="n">using</span> <span class="n">non</span><span class="o">-</span><span class="n">crystallographic</span> <span class="n">symmetry</span><span class="o">.</span>
+<span class="n">MODEL</span>                   <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">more</span> <span class="n">than</span> <span class="n">one</span> <span class="n">model</span>
+                                            <span class="ow">is</span>  <span class="n">present</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">entry</span><span class="o">.</span>
+<span class="n">ATOM</span>                    <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">standard</span> <span class="n">residues</span> <span class="n">exist</span><span class="o">.</span>
+<span class="n">ANISOU</span>                  <span class="n">Optional</span>
+<span class="n">TER</span>                     <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">ATOM</span> <span class="n">records</span> <span class="n">exist</span><span class="o">.</span>
+<span class="n">HETATM</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">group</span> <span class="n">exists</span><span class="o">.</span>
+<span class="n">ENDMDL</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">MODEL</span> <span class="n">appears</span><span class="o">.</span>
+<span class="n">CONECT</span>                  <span class="n">Optional</span>            <span class="n">Mandatory</span> <span class="k">if</span> <span class="n">non</span><span class="o">-</span><span class="n">standard</span> <span class="n">group</span> <span class="n">appears</span>
+                                            <span class="ow">and</span>  <span class="k">if</span> <span class="n">LINK</span> <span class="ow">or</span> <span class="n">SSBOND</span> <span class="n">records</span> <span class="n">exist</span><span class="o">.</span>
+<span class="n">MASTER</span>                  <span class="n">Mandatory</span>
+<span class="n">END</span>                     <span class="n">Mandatory</span>
+</pre></div>
+</div>
+<p>Description of HETATM records:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COLUMNS</span>       <span class="n">DATA</span>  <span class="n">TYPE</span>     <span class="n">FIELD</span>         <span class="n">DEFINITION</span>
+<span class="o">-----------------------------------------------------------------------</span>
+ <span class="mi">1</span> <span class="o">-</span> <span class="mi">6</span>        <span class="n">Record</span> <span class="n">name</span>    <span class="s2">&quot;HETATM&quot;</span>
+ <span class="mi">7</span> <span class="o">-</span> <span class="mi">11</span>       <span class="n">Integer</span>        <span class="n">serial</span>        <span class="n">Atom</span> <span class="n">serial</span> <span class="n">number</span><span class="o">.</span>
+<span class="mi">13</span> <span class="o">-</span> <span class="mi">16</span>       <span class="n">Atom</span>           <span class="n">name</span>          <span class="n">Atom</span> <span class="n">name</span><span class="o">.</span>
+<span class="mi">17</span>            <span class="n">Character</span>      <span class="n">altLoc</span>        <span class="n">Alternate</span> <span class="n">location</span> <span class="n">indicator</span><span class="o">.</span>
+<span class="mi">18</span> <span class="o">-</span> <span class="mi">20</span>       <span class="n">Residue</span> <span class="n">name</span>   <span class="n">resName</span>       <span class="n">Residue</span> <span class="n">name</span><span class="o">.</span>
+<span class="mi">22</span>            <span class="n">Character</span>      <span class="n">chainID</span>       <span class="n">Chain</span> <span class="n">identifier</span><span class="o">.</span>
+<span class="mi">23</span> <span class="o">-</span> <span class="mi">26</span>       <span class="n">Integer</span>        <span class="n">resSeq</span>        <span class="n">Residue</span> <span class="n">sequence</span> <span class="n">number</span><span class="o">.</span>
+<span class="mi">27</span>            <span class="n">AChar</span>          <span class="n">iCode</span>         <span class="n">Code</span> <span class="k">for</span> <span class="n">insertion</span> <span class="n">of</span> <span class="n">residues</span><span class="o">.</span>
+<span class="mi">31</span> <span class="o">-</span> <span class="mi">38</span>       <span class="n">Real</span><span class="p">(</span><span class="mf">8.3</span><span class="p">)</span>      <span class="n">x</span>             <span class="n">Orthogonal</span> <span class="n">coordinates</span> <span class="k">for</span> <span class="n">X</span><span class="o">.</span>
+<span class="mi">39</span> <span class="o">-</span> <span class="mi">46</span>       <span class="n">Real</span><span class="p">(</span><span class="mf">8.3</span><span class="p">)</span>      <span class="n">y</span>             <span class="n">Orthogonal</span> <span class="n">coordinates</span> <span class="k">for</span> <span class="n">Y</span><span class="o">.</span>
+<span class="mi">47</span> <span class="o">-</span> <span class="mi">54</span>       <span class="n">Real</span><span class="p">(</span><span class="mf">8.3</span><span class="p">)</span>      <span class="n">z</span>             <span class="n">Orthogonal</span> <span class="n">coordinates</span> <span class="k">for</span> <span class="n">Z</span><span class="o">.</span>
+<span class="mi">55</span> <span class="o">-</span> <span class="mi">60</span>       <span class="n">Real</span><span class="p">(</span><span class="mf">6.2</span><span class="p">)</span>      <span class="n">occupancy</span>     <span class="n">Occupancy</span><span class="o">.</span>
+<span class="mi">61</span> <span class="o">-</span> <span class="mi">66</span>       <span class="n">Real</span><span class="p">(</span><span class="mf">6.2</span><span class="p">)</span>      <span class="n">tempFactor</span>    <span class="n">Temperature</span> <span class="n">factor</span><span class="o">.</span>
+<span class="mi">77</span> <span class="o">-</span> <span class="mi">78</span>       <span class="n">LString</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>     <span class="n">element</span>       <span class="n">Element</span> <span class="n">symbol</span><span class="p">;</span> <span class="n">right</span><span class="o">-</span><span class="n">justified</span><span class="o">.</span>
+<span class="mi">79</span> <span class="o">-</span> <span class="mi">80</span>       <span class="n">LString</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>     <span class="n">charge</span>        <span class="n">Charge</span> <span class="n">on</span> <span class="n">the</span> <span class="n">atom</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Description of CONECT records:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COLUMNS</span>       <span class="n">DATA</span>  <span class="n">TYPE</span>      <span class="n">FIELD</span>        <span class="n">DEFINITION</span>
+<span class="o">-------------------------------------------------------------------------</span>
+ <span class="mi">1</span> <span class="o">-</span>  <span class="mi">6</span>        <span class="n">Record</span> <span class="n">name</span>    <span class="s2">&quot;CONECT&quot;</span>
+ <span class="mi">7</span> <span class="o">-</span> <span class="mi">11</span>        <span class="n">Integer</span>        <span class="n">serial</span>       <span class="n">Atom</span>  <span class="n">serial</span> <span class="n">number</span>
+<span class="mi">12</span> <span class="o">-</span> <span class="mi">16</span>        <span class="n">Integer</span>        <span class="n">serial</span>       <span class="n">Serial</span> <span class="n">number</span> <span class="n">of</span> <span class="n">bonded</span> <span class="n">atom</span>
+<span class="mi">17</span> <span class="o">-</span> <span class="mi">21</span>        <span class="n">Integer</span>        <span class="n">serial</span>       <span class="n">Serial</span>  <span class="n">number</span> <span class="n">of</span> <span class="n">bonded</span> <span class="n">atom</span>
+<span class="mi">22</span> <span class="o">-</span> <span class="mi">26</span>        <span class="n">Integer</span>        <span class="n">serial</span>       <span class="n">Serial</span> <span class="n">number</span> <span class="n">of</span> <span class="n">bonded</span> <span class="n">atom</span>
+<span class="mi">27</span> <span class="o">-</span> <span class="mi">31</span>        <span class="n">Integer</span>        <span class="n">serial</span>       <span class="n">Serial</span> <span class="n">number</span> <span class="n">of</span> <span class="n">bonded</span> <span class="n">atom</span>
+</pre></div>
+</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.pdb.PDBMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.pdb.</span></span><span class="sig-name descname"><span class="pre">PDBMixin</span></span><a class="reference internal" href="../_modules/molsystem/pdb.html#PDBMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pdb.PDBMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling PDB files.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.pdb.PDBMixin.from_pdb_text">
+<span class="sig-name descname"><span class="pre">from_pdb_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/pdb.html#PDBMixin.from_pdb_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pdb.PDBMixin.from_pdb_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the system from a PDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>str</em>) – The complete text of the Molfile.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.pdb.PDBMixin.to_pdb_text">
+<span class="sig-name descname"><span class="pre">to_pdb_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Exported</span> <span class="pre">from</span> <span class="pre">SEAMM'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/pdb.html#PDBMixin.to_pdb_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pdb.PDBMixin.to_pdb_text" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the text of the PDB file from the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str = None</em>) – The title for the structure, by default the system name.</p></li>
+<li><p><strong>comment</strong> (<em>str = 'Exported from SEAMM'</em>) – Comment line</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>text</strong> – The text of the file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.properties">
+<span id="molsystem-properties-module"></span><h2>molsystem.properties module<a class="headerlink" href="#module-molsystem.properties" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.properties.add_properties_from_file">
+<span class="sig-prename descclassname"><span class="pre">molsystem.properties.</span></span><span class="sig-name descname"><span class="pre">add_properties_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/properties.html#add_properties_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.properties.add_properties_from_file" title="Permalink to this definition">#</a></dt>
+<dd><p>The standard properties recognized by SEAMM.</p>
+<p>These are officially defined properties that can be used anywhere in SEAMM, as
+long as the type and definition correspond to the standard.</p>
+<p>Each property is defined by a string with up to three parts:</p>
+<blockquote>
+<div><p>&lt;property name&gt;#&lt;code or ‘experiment’&gt;#&lt;technique or model chemistry&gt;</p>
+</div></blockquote>
+<p>The property name is required. In most cases this is followed by either ‘experiment’
+or the name of the code, e.g. ‘MOPAC’, ‘Gaussian’, or ‘VASP’. The final part,
+if present, is either the experimental technique used to measure the property, or
+the model chemistry, such as ‘MP2/6-31G**’, ‘PM7’, or a forcefield name such as
+‘AMBER/ff19SB’.</p>
+<p>You can create other properties on the fly, but they follow the above convention
+and should have an appropriate code and, if necessary, model chemistry, so that
+they full name is unique and does not conflict with any other defined name.</p>
+<p>For example, the standard property “enthalpy of formation” refers to the
+experimental heat of formation, or a calculated value comparable to experimental
+values. If you are not sure what the heat of formation in e.g. MOPAC is, you could
+create a new property “enthalpy of formation#MOPAC#&lt;parameterization&gt;”, which is
+clearly similar to the standard “enthalpy of formation”. If the community decides
+that it is indeed the same, it can be replaced by the standard form, and also
+aliased to it for backwards compatibility.</p>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.qcschema">
+<span id="molsystem-qcschema-module"></span><h2>molsystem.qcschema module<a class="headerlink" href="#module-molsystem.qcschema" title="Permalink to this heading">#</a></h2>
+<p>Interface to qcschema.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.qcschema.</span></span><span class="sig-name descname"><span class="pre">QCSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling QCSchema.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin.from_qcschema_dict">
+<span class="sig-name descname"><span class="pre">from_qcschema_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin.from_qcschema_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin.from_qcschema_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Reset the molecule from the QCSchema data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin.from_qcschema_json">
+<span class="sig-name descname"><span class="pre">from_qcschema_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin.from_qcschema_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin.from_qcschema_json" title="Permalink to this definition">#</a></dt>
+<dd><p>Reset the molecule from the QCSchema JSON.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin.to_qcschema_dict">
+<span class="sig-name descname"><span class="pre">to_qcschema_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin.to_qcschema_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin.to_qcschema_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a dictionary compliant with QCSchema.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin.to_qcschema_json">
+<span class="sig-name descname"><span class="pre">to_qcschema_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin.to_qcschema_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin.to_qcschema_json" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the QCSchema JSON for the molecule.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.rdkit_">
+<span id="molsystem-rdkit-module"></span><h2>molsystem.rdkit_ module<a class="headerlink" href="#module-molsystem.rdkit_" title="Permalink to this heading">#</a></h2>
+<p>Interface to RDKit.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.rdkit_.</span></span><span class="sig-name descname"><span class="pre">RDKitMixin</span></span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling RDKit via its Python interface.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin.from_RDKMol">
+<span class="sig-name descname"><span class="pre">from_RDKMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdk_mol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin.from_RDKMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin.from_RDKMol" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform an RDKit molecule into the current object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin.to_RDKMol">
+<span class="sig-name descname"><span class="pre">to_RDKMol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin.to_RDKMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin.to_RDKMol" title="Permalink to this definition">#</a></dt>
+<dd><p>Return an RDKMol object for the configuration, template, or subset.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.smiles">
+<span id="molsystem-smiles-module"></span><h2>molsystem.smiles module<a class="headerlink" href="#module-molsystem.smiles" title="Permalink to this heading">#</a></h2>
+<p>Functions for handling SMILES</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.smiles.GenSMARTS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">GenSMARTS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#GenSMARTS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.GenSMARTS" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to generate SMARTS strings for an object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol_object</strong> (<em>_Configuration</em><em>, </em><em>_Template</em><em>, </em><em>_Subset</em>) – </p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.smiles.GenSMARTS.mol_object">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_object</span></span><a class="headerlink" href="#molsystem.smiles.GenSMARTS.mol_object" title="Permalink to this definition">#</a></dt>
+<dd><p>The molecular object to work with.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">SMILESMixin</span></span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling SMILES.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.canonical_smiles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">canonical_smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.canonical_smiles" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the canonical SMILES string for this object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.from_smiles">
+<span class="sig-name descname"><span class="pre">from_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.from_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.from_smiles" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the system from a SMILES string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles</strong> (<em>str</em>) – The SMILES string</p></li>
+<li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.smarts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smarts</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smarts" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the SMARTS string for this object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.smiles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smiles" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the SMILES string for this object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.to_smarts">
+<span class="sig-name descname"><span class="pre">to_smarts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.to_smarts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.to_smarts" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate a SMARTS string for this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The SMARTS string.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.to_smiles">
+<span class="sig-name descname"><span class="pre">to_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrogens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.to_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.to_smiles" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the SMILES string from the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canonical</strong> (<em>bool = False</em>) – Whether to create canonical SMILES</p></li>
+<li><p><strong>hydrogens</strong> (<em>bool = False</em>) – Whether to keep H’s in the SMILES string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The SMILES string, or (SMILES, name) if the rname is requested</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.subset">
+<span id="molsystem-subset-module"></span><h2>molsystem.subset module<a class="headerlink" href="#module-molsystem.subset" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.subsets">
+<span id="molsystem-subsets-module"></span><h2>molsystem.subsets module<a class="headerlink" href="#module-molsystem.subsets" title="Permalink to this heading">#</a></h2>
+<p>A class providing a convenient interface for subsets</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.subsets.grouped">
+<span class="sig-prename descclassname"><span class="pre">molsystem.subsets.</span></span><span class="sig-name descname"><span class="pre">grouped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/subsets.html#grouped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.subsets.grouped" title="Permalink to this definition">#</a></dt>
+<dd><p>s -&gt; (s0,s1,s2,…sn-1), (sn,sn+1,sn+2,…s2n-1), (s2n,…s3n-1), …</p>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.symmetry">
+<span id="molsystem-symmetry-module"></span><h2>molsystem.symmetry module<a class="headerlink" href="#module-molsystem.symmetry" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.system">
+<span id="molsystem-system-module"></span><h2>molsystem.system module<a class="headerlink" href="#module-molsystem.system" title="Permalink to this heading">#</a></h2>
+<p>A dictionary-like object for holding a system</p>
+</section>
+<section id="module-molsystem.system_db">
+<span id="molsystem-system-db-module"></span><h2>molsystem.system_db module<a class="headerlink" href="#module-molsystem.system_db" title="Permalink to this heading">#</a></h2>
+<p>A dictionary-like object for holding a system</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.system_db.</span></span><span class="sig-name descname"><span class="pre">SystemDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">molsystem.system_db</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#molsystem.cif.CIFMixin" title="molsystem.cif.CIFMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">CIFMixin</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></p>
+<p>A database of systems for SEAMM.</p>
+<p>A class based on a SQLite database for describing molecular and
+periodic systems.</p>
+<p>See the documentation at <a class="reference external" href="https://molssi-seamm.github.io/molsystem">https://molssi-seamm.github.io/molsystem</a>
+for a complete description of the database schema, including a
+diagram.</p>
+<p>The key concepts are:</p>
+<dl>
+<dt>System</dt><dd><p>The overall container for the configurations, atoms, bonds,
+etc. A system has one or more configurations (conformers),
+each of which details the atoms, bonds, etc.</p>
+</dd>
+<dt>Configuration</dt><dd><p>The configuration is a single instance of the system, with
+atoms, coordinates, bonds and subsets. It is close to what
+most programs consider the molecule or crystal.</p>
+<p>There may be different set of atoms in different
+configurations of a single system. This supports e.g. grand
+canonical ensembles.</p>
+<p>The set of bonds may also differ between different
+configurations, whether or not the set of atoms changes. This
+supports e.g. reactive forcefields.</p>
+<p>Each configuration also has its own set of subsets, which are
+a way of collecting atoms into groups, and can be thought of
+as a generalization of the chain and residue nomenclature for
+proteins. A configuration may have any number of subsets, and
+atoms may be in more than one subset.</p>
+</dd>
+<dt>Atoms</dt><dd><p>Each configuration contains a set of atoms, though different
+configurations may contain different atoms. Each atom is
+identified by its atomic number and unique name and has
+coordinates. It may also have other attributes, but that
+depends on the simulation.</p>
+</dd>
+<dt>Bonds</dt><dd><p>Each configuration may also have information on bonds between
+the atoms. A bond connects two atoms, and has a bond order
+(single, double, triple, aromatic, …). In periodic systems
+with an infinite network of bonds, each bond also has a cell
+offset to identify the relative cells of the two atoms.</p>
+</dd>
+<dt>Templates and Subsets</dt><dd><p>Subsets define groups of atoms in a general way. They are
+defined by a template, which may be nothing more than a type
+and name, e.g. ‘residue/ala’, or the template may be linked
+with a system which has atoms, bonds, etc.</p>
+<p>Each subset is linked to its group atoms. For example, the
+template ‘residue/ala’ mentioned above would have a subset for
+each alanine in the protein. If the template were linked to a
+system which was the alanine residue, then each atom would
+also be connected with the appropriate atom in the template
+system, so even if the order and names of atoms in the system
+were different, we could still identify each atom with the
+corresponding atom in the template system.</p>
+</dd>
+</dl>
+<p>The tables that implement this are:</p>
+<dl class="simple">
+<dt>system</dt><dd><p>The list of all the systems in the database</p>
+</dd>
+<dt>configuration</dt><dd><p>The list of all configurations of all systems, labeled by the
+system they belong to.</p>
+</dd>
+<dt>atom</dt><dd><p>The list of atoms in all systems and configurations. The
+attributes of the atoms do not depend on the configuration,
+i.e. are unchanging.</p>
+</dd>
+<dt>bond</dt><dd><p>The list of all bonds in all systems and configurations,
+giving the two atoms that are bonded plus the bond order.</p>
+</dd>
+<dt>coordinates</dt><dd><p>The fractional or Cartesian coordinates of the atoms as well
+as any other atomic properties that vary by configuration.</p>
+</dd>
+<dt>subset</dt><dd><p>The instances of subsets.</p>
+</dd>
+<dt>element</dt><dd><p>The periodic table, used as a foreign key to identify atoms.</p>
+</dd>
+<dt>template</dt><dd><p>The templates – labels – for subsets, which may connect the
+subset to a template system.</p>
+</dd>
+<dt>configuration_subset</dt><dd><p>A joining table used to define which subsets are “in” a
+configuration.</p>
+</dd>
+<dt>subset_atom</dt><dd><p>A joining table to define with atoms are in a subset. There is
+an optional field for the template atom if the template has an
+associated system. In this case, the template atom identifies
+which atom in the template system is the same as the given
+atom.</p>
+</dd>
+<dt>symmetry</dt><dd><p>Information about point or space group symmetry.</p>
+</dd>
+<dt>symmetryoperation</dt><dd><p>The detailed symmetry operations for the point or space
+groups.</p>
+</dd>
+<dt>cell</dt><dd><p>The information about the periodicity of a configuration, if
+needed.</p>
+</dd>
+<dt>atomset</dt><dd><p>A set of atoms, used with a joining table to connect atoms
+with configurations.</p>
+</dd>
+<dt>atomset_atom</dt><dd><p>The joining table connecting atomsets with their atoms.</p>
+</dd>
+<dt>bondset</dt><dd><p>A set of bonds, used with a joining table to connect bonds
+with configurations.</p>
+</dd>
+<dt>bondset_bond</dt><dd><p>The joining table connecting bondsets with their bonds.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.attach">
+<span class="sig-name descname"><span class="pre">attach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.attach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.attach" title="Permalink to this definition">#</a></dt>
+<dd><p>Attach another system to this one’s database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#molsystem.system_db.SystemDB" title="molsystem.system_db.SystemDB"><em>SystemDB</em></a>) – The other SystemDB object containing the database</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>name</strong> – The attachment name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.attached_as">
+<span class="sig-name descname"><span class="pre">attached_as</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.attached_as"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.attached_as" title="Permalink to this definition">#</a></dt>
+<dd><p>The attachment name for another system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#molsystem.system_db.SystemDB" title="molsystem.system_db.SystemDB"><em>SystemDB</em></a>) – The other SystemDB object containing the attached database</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>name</strong> – The attachment name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.attributes" title="Permalink to this definition">#</a></dt>
+<dd><p>The attributes – columns – of a given table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tablename</strong> (<em>str</em>) – The name of the table, optionally including the schema followed by
+a dot.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>attributes</strong> – A dictionary of dictionaries for the attributes and their
+descriptors</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.close" title="Permalink to this definition">#</a></dt>
+<dd><p>Close the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.create_system">
+<span class="sig-name descname"><span class="pre">create_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.create_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.create_system" title="Permalink to this definition">#</a></dt>
+<dd><p>Add a new system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str = None</em>) – A user-friendly name for the system, defaults to no name.</p></li>
+<li><p><strong>make_current</strong> (<em>bool = True</em>) – If True, make this the current system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly created system.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_System</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.create_table">
+<span class="sig-name descname"><span class="pre">create_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls=&lt;class</span> <span class="pre">'molsystem.table._Table'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.create_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.create_table" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a new table with the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the new table.</p></li>
+<li><p><strong>cls</strong> (<em>Table subclass</em>) – The class of the new table, defaults to Table</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>table</strong> – The new table</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>class Table</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.cursor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.cursor" title="Permalink to this definition">#</a></dt>
+<dd><p>A database cursor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.db">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db" title="Permalink to this definition">#</a></dt>
+<dd><p>The database connection.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.db_version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db_version</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db_version" title="Permalink to this definition">#</a></dt>
+<dd><p>The version string for the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.delete_system">
+<span class="sig-name descname"><span class="pre">delete_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.delete_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.delete_system" title="Permalink to this definition">#</a></dt>
+<dd><p>Delete an existing system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>system</strong> (<em>int</em><em> or </em><em>_System</em>) – The system to delete.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.detach">
+<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.detach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.detach" title="Permalink to this definition">#</a></dt>
+<dd><p>Detach an attached system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#molsystem.system_db.SystemDB" title="molsystem.system_db.SystemDB"><em>SystemDB</em></a>) – The other SystemDB object containing the database</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.diff">
+<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.diff" title="Permalink to this definition">#</a></dt>
+<dd><p>Differences between this system and another.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.filename">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.filename" title="Permalink to this definition">#</a></dt>
+<dd><p>The name of the file (or URI) for the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.find_configurations">
+<span class="sig-name descname"><span class="pre">find_configurations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atomset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bondset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.find_configurations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.find_configurations" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the configurations that have given atom- or bondsets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atomset</strong> (<em>int = None</em>) – The id of the atomset.</p></li>
+<li><p><strong>bondset</strong> (<em>int = None</em>) – The id of the bondset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>[_Configuration]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_configuration">
+<span class="sig-name descname"><span class="pre">get_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_configuration" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the specified configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cid</strong> (<em>int</em>) – The id of the configuration.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_Configuration</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_system">
+<span class="sig-name descname"><span class="pre">get_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_or_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_system" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the specified system object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_or_name</strong> (<em>int</em><em> or </em><em>str</em>) – The id (int) or name (str) of the system</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested system.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_System</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the system does not exist, or more than one have the requested
+    name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.is_attached">
+<span class="sig-name descname"><span class="pre">is_attached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.is_attached"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.is_attached" title="Permalink to this definition">#</a></dt>
+<dd><p>Return whether another system is attached to this one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#molsystem.system_db.SystemDB" title="molsystem.system_db.SystemDB"><em>SystemDB</em></a>) – The other SystemDB object containing the database</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the database is attached.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.list">
+<span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.list" title="Permalink to this definition">#</a></dt>
+<dd><p>Return a list of all the tables in the system.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_configurations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_configurations" title="Permalink to this definition">#</a></dt>
+<dd><p>The number of configurations in the database.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_systems">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_systems" title="Permalink to this definition">#</a></dt>
+<dd><p>The number of systems in the database.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_templates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_templates" title="Permalink to this definition">#</a></dt>
+<dd><p>The number of templates.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.names" title="Permalink to this definition">#</a></dt>
+<dd><p>The names of the system.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.parent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.parent" title="Permalink to this definition">#</a></dt>
+<dd><p>The parent of this, i.e. a Systems object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.properties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.properties" title="Permalink to this definition">#</a></dt>
+<dd><p>The class to handle the properties.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.system">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">system</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system" title="Permalink to this definition">#</a></dt>
+<dd><p>The current system object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.system_exists">
+<span class="sig-name descname"><span class="pre">system_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_or_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.system_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.system_exists" title="Permalink to this definition">#</a></dt>
+<dd><p>See if the given system exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_or_name</strong> (<em>int</em><em> or </em><em>str</em>) – The id (int) or name (str) of the system</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether it exists.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.system_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">system_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system_ids" title="Permalink to this definition">#</a></dt>
+<dd><p>The list of system ids.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.systems">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.systems" title="Permalink to this definition">#</a></dt>
+<dd><p>The list of system objects.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.templates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.templates" title="Permalink to this definition">#</a></dt>
+<dd><p>The defined templates.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem.system_properties">
+<span id="molsystem-system-properties-module"></span><h2>molsystem.system_properties module<a class="headerlink" href="#module-molsystem.system_properties" title="Permalink to this heading">#</a></h2>
+<p>Property methods for systems.</p>
+</section>
+<section id="module-molsystem.table">
+<span id="molsystem-table-module"></span><h2>molsystem.table module<a class="headerlink" href="#module-molsystem.table" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.table.grouped">
+<span class="sig-prename descclassname"><span class="pre">molsystem.table.</span></span><span class="sig-name descname"><span class="pre">grouped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/table.html#grouped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.table.grouped" title="Permalink to this definition">#</a></dt>
+<dd><p>s -&gt; (s0,s1,s2,…sn-1), (sn,sn+1,sn+2,…s2n-1), (s2n,…s3n-1), …</p>
+</dd></dl>
+
+</section>
+<section id="module-molsystem.template">
+<span id="molsystem-template-module"></span><h2>molsystem.template module<a class="headerlink" href="#module-molsystem.template" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.templates">
+<span id="molsystem-templates-module"></span><h2>molsystem.templates module<a class="headerlink" href="#module-molsystem.templates" title="Permalink to this heading">#</a></h2>
+<p>A dictionary-like object for holding templates</p>
+</section>
+<section id="module-molsystem.topology">
+<span id="molsystem-topology-module"></span><h2>molsystem.topology module<a class="headerlink" href="#module-molsystem.topology" title="Permalink to this heading">#</a></h2>
+<p>Topological methods for the system</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.topology.</span></span><span class="sig-name descname"><span class="pre">TopologyMixin</span></span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling topology in a configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.bonded_neighbors">
+<span class="sig-name descname"><span class="pre">bonded_neighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.bonded_neighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.bonded_neighbors" title="Permalink to this definition">#</a></dt>
+<dd><p>The atoms bonded to each atom in the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>as_indices</strong> (<em>bool = False</em>) – Whether to return 0-based indices (True) or atom ids (False)</p></li>
+<li><p><strong>first_index</strong> (<em>int = 0</em>) – The smallest index, e.g. 0 or 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>neighbors</strong> – list of atom ids for each atom id</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>{int: [int]} or [[int]] for indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.create_molecule_subsets">
+<span class="sig-name descname"><span class="pre">create_molecule_subsets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.create_molecule_subsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.create_molecule_subsets" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a subset for each molecule in a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The ids of the subsets, one per molecule.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.create_molecule_templates">
+<span class="sig-name descname"><span class="pre">create_molecule_templates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_templates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_subsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.create_molecule_templates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.create_molecule_templates" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a template for each unique molecule in a configuration.</p>
+<p>By default also create subsets linking each template to the atoms
+of the molecules in the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>full_templates</strong> (<em>bool = True</em>) – If true, create full templates by creating systems for the
+molecules.</p></li>
+<li><p><strong>create_subsets</strong> (<em>bool = True</em>) – If true, create subsets linking the templates to the molecules.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ids of the templates, or if create_subsets is True
+a two-element list containing the list of templates and
+list of subsets.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[int] or [[int], [int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.find_molecules">
+<span class="sig-name descname"><span class="pre">find_molecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.find_molecules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.find_molecules" title="Permalink to this definition">#</a></dt>
+<dd><p>Find the separate molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_indices</strong> (<em>bool = False</em>) – Whether to return 0-based indices (True) or atom ids (False)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>molecules</strong> – A list of lists of atom ids or indices for the molecules</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[[int]*n_molecules]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.reimage_bonded_atoms">
+<span class="sig-name descname"><span class="pre">reimage_bonded_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reimage_molecules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.reimage_bonded_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.reimage_bonded_atoms" title="Permalink to this definition">#</a></dt>
+<dd><p>Ensure that the atoms in a molecule are “near” each other.</p>
+<p>In a periodic system atoms can be translated by a unit cell without changing
+anything. However the bonds in a molecule need to account for such translations
+of atoms otherwise a bond may appear to be very long.</p>
+<p>It is often convenient physically move atoms by the correct cell translations
+to bring the atoms of a molecule close to each other. That is what this method
+does, moving all the atoms close to the first. Optionally the molecule is
+also moved to bring its geometric center into the primary unit cell, i.e. with
+fractional coordinates in the range [0..1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reimage_molecules</strong> (<em>bool = True</em>) – Whether to move molecules into the primary unit cell.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the coordinates were changed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.reimage_molecules">
+<span class="sig-name descname"><span class="pre">reimage_molecules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.reimage_molecules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.reimage_molecules" title="Permalink to this definition">#</a></dt>
+<dd><p>Reimage molecules into the primary unit cell.</p>
+<p>The molecules are moved to bring their geometric center into the primary unit
+cell, i.e. with fractional coordinates in the range [0..1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the coordinates were changed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-molsystem">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-molsystem" title="Permalink to this heading">#</a></h2>
+<p>molsystem
+A general implementation for molecular and periodic systems.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="modules.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">molsystem</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../authors.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Credits</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.atoms">molsystem.atoms module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.atoms.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.bonds">molsystem.bonds module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.bonds.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.cell">molsystem.cell module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell"><code class="docutils literal notranslate"><span class="pre">Cell</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.a"><code class="docutils literal notranslate"><span class="pre">Cell.a</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.alpha"><code class="docutils literal notranslate"><span class="pre">Cell.alpha</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.b"><code class="docutils literal notranslate"><span class="pre">Cell.b</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.beta"><code class="docutils literal notranslate"><span class="pre">Cell.beta</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.c"><code class="docutils literal notranslate"><span class="pre">Cell.c</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.equal"><code class="docutils literal notranslate"><span class="pre">Cell.equal()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.from_vectors"><code class="docutils literal notranslate"><span class="pre">Cell.from_vectors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.gamma"><code class="docutils literal notranslate"><span class="pre">Cell.gamma</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.parameters"><code class="docutils literal notranslate"><span class="pre">Cell.parameters</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.reciprocal_lengths"><code class="docutils literal notranslate"><span class="pre">Cell.reciprocal_lengths()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.reciprocal_vectors"><code class="docutils literal notranslate"><span class="pre">Cell.reciprocal_vectors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.strain"><code class="docutils literal notranslate"><span class="pre">Cell.strain()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.to_cartesians"><code class="docutils literal notranslate"><span class="pre">Cell.to_cartesians()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.to_cartesians_transform"><code class="docutils literal notranslate"><span class="pre">Cell.to_cartesians_transform()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.to_fractionals"><code class="docutils literal notranslate"><span class="pre">Cell.to_fractionals()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.to_fractionals_transform"><code class="docutils literal notranslate"><span class="pre">Cell.to_fractionals_transform()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.vectors"><code class="docutils literal notranslate"><span class="pre">Cell.vectors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.Cell.volume"><code class="docutils literal notranslate"><span class="pre">Cell.volume</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.cos"><code class="docutils literal notranslate"><span class="pre">cos()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.dot"><code class="docutils literal notranslate"><span class="pre">dot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cell.sin"><code class="docutils literal notranslate"><span class="pre">sin()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.cif">molsystem.cif module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bond-orders">Bond Orders</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin"><code class="docutils literal notranslate"><span class="pre">CIFMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin.from_cif_text"><code class="docutils literal notranslate"><span class="pre">CIFMixin.from_cif_text()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin.from_mmcif_text"><code class="docutils literal notranslate"><span class="pre">CIFMixin.from_mmcif_text()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin.read_cif_file"><code class="docutils literal notranslate"><span class="pre">CIFMixin.read_cif_file()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin.to_cif_text"><code class="docutils literal notranslate"><span class="pre">CIFMixin.to_cif_text()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cif.CIFMixin.to_mmcif_text"><code class="docutils literal notranslate"><span class="pre">CIFMixin.to_mmcif_text()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.cms_schema">molsystem.cms_schema module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cms_schema.CMSSchemaMixin"><code class="docutils literal notranslate"><span class="pre">CMSSchemaMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.cms_schema.CMSSchemaMixin.to_cms_schema"><code class="docutils literal notranslate"><span class="pre">CMSSchemaMixin.to_cms_schema()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.column">molsystem.column module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.configuration">molsystem.configuration module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.configuration_properties">molsystem.configuration_properties module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.elements">molsystem.elements module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.elements.masses"><code class="docutils literal notranslate"><span class="pre">masses()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.elements.to_atnos"><code class="docutils literal notranslate"><span class="pre">to_atnos()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.elements.to_symbols"><code class="docutils literal notranslate"><span class="pre">to_symbols()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.frozencolumn">molsystem.frozencolumn module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.molfile">molsystem.molfile module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.molfile.MolFileMixin"><code class="docutils literal notranslate"><span class="pre">MolFileMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.molfile.MolFileMixin.from_molfile_text"><code class="docutils literal notranslate"><span class="pre">MolFileMixin.from_molfile_text()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.molfile.MolFileMixin.to_molfile_text"><code class="docutils literal notranslate"><span class="pre">MolFileMixin.to_molfile_text()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.openbabel">molsystem.openbabel module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.openbabel.OpenBabelMixin"><code class="docutils literal notranslate"><span class="pre">OpenBabelMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.openbabel.OpenBabelMixin.find_substructures"><code class="docutils literal notranslate"><span class="pre">OpenBabelMixin.find_substructures()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.openbabel.OpenBabelMixin.from_OBMol"><code class="docutils literal notranslate"><span class="pre">OpenBabelMixin.from_OBMol()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.openbabel.OpenBabelMixin.to_OBMol"><code class="docutils literal notranslate"><span class="pre">OpenBabelMixin.to_OBMol()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.pdb">molsystem.pdb module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#to-do">To Do</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#file-format">File Format</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.pdb.PDBMixin"><code class="docutils literal notranslate"><span class="pre">PDBMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.pdb.PDBMixin.from_pdb_text"><code class="docutils literal notranslate"><span class="pre">PDBMixin.from_pdb_text()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.pdb.PDBMixin.to_pdb_text"><code class="docutils literal notranslate"><span class="pre">PDBMixin.to_pdb_text()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.properties">molsystem.properties module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.properties.add_properties_from_file"><code class="docutils literal notranslate"><span class="pre">add_properties_from_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.qcschema">molsystem.qcschema module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.qcschema.QCSchemaMixin"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.qcschema.QCSchemaMixin.from_qcschema_dict"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin.from_qcschema_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.qcschema.QCSchemaMixin.from_qcschema_json"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin.from_qcschema_json()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.qcschema.QCSchemaMixin.to_qcschema_dict"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin.to_qcschema_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.qcschema.QCSchemaMixin.to_qcschema_json"><code class="docutils literal notranslate"><span class="pre">QCSchemaMixin.to_qcschema_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.rdkit_">molsystem.rdkit_ module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin"><code class="docutils literal notranslate"><span class="pre">RDKitMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.from_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.from_RDKMol()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.to_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.to_RDKMol()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.smiles">molsystem.smiles module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.GenSMARTS"><code class="docutils literal notranslate"><span class="pre">GenSMARTS</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.GenSMARTS.mol_object"><code class="docutils literal notranslate"><span class="pre">GenSMARTS.mol_object</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin"><code class="docutils literal notranslate"><span class="pre">SMILESMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.canonical_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.canonical_smiles</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.from_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.from_smiles()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.smarts"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.smarts</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.smiles</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.to_smarts"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.to_smarts()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.SMILESMixin.to_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.to_smiles()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.subset">molsystem.subset module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.subsets">molsystem.subsets module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.subsets.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.symmetry">molsystem.symmetry module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.system">molsystem.system module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.system_db">molsystem.system_db module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB"><code class="docutils literal notranslate"><span class="pre">SystemDB</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attach"><code class="docutils literal notranslate"><span class="pre">SystemDB.attach()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attached_as"><code class="docutils literal notranslate"><span class="pre">SystemDB.attached_as()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attributes"><code class="docutils literal notranslate"><span class="pre">SystemDB.attributes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.close"><code class="docutils literal notranslate"><span class="pre">SystemDB.close()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.create_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_system()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.create_table"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_table()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.cursor"><code class="docutils literal notranslate"><span class="pre">SystemDB.cursor</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.db"><code class="docutils literal notranslate"><span class="pre">SystemDB.db</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.db_version"><code class="docutils literal notranslate"><span class="pre">SystemDB.db_version</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.delete_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.delete_system()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.detach"><code class="docutils literal notranslate"><span class="pre">SystemDB.detach()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.diff"><code class="docutils literal notranslate"><span class="pre">SystemDB.diff()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.filename"><code class="docutils literal notranslate"><span class="pre">SystemDB.filename</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.find_configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.find_configurations()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_configuration"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_configuration()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_system()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.is_attached"><code class="docutils literal notranslate"><span class="pre">SystemDB.is_attached()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.list"><code class="docutils literal notranslate"><span class="pre">SystemDB.list()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.n_configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.n_configurations</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.n_systems"><code class="docutils literal notranslate"><span class="pre">SystemDB.n_systems</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.n_templates"><code class="docutils literal notranslate"><span class="pre">SystemDB.n_templates</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.names"><code class="docutils literal notranslate"><span class="pre">SystemDB.names</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.parent"><code class="docutils literal notranslate"><span class="pre">SystemDB.parent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.properties"><code class="docutils literal notranslate"><span class="pre">SystemDB.properties</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system"><code class="docutils literal notranslate"><span class="pre">SystemDB.system</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system_exists"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_exists()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_ids</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.systems"><code class="docutils literal notranslate"><span class="pre">SystemDB.systems</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.templates"><code class="docutils literal notranslate"><span class="pre">SystemDB.templates</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.system_properties">molsystem.system_properties module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.table">molsystem.table module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.table.grouped"><code class="docutils literal notranslate"><span class="pre">grouped()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.template">molsystem.template module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.templates">molsystem.templates module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.topology">molsystem.topology module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin"><code class="docutils literal notranslate"><span class="pre">TopologyMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.bonded_neighbors"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.bonded_neighbors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.create_molecule_subsets"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.create_molecule_subsets()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.create_molecule_templates"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.create_molecule_templates()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.find_molecules"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.find_molecules()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.reimage_bonded_atoms"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.reimage_bonded_atoms()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.reimage_molecules"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.reimage_molecules()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/api/molsystem.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  
+
+
+
+  
+  
+  
+  
+  
+  
+  
+
+
+<div class="row h-10">
+    <div class="col-2">
+        <a href="https://molssi.org/" target="_blank" title="Go to MolSSI in a new tab">
+            <img src="../_static/molssi_main_logo.png" class="logo__image only-light footer_logo" alt="Logo image">
+            <img src="../_static/molssi_main_logo_inverted_white.png" class="logo__image only-dark footer_logo" alt="Logo image">
+        </a>
+    </div>
+    <div class="col-8">
+        <p> &copy; Copyright 2019-2023 <a href="https://molssi.org/">The Molecular Sciences Software Institute</a></p>
+        <p>Funded by the National Science Foundation 
+          <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1547580">OAC-1547580</a> and 
+          <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2136142">CHE-2136142.</a></p>
+ 
+        
+
+    </div>
+    <div class="col-2">
+        <a href="https://nsf.gov/" target="_blank" title="Go to the NSF in a new tab">
+            <img src="../_static/nsf.png" class="footer_logo" alt="The NSF">
+          </a>
+    </div>
+</div></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
