@@ -432,8 +432,6 @@ class _Cell(Cell):
 
     Provides all the functionality of the Cell class, but keeps the cell
     data in the database.
-
-    :meta public:
     """
 
     def __init__(self, configuration):

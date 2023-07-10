@@ -144,12 +144,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# pyenv python configuration file
-.python-version
-
-# pytype pyi file directory
-.pytype/
-
 # Cookiecutter
 output/
 python_boilerplate/

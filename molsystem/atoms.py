@@ -5,7 +5,6 @@
 
 from itertools import zip_longest
 import logging
-import pprint  # noqa: F401
 from typing import Any, Dict, TypeVar
 
 import numpy
@@ -26,8 +25,7 @@ def grouped(iterable, n):
 
 
 class _Atoms(_Table):
-    """:meta public:
-    The atoms in a configuration of a system.
+    """The atoms in a configuration of a system.
 
     Parameters
     ----------
@@ -1042,8 +1040,7 @@ class _Atoms(_Table):
 
 
 class _SubsetAtoms(_Atoms):
-    """:meta public:
-    The atoms in a subset.
+    """The atoms in a subset.
 
     Parameters
     ----------
@@ -1051,9 +1048,6 @@ class _SubsetAtoms(_Atoms):
         The configuration of interest.
     subset_id : int
         The id of the subset.
-
-    Attributes
-    ----------
     template_order : bool
         Whether to return atoms and properties in the order of the template
         if the template is full. Defaults to True.

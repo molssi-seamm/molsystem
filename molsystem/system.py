@@ -87,8 +87,6 @@ class _System(CIFMixin, MutableMapping):
     One or more configurations are connected with each 'all' subset,
     which is how the atoms and bonding are connected to the
     configurations.
-
-    :meta public:
     """
 
     def __init__(self, system_db, _id, logger=logger):

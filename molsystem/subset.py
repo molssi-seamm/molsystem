@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class _Subset(SMILESMixin, OpenBabelMixin, object):
-    """:meta public:
-    A class providing the API for a subset.
+    """A class providing the API for a subset.
 
     Parameters
     ----------

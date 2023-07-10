@@ -40,10 +40,7 @@ class _Configuration(
     QCSchemaMixin,
     object,
 ):
-    """A configuration (conformer) of a system.
-
-    :meta public:
-    """
+    """A configuration (conformer) of a system."""
 
     def __init__(self, _id, system_db):
         self._id = _id
