@@ -41,8 +41,6 @@ class _Configuration(
     object,
 ):
     """A configuration (conformer) of a system.
-
-    :meta public:
     """
 
     def __init__(self, _id, system_db):

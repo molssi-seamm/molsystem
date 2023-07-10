@@ -27,8 +27,6 @@ class _Table(collections.abc.MutableMapping):
     also be deleted. See the method 'add_attribute' for more detail.
 
     Rows can be added ('append') or deleted ('delete').
-
-    :meta public:
     """
 
     def __init__(self, system_db, table: str, other=None, logger=logger):

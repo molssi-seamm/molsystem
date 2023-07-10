@@ -27,8 +27,6 @@ def grouped(iterable, n):
 
 class _Bonds(_Table):
     """The Bonds class describes the bonds in the system.
-
-    :meta public:
     """
 
     def __init__(self, configuration):
@@ -660,8 +658,6 @@ class _Bonds(_Table):
 
 class _SubsetBonds(_Bonds):
     """The Bonds class describes the bonds in a subset
-
-    :meta public:
     """
 
     def __init__(self, configuration, subset_id):

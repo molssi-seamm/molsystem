@@ -31,8 +31,6 @@ class _Templates(_Table):
     protein molecule.
 
     This class handles the templates.
-
-    :meta public:
     """
 
     def __init__(self, system_db, logger=logger):

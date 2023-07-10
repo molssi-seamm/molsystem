@@ -150,8 +150,6 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
 
     bondset_bond
         The joining table connecting bondsets with their bonds.
-
-    :meta public:
     """
 
     def __init__(self, parent=None, logger=logger, **kwargs):

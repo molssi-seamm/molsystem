@@ -8,8 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class _Template(SMILESMixin, OpenBabelMixin, object):
-    """:meta public:
-    A class providing the API for templates.
+    """A class providing the API for templates.
 
     There are two types of templates:
 

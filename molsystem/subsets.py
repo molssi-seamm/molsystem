@@ -26,8 +26,6 @@ class _Subsets(_Table):
         The configuration to work with.
     logger : Logger
         The logger to use, defaults to the one for this module.
-
-    :meta public:
     """
 
     def __init__(self, configuration, logger=logger):

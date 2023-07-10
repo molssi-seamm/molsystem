@@ -8,7 +8,6 @@ Contents:
 
    installation
    usage
-   modules
    contributing
 
 Indices and tables

@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 
 class _Symmetry(object):
     """A class to handle point and space group symmetry.
-
-    :meta public:
     """
 
     spgno_to_hall = None
