@@ -3,6 +3,7 @@
 """Functions for handling InChI"""
 
 import logging
+import requests
 
 try:
     from openbabel import openbabel
@@ -93,3 +94,60 @@ class InChIMixin:
             self.name = name
         else:
             self.name = save
+
+    def from_inchikey(self, inchikey, name=None):
+        """Create the system from an InChIKey string.
+
+        Parameters
+        ----------
+        inchikey : str
+            The InChIKey string
+        name : str = None
+            The name of the molecule
+
+        Returns
+        -------
+        None
+        """
+        inchi = self._get_inchi(inchikey)
+
+        save = self.name
+
+        obConversion = openbabel.OBConversion()
+        obConversion.SetInAndOutFormats("inchi", "mdl")
+        mol = openbabel.OBMol()
+        obConversion.ReadString(mol, inchi)
+
+        # Add hydrogens
+        mol.AddHydrogens()
+
+        # Get coordinates for a 3-D structure
+        builder = openbabel.OBBuilder()
+        builder.Build(mol)
+
+        self.from_OBMol(mol)
+
+        if name is not None:
+            self.name = name
+        else:
+            self.name = save
+
+    def _get_inchi(self, inchikey):
+        """Get the InChI from PubChem given the InChIKey."""
+        url = (
+            f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchikey/{inchikey}"
+            "/property/InChI/JSON"
+        )
+        r = requests.get(url)
+        result = r.json()
+        if "Fault" in result:
+            raise RuntimeError(f"InChIKey '{inchikey}' not found in PubChem.")
+
+        inchi = set()
+        for properties in result["PropertyTable"]["Properties"]:
+            if "InChI" in properties:
+                inchi.add(properties["InChI"])
+        if len(inchi) == 1:
+            return inchi.pop()
+        else:
+            return [*inchi]

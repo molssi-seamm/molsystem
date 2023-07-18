@@ -60,3 +60,16 @@ def test_from_inchi(configuration):
         print(result)
 
     assert result == correct
+
+
+def test_from_inchikey(configuration):
+    """Create a configuration from an InChIKey"""
+    correct = "CC(=O)O"
+
+    configuration.from_inchikey("QTBSBXVTEAMEQO-UHFFFAOYSA-N")
+    result = configuration.to_smiles(canonical=True)
+
+    if result != correct:
+        print(result)
+
+    assert result == correct
