@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>molsystem package &#8212; MolSystem 2023.7.9 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2023.7.18 documentation</title>
   
   
   
@@ -972,6 +972,63 @@ configuration will point to it; otherwise to the last conformer.</p>
 </section>
 <section id="module-molsystem.frozencolumn">
 <span id="molsystem-frozencolumn-module"></span><h2>molsystem.frozencolumn module<a class="headerlink" href="#module-molsystem.frozencolumn" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-molsystem.inchi">
+<span id="molsystem-inchi-module"></span><h2>molsystem.inchi module<a class="headerlink" href="#module-molsystem.inchi" title="Permalink to this heading">#</a></h2>
+<p>Functions for handling InChI</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.inchi.</span></span><span class="sig-name descname"><span class="pre">InChIMixin</span></span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin for handling InChI.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.from_inchi">
+<span class="sig-name descname"><span class="pre">from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchi" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the system from a InChI string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inchi</strong> (<em>str</em>) – The InChI string</p></li>
+<li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.inchi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchi</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchi" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the InChI string for this object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.inchikey">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchikey</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchikey" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the InChIKey string for this object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.to_inchi">
+<span class="sig-name descname"><span class="pre">to_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.to_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.to_inchi" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the InChI string from the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>bool = False</em>) – Whether to create the InChIKey</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The InChI string, or (InChI, name) if the rname is requested</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-molsystem.molfile">
 <span id="molsystem-molfile-module"></span><h2>molsystem.molfile module<a class="headerlink" href="#module-molsystem.molfile" title="Permalink to this heading">#</a></h2>
@@ -2111,6 +2168,16 @@ A general implementation for molecular and periodic systems.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.frozencolumn">molsystem.frozencolumn module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.inchi">molsystem.inchi module</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin"><code class="docutils literal notranslate"><span class="pre">InChIMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.from_inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.from_inchi()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.inchi</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.inchikey"><code class="docutils literal notranslate"><span class="pre">InChIMixin.inchikey</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.to_inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.to_inchi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.molfile">molsystem.molfile module</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.molfile.MolFileMixin"><code class="docutils literal notranslate"><span class="pre">MolFileMixin</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.molfile.MolFileMixin.from_molfile_text"><code class="docutils literal notranslate"><span class="pre">MolFileMixin.from_molfile_text()</span></code></a></li>

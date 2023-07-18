@@ -84,6 +84,14 @@ molsystem.frozencolumn module
    :undoc-members:
    :show-inheritance:
 
+molsystem.inchi module
+----------------------
+
+.. automodule:: molsystem.inchi
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 molsystem.molfile module
 ------------------------
 
