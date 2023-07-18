@@ -2,8 +2,10 @@
 History
 =======
 
+2023.7.18 -- Added support for InChI and InChIKeys
+
 2023.7.9 -- Added JSON properties
-    * Added properties sotred as JSON, which allows, vectors, tensors, etc.
+    * Added properties stored as JSON, which allows, vectors, tensors, etc.
       
 2023.4.6 -- Enhancements for CIF files
     * Handle uncertainties in CIF files expressed as '(x)' at end of value.

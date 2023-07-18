@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from .inchi import InChIMixin
 from .openbabel import OpenBabelMixin
 from .smiles import SMILESMixin
 
 logger = logging.getLogger(__name__)
 
 
-class _Template(SMILESMixin, OpenBabelMixin, object):
+class _Template(InChIMixin, SMILESMixin, OpenBabelMixin, object):
     """A class providing the API for templates.
 
     There are two types of templates:
