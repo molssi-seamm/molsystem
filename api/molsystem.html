@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>molsystem package &#8212; MolSystem 2023.7.18 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2023.7.18.1 documentation</title>
   
   
   
@@ -989,6 +989,23 @@ configuration will point to it; otherwise to the last conformer.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inchi</strong> (<em>str</em>) – The InChI string</p></li>
+<li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.from_inchikey">
+<span class="sig-name descname"><span class="pre">from_inchikey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchikey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchikey" title="Permalink to this definition">#</a></dt>
+<dd><p>Create the system from an InChIKey string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inchikey</strong> (<em>str</em>) – The InChIKey string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
 </ul>
 </dd>
@@ -2171,6 +2188,7 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.inchi">molsystem.inchi module</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin"><code class="docutils literal notranslate"><span class="pre">InChIMixin</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.from_inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.from_inchi()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.from_inchikey"><code class="docutils literal notranslate"><span class="pre">InChIMixin.from_inchikey()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.inchi</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.inchikey"><code class="docutils literal notranslate"><span class="pre">InChIMixin.inchikey</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.inchi.InChIMixin.to_inchi"><code class="docutils literal notranslate"><span class="pre">InChIMixin.to_inchi()</span></code></a></li>
