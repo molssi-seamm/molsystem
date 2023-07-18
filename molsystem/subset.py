@@ -3,6 +3,7 @@ import logging
 
 from .atoms import _SubsetAtoms
 from .bonds import _SubsetBonds
+from .inchi import InChIMixin
 from .openbabel import OpenBabelMixin
 from .smiles import SMILESMixin
 from .template import _Template
@@ -10,7 +11,7 @@ from .template import _Template
 logger = logging.getLogger(__name__)
 
 
-class _Subset(SMILESMixin, OpenBabelMixin, object):
+class _Subset(InChIMixin, SMILESMixin, OpenBabelMixin, object):
     """A class providing the API for a subset.
 
     Parameters

@@ -14,6 +14,7 @@ from .cell import _Cell
 from .cif import CIFMixin
 from .cms_schema import CMSSchemaMixin
 from .configuration_properties import _ConfigurationProperties
+from .inchi import InChIMixin
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
 from .rdkit_ import RDKitMixin
@@ -33,6 +34,7 @@ class _Configuration(
     MolFileMixin,
     CIFMixin,
     CMSSchemaMixin,
+    InChIMixin,
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
