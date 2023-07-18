@@ -2,6 +2,9 @@
 History
 =======
 
+2023.7.18.1 -- Added support for creating structures from InChIKeys
+    * Uses PubChem to translate the InChiKey to InChI.
+      
 2023.7.18 -- Added support for InChI and InChIKeys
 
 2023.7.9 -- Added JSON properties
