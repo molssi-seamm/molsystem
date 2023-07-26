@@ -35,8 +35,9 @@ class QCSchemaMixin:
 
         # Bonds, if any
         bonds = []
+        index = {j: i for i, j in zip(range(self.n_atoms), self.atoms.ids)}
         for row in self.bonds.bonds():
-            bonds.append((row["i"], row["j"], row["bondorder"]))
+            bonds.append((index[row["i"]], index[row["j"]], row["bondorder"]))
         if len(bonds) > 0:
             result["connectivity"] = bonds
 
