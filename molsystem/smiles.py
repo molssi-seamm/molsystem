@@ -12,6 +12,12 @@ except ModuleNotFoundError:
         "     conda install -c conda-forge openbabel"
     )
     raise
+try:
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+except ModuleNotFoundError:
+    print("Please install RDKit using conda:\n     conda install -c conda-forge rdkit")
+    raise
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +40,7 @@ class SMILESMixin:
         """Return the SMILES string for this object."""
         return self.to_smiles()
 
-    def to_smiles(self, canonical=False, hydrogens=False):
+    def to_smiles(self, canonical=False, hydrogens=False, isomeric=True, rdkit=False):
         """Create the SMILES string from the system.
 
         Parameters
@@ -43,6 +49,10 @@ class SMILESMixin:
             Whether to create canonical SMILES
         hydrogens : bool = False
             Whether to keep H's in the SMILES string.
+        isomeric : bool = True
+            Whether to use isomeric SMILES
+        rdkit : bool = False
+            Whether to use RDKit rather than default of OpenBabel
 
         Returns
         -------
@@ -51,23 +61,40 @@ class SMILESMixin:
         """
         logger.info("to_smiles")
 
-        obConversion = openbabel.OBConversion()
-        if canonical:
-            obConversion.SetOutFormat("can")
+        if rdkit:
+            mol = self.to_RDKMol()
+            if isomeric:
+                Chem.FindPotentialStereo(mol)
+            if hydrogens:
+                mol2 = mol
+            else:
+                mol2 = AllChem.RemoveHs(mol)
+            if canonical:
+                smiles = Chem.MolToSmiles(mol2, isomericSmiles=isomeric)
+            else:
+                smiles = Chem.MolToSmiles(
+                    mol2, isomericSmiles=isomeric, canonical=False
+                )
         else:
-            obConversion.SetOutFormat("smi")
+            obConversion = openbabel.OBConversion()
+            if canonical:
+                obConversion.SetOutFormat("can")
+            else:
+                obConversion.SetOutFormat("smi")
 
-        mol = self.to_OBMol()
+            mol = self.to_OBMol()
 
-        if hydrogens:
-            obConversion.AddOption("h")
-        smiles = obConversion.WriteString(mol)
+            if hydrogens:
+                obConversion.AddOption("h")
+            if not isomeric:
+                obConversion.AddOption("i")
+            smiles = obConversion.WriteString(mol)
 
         logger.info(f"smiles = '{smiles}'")
 
         return smiles.strip()
 
-    def from_smiles(self, smiles, name=None):
+    def from_smiles(self, smiles, name=None, rdkit=False):
         """Create the system from a SMILES string.
 
         Parameters
@@ -76,6 +103,8 @@ class SMILESMixin:
             The SMILES string
         name : str = None
             The name of the molecule
+        rdkit : bool = False
+            Whether to use RDKit rather than default of OpenBabel
 
         Returns
         -------
@@ -84,23 +113,26 @@ class SMILESMixin:
 
         save = self.name
 
-        obConversion = openbabel.OBConversion()
-        obConversion.SetInAndOutFormats("smi", "mdl")
-        obConversion.AddOption("3")
-        mol = openbabel.OBMol()
-        obConversion.ReadString(mol, smiles)
+        if rdkit:
+            mol = Chem.rdmolfiles.MolFromSmiles(smiles)
+            mol = Chem.AddHs(mol)
+            AllChem.EmbedMolecule(mol)
+            self.from_RDKMol(mol)
+        else:
+            obConversion = openbabel.OBConversion()
+            obConversion.SetInAndOutFormats("smi", "mdl")
+            obConversion.AddOption("3")
+            mol = openbabel.OBMol()
+            obConversion.ReadString(mol, smiles)
 
-        # Add hydrogens
-        mol.AddHydrogens()
+            # Add hydrogens
+            mol.AddHydrogens()
 
-        # Get coordinates for a 3-D structure
-        builder = openbabel.OBBuilder()
-        builder.Build(mol)
+            # Get coordinates for a 3-D structure
+            builder = openbabel.OBBuilder()
+            builder.Build(mol)
 
-        # molfile = obConversion.WriteString(mol)
-        # self.from_molfile_text(molfile)
-
-        self.from_OBMol(mol)
+            self.from_OBMol(mol)
 
         if name is not None:
             self.name = name

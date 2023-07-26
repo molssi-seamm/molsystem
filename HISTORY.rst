@@ -2,9 +2,13 @@
 History
 =======
 
+2023.7.26 -- Bugfix: error in QCSchema bonds; enhancement: RDKit
+    * Fixed bug in the bond indices in QCSchema
+    * Added ability to use RDKit for SMILES and InChI
+
 2023.7.18.1 -- Added support for creating structures from InChIKeys
     * Uses PubChem to translate the InChiKey to InChI.
-      
+       
 2023.7.18 -- Added support for InChI and InChIKeys
 
 2023.7.9 -- Added JSON properties

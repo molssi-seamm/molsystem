@@ -24,9 +24,10 @@ class QCSchemaMixin:
         result["symbols"] = [*self.atoms.symbols]
         factor = Q_(1.0, "Å").m_as("a_0")
         xyz = []
+        # round() below helps tests work across platforms. 9 digits are enough!
         for row in self.atoms.get_coordinates(fractionals=False):
             for val in row:
-                xyz.append(val * factor)
+                xyz.append(round(val * factor, 9))
         result["geometry"] = xyz
 
         # Charge and multiplicity
@@ -35,8 +36,9 @@ class QCSchemaMixin:
 
         # Bonds, if any
         bonds = []
+        index = {j: i for i, j in zip(range(self.n_atoms), self.atoms.ids)}
         for row in self.bonds.bonds():
-            bonds.append((row["i"], row["j"], row["bondorder"]))
+            bonds.append((index[row["i"]], index[row["j"]], row["bondorder"]))
         if len(bonds) > 0:
             result["connectivity"] = bonds
 
