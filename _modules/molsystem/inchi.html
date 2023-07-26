@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.inchi &#8212; MolSystem 2023.7.18.1 documentation</title>
+    <title>molsystem.inchi &#8212; MolSystem 2023.7.26 documentation</title>
   
   
   
@@ -491,6 +491,11 @@ document.write(`
         <span class="s2">&quot;     conda install -c conda-forge openbabel&quot;</span>
     <span class="p">)</span>
     <span class="k">raise</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please install RDKit using conda:</span><span class="se">\n</span><span class="s2">     conda install -c conda-forge rdkit&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -508,13 +513,15 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the InChIKey string for this object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_inchi</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="InChIMixin.to_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.to_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">to_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="InChIMixin.to_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.to_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">to_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the InChI string from the system.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        key : bool = False</span>
 <span class="sd">            Whether to create the InChIKey</span>
+<span class="sd">        rdkit : bool = False</span>
+<span class="sd">            Whether to use RDKit rather than default of OpenBabel</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -523,21 +530,28 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;to_inchi&quot;</span><span class="p">)</span>
 
-        <span class="n">obConversion</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
-            <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchikey&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rdkit</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">inchi</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">inchi</span><span class="o">.</span><span class="n">MolToInchiKey</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inchi</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">inchi</span><span class="o">.</span><span class="n">MolToInchi</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">)</span>
+            <span class="n">obConversion</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchikey&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">)</span>
 
-        <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
 
-        <span class="n">inchi</span> <span class="o">=</span> <span class="n">obConversion</span><span class="o">.</span><span class="n">WriteString</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">inchi</span> <span class="o">=</span> <span class="n">obConversion</span><span class="o">.</span><span class="n">WriteString</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inchi = &#39;</span><span class="si">{</span><span class="n">inchi</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">inchi</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="InChIMixin.from_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="InChIMixin.from_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from a InChI string.</span>
 
 <span class="sd">        Parameters</span>
@@ -546,6 +560,8 @@ document.write(`
 <span class="sd">            The InChI string</span>
 <span class="sd">        name : str = None</span>
 <span class="sd">            The name of the molecule</span>
+<span class="sd">        rdkit : bool = False</span>
+<span class="sd">            Whether to use RDKit rather than default of OpenBabel</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -554,19 +570,23 @@ document.write(`
 
         <span class="n">save</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">obConversion</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-        <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">,</span> <span class="s2">&quot;mdl&quot;</span><span class="p">)</span>
-        <span class="n">mol</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
-        <span class="n">obConversion</span><span class="o">.</span><span class="n">ReadString</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">inchi</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rdkit</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">inchi</span><span class="o">.</span><span class="n">MolFromInchi</span><span class="p">(</span><span class="n">inchi</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obConversion</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
+            <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">,</span> <span class="s2">&quot;mdl&quot;</span><span class="p">)</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
+            <span class="n">obConversion</span><span class="o">.</span><span class="n">ReadString</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">inchi</span><span class="p">)</span>
 
-        <span class="c1"># Add hydrogens</span>
-        <span class="n">mol</span><span class="o">.</span><span class="n">AddHydrogens</span><span class="p">()</span>
+            <span class="c1"># Add hydrogens</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">AddHydrogens</span><span class="p">()</span>
 
-        <span class="c1"># Get coordinates for a 3-D structure</span>
-        <span class="n">builder</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBBuilder</span><span class="p">()</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="c1"># Get coordinates for a 3-D structure</span>
+            <span class="n">builder</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBBuilder</span><span class="p">()</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>

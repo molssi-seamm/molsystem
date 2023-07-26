@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.qcschema &#8212; MolSystem 2023.7.18.1 documentation</title>
+    <title>molsystem.qcschema &#8212; MolSystem 2023.7.26 documentation</title>
   
   
   
@@ -502,9 +502,10 @@ document.write(`
         <span class="n">result</span><span class="p">[</span><span class="s2">&quot;symbols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">symbols</span><span class="p">]</span>
         <span class="n">factor</span> <span class="o">=</span> <span class="n">Q_</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;Å&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s2">&quot;a_0&quot;</span><span class="p">)</span>
         <span class="n">xyz</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># round() below helps tests work across platforms. 9 digits are enough!</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
-                <span class="n">xyz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span>
+                <span class="n">xyz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">val</span> <span class="o">*</span> <span class="n">factor</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
         <span class="n">result</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xyz</span>
 
         <span class="c1"># Charge and multiplicity</span>
@@ -513,8 +514,9 @@ document.write(`
 
         <span class="c1"># Bonds, if any</span>
         <span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">)}</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-            <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]))</span>
+            <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">result</span><span class="p">[</span><span class="s2">&quot;connectivity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bonds</span>
 

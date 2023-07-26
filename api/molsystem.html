@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>molsystem package &#8212; MolSystem 2023.7.18.1 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2023.7.26 documentation</title>
   
   
   
@@ -983,13 +983,14 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>A mixin for handling InChI.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.from_inchi">
-<span class="sig-name descname"><span class="pre">from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchi" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchi" title="Permalink to this definition">#</a></dt>
 <dd><p>Create the system from a InChI string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inchi</strong> (<em>str</em>) – The InChI string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+<li><p><strong>rdkit</strong> (<em>bool = False</em>) – Whether to use RDKit rather than default of OpenBabel</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1029,11 +1030,14 @@ configuration will point to it; otherwise to the last conformer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.to_inchi">
-<span class="sig-name descname"><span class="pre">to_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.to_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.to_inchi" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.to_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.to_inchi" title="Permalink to this definition">#</a></dt>
 <dd><p>Create the InChI string from the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>key</strong> (<em>bool = False</em>) – Whether to create the InChIKey</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>bool = False</em>) – Whether to create the InChIKey</p></li>
+<li><p><strong>rdkit</strong> (<em>bool = False</em>) – Whether to use RDKit rather than default of OpenBabel</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The InChI string, or (InChI, name) if the rname is requested</p>
@@ -1410,13 +1414,14 @@ aliased to it for backwards compatibility.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.from_smiles">
-<span class="sig-name descname"><span class="pre">from_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.from_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.from_smiles" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.from_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.from_smiles" title="Permalink to this definition">#</a></dt>
 <dd><p>Create the system from a SMILES string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smiles</strong> (<em>str</em>) – The SMILES string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+<li><p><strong>rdkit</strong> (<em>bool = False</em>) – Whether to use RDKit rather than default of OpenBabel</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1453,13 +1458,15 @@ aliased to it for backwards compatibility.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.to_smiles">
-<span class="sig-name descname"><span class="pre">to_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrogens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.to_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.to_smiles" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrogens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isomeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.to_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.to_smiles" title="Permalink to this definition">#</a></dt>
 <dd><p>Create the SMILES string from the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>canonical</strong> (<em>bool = False</em>) – Whether to create canonical SMILES</p></li>
 <li><p><strong>hydrogens</strong> (<em>bool = False</em>) – Whether to keep H’s in the SMILES string.</p></li>
+<li><p><strong>isomeric</strong> (<em>bool = True</em>) – Whether to use isomeric SMILES</p></li>
+<li><p><strong>rdkit</strong> (<em>bool = False</em>) – Whether to use RDKit rather than default of OpenBabel</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
