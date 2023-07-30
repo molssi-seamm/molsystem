@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.properties &#8212; MolSystem 2023.7.26 documentation</title>
+    <title>molsystem.properties &#8212; MolSystem 2023.7.30 documentation</title>
   
   
   
@@ -28,10 +27,10 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
@@ -45,12 +44,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/clipboard.min.js"></script>
-    <script src="../../_static/copybutton.js"></script>
-    <script src="../../_static/design-tabs.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/molsystem/properties';</script>
 
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -795,7 +794,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(*) FROM property WHERE name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration_id</span><span class="p">,</span> <span class="n">_property</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration_id</span><span class="p">,</span> <span class="n">_property</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the given property value for the configuration.</span>
 
 <span class="sd">        Parameters</span>
@@ -804,38 +803,85 @@ document.write(`
 <span class="sd">            The id of the configuration.</span>
 <span class="sd">        _property : int or str, or &quot;all&quot;</span>
 <span class="sd">            The id or name of the property, or all properties if &quot;all&quot;.</span>
+<span class="sd">        include_system_properties : bool=False</span>
+<span class="sd">            Whether to include properties that are on the system, not any configuration</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int, float, or str</span>
 <span class="sd">            The value of the property.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">_property</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, float_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE float_data.property = property.id AND configuration = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, int_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE int_data.property = property.id AND configuration = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, str_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE str_data.property = property.id AND configuration = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, json_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE json_data.property = property.id AND configuration = ?&quot;</span>
-
+        <span class="k">if</span> <span class="n">include_system_properties</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                <span class="n">sql</span><span class="p">,</span>
-                <span class="p">(</span>
-                    <span class="n">configuration_id</span><span class="p">,</span>
-                    <span class="n">configuration_id</span><span class="p">,</span>
-                    <span class="n">configuration_id</span><span class="p">,</span>
-                    <span class="n">configuration_id</span><span class="p">,</span>
-                <span class="p">),</span>
+                <span class="s2">&quot;SELECT system FROM configuration WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">configuration_id</span><span class="p">,)</span>
             <span class="p">)</span>
+            <span class="n">system_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">_property</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;  FROM property, float_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; WHERE float_data.property = property.id AND configuration = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;  FROM property, int_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; WHERE int_data.property = property.id AND configuration = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;  FROM property, str_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; WHERE str_data.property = property.id AND configuration = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;  FROM property, json_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; WHERE json_data.property = property.id AND configuration = ?&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">include_system_properties</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, float_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE float_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration IS NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, int_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE int_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration IS NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, str_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE str_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration IS NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, json_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE json_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration IS NULL AND system = ? </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="n">sql</span><span class="p">,</span>
+                    <span class="p">(</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">system_id</span><span class="p">,</span>
+                        <span class="n">system_id</span><span class="p">,</span>
+                        <span class="n">system_id</span><span class="p">,</span>
+                        <span class="n">system_id</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="n">sql</span><span class="p">,</span>
+                    <span class="p">(</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                        <span class="n">configuration_id</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">:</span>
@@ -860,10 +906,19 @@ document.write(`
 
             <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
             <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;  WHERE configuration = ? AND property = ?&quot;</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">configuration_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">include_system_properties</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  WHERE configuration IS NULL and system = ? AND property = ?&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">configuration_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">configuration_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -875,7 +930,9 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">get_for_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">_property</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_for_system</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">_property</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">include_configuration_properties</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the given property value(s) for the system.</span>
 
 <span class="sd">        Parameters</span>
@@ -884,6 +941,8 @@ document.write(`
 <span class="sd">            The id of the system.</span>
 <span class="sd">        _property : int or str of &quot;all&quot;</span>
 <span class="sd">            The id or name of the property, or &quot;all&quot; for all properties.</span>
+<span class="sd">        include_configuration_properties : bool=False</span>
+<span class="sd">            Whether to include properties from any configuration in the system.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -891,22 +950,46 @@ document.write(`
 <span class="sd">            The value(s) of the property.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">_property</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, float_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE float_data.property = property.id AND system = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, int_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE int_data.property = property.id AND system = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, str_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE str_data.property = property.id AND system = ?&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; UNION &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;SELECT name, type, value&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;  FROM property, json_data&quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE json_data.property = property.id AND system = ?&quot;</span>
-
+            <span class="k">if</span> <span class="n">include_configuration_properties</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, float_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE float_data.property = property.id AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, int_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE int_data.property = property.id AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, str_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE str_data.property = property.id AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, json_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE json_data.property = property.id AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, float_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE float_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration is NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, int_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE int_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration is NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, str_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE str_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration is NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; UNION </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;SELECT name, type, value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;  FROM property, json_data</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; WHERE json_data.property = property.id&quot;</span>
+                    <span class="s2">&quot;   AND configuration is NULL AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">system_id</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">system_id</span><span class="p">))</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
@@ -930,7 +1013,15 @@ document.write(`
                 <span class="n">pid</span> <span class="o">=</span> <span class="n">_property</span>
             <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
-            <span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND property = ?&quot;</span>
+            <span class="k">if</span> <span class="n">include_configuration_properties</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND property = ?&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;SELECT value FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data&quot;</span>
+                    <span class="s2">&quot;  WHERE configuration ISNULL AND system = ? AND property = ?&quot;</span>
+                <span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">system_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>

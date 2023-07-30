@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -7,9 +6,9 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2023.7.26 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2023.7.30 documentation</title>
   
   
   
@@ -29,10 +28,10 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c224919a" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
@@ -46,12 +45,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/design-tabs.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/molsystem';</script>
 
     <link rel="index" title="Index" href="../genindex.html" />
@@ -1672,6 +1671,18 @@ descriptors</p>
 <dd><p>Close the database.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.configuration_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configuration_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configuration_ids" title="Permalink to this definition">#</a></dt>
+<dd><p>The list of configuration ids.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.configurations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configurations" title="Permalink to this definition">#</a></dt>
+<dd><p>The list of configuration objects.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.create_system">
 <span class="sig-name descname"><span class="pre">create_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.create_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.create_system" title="Permalink to this definition">#</a></dt>
@@ -1802,6 +1813,40 @@ descriptors</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_configuration_ids">
+<span class="sig-name descname"><span class="pre">get_configuration_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_configuration_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_configuration_ids" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the configuration ids matching the glob pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>list</em><em> or </em><em>str = &quot;*&quot;</em>) – The glob-style pattern for matching the configuration names</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested configuration ids</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_configurations">
+<span class="sig-name descname"><span class="pre">get_configurations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_configurations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_configurations" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the configurations matching the glob pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>list</em><em> or </em><em>str = &quot;*&quot;</em>) – The glob-style pattern for matching the configuration names</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested configuration ids</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[_configuration]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_system">
 <span class="sig-name descname"><span class="pre">get_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_or_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_system" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the specified system object.</p>
@@ -1818,6 +1863,40 @@ descriptors</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – If the system does not exist, or more than one have the requested
     name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_system_ids">
+<span class="sig-name descname"><span class="pre">get_system_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_system_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_system_ids" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the system ids matching the glob pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>list</em><em> or </em><em>str = &quot;*&quot;</em>) – The glob-style pattern for matching the system names</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested system ids</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.get_systems">
+<span class="sig-name descname"><span class="pre">get_systems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.get_systems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.get_systems" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the systems matching the glob pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>list</em><em> or </em><em>str = &quot;*&quot;</em>) – The glob-style pattern for matching the system names</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The requested system ids</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[_system]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2281,6 +2360,8 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attached_as"><code class="docutils literal notranslate"><span class="pre">SystemDB.attached_as()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attributes"><code class="docutils literal notranslate"><span class="pre">SystemDB.attributes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.close"><code class="docutils literal notranslate"><span class="pre">SystemDB.close()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.configuration_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.configuration_ids</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.configurations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.create_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_system()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.create_table"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_table()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.cursor"><code class="docutils literal notranslate"><span class="pre">SystemDB.cursor</span></code></a></li>
@@ -2292,7 +2373,11 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.filename"><code class="docutils literal notranslate"><span class="pre">SystemDB.filename</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.find_configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.find_configurations()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_configuration"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_configuration()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_configuration_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_configuration_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_configurations()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_system()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_system_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_system_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.get_systems"><code class="docutils literal notranslate"><span class="pre">SystemDB.get_systems()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.is_attached"><code class="docutils literal notranslate"><span class="pre">SystemDB.is_attached()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.list"><code class="docutils literal notranslate"><span class="pre">SystemDB.list()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.n_configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.n_configurations</span></code></a></li>

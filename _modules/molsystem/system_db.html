@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.system_db &#8212; MolSystem 2023.7.26 documentation</title>
+    <title>molsystem.system_db &#8212; MolSystem 2023.7.30 documentation</title>
   
   
   
@@ -28,10 +27,10 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
@@ -45,12 +44,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/clipboard.min.js"></script>
-    <script src="../../_static/copybutton.js"></script>
-    <script src="../../_static/design-tabs.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/molsystem/system_db';</script>
 
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -791,6 +790,16 @@ document.write(`
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The list of configuration objects.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_Configuration</span><span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_ids</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">configuration_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The list of configuration ids.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM configuration&quot;</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A database cursor.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span>
@@ -1154,6 +1163,50 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_Configuration</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">system_db</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="SystemDB.get_configurations"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configurations">[docs]</a>    <span class="k">def</span> <span class="nf">get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the configurations matching the glob pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pattern : list or str = &quot;*&quot;</span>
+<span class="sd">            The glob-style pattern for matching the configuration names</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        [_configuration]</span>
+<span class="sd">            The requested configuration ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">_Configuration</span><span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_configuration_ids</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="SystemDB.get_configuration_ids"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configuration_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the configuration ids matching the glob pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pattern : list or str = &quot;*&quot;</span>
+<span class="sd">            The glob-style pattern for matching the configuration names</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        [int]</span>
+<span class="sd">            The requested configuration ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pattern</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM configuration&quot;</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> UNION </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;SELECT id FROM configuration WHERE name GLOB ?&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">pattern</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT id FROM configuration WHERE name GLOB ?&quot;</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)]</span></div>
+
 <div class="viewcode-block" id="SystemDB.get_system"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system">[docs]</a>    <span class="k">def</span> <span class="nf">get_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the specified system object.</span>
 
@@ -1184,6 +1237,47 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">id_or_name</span> <span class="o">=</span> <span class="n">systems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">_System</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SystemDB.get_systems"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_systems">[docs]</a>    <span class="k">def</span> <span class="nf">get_systems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the systems matching the glob pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pattern : list or str = &quot;*&quot;</span>
+<span class="sd">            The glob-style pattern for matching the system names</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        [_system]</span>
+<span class="sd">            The requested system ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_System</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_system_ids</span><span class="p">(</span><span class="n">pattern</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="SystemDB.get_system_ids"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_system_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the system ids matching the glob pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pattern : list or str = &quot;*&quot;</span>
+<span class="sd">            The glob-style pattern for matching the system names</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        [int]</span>
+<span class="sd">            The requested system ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pattern</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM system&quot;</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> UNION </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;SELECT id FROM system WHERE name GLOB ?&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">pattern</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT id FROM system WHERE name GLOB ?&quot;</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="SystemDB.is_attached"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.is_attached">[docs]</a>    <span class="k">def</span> <span class="nf">is_attached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether another system is attached to this one.</span>
