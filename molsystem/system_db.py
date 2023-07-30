@@ -313,6 +313,16 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         return result
 
     @property
+    def configurations(self):
+        """The list of configuration objects."""
+        return [_Configuration(_id, self) for _id in self.configuration_ids]
+
+    @property
+    def configuration_ids(self):
+        """The list of configuration ids."""
+        return [row[0] for row in self.db.execute("SELECT id FROM configuration")]
+
+    @property
     def cursor(self):
         """A database cursor."""
         return self._cursor
@@ -676,6 +686,50 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """
         return _Configuration(_id=cid, system_db=self)
 
+    def get_configurations(self, pattern="*"):
+        """Return the configurations matching the glob pattern.
+
+        Parameters
+        ----------
+        pattern : list or str = "*"
+            The glob-style pattern for matching the configuration names
+
+        Returns
+        -------
+        [_configuration]
+            The requested configuration ids
+        """
+        return [
+            _Configuration(_id, self) for _id in self.get_configuration_ids(pattern)
+        ]
+
+    def get_configuration_ids(self, pattern="*"):
+        """Return the configuration ids matching the glob pattern.
+
+        Parameters
+        ----------
+        pattern : list or str = "*"
+            The glob-style pattern for matching the configuration names
+
+        Returns
+        -------
+        [int]
+            The requested configuration ids
+        """
+        if pattern == "*":
+            return [row[0] for row in self.db.execute("SELECT id FROM configuration")]
+
+        if isinstance(pattern, list):
+            sql = "\n UNION \n".join(
+                ["SELECT id FROM configuration WHERE name GLOB ?"] * len(pattern)
+            )
+            params = pattern
+        else:
+            sql = "SELECT id FROM configuration WHERE name GLOB ?"
+            params = (pattern,)
+
+        return [row[0] for row in self.db.execute(sql, params)]
+
     def get_system(self, id_or_name):
         """Get the specified system object.
 
@@ -706,6 +760,47 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             else:
                 id_or_name = systems[0]
         return _System(self, id_or_name)
+
+    def get_systems(self, pattern="*"):
+        """Return the systems matching the glob pattern.
+
+        Parameters
+        ----------
+        pattern : list or str = "*"
+            The glob-style pattern for matching the system names
+
+        Returns
+        -------
+        [_system]
+            The requested system ids
+        """
+        return [_System(self, _id) for _id in self.get_system_ids(pattern)]
+
+    def get_system_ids(self, pattern="*"):
+        """Return the system ids matching the glob pattern.
+
+        Parameters
+        ----------
+        pattern : list or str = "*"
+            The glob-style pattern for matching the system names
+
+        Returns
+        -------
+        [int]
+            The requested system ids
+        """
+        if pattern == "*":
+            return [row[0] for row in self.db.execute("SELECT id FROM system")]
+
+        if isinstance(pattern, list):
+            sql = "\n UNION \n".join(
+                ["SELECT id FROM system WHERE name GLOB ?"] * len(pattern)
+            )
+            params = pattern
+        else:
+            sql = "SELECT id FROM system WHERE name GLOB ?"
+            params = (pattern,)
+        return [row[0] for row in self.db.execute(sql, params)]
 
     def is_attached(self, other):
         """Return whether another system is attached to this one.

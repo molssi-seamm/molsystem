@@ -58,7 +58,7 @@ class _SystemProperties(object):
         """A thin wrapper of the _Properties method."""
         return self.properties.exists(name)
 
-    def get(self, _property="all"):
+    def get(self, _property="all", include_configuration_properties=False):
         """Get the given property value for this system.
 
         Parameters
@@ -70,8 +70,14 @@ class _SystemProperties(object):
         -------
         int, float, or str
             The value of the property.
+        include_configuration_properties : bool=False
+            Whether to include properties from any configuration in the system.
         """
-        return self.properties.get_for_system(self._sid, _property)
+        return self.properties.get_for_system(
+            self._sid,
+            _property,
+            include_configuration_properties=include_configuration_properties,
+        )
 
     def id(self, name):
         """The id for a property
