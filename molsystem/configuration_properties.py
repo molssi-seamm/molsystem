@@ -58,20 +58,26 @@ class _ConfigurationProperties(object):
         """A thin wrapper of the _Properties method."""
         return self.properties.exists(name)
 
-    def get(self, _property="all"):
+    def get(self, _property="all", include_system_properties=False):
         """Get the given property value for this configuration.
 
         Parameters
         ----------
         _property : int or str
             The id or name of the property.
+        include_system_properties : bool=False
+            Whether to include properties that are on the system, not any configuration
 
         Returns
         -------
         int, float, or str
             The value of the property.
         """
-        return self.properties.get(self._cid, _property)
+        return self.properties.get(
+            self._cid,
+            _property,
+            include_system_properties=include_system_properties,
+        )
 
     def id(self, name):
         """The id for a property

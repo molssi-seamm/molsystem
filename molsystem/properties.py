@@ -317,7 +317,7 @@ class _Properties(object):
         self.cursor.execute("SELECT COUNT(*) FROM property WHERE name = ?", (name,))
         return self.cursor.fetchone()[0] != 0
 
-    def get(self, configuration_id, _property="all"):
+    def get(self, configuration_id, _property="all", include_system_properties=False):
         """Get the given property value for the configuration.
 
         Parameters
@@ -326,38 +326,85 @@ class _Properties(object):
             The id of the configuration.
         _property : int or str, or "all"
             The id or name of the property, or all properties if "all".
+        include_system_properties : bool=False
+            Whether to include properties that are on the system, not any configuration
 
         Returns
         -------
         int, float, or str
             The value of the property.
         """
-        if _property == "all":
-            sql = "SELECT name, type, value"
-            sql += "  FROM property, float_data"
-            sql += " WHERE float_data.property = property.id AND configuration = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, int_data"
-            sql += " WHERE int_data.property = property.id AND configuration = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, str_data"
-            sql += " WHERE str_data.property = property.id AND configuration = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, json_data"
-            sql += " WHERE json_data.property = property.id AND configuration = ?"
-
+        if include_system_properties:
             self.cursor.execute(
-                sql,
-                (
-                    configuration_id,
-                    configuration_id,
-                    configuration_id,
-                    configuration_id,
-                ),
+                "SELECT system FROM configuration WHERE id = ?", (configuration_id,)
             )
+            system_id = self.cursor.fetchone()[0]
+
+        if _property == "all":
+            sql = (
+                "SELECT name, type, value\n"
+                "  FROM property, float_data\n"
+                " WHERE float_data.property = property.id AND configuration = ?\n"
+                " UNION \n"
+                "SELECT name, type, value\n"
+                "  FROM property, int_data\n"
+                " WHERE int_data.property = property.id AND configuration = ?\n"
+                " UNION \n"
+                "SELECT name, type, value\n"
+                "  FROM property, str_data\n"
+                " WHERE str_data.property = property.id AND configuration = ?\n"
+                " UNION \n"
+                "SELECT name, type, value\n"
+                "  FROM property, json_data\n"
+                " WHERE json_data.property = property.id AND configuration = ?"
+            )
+            if include_system_properties:
+                sql += (
+                    "\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, float_data\n"
+                    " WHERE float_data.property = property.id"
+                    "   AND configuration IS NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, int_data\n"
+                    " WHERE int_data.property = property.id"
+                    "   AND configuration IS NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, str_data\n"
+                    " WHERE str_data.property = property.id"
+                    "   AND configuration IS NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, json_data\n"
+                    " WHERE json_data.property = property.id"
+                    "   AND configuration IS NULL AND system = ? \n"
+                )
+                self.cursor.execute(
+                    sql,
+                    (
+                        configuration_id,
+                        configuration_id,
+                        configuration_id,
+                        configuration_id,
+                        system_id,
+                        system_id,
+                        system_id,
+                        system_id,
+                    ),
+                )
+            else:
+                self.cursor.execute(
+                    sql,
+                    (
+                        configuration_id,
+                        configuration_id,
+                        configuration_id,
+                        configuration_id,
+                    ),
+                )
 
             result = {}
             for row in self.cursor:
@@ -382,10 +429,19 @@ class _Properties(object):
 
             ptype = self.type(pid)
             sql = (
-                f"SELECT value FROM {ptype}_data"
+                f"SELECT value FROM {ptype}_data\n"
                 "  WHERE configuration = ? AND property = ?"
             )
-            self.cursor.execute(sql, (configuration_id, pid))
+            if include_system_properties:
+                sql += (
+                    "\n"
+                    "  UNION \n"
+                    f"SELECT value FROM {ptype}_data\n"
+                    "  WHERE configuration IS NULL and system = ? AND property = ?"
+                )
+                self.cursor.execute(sql, (configuration_id, pid, system_id, pid))
+            else:
+                self.cursor.execute(sql, (configuration_id, pid))
             result = self.cursor.fetchone()
             if result is None:
                 raise ValueError(
@@ -397,7 +453,9 @@ class _Properties(object):
             else:
                 return result[0]
 
-    def get_for_system(self, system_id, _property="all"):
+    def get_for_system(
+        self, system_id, _property="all", include_configuration_properties=False
+    ):
         """Get the given property value(s) for the system.
 
         Parameters
@@ -406,6 +464,8 @@ class _Properties(object):
             The id of the system.
         _property : int or str of "all"
             The id or name of the property, or "all" for all properties.
+        include_configuration_properties : bool=False
+            Whether to include properties from any configuration in the system.
 
         Returns
         -------
@@ -413,22 +473,46 @@ class _Properties(object):
             The value(s) of the property.
         """
         if _property == "all":
-            sql = "SELECT name, type, value"
-            sql += "  FROM property, float_data"
-            sql += " WHERE float_data.property = property.id AND system = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, int_data"
-            sql += " WHERE int_data.property = property.id AND system = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, str_data"
-            sql += " WHERE str_data.property = property.id AND system = ?"
-            sql += " UNION "
-            sql += "SELECT name, type, value"
-            sql += "  FROM property, json_data"
-            sql += " WHERE json_data.property = property.id AND system = ?"
-
+            if include_configuration_properties:
+                sql = (
+                    "SELECT name, type, value\n"
+                    "  FROM property, float_data\n"
+                    " WHERE float_data.property = property.id AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, int_data\n"
+                    " WHERE int_data.property = property.id AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, str_data\n"
+                    " WHERE str_data.property = property.id AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, json_data\n"
+                    " WHERE json_data.property = property.id AND system = ?\n"
+                )
+            else:
+                sql = (
+                    "SELECT name, type, value\n"
+                    "  FROM property, float_data\n"
+                    " WHERE float_data.property = property.id"
+                    "   AND configuration is NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, int_data\n"
+                    " WHERE int_data.property = property.id"
+                    "   AND configuration is NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, str_data\n"
+                    " WHERE str_data.property = property.id"
+                    "   AND configuration is NULL AND system = ?\n"
+                    " UNION \n"
+                    "SELECT name, type, value\n"
+                    "  FROM property, json_data\n"
+                    " WHERE json_data.property = property.id"
+                    "   AND configuration is NULL AND system = ?\n"
+                )
             self.cursor.execute(sql, (system_id, system_id, system_id, system_id))
 
             result = {}
@@ -452,7 +536,15 @@ class _Properties(object):
                 pid = _property
             ptype = self.type(pid)
 
-            sql = f"SELECT value FROM {ptype}_data WHERE system = ? AND property = ?"
+            if include_configuration_properties:
+                sql = (
+                    f"SELECT value FROM {ptype}_data WHERE system = ? AND property = ?"
+                )
+            else:
+                sql = (
+                    f"SELECT value FROM {ptype}_data"
+                    "  WHERE configuration ISNULL AND system = ? AND property = ?"
+                )
             result = []
             for row in self.db.execute(sql, (system_id, pid)):
                 if ptype == "json":

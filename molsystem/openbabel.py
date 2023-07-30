@@ -47,7 +47,7 @@ class OpenBabelMixin:
         ob_mol.AssignSpinMultiplicity(True)
 
         if properties == "all":
-            data = self.properties.get("all")
+            data = self.properties.get("all", include_system_properties=True)
             pair = openbabel.OBPairData()
             for key, value in data.items():
                 pair.SetAttribute(key)

@@ -2,6 +2,12 @@
 History
 =======
 
+2023.7.30 -- Improved handling of properties
+    * Added ability to get lists of systems or configurations filtered by name
+    * Improved handling of properties on just a system, not configuration
+    * Added ability to filter properties retrieved
+    * Improved handling of properties when creating OpenBabel OB_MOL object
+      
 2023.7.26 -- Bugfix: error in QCSchema bonds; enhancement: RDKit
     * Fixed bug in the bond indices in QCSchema
     * Added ability to use RDKit for SMILES and InChI
