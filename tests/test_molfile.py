@@ -41,12 +41,12 @@ atoms1 = """\
 6     8             -1              1  1.9464  0.4244  0.0"""
 
 bonds1 = """\
-   i  j  bondorder
-1  1  2          1
-2  1  3          1
-3  1  4          1
-4  2  5          2
-5  2  6          1"""
+   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
+1  1  2          1           1           1        0        0        0
+2  1  3          1           1           1        0        0        0
+3  1  4          1           1           1        0        0        0
+4  2  5          2           1           1        0        0        0
+5  2  6          1           1           1        0        0        0"""
 
 text2 = """\
 L-Alanine

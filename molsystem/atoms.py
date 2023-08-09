@@ -103,8 +103,8 @@ class _Atoms(_Table):
         return self.get_ids()
 
     @property
-    def atomic_numbers(self):
-        """The atomic numbers of the atoms.
+    def asymmetric_atomic_numbers(self):
+        """The atomic numbers of the asymmetric atoms.
 
         Returns
         -------
@@ -114,7 +114,22 @@ class _Atoms(_Table):
         return self.get_column_data("atno")
 
     @property
-    def atomic_masses(self):
+    def atomic_numbers(self):
+        """The atomic numbers of the atoms.
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
+        """
+        result = []
+        atno = self.asymmetric_atomic_numbers
+        for i in self.configuration.atom_to_asymmetric_atom:
+            result.append(atno[i])
+        return result
+
+    @property
+    def asymmetric_atomic_masses(self):
         """The atomic masses of the atoms.
 
         Returns
@@ -131,9 +146,29 @@ class _Atoms(_Table):
         return result
 
     @property
+    def atomic_masses(self):
+        """The atomic masses of the atoms.
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
+        """
+        result = []
+        mass = self.asymmetric_atomic_masses
+        for i in self.configuration.atom_to_asymmetric_atom:
+            result.append(mass[i])
+        return result
+
+    @property
     def atomset(self):
         """The atomset for these atoms."""
         return self._atomset
+
+    @property
+    def atom_generators(self):
+        """The symmetry operations that create the symmetric atoms."""
+        return self.configuration.symmetry.atom_generators
 
     @property
     def attributes(self) -> Dict[str, Any]:
@@ -176,13 +211,46 @@ class _Atoms(_Table):
         return self.system_db.db
 
     @property
-    def n_atoms(self) -> int:
-        """The number of atoms in this configuration."""
+    def group(self):
+        """The space or point group of the configuration."""
+        return self.configuration.symmetry.group
+
+    @group.setter
+    def group(self, value):
+        self.configuration.symmetry.group = value
+
+    @property
+    def n_asymmetric_atoms(self) -> int:
+        """The number of symmetry-unique atoms in this configuration."""
         self.cursor.execute(
             "SELECT COUNT(*) FROM atomset_atom WHERE atomset = ?", (self.atomset,)
         )
         result = self.cursor.fetchone()[0]
         return result
+
+    @property
+    def n_atoms(self) -> int:
+        """The number of atoms in this configuration."""
+        n_atoms = 0
+        for symops in self.atom_generators:
+            n_atoms += len(symops)
+        return n_atoms
+
+    @property
+    def n_symops(self):
+        """The number of symmetry operations in the group."""
+        return self.configuration.symmetry.n_symops
+
+    @property
+    def asymmetric_symbols(self):
+        """The element symbols for the atoms in this configuration.
+
+        Returns
+        -------
+        [str]
+            The element symbols
+        """
+        return elements.to_symbols(self.asymmetric_atomic_numbers)
 
     @property
     def symbols(self):
@@ -194,6 +262,25 @@ class _Atoms(_Table):
             The element symbols
         """
         return elements.to_symbols(self.atomic_numbers)
+
+    @property
+    def symmetry_matrices(self):
+        """The 4x4 matrices for the symmetry operations."""
+        return self.configuration.symmetry.symmetry_matrices
+
+    @property
+    def symops(self):
+        """The symmetry operators as shorthand strings."""
+        return self.configuration.symmetry.symops
+
+    @symops.setter
+    def symops(self, value):
+        self.configuration.symmetry.symops = value
+
+    @property
+    def symop_to_atom(self):
+        """List of list of symop #'s for creating symmetry atoms from asymmetric."""
+        return self.configuration.symmetry.symop_to_atom
 
     @property
     def system_db(self):
@@ -655,7 +742,13 @@ class _Atoms(_Table):
 
         return [x[0] for x in self.db.execute(sql, parameters)]
 
-    def get_coordinates(self, fractionals=True, in_cell=False, as_array=False):
+    def get_coordinates(
+        self,
+        fractionals=True,
+        in_cell=False,
+        as_array=False,
+        asymmetric=False,
+    ):
         """Return the coordinates optionally translated back into the principal
         unit cell.
 
@@ -670,6 +763,9 @@ class _Atoms(_Table):
         as_array : bool = False
             Whether to return the results as a numpy array or as a list of
             lists (the default).
+        asymmetric : bool = False
+            If true, return coordinates for only the symmetry-unique atoms.
+            By default, expand to all atoms in the system.
 
         Returns
         -------
@@ -680,6 +776,8 @@ class _Atoms(_Table):
 
         periodicity = self.configuration.periodicity
         if periodicity == 0:
+            if asymmetric:
+                raise NotImplementedError("Point-group symmetry not handled yet.")
             if as_array:
                 return numpy.array(xyz)
             else:
@@ -687,7 +785,14 @@ class _Atoms(_Table):
 
         cell = self.configuration.cell
 
-        if isinstance(in_cell, str) and "molecule" in in_cell:
+        if not asymmetric and self.n_symops > 0:
+            raise NotImplementedError("Can't return full set of coordinates.")
+
+        if (
+            isinstance(in_cell, str)
+            and "molecule" in in_cell
+            and self.configuration.n_bonds > 0
+        ):
             # Need fractionals...
             if self.configuration.coordinate_system == "Cartesian":
                 UVW = cell.to_fractionals(xyz, as_array=True)

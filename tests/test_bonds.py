@@ -51,9 +51,9 @@ def test_get_item(AceticAcid):
     configuration = AceticAcid
     bonds = configuration.bonds
     bond = bonds.get_bond(5, 6)
-    assert [*bond] == [5, 5, 6, 2]
+    assert [*bond] == [5, 5, 6, 2, 1, 1, 0, 0, 0]
     bond = bonds.get_bond(6, 5)
-    assert [*bond] == [5, 5, 6, 2]
+    assert [*bond] == [5, 5, 6, 2, 1, 1, 0, 0, 0]
 
 
 def test_delete_bond(AceticAcid):
@@ -79,14 +79,14 @@ def test_add_bond(AceticAcid):
 def test_str(AceticAcid):
     """Test that we can get a string representation."""
     answer = """\
-   i  j  bondorder
-1  1  2          1
-2  1  3          1
-3  1  4          1
-4  1  5          1
-5  5  6          2
-6  5  7          1
-7  7  8          1"""
+   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
+1  1  2          1           1           1        0        0        0
+2  1  3          1           1           1        0        0        0
+3  1  4          1           1           1        0        0        0
+4  1  5          1           1           1        0        0        0
+5  5  6          2           1           1        0        0        0
+6  5  7          1           1           1        0        0        0
+7  7  8          1           1           1        0        0        0"""
     configuration = AceticAcid
     bonds = configuration.bonds
     if str(bonds) != answer:
@@ -97,14 +97,14 @@ def test_str(AceticAcid):
 def test_repr(AceticAcid):
     """Test that we can get a representation."""
     answer = """\
-   i  j  bondorder
-1  1  2          1
-2  1  3          1
-3  1  4          1
-4  1  5          1
-5  5  6          2
-6  5  7          1
-7  7  8          1"""
+   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
+1  1  2          1           1           1        0        0        0
+2  1  3          1           1           1        0        0        0
+3  1  4          1           1           1        0        0        0
+4  1  5          1           1           1        0        0        0
+5  5  6          2           1           1        0        0        0
+6  5  7          1           1           1        0        0        0
+7  7  8          1           1           1        0        0        0"""
     configuration = AceticAcid
     bonds = configuration.bonds
     if repr(bonds) != answer:
@@ -118,8 +118,19 @@ def test_adding_attribute(AceticAcid):
     bonds = configuration.bonds
     bonds.add_attribute("name", coltype="str")
     bond = bonds.get_bond(5, 7)
-    assert len(bond) == 5
-    assert bond.keys() == ["id", "i", "j", "bondorder", "name"]
+    assert len(bond) == 10
+    assert bond.keys() == [
+        "id",
+        "i",
+        "j",
+        "bondorder",
+        "symop_1_no",
+        "symop_2_no",
+        "offset1",
+        "offset2",
+        "offset3",
+        "name",
+    ]
 
 
 def test_adding_attribute_with_values(AceticAcid):
@@ -129,8 +140,19 @@ def test_adding_attribute_with_values(AceticAcid):
     bonds = configuration.bonds
     bonds.add_attribute("name", coltype="str", values=names)
     bond = bonds.get_bond(5, 7)
-    assert len(bond) == 5
-    assert bond.keys() == ["id", "i", "j", "bondorder", "name"]
+    assert len(bond) == 10
+    assert bond.keys() == [
+        "id",
+        "i",
+        "j",
+        "bondorder",
+        "symop_1_no",
+        "symop_2_no",
+        "offset1",
+        "offset2",
+        "offset3",
+        "name",
+    ]
     assert bond["name"] == "C-O"
 
 
@@ -149,14 +171,14 @@ def test_set_column(AceticAcid):
     """Test setting columns of the bond data."""
     answer = [1, 1, 1, 1, 2, 3, 1]
     answer2 = """\
-   i  j  bondorder
-1  1  2          1
-2  1  3          1
-3  1  4          1
-4  1  5          1
-5  5  6          2
-6  5  7          3
-7  7  8          1"""
+   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
+1  1  2          1           1           1        0        0        0
+2  1  3          1           1           1        0        0        0
+3  1  4          1           1           1        0        0        0
+4  1  5          1           1           1        0        0        0
+5  5  6          2           1           1        0        0        0
+6  5  7          3           1           1        0        0        0
+7  7  8          1           1           1        0        0        0"""
     configuration = AceticAcid
     bonds = configuration.bonds
     bondorders = bonds.get_column("bondorder")

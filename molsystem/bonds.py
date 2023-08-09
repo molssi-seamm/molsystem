@@ -191,16 +191,40 @@ class _Bonds(_Table):
 
         i2 = []
         j2 = []
-        for i_, j_ in zip(i, j):
-            # will need to handle offsets here at some point
+        offset1 = []
+        offset2 = []
+        offset3 = []
+
+        o1s = kwargs["offset1"] if "offset1" in kwargs else [0] * len(i)
+        o2s = kwargs["offset2"] if "offset2" in kwargs else [0] * len(i)
+        o3s = kwargs["offset3"] if "offset3" in kwargs else [0] * len(i)
+
+        if isinstance(o1s, int):
+            o1s = [o1s]
+        if isinstance(o2s, int):
+            o2s = [o2s]
+        if isinstance(o3s, int):
+            o3s = [o3s]
+
+        for i_, j_, o1, o2, o3 in zip(i, j, o1s, o2s, o3s):
             if not isinstance(i_, int) or not isinstance(j_, int):
                 raise TypeError("'i' and 'j', the atom indices, must be integers")
             if i_ < j_:
                 i2.append(i_)
                 j2.append(j_)
+                offset1.append(o1)
+                offset2.append(o2)
+                offset3.append(o3)
             else:
                 i2.append(j_)
                 j2.append(i_)
+                offset1.append(-o1)
+                offset2.append(-o2)
+                offset3.append(-o3)
+
+        kwargs["offset1"] = offset1
+        kwargs["offset2"] = offset2
+        kwargs["offset3"] = offset3
 
         ids = super().append(i=i2, j=j2, **kwargs)
 

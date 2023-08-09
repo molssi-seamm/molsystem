@@ -129,10 +129,6 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     symmetry
         Information about point or space group symmetry.
 
-    symmetryoperation
-        The detailed symmetry operations for the point or space
-        groups.
-
     cell
         The information about the periodicity of a configuration, if
         needed.
@@ -866,10 +862,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table = self["symmetry"]
             table.add_attribute("id", coltype="int", pk=True)
             table.add_attribute("group", coltype="str", default="")
-
-            table = self["symmetryoperation"]
-            table.add_attribute("symmetry", coltype="int", references="symmetry")
-            table.add_attribute("symop", coltype="str")
+            table.add_attribute("symops", coltype="str", default="")
 
             # Periodic cell information
             table = self["cell"]
@@ -908,10 +901,12 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("i", coltype="int", references="atom")
             table.add_attribute("j", coltype="int", references="atom")
             table.add_attribute("bondorder", coltype="int", default=1)
-            # Only need for infinite networked systems. Think about later!
-            # table.add_attribute("offset1", coltype="int", default=0)
-            # table.add_attribute("offset2", coltype="int", default=0)
-            # table.add_attribute("offset3", coltype="int", default=0)
+            table.add_attribute("symop_1_no", coltype="int", default=1)
+            table.add_attribute("symop_2_no", coltype="int", default=1)
+            # Needed for periodic systems
+            table.add_attribute("offset1", coltype="int", default=0)
+            table.add_attribute("offset2", coltype="int", default=0)
+            table.add_attribute("offset3", coltype="int", default=0)
 
             table = self["bondset"]
             table.add_attribute("id", coltype="int", pk=True)

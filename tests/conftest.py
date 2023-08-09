@@ -78,6 +78,12 @@ def configuration(system):
 
 
 @pytest.fixture()
+def symmetry(configuration):
+    """An _Symmetry object."""
+    return configuration.symmetry
+
+
+@pytest.fixture()
 def atoms(configuration):
     """An empty atoms table."""
     return configuration.atoms
@@ -480,3 +486,13 @@ def properties(system):
             ival += 1
 
     return properties
+
+
+@pytest.fixture()
+def polyethylene(configuration):
+    """A polyethylene crystal with bonds."""
+    path = data_path / "polyethylene.cif"
+    cif_text = path.read_text()
+    configuration.from_cif_text(cif_text)
+
+    return configuration
