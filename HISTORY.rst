@@ -2,6 +2,8 @@
 History
 =======
 
+2023.8.27 -- Bugfix: writing SDF did not handle charge and multiplicity.
+
 2023.7.30 -- Improved handling of properties
     * Added ability to get lists of systems or configurations filtered by name
     * Improved handling of properties on just a system, not configuration
