@@ -1,0 +1,62 @@
+# CIF file created by ISOCIF, version 3.1.1               
+# Space Group: 62 Pnma
+# Space-group preferences: orthorhombic axes abc
+# Lattice parameters: a=7.48, b=2.55, c=4.97, alpha=90, beta=90, gamma=90
+# C 4c (x,1/4,z), x=0.033, z=0.066
+# H1 4c (x,1/4,z), x=0.1898, z=0.0520
+# H2 4c (x,1/4,z), x=0.0339, z=0.2607
+
+data_isocif-output
+_audit_creation_method ISOCIF
+
+_cell_length_a    7.48000
+_cell_length_b    2.55000
+_cell_length_c    4.97000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+_cell_volume      94.79778
+
+_symmetry_space_group_name_H-M "P n m a"
+_symmetry_Int_Tables_number 62
+_symmetry_cell_setting "orthorhombic"
+_space_group.reference_setting '062:-P 2ac 2n'
+_space_group.transform_Pp_abc a,b,c;0,0,0
+
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 x+1/2,-y+1/2,-z+1/2
+3 -x,y+1/2,-z
+4 -x+1/2,-y,z+1/2
+5 -x,-y,-z
+6 -x+1/2,y+1/2,z+1/2
+7 x,-y+1/2,z
+8 x+1/2,y,-z+1/2
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_fract_symmform
+C  C   4 c 0.038 0.250 0.065 1.00000 Dx,0,Dz 
+H1 H   4 c 0.179 0.250 0.049 1.00000 Dx,0,Dz 
+H2 H   4 c 0.010 0.250 0.273 1.00000 Dx,0,Dz 
+
+loop_
+_geom_bond_atom_site_label_1
+_geom_bond_atom_site_label_2
+_geom_bond_site_symmetry_1
+_geom_bond_site_symmetry_2
+C  H1 . .
+C  H2 . .
+C  C  . 3
+C  C  . 3_545
+
+# end of cif

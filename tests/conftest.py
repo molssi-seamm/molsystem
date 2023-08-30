@@ -78,6 +78,12 @@ def configuration(system):
 
 
 @pytest.fixture()
+def symmetry(configuration):
+    """An _Symmetry object."""
+    return configuration.symmetry
+
+
+@pytest.fixture()
 def atoms(configuration):
     """An empty atoms table."""
     return configuration.atoms
@@ -331,6 +337,88 @@ def copper(configuration):
 
 
 @pytest.fixture()
+def diamond(configuration):
+    """Diamond crystal."""
+    # Atoms
+    x = [0.0]
+    y = [0.0]
+    z = [0.0]
+
+    # Bonds
+    # Generators = [ 0,  2,  1,  5, 10, 18,  3,  7]
+    II = [0, 0, 0, 0]
+    JJ = [0, 0, 0, 0]
+    symop2 = ["2", "6_544", "4_454", "8_445"]
+
+    configuration.name = "Diamond"
+    configuration.periodicity = 3
+    configuration.group = "F d -3 m :1"
+    configuration.coordinate_system = "fractional"
+    configuration.cell.parameters = (3.57, 3.57, 3.57, 90, 90, 90)
+    ids = configuration.atoms.append(x=x, y=y, z=z, symbol=["C"])
+
+    Is = [ids[i] for i in II]
+    Js = [ids[j] for j in JJ]
+    configuration.bonds.append(i=Is, j=Js, symop2=symop2)
+
+    return configuration
+
+
+@pytest.fixture()
+def h_chain(configuration):
+    """Hydrogen chain crystal."""
+    # Atoms
+    x = [0.0]
+    y = [0.0]
+    z = [0.5]
+
+    # Bonds
+    II = [0]
+    JJ = [0]
+    symop2 = ["1_556"]
+
+    configuration.name = "H-chain"
+    configuration.periodicity = 3
+    configuration.group = "P 1"
+    configuration.coordinate_system = "fractional"
+    configuration.cell.parameters = (10.0, 10.0, 1.0, 90, 90, 90)
+    ids = configuration.atoms.append(x=x, y=y, z=z, symbol=["H"])
+
+    Is = [ids[i] for i in II]
+    Js = [ids[j] for j in JJ]
+    configuration.bonds.append(i=Is, j=Js, symop2=symop2)
+
+    return configuration
+
+
+@pytest.fixture()
+def h_chain2(configuration):
+    """Hydrogen chain crystal."""
+    # Atoms
+    x = [0.0, 0.0]
+    y = [0.0, 0.0]
+    z = [0.26, 0.74]
+
+    # Bonds
+    II = [0, 0]
+    JJ = [1, 1]
+    symop2 = [".", "1_554"]
+
+    configuration.name = "H-chain2"
+    configuration.periodicity = 3
+    configuration.group = "P 1"
+    configuration.coordinate_system = "fractional"
+    configuration.cell.parameters = (10.0, 10.0, 2.0, 90, 90, 90)
+    ids = configuration.atoms.append(x=x, y=y, z=z, symbol=["H", "H"])
+
+    Is = [ids[i] for i in II]
+    Js = [ids[j] for j in JJ]
+    configuration.bonds.append(i=Is, j=Js, symop2=symop2)
+
+    return configuration
+
+
+@pytest.fixture()
 def CH3COOH_3H2O(AceticAcid):
     """Configuration with acetic acid and 3 water molecules"""
     configuration = AceticAcid
@@ -480,3 +568,23 @@ def properties(system):
             ival += 1
 
     return properties
+
+
+@pytest.fixture()
+def polyethylene(configuration):
+    """A polyethylene crystal with bonds."""
+    path = data_path / "polyethylene.cif"
+    cif_text = path.read_text()
+    configuration.from_cif_text(cif_text)
+
+    return configuration
+
+
+@pytest.fixture()
+def benzene(configuration):
+    """A benzene crystal with bonds."""
+    path = data_path / "benzene.cif"
+    cif_text = path.read_text()
+    configuration.from_cif_text(cif_text)
+
+    return configuration

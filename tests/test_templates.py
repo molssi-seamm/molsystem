@@ -198,17 +198,18 @@ def test_template_bonds(gly):
 def test_print_template_bonds(gly):
     """Test the string reprentation of the bonds in the template."""
     answer = """\
-       i    j  bondorder _chem_comp_bond.comp_id
-120  127  128          1                     GLY
-121  127  132          1                     GLY
-122  127  133          1                     GLY
-123  128  129          1                     GLY
-124  128  134          1                     GLY
-125  128  135          1                     GLY
-126  129  130          2                     GLY
-127  129  131          1                     GLY
-128  131  136          1                     GLY"""
-    result = str(gly.bonds)
+       i    j  bondorder symop1 symop2 _chem_comp_bond.comp_id
+120  127  128          1      .      .                     GLY
+121  127  132          1      .      .                     GLY
+122  127  133          1      .      .                     GLY
+123  128  129          1      .      .                     GLY
+124  128  134          1      .      .                     GLY
+125  128  135          1      .      .                     GLY
+126  129  130          2      .      .                     GLY
+127  129  131          1      .      .                     GLY
+128  131  136          1      .      .                     GLY"""
+
+    result = gly.bonds.to_dataframe().to_string()
     if result != answer:
         print(result)
     assert result == answer

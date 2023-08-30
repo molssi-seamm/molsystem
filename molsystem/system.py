@@ -429,10 +429,13 @@ class _System(CIFMixin, MutableMapping):
             system=self.id, periodicity=periodicity, **kwargs
         )[0]
         configuration = _Configuration(_id=cid, system_db=self.system_db)
+        if symmetry is None:
+            # Make sure that symmetry is set up...
+            configuration.periodicity = periodicity
 
         # If the atomset was given, need to create dummy coordinates
         if atomset is not None:
-            n_atoms = configuration.n_atoms
+            n_atoms = configuration.n_asymmetric_atoms
             data = {"configuration": configuration.id}
             data["atom"] = configuration.atoms.ids
             data["x"] = [0.0] * n_atoms

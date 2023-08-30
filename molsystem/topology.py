@@ -37,39 +37,41 @@ class TopologyMixin:
 
         molecules = []
 
-        atoms = self.atoms
-        atom_ids = atoms.ids
-        n_atoms = len(atom_ids)
+        n_atoms = self.atoms.n_atoms
 
         if n_atoms == 0:
             return molecules
 
-        to_index = {j: i for i, j in enumerate(atom_ids)}
-        neighbors = self.bonded_neighbors()
+        if not as_indices and self.symmetry.n_symops > 1:
+            raise RuntimeError(
+                "Cannot return atom ids for bonded_neighbors when there is symmetry"
+            )
+        neighbors = self.bonded_neighbors(as_indices=True)
         visited = [False] * n_atoms
         while True:
             # Find first atom not yet visited
             try:
-                index = visited.index(False)
+                i = visited.index(False)
             except ValueError:
                 break
-            visited[index] = True
-            i = atom_ids[index]
+            visited[i] = True
             atoms = [i]
             next_atoms = neighbors[i]
             while len(next_atoms) > 0:
                 tmp = []
                 for i in next_atoms:
-                    if not visited[to_index[i]]:
+                    if not visited[i]:
                         atoms.append(i)
-                        visited[to_index[i]] = True
+                        visited[i] = True
                         tmp.extend(neighbors[i])
                 next_atoms = tmp
             molecules.append(sorted(atoms))
         if as_indices:
-            return [[to_index[j] for j in js] for js in molecules]
-        else:
             return molecules
+        else:
+            atom_ids = self.atoms.ids
+            to_id = {i: j for i, j in enumerate(atom_ids)}
+            return [[to_id[j] for j in js] for js in molecules]
 
     def bonded_neighbors(self, as_indices=False, first_index=0):
         """The atoms bonded to each atom in the system.
@@ -88,6 +90,7 @@ class TopologyMixin:
         """
         neighbors = {}
 
+        symmetry = self.symmetry
         atoms = self.atoms
         bonds = self.bonds
         n_atoms = atoms.n_atoms
@@ -98,28 +101,43 @@ class TopologyMixin:
             else:
                 return neighbors
 
-        atom_ids = atoms.ids
-        neighbors = {i: [] for i in atom_ids}
-
-        if bonds.n_bonds > 0:
-            for bond in bonds.bonds():
-                i = bond["i"]
-                j = bond["j"]
+        if self.symmetry.n_symops > 1:
+            # Symmetry involved...
+            if not as_indices:
+                raise RuntimeError(
+                    "Cannot return atom ids for bonded_neighbors when there is symmetry"
+                )
+            pairs = symmetry.bond_atoms
+            neighbors = [[] for i in range(n_atoms)]
+            for i, j in pairs:
                 neighbors[i].append(j)
                 neighbors[j].append(i)
-
-        if as_indices:
-            # Convert to indices
-            to_index = {j: i + first_index for i, j in enumerate(atom_ids)}
-            result = [[]] * (n_atoms + first_index)
-            for i, js in neighbors.items():
-                result[to_index[i]] = sorted([to_index[j] for j in js])
-            return result
-        else:
-            for i in neighbors:
-                neighbors[i].sort()
-
+            for js in neighbors:
+                js.sort()
             return neighbors
+        else:
+            atom_ids = atoms.ids
+            neighbors = {i: [] for i in atom_ids}
+
+            if bonds.n_bonds > 0:
+                for bond in bonds.bonds():
+                    i = bond["i"]
+                    j = bond["j"]
+                    neighbors[i].append(j)
+                    neighbors[j].append(i)
+
+            if as_indices:
+                # Convert to indices
+                to_index = {j: i + first_index for i, j in enumerate(atom_ids)}
+                result = [[]] * (n_atoms + first_index)
+                for i, js in neighbors.items():
+                    result[to_index[i]] = sorted([to_index[j] for j in js])
+                return result
+            else:
+                for i in neighbors:
+                    neighbors[i].sort()
+
+                return neighbors
 
     def create_molecule_subsets(self):
         """Create a subset for each molecule in a configuration.
@@ -288,7 +306,14 @@ class TopologyMixin:
                     mapper.MapFirst(ob_mol, mapping)
                     reordered_atoms = [atoms[j] for i, j in mapping]
 
-                    subset = self.subsets.create(template, reordered_atoms, tatom_ids)
+                    if len(reordered_atoms) == 0:
+                        logger.warning(
+                            "There are no atoms in the subset for this molecule!"
+                        )
+                    else:
+                        subset = self.subsets.create(
+                            template, reordered_atoms, tatom_ids
+                        )
                 else:
                     subset = self.subsets.create(template, atoms)
 
@@ -303,6 +328,60 @@ class TopologyMixin:
             return new_templates, new_subsets
         else:
             return new_templates
+
+    def get_molecule_smiles(self):
+        """Return the a list of the canonical SMILES for each molecule..
+
+        Returns
+        -------
+        [str]
+            The canonical SMILES for each molecule, in order that they are found.
+        """
+        # Find the molecules
+        molecules = self.find_molecules()
+        n_molecules = len(molecules)
+
+        # And the molecule each atom is in
+        atom_to_molecule = {}
+        for molecule, atoms in enumerate(molecules):
+            for atom in atoms:
+                atom_to_molecule[atom] = molecule
+
+        # The bonds in each molecule
+        bonds_per_molecule = [[] for i in range(n_molecules)]
+        for bond in self.bonds.bonds():
+            i = bond["i"]
+            j = bond["j"]
+            order = bond["bondorder"]
+            molecule = atom_to_molecule[i]
+            bonds_per_molecule[molecule].append((i, j, order))
+
+        # Get the canonical smiles for each molecule
+        to_can = openbabel.OBConversion()
+        to_can.SetOutFormat("can")
+        ob_mol = openbabel.OBMol()
+        atnos = self.atoms.atomic_numbers
+
+        atom_index = {j: i for i, j in enumerate(self.atoms.ids)}
+
+        SMILES = []
+        for molecule, atoms in enumerate(molecules):
+            to_index = {j: i for i, j in enumerate(atoms)}
+            molecule_atnos = [atnos[atom_index[i]] for i in atoms]
+
+            ob_mol.Clear()
+            for atom, atno in zip(atoms, molecule_atnos):
+                ob_atom = ob_mol.NewAtom()
+                ob_atom.SetAtomicNum(atno)
+            bonds = []
+            for i, j, order in bonds_per_molecule[molecule]:
+                bonds.append((to_index[i], to_index[j], order))
+                # 1-based indices in ob.
+                ob_mol.AddBond(to_index[i] + 1, to_index[j] + 1, order)
+
+            canonical = to_can.WriteString(ob_mol).strip()
+            SMILES.append(canonical)
+        return SMILES
 
     def reimage_bonded_atoms(self, reimage_molecules=True):
         """Ensure that the atoms in a molecule are "near" each other.

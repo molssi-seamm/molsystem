@@ -4,6 +4,7 @@ from collections import Counter
 from functools import reduce
 import logging
 import math
+import pprint  # noqa: E401
 
 import seekpath
 import spglib
@@ -59,6 +60,11 @@ class _Configuration(
         self._periodicity = None
         self._symmetry_id = None
 
+        self._symmetry = None  # A cache for the symmetry instance
+
+        # Initialize periodicity and symmetry to 0 and C1
+        # self.periodicity = 0
+
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
         self.system_db["configuration"].__enter__()
@@ -87,6 +93,11 @@ class _Configuration(
     def atoms(self):
         """The atoms for this configuration."""
         return _Atoms(self)
+
+    @property
+    def atom_to_asymmetric_atom(self):
+        """The asymmetric atom related to each atom."""
+        return self.symmetry.atom_to_asymmetric_atom
 
     @property
     def atomset(self):
@@ -129,6 +140,11 @@ class _Configuration(
             pass
         else:
             raise RuntimeError("The atomset is already set!")
+
+    @property
+    def atom_generators(self):
+        """The symmetry operations that create the symmetric atoms."""
+        return self.symmetry.atom_generators
 
     @property
     def bonds(self):
@@ -347,6 +363,15 @@ class _Configuration(
         return " ".join(formula), " ".join(empirical_formula), Z
 
     @property
+    def group(self):
+        """The space or point group of the configuration."""
+        return self.symmetry.group
+
+    @group.setter
+    def group(self, value):
+        self.symmetry.group = value
+
+    @property
     def id(self):
         """The id of this configuration."""
         return self._id
@@ -365,32 +390,15 @@ class _Configuration(
         return sum(masses)
 
     @property
-    def spin_multiplicity(self):
-        """The spin_multiplicity of the system, 0, 1, 2, 3, ..."""
-        if self._spin_multiplicity == 0:
-            self.cursor.execute(
-                "SELECT spin_multiplicity FROM configuration WHERE id = ?", (self.id,)
-            )
-            multiplicity = self.cursor.fetchone()[0]
-            if multiplicity is None or multiplicity == 0:
-                n_electrons = sum(self.atoms.atomic_numbers) - self.charge
-                if n_electrons % 2 == 0:
-                    multiplicity = 1
-                else:
-                    multiplicity = 2
-                self.spin_multiplicity = multiplicity
-            else:
-                self._spin_multiplicity = multiplicity
-        return self._spin_multiplicity
+    def n_asymmetric_atoms(self) -> int:
+        """The number of symmetry-unique atoms.
 
-    @spin_multiplicity.setter
-    def spin_multiplicity(self, value):
-        self.cursor.execute(
-            "UPDATE configuration SET spin_multiplicity = ? WHERE id = ?",
-            (value, self.id),
-        )
-        self.db.commit()
-        self._spin_multiplicity = value
+        Returns
+        -------
+        int
+            Number of atoms
+        """
+        return self.atoms.n_asymmetric_atoms
 
     @property
     def n_atoms(self) -> int:
@@ -421,6 +429,17 @@ class _Configuration(
         )
         self.db.commit()
         self._name = value
+
+    @property
+    def n_asymmetric_bonds(self) -> int:
+        """The number of asymmetric bonds.
+
+        Returns
+        -------
+        int
+            Number of asymmetric bonds
+        """
+        return self.bonds.n_asymmetric_bonds
 
     @property
     def n_bonds(self) -> int:
@@ -466,6 +485,11 @@ class _Configuration(
         self.db.commit()
 
     @property
+    def n_symops(self):
+        """The number of symmetry operations in the group."""
+        return self.symmetry.n_symops
+
+    @property
     def periodicity(self):
         """The periodicity of the system, 0, 1, 2 or 3"""
         if self._periodicity is None:
@@ -484,11 +508,43 @@ class _Configuration(
         )
         self.db.commit()
         self._periodicity = value
+        if value == 0:
+            self.symmetry.group = "C1"
+        else:
+            self.symmetry.group = "P 1"
 
     @property
     def properties(self):
         """The class to handle the properties for this configuration."""
         return _ConfigurationProperties(self)
+
+    @property
+    def spin_multiplicity(self):
+        """The spin_multiplicity of the system, 0, 1, 2, 3, ..."""
+        if self._spin_multiplicity == 0:
+            self.cursor.execute(
+                "SELECT spin_multiplicity FROM configuration WHERE id = ?", (self.id,)
+            )
+            multiplicity = self.cursor.fetchone()[0]
+            if multiplicity is None or multiplicity == 0:
+                n_electrons = sum(self.atoms.atomic_numbers) - self.charge
+                if n_electrons % 2 == 0:
+                    multiplicity = 1
+                else:
+                    multiplicity = 2
+                self.spin_multiplicity = multiplicity
+            else:
+                self._spin_multiplicity = multiplicity
+        return self._spin_multiplicity
+
+    @spin_multiplicity.setter
+    def spin_multiplicity(self, value):
+        self.cursor.execute(
+            "UPDATE configuration SET spin_multiplicity = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
+        self._spin_multiplicity = value
 
     @property
     def subsets(self):
@@ -513,7 +569,9 @@ class _Configuration(
     @property
     def symmetry(self):
         """The periodic (unit) symmetry for this configuration."""
-        return _Symmetry(self)
+        if self._symmetry is None:
+            self._symmetry = _Symmetry(self)
+        return self._symmetry
 
     @property
     def symmetry_id(self):
@@ -532,6 +590,25 @@ class _Configuration(
                 )
                 self.db.commit()
         return self._symmetry_id
+
+    @property
+    def symmetry_matrices(self):
+        """The 4x4 matrices for the symmetry operations."""
+        return self.symmetry.symmetry_matrices
+
+    @property
+    def symops(self):
+        """The symmetry operators as shorthand strings."""
+        return self.symmetry.symops
+
+    @symops.setter
+    def symops(self, value):
+        self.symmetry.symops = value
+
+    @property
+    def symop_to_atom(self):
+        """List of list of symop #'s for creating symmetry atoms from asymmetric."""
+        return self.symmetry.symop_to_atom
 
     @property
     def system(self):
@@ -740,6 +817,9 @@ class _Configuration(
                 atomic_numbers = dataset["conv_types"].tolist()
                 space_group = dataset["spacegroup_international"].strip("'")
 
+            print(f"{self.n_atoms}")
+            pprint.pprint(dataset)
+
             logger.debug("")
             logger.debug("Lattice after symmetrize")
             for vector in lattice:
@@ -765,6 +845,7 @@ class _Configuration(
             self.coordinate_system = "fractional"
             self.atoms.append(atno=atomic_numbers, x=xs, y=ys, z=zs)
             self.symmetry.group = space_group
+            print(f"{self.n_atoms}")
 
     def update(
         self,

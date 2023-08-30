@@ -21,11 +21,24 @@ class OpenBabelMixin:
 
     def to_OBMol(self, properties=None):
         """Return an OBMol object for the configuration, template, or subset."""
+        if self.__class__.__name__ == "_Configuration":
+            charge = self.charge
+            spin = self.spin_multiplicity
+        else:
+            charge = None
+            spin = None
+
         ob_mol = openbabel.OBMol()
         for atno, xyz in zip(self.atoms.atomic_numbers, self.atoms.coordinates):
             ob_atom = ob_mol.NewAtom()
             ob_atom.SetAtomicNum(atno)
             ob_atom.SetVector(*xyz)
+            if charge is not None:
+                ob_atom.SetFormalCharge(charge)
+                charge = None
+            if spin is not None:
+                ob_atom.SetSpinMultiplicity(spin)
+                spin = None
 
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
