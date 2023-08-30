@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.molfile &#8212; MolSystem 2023.7.30 documentation</title>
+    <title>molsystem.molfile &#8212; MolSystem 2023.8.30 documentation</title>
   
   
   
@@ -27,7 +27,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
@@ -44,9 +44,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/documentation_options.js?v=e6c77f19"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -487,10 +487,14 @@ document.write(`
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MolFileMixin"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin">[docs]</a><span class="k">class</span> <span class="nc">MolFileMixin</span><span class="p">:</span>
+<div class="viewcode-block" id="MolFileMixin">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin">[docs]</a>
+<span class="k">class</span> <span class="nc">MolFileMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling MDL Molfiles.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MolFileMixin.to_molfile_text"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin.to_molfile_text">[docs]</a>    <span class="k">def</span> <span class="nf">to_molfile_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Exported from SEAMM&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="MolFileMixin.to_molfile_text">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin.to_molfile_text">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_molfile_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Exported from SEAMM&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the text of the Molfile from the system.</span>
 
 <span class="sd">        Parameters</span>
@@ -563,7 +567,10 @@ document.write(`
 
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MolFileMixin.from_molfile_text"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin.from_molfile_text">[docs]</a>    <span class="k">def</span> <span class="nf">from_molfile_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MolFileMixin.from_molfile_text">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.molfile.MolFileMixin.from_molfile_text">[docs]</a>
+    <span class="k">def</span> <span class="nf">from_molfile_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from an MDL Molfile, version 3</span>
 
 <span class="sd">        Parameters</span>
@@ -666,7 +673,9 @@ document.write(`
                     <span class="n">bondorder</span><span class="p">,</span> <span class="n">iatom</span><span class="p">,</span> <span class="n">jatom</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
                     <span class="n">iatoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">iatom</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
                     <span class="n">jatoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">jatom</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="n">bondorders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bondorder</span><span class="p">))</span></div></div>
+                    <span class="n">bondorders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bondorder</span><span class="p">))</span></div>
+</div>
+
 </pre></div>
 
                 </article>

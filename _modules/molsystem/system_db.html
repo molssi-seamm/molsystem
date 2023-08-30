@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.system_db &#8212; MolSystem 2023.7.30 documentation</title>
+    <title>molsystem.system_db &#8212; MolSystem 2023.8.30 documentation</title>
   
   
   
@@ -27,7 +27,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
@@ -44,9 +44,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/documentation_options.js?v=e6c77f19"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -495,7 +495,9 @@ document.write(`
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SystemDB"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB">[docs]</a><span class="k">class</span> <span class="nc">SystemDB</span><span class="p">(</span><span class="n">CIFMixin</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">):</span>
+<div class="viewcode-block" id="SystemDB">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB">[docs]</a>
+<span class="k">class</span> <span class="nc">SystemDB</span><span class="p">(</span><span class="n">CIFMixin</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A database of systems for SEAMM.</span>
 
 <span class="sd">    A class based on a SQLite database for describing molecular and</span>
@@ -605,10 +607,6 @@ document.write(`
 
 <span class="sd">    symmetry</span>
 <span class="sd">        Information about point or space group symmetry.</span>
-
-<span class="sd">    symmetryoperation</span>
-<span class="sd">        The detailed symmetry operations for the point or space</span>
-<span class="sd">        groups.</span>
 
 <span class="sd">    cell</span>
 <span class="sd">        The information about the periodicity of a configuration, if</span>
@@ -909,7 +907,9 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The defined templates.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_Templates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SystemDB.attach"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attach">[docs]</a>    <span class="k">def</span> <span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="SystemDB.attach">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attach">[docs]</a>
+    <span class="k">def</span> <span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach another system to this one&#39;s database.</span>
 
 <span class="sd">        Parameters</span>
@@ -935,7 +935,10 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">_attached</span><span class="p">[</span><span class="n">other</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">attached_name</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attached</span><span class="p">[</span><span class="n">other</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SystemDB.attached_as"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attached_as">[docs]</a>    <span class="k">def</span> <span class="nf">attached_as</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.attached_as">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attached_as">[docs]</a>
+    <span class="k">def</span> <span class="nf">attached_as</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The attachment name for another system.</span>
 
 <span class="sd">        Parameters</span>
@@ -950,7 +953,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attached</span><span class="p">[</span><span class="n">other</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SystemDB.attributes"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attributes">[docs]</a>    <span class="k">def</span> <span class="nf">attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tablename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.attributes">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.attributes">[docs]</a>
+    <span class="k">def</span> <span class="nf">attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tablename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The attributes -- columns -- of a given table.</span>
 
 <span class="sd">        Parameters</span>
@@ -981,11 +987,17 @@ document.write(`
             <span class="p">}</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="SystemDB.close"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.close">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.close">[docs]</a>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the database.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="SystemDB.create_system"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.create_system">[docs]</a>    <span class="k">def</span> <span class="nf">create_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">make_current</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.create_system">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.create_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">make_current</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new system.</span>
 
 <span class="sd">        Parameters</span>
@@ -1008,7 +1020,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">_System</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SystemDB.create_table"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.create_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">_Table</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.create_table">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.create_table">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">_Table</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new table with the given name.</span>
 
 <span class="sd">        Parameters</span>
@@ -1030,7 +1045,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SystemDB.delete_system"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.delete_system">[docs]</a>    <span class="k">def</span> <span class="nf">delete_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.delete_system">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.delete_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">delete_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete an existing system.</span>
 
 <span class="sd">        Parameters</span>
@@ -1054,7 +1072,10 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_system_id</span> <span class="o">==</span> <span class="n">sid</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_current_system_id</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="SystemDB.detach"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.detach">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.detach">[docs]</a>
+    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detach an attached system.</span>
 
 <span class="sd">        Parameters</span>
@@ -1067,7 +1088,10 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;DETACH DATABASE &quot;</span><span class="si">{</span><span class="n">attached_name</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attached</span><span class="p">[</span><span class="n">other</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SystemDB.diff"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.diff">[docs]</a>    <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.diff">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Differences between this system and another.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1108,7 +1132,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="SystemDB.find_configurations"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.find_configurations">[docs]</a>    <span class="k">def</span> <span class="nf">find_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bondset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.find_configurations">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.find_configurations">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bondset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the configurations that have given atom- or bondsets</span>
 
 <span class="sd">        Parameters</span>
@@ -1148,7 +1175,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Must give atomset or bondset.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_configuration"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_configuration">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configuration">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the specified configuration.</span>
 
 <span class="sd">        Parameters</span>
@@ -1163,7 +1193,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_Configuration</span><span class="p">(</span><span class="n">_id</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">system_db</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_configurations"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configurations">[docs]</a>    <span class="k">def</span> <span class="nf">get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_configurations">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configurations">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the configurations matching the glob pattern.</span>
 
 <span class="sd">        Parameters</span>
@@ -1180,7 +1213,10 @@ document.write(`
             <span class="n">_Configuration</span><span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_configuration_ids</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_configuration_ids"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configuration_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_configuration_ids">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_configuration_ids">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_configuration_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the configuration ids matching the glob pattern.</span>
 
 <span class="sd">        Parameters</span>
@@ -1207,7 +1243,10 @@ document.write(`
 
         <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_system"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system">[docs]</a>    <span class="k">def</span> <span class="nf">get_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_system">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the specified system object.</span>
 
 <span class="sd">        Parameters</span>
@@ -1238,7 +1277,10 @@ document.write(`
                 <span class="n">id_or_name</span> <span class="o">=</span> <span class="n">systems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">_System</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_systems"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_systems">[docs]</a>    <span class="k">def</span> <span class="nf">get_systems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_systems">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_systems">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_systems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the systems matching the glob pattern.</span>
 
 <span class="sd">        Parameters</span>
@@ -1253,7 +1295,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">_System</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_system_ids</span><span class="p">(</span><span class="n">pattern</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="SystemDB.get_system_ids"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_system_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.get_system_ids">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.get_system_ids">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_system_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the system ids matching the glob pattern.</span>
 
 <span class="sd">        Parameters</span>
@@ -1279,7 +1324,10 @@ document.write(`
             <span class="n">params</span> <span class="o">=</span> <span class="p">(</span><span class="n">pattern</span><span class="p">,)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="SystemDB.is_attached"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.is_attached">[docs]</a>    <span class="k">def</span> <span class="nf">is_attached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.is_attached">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.is_attached">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_attached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether another system is attached to this one.</span>
 
 <span class="sd">        Parameters</span>
@@ -1294,7 +1342,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">other</span><span class="o">.</span><span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attached</span></div>
 
-<div class="viewcode-block" id="SystemDB.list"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SystemDB.list">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.list">[docs]</a>
+    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all the tables in the system.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
@@ -1302,6 +1353,7 @@ document.write(`
         <span class="p">):</span>
             <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">result</span></div>
+
 
     <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the SQLite database.</span>
@@ -1342,11 +1394,8 @@ document.write(`
             <span class="c1"># Symmetry information</span>
             <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;symmetry&quot;</span><span class="p">]</span>
             <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-            <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;symmetryoperation&quot;</span><span class="p">]</span>
-            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;symmetry&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;symmetry&quot;</span><span class="p">)</span>
-            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;symop&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;symops&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;x,y,z&quot;</span><span class="p">)</span>
 
             <span class="c1"># Periodic cell information</span>
             <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span>
@@ -1385,10 +1434,8 @@ document.write(`
             <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;atom&quot;</span><span class="p">)</span>
             <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;j&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;atom&quot;</span><span class="p">)</span>
             <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;bondorder&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="c1"># Only need for infinite networked systems. Think about later!</span>
-            <span class="c1"># table.add_attribute(&quot;offset1&quot;, coltype=&quot;int&quot;, default=0)</span>
-            <span class="c1"># table.add_attribute(&quot;offset2&quot;, coltype=&quot;int&quot;, default=0)</span>
-            <span class="c1"># table.add_attribute(&quot;offset3&quot;, coltype=&quot;int&quot;, default=0)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;symop1&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;symop2&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
             <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bondset&quot;</span><span class="p">]</span>
             <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1517,7 +1564,9 @@ document.write(`
 
             <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SystemDB.system_exists"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.system_exists">[docs]</a>    <span class="k">def</span> <span class="nf">system_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">):</span>
+<div class="viewcode-block" id="SystemDB.system_exists">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.system_db.SystemDB.system_exists">[docs]</a>
+    <span class="k">def</span> <span class="nf">system_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_or_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;See if the given system exists.</span>
 
 <span class="sd">        Parameters</span>
@@ -1538,7 +1587,9 @@ document.write(`
             <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT COUNT(*) FROM SYSTEM WHERE id = ?&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">id_or_name</span><span class="p">,))</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span></div>
+</div>
+
 </pre></div>
 
                 </article>

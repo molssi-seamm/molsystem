@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.inchi &#8212; MolSystem 2023.7.30 documentation</title>
+    <title>molsystem.inchi &#8212; MolSystem 2023.8.30 documentation</title>
   
   
   
@@ -27,7 +27,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
@@ -44,9 +44,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/documentation_options.js?v=e6c77f19"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -499,7 +499,9 @@ document.write(`
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="InChIMixin"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin">[docs]</a><span class="k">class</span> <span class="nc">InChIMixin</span><span class="p">:</span>
+<div class="viewcode-block" id="InChIMixin">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin">[docs]</a>
+<span class="k">class</span> <span class="nc">InChIMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling InChI.&quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -512,7 +514,9 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the InChIKey string for this object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_inchi</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="InChIMixin.to_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.to_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">to_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="InChIMixin.to_inchi">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.to_inchi">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the InChI string from the system.</span>
 
 <span class="sd">        Parameters</span>
@@ -550,7 +554,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">inchi</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="InChIMixin.from_inchi"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InChIMixin.from_inchi">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>
+    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from a InChI string.</span>
 
 <span class="sd">        Parameters</span>
@@ -592,7 +599,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">save</span></div>
 
-<div class="viewcode-block" id="InChIMixin.from_inchikey"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchikey">[docs]</a>    <span class="k">def</span> <span class="nf">from_inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InChIMixin.from_inchikey">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchikey">[docs]</a>
+    <span class="k">def</span> <span class="nf">from_inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from an InChIKey string.</span>
 
 <span class="sd">        Parameters</span>
@@ -629,6 +639,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">save</span></div>
 
+
     <span class="k">def</span> <span class="nf">_get_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the InChI from PubChem given the InChIKey.&quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
@@ -648,6 +659,7 @@ document.write(`
             <span class="k">return</span> <span class="n">inchi</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="o">*</span><span class="n">inchi</span><span class="p">]</span></div>
+
 </pre></div>
 
                 </article>

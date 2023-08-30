@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2023.7.30 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2023.8.30 documentation</title>
   
   
   
@@ -27,7 +27,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
@@ -44,9 +44,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=49eff67c"></script>
+    <script src="../../_static/documentation_options.js?v=e6c77f19"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -515,10 +515,14 @@ document.write(`
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="RDKitMixin"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin">[docs]</a><span class="k">class</span> <span class="nc">RDKitMixin</span><span class="p">:</span>
+<div class="viewcode-block" id="RDKitMixin">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin">[docs]</a>
+<span class="k">class</span> <span class="nc">RDKitMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling RDKit via its Python interface.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="RDKitMixin.to_RDKMol"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol">[docs]</a>    <span class="k">def</span> <span class="nf">to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RDKitMixin.to_RDKMol">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an RDKMol object for the configuration, template, or subset.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
@@ -557,7 +561,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">rdk_mol</span></div>
 
-<div class="viewcode-block" id="RDKitMixin.from_RDKMol"><a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol">[docs]</a>    <span class="k">def</span> <span class="nf">from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdk_mol</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RDKitMixin.from_RDKMol">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol">[docs]</a>
+    <span class="k">def</span> <span class="nf">from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdk_mol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform an RDKit molecule into the current object.&quot;&quot;&quot;</span>
 
         <span class="n">atnos</span> <span class="o">=</span> <span class="p">[]</span>
@@ -600,7 +607,9 @@ document.write(`
         <span class="n">j</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Js</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">bondorder</span><span class="o">=</span><span class="n">BondOrders</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
 </pre></div>
 
                 </article>
