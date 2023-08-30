@@ -2,6 +2,8 @@
 History
 =======
 
+2023.8.30 -- Support for spacegroup symmetry.
+
 2023.8.27 -- Bugfix: writing SDF did not handle charge and multiplicity.
 
 2023.7.30 -- Improved handling of properties
