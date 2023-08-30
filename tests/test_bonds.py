@@ -3,6 +3,8 @@
 
 """Tests for `bonds` in the `molsystem` package."""
 
+import json  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
 
@@ -51,9 +53,9 @@ def test_get_item(AceticAcid):
     configuration = AceticAcid
     bonds = configuration.bonds
     bond = bonds.get_bond(5, 6)
-    assert [*bond] == [5, 5, 6, 2, 1, 1, 0, 0, 0]
+    assert [*bond] == [5, 5, 6, 2, ".", "."]
     bond = bonds.get_bond(6, 5)
-    assert [*bond] == [5, 5, 6, 2, 1, 1, 0, 0, 0]
+    assert [*bond] == [5, 5, 6, 2, ".", "."]
 
 
 def test_delete_bond(AceticAcid):
@@ -79,14 +81,14 @@ def test_add_bond(AceticAcid):
 def test_str(AceticAcid):
     """Test that we can get a string representation."""
     answer = """\
-   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
-1  1  2          1           1           1        0        0        0
-2  1  3          1           1           1        0        0        0
-3  1  4          1           1           1        0        0        0
-4  1  5          1           1           1        0        0        0
-5  5  6          2           1           1        0        0        0
-6  5  7          1           1           1        0        0        0
-7  7  8          1           1           1        0        0        0"""
+   i  j  bondorder symop1 symop2
+1  1  2          1      .      .
+2  1  3          1      .      .
+3  1  4          1      .      .
+4  1  5          1      .      .
+5  5  6          2      .      .
+6  5  7          1      .      .
+7  7  8          1      .      ."""
     configuration = AceticAcid
     bonds = configuration.bonds
     if str(bonds) != answer:
@@ -97,14 +99,14 @@ def test_str(AceticAcid):
 def test_repr(AceticAcid):
     """Test that we can get a representation."""
     answer = """\
-   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
-1  1  2          1           1           1        0        0        0
-2  1  3          1           1           1        0        0        0
-3  1  4          1           1           1        0        0        0
-4  1  5          1           1           1        0        0        0
-5  5  6          2           1           1        0        0        0
-6  5  7          1           1           1        0        0        0
-7  7  8          1           1           1        0        0        0"""
+   i  j  bondorder symop1 symop2
+1  1  2          1      .      .
+2  1  3          1      .      .
+3  1  4          1      .      .
+4  1  5          1      .      .
+5  5  6          2      .      .
+6  5  7          1      .      .
+7  7  8          1      .      ."""
     configuration = AceticAcid
     bonds = configuration.bonds
     if repr(bonds) != answer:
@@ -118,17 +120,14 @@ def test_adding_attribute(AceticAcid):
     bonds = configuration.bonds
     bonds.add_attribute("name", coltype="str")
     bond = bonds.get_bond(5, 7)
-    assert len(bond) == 10
+    assert len(bond) == 7
     assert bond.keys() == [
         "id",
         "i",
         "j",
         "bondorder",
-        "symop_1_no",
-        "symop_2_no",
-        "offset1",
-        "offset2",
-        "offset3",
+        "symop1",
+        "symop2",
         "name",
     ]
 
@@ -140,17 +139,14 @@ def test_adding_attribute_with_values(AceticAcid):
     bonds = configuration.bonds
     bonds.add_attribute("name", coltype="str", values=names)
     bond = bonds.get_bond(5, 7)
-    assert len(bond) == 10
+    assert len(bond) == 7
     assert bond.keys() == [
         "id",
         "i",
         "j",
         "bondorder",
-        "symop_1_no",
-        "symop_2_no",
-        "offset1",
-        "offset2",
-        "offset3",
+        "symop1",
+        "symop2",
         "name",
     ]
     assert bond["name"] == "C-O"
@@ -171,14 +167,14 @@ def test_set_column(AceticAcid):
     """Test setting columns of the bond data."""
     answer = [1, 1, 1, 1, 2, 3, 1]
     answer2 = """\
-   i  j  bondorder  symop_1_no  symop_2_no  offset1  offset2  offset3
-1  1  2          1           1           1        0        0        0
-2  1  3          1           1           1        0        0        0
-3  1  4          1           1           1        0        0        0
-4  1  5          1           1           1        0        0        0
-5  5  6          2           1           1        0        0        0
-6  5  7          3           1           1        0        0        0
-7  7  8          1           1           1        0        0        0"""
+   i  j  bondorder symop1 symop2
+1  1  2          1      .      .
+2  1  3          1      .      .
+3  1  4          1      .      .
+4  1  5          1      .      .
+5  5  6          2      .      .
+6  5  7          3      .      .
+7  7  8          1      .      ."""
     configuration = AceticAcid
     bonds = configuration.bonds
     bondorders = bonds.get_column("bondorder")
@@ -189,3 +185,43 @@ def test_set_column(AceticAcid):
     if str(bonds) != answer2:
         print(str(bonds))
     assert str(bonds) == answer2
+
+
+def test_bond_lengths(diamond):
+    """Test the creation of the symmetric bonds."""
+    # diamond.symmetry.loglevel = "DEBUG"
+    # diamond.bonds.loglevel = "DEBUG"
+
+    assert diamond.n_asymmetric_bonds == 4
+    assert diamond.n_bonds == 16
+
+    correct = 1.5459
+    R = diamond.bonds.get_lengths(as_array=True, asymmetric=False)
+    R = np.round(R, 4)
+    assert np.all(R == correct)
+
+
+def test_bonds_across_cell2(h_chain2):
+    """Test the creation of the symmetric bonds."""
+    # h_chain2.symmetry.loglevel = "DEBUG"
+    # h_chain2.bonds.loglevel = "DEBUG"
+
+    assert h_chain2.n_asymmetric_bonds == 2
+    assert h_chain2.n_bonds == 2
+
+    correct = [0.96, 1.04]
+    R = h_chain2.bonds.get_lengths(as_array=True, asymmetric=False)
+    assert np.all(R == correct)
+
+
+def test_bonds_across_cell(h_chain):
+    """Test the creation of the symmetric bonds."""
+    # h_chain.symmetry.loglevel = "DEBUG"
+    # h_chain.bonds.loglevel = "DEBUG"
+
+    assert h_chain.n_asymmetric_bonds == 1
+    assert h_chain.n_bonds == 1
+
+    correct = 1.0
+    R = h_chain.bonds.get_lengths(as_array=True, asymmetric=False)
+    assert np.all(R == correct)

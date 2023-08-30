@@ -63,7 +63,7 @@ class _Configuration(
         self._symmetry = None  # A cache for the symmetry instance
 
         # Initialize periodicity and symmetry to 0 and C1
-        self.periodicity = 0
+        # self.periodicity = 0
 
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
@@ -429,6 +429,17 @@ class _Configuration(
         )
         self.db.commit()
         self._name = value
+
+    @property
+    def n_asymmetric_bonds(self) -> int:
+        """The number of asymmetric bonds.
+
+        Returns
+        -------
+        int
+            Number of asymmetric bonds
+        """
+        return self.bonds.n_asymmetric_bonds
 
     @property
     def n_bonds(self) -> int:

@@ -17,8 +17,9 @@ _cell_angle_beta  90.00000
 _cell_angle_gamma 90.00000
 _cell_volume      94.79778
 
-_symmetry_space_group_name_H-M "P 21/n 21/m 21/a"
+_symmetry_space_group_name_H-M "P n m a"
 _symmetry_Int_Tables_number 62
+_symmetry_cell_setting "orthorhombic"
 _space_group.reference_setting '062:-P 2ac 2n'
 _space_group.transform_Pp_abc a,b,c;0,0,0
 
@@ -44,8 +45,18 @@ _atom_site_fract_y
 _atom_site_fract_z
 _atom_site_occupancy
 _atom_site_fract_symmform
-C  C   4 c 0.03300 0.25000 0.06600 1.00000 Dx,0,Dz 
-H1 H   4 c 0.18980 0.25000 0.05200 1.00000 Dx,0,Dz 
-H2 H   4 c 0.03390 0.25000 0.26070 1.00000 Dx,0,Dz 
+C  C   4 c 0.038 0.250 0.065 1.00000 Dx,0,Dz 
+H1 H   4 c 0.179 0.250 0.049 1.00000 Dx,0,Dz 
+H2 H   4 c 0.010 0.250 0.273 1.00000 Dx,0,Dz 
+
+loop_
+_geom_bond_atom_site_label_1
+_geom_bond_atom_site_label_2
+_geom_bond_site_symmetry_1
+_geom_bond_site_symmetry_2
+C  H1 . .
+C  H2 . .
+C  C  . 3
+C  C  . 3_545
 
 # end of cif

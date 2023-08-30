@@ -13,6 +13,7 @@ dependencies:
   # molsystem requires, and only available via Conda.
   - seamm-util
   
+  - mendeleev
   - openbabel
   - pathvalidate
   - pycifrw

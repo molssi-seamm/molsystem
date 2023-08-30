@@ -7,7 +7,7 @@ from itertools import zip_longest
 import logging
 from typing import Any, Dict, TypeVar
 
-import numpy
+import numpy as np
 import pandas
 
 from molsystem import elements
@@ -17,6 +17,7 @@ from .table import _Table
 Atoms_tp = TypeVar("Atoms_tp", "_Atoms", str, None)
 
 logger = logging.getLogger(__name__)
+# logger.setLevel("DEBUG")
 
 
 def grouped(iterable, n):
@@ -122,11 +123,14 @@ class _Atoms(_Table):
         [int]
             The atomic numbers.
         """
-        result = []
-        atno = self.asymmetric_atomic_numbers
-        for i in self.configuration.atom_to_asymmetric_atom:
-            result.append(atno[i])
-        return result
+        if self.configuration.symmetry.n_symops == 1:
+            return self.asymmetric_atomic_numbers
+        else:
+            result = []
+            atno = self.asymmetric_atomic_numbers
+            for i in self.configuration.atom_to_asymmetric_atom:
+                result.append(atno[i])
+            return result
 
     @property
     def asymmetric_atomic_masses(self):
@@ -154,11 +158,14 @@ class _Atoms(_Table):
         [int]
             The atomic numbers.
         """
-        result = []
-        mass = self.asymmetric_atomic_masses
-        for i in self.configuration.atom_to_asymmetric_atom:
-            result.append(mass[i])
-        return result
+        if self.configuration.symmetry.n_symops == 1:
+            return self.asymmetric_atomic_masses
+        else:
+            result = []
+            mass = self.asymmetric_atomic_masses
+            for i in self.configuration.atom_to_asymmetric_atom:
+                result.append(mass[i])
+            return result
 
     @property
     def atomset(self):
@@ -220,6 +227,24 @@ class _Atoms(_Table):
         self.configuration.symmetry.group = value
 
     @property
+    def loglevel(self):
+        """The logging level for this module."""
+        result = logger.getEffectiveLevel()
+        tmp = logging.getLevelName(result)
+        if "Level" not in tmp:
+            result = tmp
+        return result
+
+    @loglevel.setter
+    def loglevel(self, value):
+        logger.setLevel(value)
+
+    @property
+    def names(self):
+        """The names of the atoms."""
+        return self.get_names()
+
+    @property
     def n_asymmetric_atoms(self) -> int:
         """The number of symmetry-unique atoms in this configuration."""
         self.cursor.execute(
@@ -231,10 +256,13 @@ class _Atoms(_Table):
     @property
     def n_atoms(self) -> int:
         """The number of atoms in this configuration."""
-        n_atoms = 0
-        for symops in self.atom_generators:
-            n_atoms += len(symops)
-        return n_atoms
+        if self.configuration.symmetry.n_symops == 1:
+            return self.n_asymmetric_atoms
+        else:
+            n_atoms = 0
+            for symops in self.atom_generators:
+                n_atoms += len(symops)
+            return n_atoms
 
     @property
     def n_symops(self):
@@ -261,7 +289,10 @@ class _Atoms(_Table):
         [str]
             The element symbols
         """
-        return elements.to_symbols(self.atomic_numbers)
+        if self.configuration.symmetry.n_symops == 1:
+            return self.asymmetric_symbols
+        else:
+            return elements.to_symbols(self.atomic_numbers)
 
     @property
     def symmetry_matrices(self):
@@ -408,6 +439,8 @@ class _Atoms(_Table):
         # And to the atomset
         table = _Table(self.system_db, "atomset_atom")
         table.append(atomset=self.atomset, atom=ids)
+
+        self.configuration.symmetry.reset_atoms()
 
         return ids
 
@@ -761,7 +794,7 @@ class _Atoms(_Table):
             Whether to translate the atoms into the unit cell, and if so
             whether to do so by molecule or just atoms.
         as_array : bool = False
-            Whether to return the results as a numpy array or as a list of
+            Whether to return the results as a np array or as a list of
             lists (the default).
         asymmetric : bool = False
             If true, return coordinates for only the symmetry-unique atoms.
@@ -776,17 +809,43 @@ class _Atoms(_Table):
 
         periodicity = self.configuration.periodicity
         if periodicity == 0:
-            if asymmetric:
+            if asymmetric and self.configuration.symmetry.n_symops > 1:
                 raise NotImplementedError("Point-group symmetry not handled yet.")
             if as_array:
-                return numpy.array(xyz)
+                return np.array(xyz)
             else:
                 return xyz
 
         cell = self.configuration.cell
 
-        if not asymmetric and self.n_symops > 0:
-            raise NotImplementedError("Can't return full set of coordinates.")
+        UVW = None
+        if not asymmetric and self.n_symops > 1:
+            # Get the asymmetric fractional coordinates as np array
+            if self.configuration.coordinate_system == "Cartesian":
+                UVW_asym = cell.to_fractionals(xyz, as_array=True)
+            elif not isinstance(xyz, np.ndarray):
+                UVW_asym = np.array(xyz)
+            else:
+                UVW_asym = xyz
+
+            # Move into unit cell, remembering shift
+            trans = np.floor(UVW_asym)
+            UVW_asym -= trans
+
+            # Apply the generating symmetry operators
+            op = self.configuration.symmetry.symmetry_matrices
+            generators = self.configuration.symmetry.atom_generators
+
+            for i, indices in enumerate(generators):
+                uvw4 = np.array([0.0, 0.0, 0.0, 1.0])
+                uvw4[0:3] = UVW_asym[i]
+
+                xformed = np.einsum("ijk,k", op[indices, :, :], uvw4)
+                uvw = xformed[:, 0:3]
+                if UVW is None:
+                    UVW = uvw
+                else:
+                    UVW = np.concatenate((UVW, uvw))
 
         if (
             isinstance(in_cell, str)
@@ -794,24 +853,23 @@ class _Atoms(_Table):
             and self.configuration.n_bonds > 0
         ):
             # Need fractionals...
-            if self.configuration.coordinate_system == "Cartesian":
-                UVW = cell.to_fractionals(xyz, as_array=True)
-            elif not isinstance(xyz, numpy.ndarray):
-                UVW = numpy.array(xyz)
-            else:
-                UVW = xyz
+            if UVW is None:
+                if self.configuration.coordinate_system == "Cartesian":
+                    UVW = cell.to_fractionals(xyz, as_array=True)
+                elif not isinstance(xyz, np.ndarray):
+                    UVW = np.array(xyz)
+                else:
+                    UVW = xyz
 
             molecules = self.configuration.find_molecules(as_indices=True)
 
             for indices in molecules:
-                indices = numpy.array(indices)
-                uvw_mol = numpy.take(UVW, indices, axis=0)
-                center = numpy.average(uvw_mol, axis=0)
-                delta = numpy.floor(center)
+                indices = np.array(indices)
+                uvw_mol = np.take(UVW, indices, axis=0)
+                center = np.average(uvw_mol, axis=0)
+                delta = np.floor(center)
                 uvw_mol -= delta
-                numpy.put_along_axis(
-                    UVW, numpy.expand_dims(indices, axis=1), uvw_mol, axis=0
-                )
+                np.put_along_axis(UVW, np.expand_dims(indices, axis=1), uvw_mol, axis=0)
             if fractionals:
                 if as_array:
                     return UVW
@@ -821,13 +879,14 @@ class _Atoms(_Table):
                 return cell.to_cartesians(UVW, as_array=as_array)
         elif in_cell:
             # Need fractionals...
-            if self.configuration.coordinate_system == "Cartesian":
-                UVW = cell.to_fractionals(xyz, as_array=True)
-            elif not isinstance(xyz, numpy.ndarray):
-                UVW = numpy.array(xyz)
-            else:
-                UVW = xyz
-            delta = numpy.floor(UVW)
+            if UVW is None:
+                if self.configuration.coordinate_system == "Cartesian":
+                    UVW = cell.to_fractionals(xyz, as_array=True)
+                elif not isinstance(xyz, np.ndarray):
+                    UVW = np.array(xyz)
+                else:
+                    UVW = xyz
+            delta = np.floor(UVW)
             UVW -= delta
             if fractionals:
                 if as_array:
@@ -838,19 +897,66 @@ class _Atoms(_Table):
                 return cell.to_cartesians(UVW, as_array=as_array)
         else:
             if fractionals:
-                if self.configuration.coordinate_system == "Cartesian":
-                    return cell.to_fractionals(xyz, as_array=as_array)
-                elif as_array:
-                    return numpy.array(xyz)
+                if UVW is None:
+                    if self.configuration.coordinate_system == "Cartesian":
+                        return cell.to_fractionals(xyz, as_array=as_array)
+                    elif as_array:
+                        return np.array(xyz)
+                    else:
+                        return xyz
                 else:
-                    return xyz
+                    if as_array:
+                        return UVW
+                    else:
+                        return UVW.tolist()
             else:
-                if self.configuration.coordinate_system == "fractional":
-                    return cell.to_cartesians(xyz, as_array=as_array)
-                elif as_array:
-                    return numpy.array(xyz)
+                if UVW is None:
+                    if self.configuration.coordinate_system == "fractional":
+                        return cell.to_cartesians(xyz, as_array=as_array)
+                    elif as_array:
+                        return np.array(xyz)
+                    else:
+                        return xyz
                 else:
-                    return xyz
+                    return cell.to_cartesians(UVW, as_array=as_array)
+
+    def get_names(self, asymmetric=False):
+        """Return the names of the atoms, return a default if not in the database.
+
+        Parameters
+        ----------
+        asymmetric : bool = False
+            Return just the names for the asymmetric atoms.
+
+        Returns
+        -------
+        [str]
+            The names of the atoms.
+        """
+        if "name" in self:
+            name = self.get_column_data("name")
+        else:
+            name = []
+            count = {}
+            for symbol in self.asymmetric_symbols:
+                if symbol not in count:
+                    count[symbol] = 1
+                else:
+                    count[symbol] += 1
+                name.append(f"{symbol}{count[symbol]}")
+
+        symmetry = self.configuration.symmetry
+
+        if asymmetric or symmetry.n_symops == 1:
+            return name
+
+        # Expand to the asymmetric atoms
+        result = []
+        count = {i: 0 for i in range(len(name))}
+        for asym_atom in symmetry.atom_to_asymmetric_atom:
+            count[asym_atom] += 1
+            result.append(f"{name[asym_atom]}_{count[asym_atom]}")
+        return result
 
     def get_n_atoms(self, *args):
         """Return the number of atoms meeting the cirteria.
@@ -925,7 +1031,18 @@ class _Atoms(_Table):
         -------
         None
         """
-        as_array = isinstance(xyz, numpy.ndarray)
+        as_array = isinstance(xyz, np.ndarray)
+
+        if as_array:
+            n_coords = xyz.shape[0]
+        else:
+            n_coords = len(xyz)
+
+        # May need to handle symmetry
+        if n_coords != self.n_asymmetric_atoms and n_coords == self.n_atoms:
+            xyz, error = self.configuration.symmetry.symmetrize_coordinates(
+                xyz, fractionals=fractionals
+            )
 
         x_column = self.get_column("x")
         y_column = self.get_column("y")
@@ -1116,6 +1233,8 @@ class _Atoms(_Table):
             parameters = [(i, self.atomset) for i in atoms]
             self.db.executemany(sql, parameters)
 
+        self.configuration.symmetry.reset_atoms()
+
     def to_dataframe(self):
         """Return the contents of the table as a Pandas Dataframe."""
         data = {}
@@ -1178,16 +1297,36 @@ class _SubsetAtoms(_Atoms):
         return self._sid
 
     @property
-    def n_atoms(self) -> int:
-        """The number of atoms in this configuration."""
-        sql = """
-        SELECT COUNT(*)
-          FROM atomset_atom
-         WHERE atomset = ?
-           AND atom IN (SELECT atom FROM subset_atom WHERE subset = ?)
+    def atomic_numbers(self):
+        """The atomic numbers of the subset atoms.
+
+        Note that subsets refer to asymmetric atoms!
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
         """
-        self.cursor.execute(sql, (self.atomset, self.subset_id))
-        return self.cursor.fetchone()[0]
+        return self.get_column_data("atno")
+
+    @property
+    def atomic_masses(self):
+        """The atomic masses of the atoms in the subset.
+
+        Note that subsets refer to asymmetric atoms!
+
+        Returns
+        -------
+        [int]
+            The atomic numbers.
+        """
+
+        if "mass" in self:
+            result = self.get_column_data("mass")
+        else:
+            atnos = self.atomic_numbers
+            result = elements.masses(atnos)
+        return result
 
     @property
     def ids(self):
@@ -1201,6 +1340,18 @@ class _SubsetAtoms(_Atoms):
             sql += "ORDER BY templateatom"
 
         return [x[0] for x in self.db.execute(sql, (self.subset_id,))]
+
+    @property
+    def n_atoms(self) -> int:
+        """The number of atoms in this subset."""
+        sql = """
+        SELECT COUNT(*)
+          FROM atomset_atom
+         WHERE atomset = ?
+           AND atom IN (SELECT atom FROM subset_atom WHERE subset = ?)
+        """
+        self.cursor.execute(sql, (self.atomset, self.subset_id))
+        return self.cursor.fetchone()[0]
 
     @property
     def template(self):
@@ -1298,7 +1449,7 @@ class _SubsetAtoms(_Atoms):
         return self.db.execute(sql, parameters)
 
     def get_n_atoms(self, *args):
-        """Return the number of atoms meeting the cirteria.
+        """Return the number of atoms meeting the criteria.
 
         Parameters
         ----------
@@ -1485,7 +1636,7 @@ class _SubsetAtoms(_Atoms):
         if self.template.is_full:
             raise ValueError("Cannot add atoms to a subset for a full template.")
 
-        # Check that the atoms are in this configuration!
+        # Check that the atoms are in this subset!
         atom_ids = self.ids
         for aid in ids:
             if aid not in atom_ids:

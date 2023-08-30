@@ -64,3 +64,4 @@ def test_simple_subsets(simple_templates):
 
     for water in waters:
         assert water.atoms.atomic_numbers == [8, 1, 1]
+        assert water.atoms.symbols == ["O", "H", "H"]

@@ -128,7 +128,7 @@ class CIFMixin:
             volume = cell.volume
             spgname = symmetry.group
             if spgname == "":
-                lines.append("space_group_name_H-M_full   'P 1'")
+                pass
             elif symmetry.n_symops == 1:
                 lines.append("space_group_name_H-M_full   'P 1'")
             else:
@@ -146,12 +146,12 @@ class CIFMixin:
             lines.append(" _symmetry_equiv_pos_site_id")
             lines.append(" _symmetry_equiv_pos_as_xyz")
             if symmetry.n_symops == 1:
-                lines.append("  1  'x, y, z'")
+                lines.append("  1  x,y,z")
             else:
-                for i, op in enumerate(symmetry.symops):
+                for i, op in enumerate(symmetry.symops, start=1):
                     lines.append(f" {i:2} {op}")
 
-        lines.append(f"_chemical_formula_structural   {empirical_formula}")
+        lines.append(f"_chemical_formula_structural   '{empirical_formula}'")
         lines.append(f"_chemical_formula_sum   '{formula}'")
 
         # The atoms
@@ -168,7 +168,7 @@ class CIFMixin:
         if "names" in atoms:
             original_names = atoms.get_column("names")
         else:
-            original_names = atoms.symbols
+            original_names = atoms.asymmetric_symbols
 
         names = []
         tmp = {}
@@ -178,16 +178,42 @@ class CIFMixin:
                 names.append(name + str(tmp[name]))
             else:
                 tmp[name] = 1
-                names.append(name)
+                names.append(name + "1")
 
-        UVW = atoms.get_coordinates(
-            fractionals=True, in_cell="molecule", asymmetric=True
-        )
+        if symmetry.n_symops == 1:
+            UVW = atoms.get_coordinates(
+                fractionals=True, in_cell="molecule", asymmetric=True
+            )
+        else:
+            # For the moment can't center molecules in cell with symmetry.
+            UVW = atoms.get_coordinates(fractionals=True, asymmetric=True)
 
-        symbols = atoms.symbols
+        symbols = atoms.asymmetric_symbols
         for element, name, uvw in zip(symbols, names, UVW):
             u, v, w = uvw
-            lines.append(f"{element} {name}  1  {u:.3f} {v:.3f} {w:.3f}  1")
+            lines.append(f"  {element} {name}  1  {u:.3f} {v:.3f} {w:.3f}  1")
+
+        # Handle bonds.
+        if self.n_asymmetric_bonds > 0:
+            bonds = self.bonds
+            sym_bonds = bonds.bonds_for_asymmetric_bonds
+            indx = {j: i for i, j in enumerate(atoms.ids)}
+            Is = [indx[i] for i in bonds.get_column_data("i")]
+            Js = [indx[j] for j in bonds.get_column_data("j")]
+            op1s = bonds.get_column_data("symop1")
+            op2s = bonds.get_column_data("symop2")
+            Rs = bonds.get_lengths(asymmetric=True)
+            lines.append("loop_")
+            lines.append("_geom_bond_atom_site_label_1")
+            lines.append("_geom_bond_atom_site_label_2")
+            lines.append("_geom_bond_distance")
+            lines.append("_geom_bond_site_symmetry_1")
+            lines.append("_geom_bond_site_symmetry_2")
+            for i, j, r, op1, op2, n_sym_bonds in zip(
+                Is, Js, Rs, op1s, op2s, [len(x) for x in sym_bonds]
+            ):
+                if n_sym_bonds > 0:
+                    lines.append(f"  {names[i]} {names[j]} {r:.4f} {op1} {op2}")
 
         # And that is it!
         return "\n".join(lines)
@@ -462,9 +488,6 @@ class CIFMixin:
             Js = []
             symop1s = []
             symop2s = []
-            offset1s = []
-            offset2s = []
-            offset3s = []
 
             for label1, label2, sym1, sym2 in zip(
                 data_block[label_1_section],
@@ -474,64 +497,24 @@ class CIFMixin:
             ):
                 i = atom_id[label1]
                 j = atom_id[label2]
-                if sym1 == ".":
-                    symop1 = 1
-                    off1 = "555"
-                else:
-                    if "_" in sym1:
-                        symop1, off1 = sym1.split("_")
-                        symop1 = int(symop1)
-                    else:
-                        symop1 = int(sym1)
-                        off1 = "555"
-
-                if sym2 == ".":
-                    symop2 = 1
-                    off2 = "555"
-                else:
-                    if "_" in sym2:
-                        symop2, off2 = sym2.split("_")
-                        symop2 = int(symop2)
-                    else:
-                        symop2 = int(sym2)
-                        off2 = "555"
-
-                o1a, o1b, o1c = off1
-                o2a, o2b, o2c = off2
-                offa = int(o2a) - int(o1a)
-                offb = int(o2b) - int(o1b)
-                offc = int(o2c) - int(o1c)
 
                 if i < j:
                     Is.append(i)
                     Js.append(j)
-                    symop1s.append(symop1)
-                    symop2s.append(symop2)
-                    offset1s.append(offa)
-                    offset2s.append(offb)
-                    offset3s.append(offc)
+                    symop1s.append(sym1)
+                    symop2s.append(sym2)
                 else:
                     Is.append(j)
                     Js.append(i)
-                    symop1s.append(symop2)
-                    symop2s.append(symop1)
-                    offset1s.append(-offa)
-                    offset2s.append(-offb)
-                    offset3s.append(-offc)
+                    symop1s.append(sym2)
+                    symop2s.append(sym1)
 
             self.bonds.append(
                 i=Is,
                 j=Js,
-                symop_1_no=symop1s,
-                symop_2_no=symop2s,
-                offset1=offset1s,
-                offset2=offset2s,
-                offset3=offset3s,
+                symop1=symop1s,
+                symop2=symop2s,
             )
-
-        # if self.periodicity == 3:
-        #     # Find the symmetry and set to the conventional cell.
-        #     self.symmetrize(symprec=0.0001, spg=True)
 
         return result
 
