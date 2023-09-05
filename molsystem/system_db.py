@@ -952,6 +952,24 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "CREATE INDEX idx_coordinates_atom_configuration "
                 "    ON coordinates(atom, configuration)"
             )
+
+            # Keep the velocities separate from coordinates to keep the size down
+            table = self["velocities"]
+            table.add_attribute(
+                "configuration", coltype="int", references="configuration"
+            )
+            table.add_attribute("atom", coltype="int", references="atom")
+            table.add_attribute("vx", coltype="float")
+            table.add_attribute("vy", coltype="float")
+            table.add_attribute("vz", coltype="float")
+            self.db.execute(
+                "CREATE INDEX 'idx_velocities_atom' ON velocities (\"atom\")"
+            )
+            self.db.execute(
+                "CREATE INDEX idx_velocities_atom_configuration "
+                "    ON velocities(atom, configuration)"
+            )
+
             # The definition of the subsets -- templates
             table = self["template"]
             table.add_attribute("id", coltype="int", pk=True)
