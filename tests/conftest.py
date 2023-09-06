@@ -318,7 +318,15 @@ def vanadium(configuration):
     configuration.periodicity = 3
     configuration.coordinate_system = "fractional"
     configuration.cell.parameters = [3.03, 3.03, 3.03, 90, 90, 90]
-    configuration.atoms.append(x=[0.0, 0.5], y=[0.0, 0.5], z=[0.0, 0.5], symbol="V")
+    configuration.atoms.append(
+        x=[0.0, 0.5],
+        y=[0.0, 0.5],
+        z=[0.0, 0.5],
+        vx=[0.0, 0.02],
+        vy=[0.01, -0.02],
+        vz=[-0.01, 0.01],
+        symbol="V",
+    )
     return configuration
 
 

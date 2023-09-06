@@ -44,6 +44,7 @@ class _Atoms(_Table):
 
         self._atom_table = _Table(self.system_db, "atom")
         self._coordinates_table = _Table(self.system_db, "coordinates")
+        self._velocities_table = _Table(self.system_db, "velocities")
 
         super().__init__(self._system_db, "atom")
 
@@ -66,6 +67,8 @@ class _Atoms(_Table):
             del self._atom_table[key]
         elif key in self._coordinates_table.attributes:
             del self._coordinates_table[key]
+        elif key in self._velocities_table.attributes:
+            del self._velocities_table[key]
 
     def __iter__(self) -> iter:
         """Allow iteration over the object"""
@@ -180,13 +183,17 @@ class _Atoms(_Table):
     @property
     def attributes(self) -> Dict[str, Any]:
         """The definitions of the attributes.
-        Combine the attributes of the atom and coordinates tables to
+        Combine the attributes of the atom, coordinates, and velocities tables to
         make it look like a single larger table.
         """
 
         result = self._atom_table.attributes
 
         for key, value in self._coordinates_table.attributes.items():
+            if key != "atom":  # atom key links the tables together, so ignore
+                result[key] = value
+
+        for key, value in self._velocities_table.attributes.items():
             if key != "atom":  # atom key links the tables together, so ignore
                 result[key] = value
 
@@ -225,6 +232,19 @@ class _Atoms(_Table):
     @group.setter
     def group(self, value):
         self.configuration.symmetry.group = value
+
+    @property
+    def have_velocities(self):
+        """Whether there are any velocities for this configuration."""
+        sql = (
+            "SELECT COUNT(*)"
+            " FROM atomset_atom AS aa, velocities AS ve "
+            "WHERE aa.atomset = ?"
+            "  AND ve.atom = aa.atom AND ve.configuration = ?"
+        )
+        parameters = [self.atomset, self.configuration.id]
+        self.cursor.execute(sql, parameters)
+        return self.cursor.fetchone()[0] > 0
 
     @property
     def loglevel(self):
@@ -317,6 +337,16 @@ class _Atoms(_Table):
     def system_db(self):
         """The system database that we belong to."""
         return self._system_db
+
+    @property
+    def velocities(self):
+        """The velocities as list of lists."""
+        return self.get_velocities()
+
+    @velocities.setter
+    def velocities(self, xyz):
+        """The velocities as list of lists."""
+        return self.set_velocities(xyz)
 
     def add_attribute(
         self,
@@ -433,8 +463,17 @@ class _Atoms(_Table):
         for column in self._coordinates_table.attributes:
             if column != "id" and column in kwargs:
                 data[column] = kwargs.pop(column)
-
         self._coordinates_table.append(n=n_rows, **data)
+
+        # And velocities table
+        data = {"configuration": configuration, "atom": ids}
+        have_velocities = False
+        for column in self._velocities_table.attributes:
+            if column != "id" and column in kwargs:
+                data[column] = kwargs.pop(column)
+                have_velocities = True
+        if have_velocities:
+            self._velocities_table.append(n=n_rows, **data)
 
         # And to the atomset
         table = _Table(self.system_db, "atomset_atom")
@@ -457,41 +496,88 @@ class _Atoms(_Table):
         sqlite3.Cursor
             A cursor that returns sqlite3.Row objects for the atoms.
         """
-        columns = self._columns()
-        column_defs = ", ".join(columns)
+        if self.have_velocities:
+            columns = self._columns(velocities=True)
+            column_defs = ", ".join(columns)
 
-        # What tables are requested in the extra arguments?
-        tables = set()
-        if len(args) > 0:
-            atom_columns = [*self._atom_table.attributes]
-            coordinates_columns = [*self._coordinates_table.attributes]
-            for col, op, value in grouped(args, 3):
-                if "." in col:
-                    tables.add(col.split(".")[0])
-                elif col in atom_columns:
-                    tables.add("at")
-                elif col in coordinates_columns:
-                    tables.add("co")
-                else:
-                    raise ValueError(f"Column '{col}' is not available")
+            # What tables are requested in the extra arguments?
+            tables = set()
+            if len(args) > 0:
+                atom_columns = [*self._atom_table.attributes]
+                coordinates_columns = [*self._coordinates_table.attributes]
+                velocities_columns = [*self._velocities_table.attributes]
+                for col, op, value in grouped(args, 3):
+                    if "." in col:
+                        tables.add(col.split(".")[0])
+                    elif col in atom_columns:
+                        tables.add("at")
+                    elif col in coordinates_columns:
+                        tables.add("co")
+                    elif col in velocities_columns:
+                        tables.add("ve")
+                    else:
+                        raise ValueError(f"Column '{col}' is not available")
 
-        # Build the query based on the tables needed
-        sql = (
-            f"SELECT {column_defs}"
-            " FROM atomset_atom AS aa, atom AS at, coordinates AS co "
-            "WHERE aa.atomset = ?"
-            "  AND at.id = aa.atom"
-            "  AND co.atom = at.id AND co.configuration = ?"
-        )
-        parameters = [self.atomset, self.configuration.id]
+            # Build the query based on the tables needed
+            sql = (
+                f"SELECT {column_defs}"
+                " FROM atomset_atom AS aa, atom AS at, coordinates AS co, "
+                "      velocities AS ve "
+                "WHERE aa.atomset = ?"
+                "  AND at.id = aa.atom"
+                "  AND co.atom = at.id AND co.configuration = ?"
+                "  AND ve.atom = at.id AND ve.configuration = ?"
+            )
+            parameters = [self.atomset, self.configuration.id, self.configuration.id]
 
-        # And any extra selection criteria
-        if len(args) > 0:
-            for col, op, value in grouped(args, 3):
-                if op == "==":
-                    op = "="
-                sql += f' AND "{col}" {op} ?'
-                parameters.append(value)
+            # And any extra selection criteria
+            if len(args) > 0:
+                for col, op, value in grouped(args, 3):
+                    if op == "==":
+                        op = "="
+                    sql += f' AND "{col}" {op} ?'
+                    parameters.append(value)
+        else:
+            columns = self._columns(velocities=False)
+            column_defs = ", ".join(columns)
+
+            # What tables are requested in the extra arguments?
+            tables = set()
+            if len(args) > 0:
+                atom_columns = [*self._atom_table.attributes]
+                coordinates_columns = [*self._coordinates_table.attributes]
+                velocities_columns = [*self._velocities_table.attributes]
+                for col, op, value in grouped(args, 3):
+                    if "." in col:
+                        tables.add(col.split(".")[0])
+                    elif col in atom_columns:
+                        tables.add("at")
+                    elif col in coordinates_columns:
+                        tables.add("co")
+                    elif col in velocities_columns:
+                        raise ValueError(
+                            "Query for atom has velocities, but the atoms don't"
+                        )
+                    else:
+                        raise ValueError(f"Column '{col}' is not available")
+
+            # Build the query based on the tables needed
+            sql = (
+                f"SELECT {column_defs}"
+                " FROM atomset_atom AS aa, atom AS at, coordinates AS co "
+                "WHERE aa.atomset = ?"
+                "  AND at.id = aa.atom"
+                "  AND co.atom = at.id AND co.configuration = ?"
+            )
+            parameters = [self.atomset, self.configuration.id]
+
+            # And any extra selection criteria
+            if len(args) > 0:
+                for col, op, value in grouped(args, 3):
+                    if op == "==":
+                        op = "="
+                    sql += f' AND "{col}" {op} ?'
+                    parameters.append(value)
 
         logger.debug("atoms query:")
         logger.debug(sql)
@@ -502,6 +588,8 @@ class _Atoms(_Table):
 
     def diff(self, other):
         """Difference between these atoms and another
+
+        Currently ignores velocities. Not sure what we want to do....
 
         Parameters
         ----------
@@ -516,8 +604,8 @@ class _Atoms(_Table):
         result = {}
 
         # Check the columns
-        columns = self._columns()
-        other_columns = other._columns()
+        columns = self._columns(velocities=False)
+        other_columns = other._columns(velocities=False)
 
         column_defs = ", ".join(columns)
         other_column_defs = ", ".join(other_columns)
@@ -1018,6 +1106,58 @@ class _Atoms(_Table):
         self.cursor.execute(sql, parameters)
         return self.cursor.fetchone()[0]
 
+    def get_velocities(
+        self,
+        fractionals=True,
+        as_array=False,
+    ):
+        """Return the velocities.
+
+        Symmetry is not supported, because it makes no (little?) sense for velocities.
+
+        Parameters
+        ----------
+        fractionals : bool = True
+            Return the velocities as fractional velocities for periodic
+            systems. Non-periodic systems always use Cartesian velocities.
+        as_array : bool = False
+            Whether to return the results as a np array or as a list of
+            lists (the default).
+
+        Returns
+        -------
+        abc : [N][float*3]
+            The velocities, either Cartesian or fractional
+        """
+        vxs = self.get_column_data("vx")
+        vys = self.get_column_data("vy")
+        vzs = self.get_column_data("vz")
+        xyz = [[vx, vy, vz] for vx, vy, vz in zip(vxs, vys, vzs)]
+
+        periodicity = self.configuration.periodicity
+        if periodicity == 0:
+            if as_array:
+                return np.array(xyz)
+            else:
+                return xyz
+
+        cell = self.configuration.cell
+
+        if fractionals:
+            if self.configuration.coordinate_system == "Cartesian":
+                return cell.to_fractionals(xyz, as_array=as_array)
+            elif as_array:
+                return np.array(xyz)
+            else:
+                return xyz
+        else:
+            if self.configuration.coordinate_system == "fractional":
+                return cell.to_cartesians(xyz, as_array=as_array)
+            elif as_array:
+                return np.array(xyz)
+            else:
+                return xyz
+
     def set_coordinates(self, xyz, fractionals=True):
         """Set the coordinates to new values.
 
@@ -1086,6 +1226,77 @@ class _Atoms(_Table):
         y_column[0:] = ys
         z_column[0:] = zs
 
+    def set_velocities(self, vxyz, fractionals=False):
+        """Set the velocities to new values.
+
+        Parameters
+        ----------
+        fractionals : bool = False
+            The velocities are fractional velocities for periodic
+            systems. Ignored for non-periodic systems.
+
+        Returns
+        -------
+        None
+        """
+        if self.n_symops > 1:
+            raise RuntimeError("Can't handle velocities with symmetry.")
+
+        as_array = isinstance(vxyz, np.ndarray)
+
+        vxs = []
+        vys = []
+        vzs = []
+
+        periodicity = self.configuration.periodicity
+        coordinate_system = self.configuration.coordinate_system
+        if (
+            periodicity == 0
+            or (coordinate_system == "Cartesian" and not fractionals)
+            or (coordinate_system == "fractional" and fractionals)
+        ):
+            if as_array:
+                for vx, vy, vz in vxyz.tolist():
+                    vxs.append(vx)
+                    vys.append(vy)
+                    vzs.append(vz)
+            else:
+                for vx, vy, vz in vxyz:
+                    vxs.append(vx)
+                    vys.append(vy)
+                    vzs.append(vz)
+        else:
+            cell = self.configuration.cell
+            if coordinate_system == "fractional":
+                # Convert velocities to fractionals
+                for vx, vy, vz in cell.to_fractionals(vxyz):
+                    vxs.append(vx)
+                    vys.append(vy)
+                    vzs.append(vz)
+            else:
+                for vx, vy, vz in cell.to_cartesians(vxyz):
+                    vxs.append(vx)
+                    vys.append(vy)
+                    vzs.append(vz)
+
+        vx_column = self.get_column("vx")
+        if len(vx_column) == 0:
+            # No velocities in the database, so need to add rather than setFormatter
+            self._velocities_table.append(
+                n=len(vxs),
+                vx=vxs,
+                vy=vys,
+                vz=vzs,
+                atom=self.ids,
+                configuration=self.configuration.id,
+            )
+        else:
+            vy_column = self.get_column("vy")
+            vz_column = self.get_column("vz")
+            vx_column[0:] = vxs
+            vy_column[0:] = vys
+            vz_column[0:] = vzs
+
     def get_column(self, key: str) -> Any:
         """Get a Column object with the requested data
 
@@ -1118,6 +1329,18 @@ class _Atoms(_Table):
                 f"   AND aa.atomset = {self.atomset}"
             )
             return _Column(self._coordinates_table, key, sql=sql)
+        elif key in self._velocities_table.attributes:
+            sql = (
+                f'SELECT ve.rowid, ve."{key}"'
+                "   FROM atom as at,"
+                "        velocities as ve,"
+                "        atomset_atom as aa"
+                "  WHERE ve.atom = at.id"
+                f"   AND ve.configuration = {self.configuration.id}"
+                "    AND at.id = aa.atom"
+                f"   AND aa.atomset = {self.atomset}"
+            )
+            return _Column(self._velocities_table, key, sql=sql)
         else:
             raise KeyError(f"'{key}' not in atoms")
 
@@ -1149,6 +1372,18 @@ class _Atoms(_Table):
                 "        atomset_atom as aa"
                 "  WHERE co.atom = at.id"
                 f"   AND co.configuration = {self.configuration.id}"
+                "    AND at.id = aa.atom"
+                f"   AND aa.atomset = {self.atomset}"
+            )
+            return [row[0] for row in self.db.execute(sql)]
+        elif key in self._velocities_table.attributes:
+            sql = (
+                f'SELECT ve."{key}"'
+                "   FROM atom as at,"
+                "        velocities as ve,"
+                "        atomset_atom as aa"
+                "  WHERE ve.atom = at.id"
+                f"   AND ve.configuration = {self.configuration.id}"
                 "    AND at.id = aa.atom"
                 f"   AND aa.atomset = {self.atomset}"
             )
@@ -1216,7 +1451,8 @@ class _Atoms(_Table):
         -------
         None
         """
-        # Delete the listed atoms, which will cascade to delete coordinates...
+        # Delete the listed atoms, which will cascade to delete coordinates and
+        # velocities
         if atoms == "all" or atoms == "*":
             sql = """
             DELETE FROM atom
@@ -1248,17 +1484,20 @@ class _Atoms(_Table):
 
         return df
 
-    def _columns(self):
-        """The list of columns across the atom and coordinates table.
+    def _columns(self, velocities=True):
+        """The list of columns across the atom, coordinates and velocities tables.
 
-        Uses 'at' and 'co' as the shorthand for the fullt table names.
+        Uses 'at', 'co', and 've' as the shorthand for the full table names.
         """
         atom_columns = [*self._atom_table.attributes]
         coordinates_columns = [*self._coordinates_table.attributes]
         coordinates_columns.remove("atom")
-
         columns = [f'at."{x}"' for x in atom_columns]
         columns += [f'co."{x}"' for x in coordinates_columns]
+        if velocities:
+            velocities_columns = [*self._velocities_table.attributes]
+            velocities_columns.remove("atom")
+            columns += [f've."{x}"' for x in velocities_columns]
 
         return columns
 
@@ -1327,6 +1566,19 @@ class _SubsetAtoms(_Atoms):
             atnos = self.atomic_numbers
             result = elements.masses(atnos)
         return result
+
+    @property
+    def have_velocities(self):
+        """Whether there are any velocities for this configuration."""
+        sql = (
+            "SELECT COUNT(*)"
+            " FROM subset_atom AS sa, velocities AS ve "
+            "WHERE sa.subset = ?"
+            "  AND ve.atom = sa.atom AND ve.configuration = ?"
+        )
+        parameters = [self.subset_id, self.configuration.id]
+        self.cursor.execute(sql, parameters)
+        return self.cursor.fetchone()[0] > 0
 
     @property
     def ids(self):
@@ -1423,28 +1675,51 @@ class _SubsetAtoms(_Atoms):
         sqlite3.Cursor
             A cursor that returns sqlite3.Row objects for the atoms.
         """
-        columns = self._columns()
-        column_defs = ", ".join(columns)
+        if self.have_velocities:
+            columns = self._columns()
+            column_defs = ", ".join(columns)
 
-        sql = f"""
-        SELECT {column_defs}
-          FROM atom as at, coordinates as co, subset_atom as sa
-         WHERE co.atom = at.id
-           AND co.configuration = ?
-           AND at.id = sa.atom
-           AND sa.subset = ?
-        """
+            sql = f"""
+            SELECT {column_defs}
+              FROM atom as at, coordinates as co, velocities as ve, subset_atom as sa
+             WHERE co.atom = at.id
+               AND co.configuration = ?
+               AND ve.atom = at.id
+               AND ve.configuration = ?
+               AND at.id = sa.atom
+               AND sa.subset = ?
+            """
 
-        parameters = [self.configuration.id, self.subset_id]
-        if len(args) > 0:
-            for col, op, value in grouped(args, 3):
-                if op == "==":
-                    op = "="
-                sql += f' AND "{col}" {op} ?'
-                parameters.append(value)
+            parameters = [self.configuration.id, self.configuration.id, self.subset_id]
+            if len(args) > 0:
+                for col, op, value in grouped(args, 3):
+                    if op == "==":
+                        op = "="
+                    sql += f' AND "{col}" {op} ?'
+                    parameters.append(value)
+        else:
+            columns = self._columns(velocities=False)
+            column_defs = ", ".join(columns)
 
-        if self.template.is_full and self.template_order:
-            sql += "ORDER BY sa.templateatom"
+            sql = f"""
+            SELECT {column_defs}
+              FROM atom as at, coordinates as co, subset_atom as sa
+             WHERE co.atom = at.id
+               AND co.configuration = ?
+               AND at.id = sa.atom
+               AND sa.subset = ?
+            """
+
+            parameters = [self.configuration.id, self.subset_id]
+            if len(args) > 0:
+                for col, op, value in grouped(args, 3):
+                    if op == "==":
+                        op = "="
+                    sql += f' AND "{col}" {op} ?'
+                    parameters.append(value)
+
+            if self.template.is_full and self.template_order:
+                sql += "ORDER BY sa.templateatom"
 
         return self.db.execute(sql, parameters)
 
