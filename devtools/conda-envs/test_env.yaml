@@ -16,6 +16,7 @@ dependencies:
   - mendeleev
   - openbabel
   - pathvalidate
+  - pubchempy
   - pycifrw
   - rdkit
   - seekpath
