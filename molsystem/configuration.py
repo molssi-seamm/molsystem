@@ -12,19 +12,22 @@ import spglib
 from .atoms import _Atoms
 from .bonds import _Bonds
 from .cell import _Cell
+from .configuration_properties import _ConfigurationProperties
+from .subsets import _Subsets
+from .symmetry import _Symmetry
+from .table import _Table
+
+from .align import AlignMixin
 from .cif import CIFMixin
 from .cms_schema import CMSSchemaMixin
-from .configuration_properties import _ConfigurationProperties
 from .inchi import InChIMixin
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
+from .pubchem import PubChemMixin
 from .rdkit_ import RDKitMixin
 from .pdb import PDBMixin
 from .qcschema import QCSchemaMixin
 from .smiles import SMILESMixin
-from .subsets import _Subsets
-from .symmetry import _Symmetry
-from .table import _Table
 from .topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
@@ -39,8 +42,10 @@ class _Configuration(
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
+    PubChemMixin,
     RDKitMixin,
     QCSchemaMixin,
+    AlignMixin,
     object,
 ):
     """A configuration (conformer) of a system."""
@@ -372,6 +377,11 @@ class _Configuration(
         self.symmetry.group = value
 
     @property
+    def hall_number(self):
+        """The hall number for the (periodic) configuration."""
+        return self.symmetry.hall_number
+
+    @property
     def id(self):
         """The id of this configuration."""
         return self._id
@@ -659,7 +669,27 @@ class _Configuration(
         # Delete the atoms
         self.atoms.delete("all")
 
-    def primitive_cell(self, symprec=1.0e-05, spg=False):
+    def get_symmetry_data(self, hall_number):
+        """Get the raw spglib symmetry data for the system given a Hall number"""
+        cell_in = (
+            self.cell.vectors(),
+            self.atoms.get_coordinates(fractionals=True),
+            self.atoms.atomic_numbers,
+        )
+        tmp = spglib.get_symmetry_dataset(cell_in, hall_number=hall_number)
+        return tmp
+
+    def new_bondset(self):
+        """Setup a new, empty bondset for this configuration."""
+        self._bondset = self.system_db["bondset"].append(n=1)[0]
+        self.db.execute(
+            "UPDATE configuration SET bondset = ? WHERE id = ?",
+            (self._bondset, self.id),
+        )
+        self.db.commit()
+        return self._bondset
+
+    def primitive_cell(self, symprec=1.0e-05, spg=True):
         """Find the symmetry of periodic systems and transform to conventional cell.
 
         Parameters
@@ -690,7 +720,9 @@ class _Configuration(
         cell_in = (lattice_in, fractionals_in, atomic_numbers_in)
 
         # Need this to get the mapping to the primitive cell...uff!
-        tmp = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+        tmp = spglib.get_symmetry_dataset(
+            cell_in, symprec=symprec, hall_number=self.hall_number
+        )
         mapping_to_primitive = [*tmp["mapping_to_primitive"]]
         n_max = max(mapping_to_primitive)
         mapping_from_primitive = [None for i in range(n_max + 1)]
@@ -699,9 +731,7 @@ class _Configuration(
                 mapping_from_primitive[prim] = at
 
         if spg:
-            lattice, fractionals, atomic_numbers = spglib.standardize_cell(
-                cell_in, to_primitive=True, no_idealize=True, symprec=symprec
-            )
+            lattice, fractionals, atomic_numbers = spglib.find_primitive(cell_in)
         else:
             dataset = seekpath.get_path(cell_in, symprec=symprec)
             lattice = dataset["primitive_lattice"].tolist()
@@ -748,7 +778,7 @@ class _Configuration(
         else:
             raise NotImplementedError("Only affine transformations so far.")
 
-    def symmetrize(self, symprec=1.0e-05, angle_tolerance=None, spg=False):
+    def symmetrize(self, symprec=1.0e-05, angle_tolerance=None, spg=True):
         """Find the symmetry of periodic systems and transform to conventional cell.
 
         Parameters
@@ -771,7 +801,7 @@ class _Configuration(
             recommended approach!
 
         spg : bool = False
-            Whether to use ``spglib`` or ``seekpath`` (the default)
+            Whether to use ``spglib`` (default) or ``seekpath``
         """
         if self.periodicity == 3:
             lattice_in = self.cell.vectors()
@@ -795,10 +825,15 @@ class _Configuration(
             if spg:
                 if angle_tolerance is not None:
                     dataset = spglib.get_symmetry_dataset(
-                        cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                        cell_in,
+                        symprec=symprec,
+                        angle_tolerance=angle_tolerance,
+                        hall_number=self.hall_number,
                     )
                 else:
-                    dataset = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+                    dataset = spglib.get_symmetry_dataset(
+                        cell_in, symprec=symprec, hall_number=self.hall_number
+                    )
 
                 lattice = dataset["std_lattice"].tolist()
                 fractionals = dataset["std_positions"].tolist()
@@ -856,7 +891,7 @@ class _Configuration(
         space_group=None,
         symprec=1.0e-05,
         angle_tolerance=None,
-        spg=False,
+        spg=True,
     ):
         """Update the system, checking symmetry.
 
@@ -895,24 +930,33 @@ class _Configuration(
             recommended approach!
 
         spg : bool = False
-            Whether to use ``spglib`` or ``seekpath`` (the default)
+            Whether to use ``spglib`` (default) or ``seekpath``
         """
         text = ""
 
         cell_in = (lattice, coordinates, atomic_numbers)
 
         if spg:
+            print(f"{self.hall_number=}")
             if angle_tolerance is not None:
                 dataset = spglib.get_symmetry_dataset(
-                    cell_in, symprec=symprec, angle_tolerance=angle_tolerance
+                    cell_in,
+                    symprec=symprec,
+                    angle_tolerance=angle_tolerance,
+                    hall_number=self.hall_number,
                 )
             else:
-                dataset = spglib.get_symmetry_dataset(cell_in, symprec=symprec)
+                dataset = spglib.get_symmetry_dataset(
+                    cell_in, symprec=symprec, hall_number=self.hall_number
+                )
 
+            pprint.pprint(dataset)
             lattice_out = dataset["std_lattice"].tolist()
             fractionals_out = dataset["std_positions"].tolist()
             atomic_numbers_out = dataset["std_types"].tolist()
-            space_group_out = dataset["international"].strip("'")
+            space_group_out = self.symmetry.hall_to_spacegroup_name(
+                dataset["hall_number"]
+            )
         else:
             if angle_tolerance is not None:
                 dataset = seekpath.get_path(
@@ -937,20 +981,38 @@ class _Configuration(
             )
         logger.debug(f"{space_group_out}")
 
+        print("Lattice")
+        for vector in lattice_out:
+            print(f"   {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}")
+        print("")
+        print("Fractionals")
+        for vector, atno in zip(fractionals_out, atomic_numbers_out):
+            print(f"   {atno:2} {vector[0]:7.3f}   {vector[1]:7.3f}   {vector[2]:7.3f}")
+        print(f"{space_group_out}")
+
         if space_group != space_group_out:
             text = f"The space group changed from {space_group} to {space_group_out}."
             logger.debug(text)
+            raise RuntimeError(text)
 
         self.cell.from_vectors(lattice_out)
 
-        self.atoms.delete("all")
+        # self.atoms.delete("all")
 
-        xs = [f[0] for f in fractionals_out]
-        ys = [f[1] for f in fractionals_out]
-        zs = [f[2] for f in fractionals_out]
+        # xs = [f[0] for f in fractionals_out]
+        # ys = [f[1] for f in fractionals_out]
+        # zs = [f[2] for f in fractionals_out]
 
-        self.coordinate_system = "fractional"
-        self.atoms.append(atno=atomic_numbers_out, x=xs, y=ys, z=zs)
-        self.symmetry.group = space_group_out
+        # self.coordinate_system = "fractional"
+        # self.atoms.append(atno=atomic_numbers_out, x=xs, y=ys, z=zs)
+        # self.symmetry.group = space_group_out
+
+        print("Updating the coordinates to these")
+        pprint.pprint(fractionals_out)
+        self.atoms.set_coordinates(fractionals_out)
+
+        print("coordinates in system after update")
+        pprint.pprint(self.coordinates)
+        print("")
 
         return text
