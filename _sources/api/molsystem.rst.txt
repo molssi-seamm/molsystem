@@ -4,6 +4,14 @@ molsystem package
 Submodules
 ----------
 
+molsystem.align module
+----------------------
+
+.. automodule:: molsystem.align
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 molsystem.atoms module
 ----------------------
 
@@ -120,6 +128,14 @@ molsystem.properties module
 ---------------------------
 
 .. automodule:: molsystem.properties
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+molsystem.pubchem module
+------------------------
+
+.. automodule:: molsystem.pubchem
    :members:
    :undoc-members:
    :show-inheritance:

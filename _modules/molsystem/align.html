@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2023.10.30 documentation</title>
+    <title>molsystem.align &#8212; MolSystem 2023.10.30 documentation</title>
   
   
   
@@ -51,7 +51,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/molsystem/rdkit_';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/molsystem/align';</script>
 
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -472,7 +472,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">molsystem.rdkit_</li>
+    <li class="breadcrumb-item active" aria-current="page">molsystem.align</li>
   </ul>
 </nav>
 </div>
@@ -489,140 +489,151 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <h1>Source code for molsystem.rdkit_</h1><div class="highlight"><pre>
+  <h1>Source code for molsystem.align</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="sd">&quot;&quot;&quot;Interface to RDKit.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Alignment methods for configurations&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+    <span class="kn">import</span> <span class="nn">openbabel</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">import</span> <span class="nn">openbabel.openbabel</span> <span class="k">as</span> <span class="nn">ob</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;Please install rdkit using conda:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="s2">&quot;     conda install -c conda-forge rdkit&quot;</span>
+        <span class="s2">&quot;Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;     conda install -c conda-forge openbabel&quot;</span>
     <span class="p">)</span>
     <span class="k">raise</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="c1"># Valence</span>
-<span class="n">valence</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="mi">8</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="mi">9</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">10</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">11</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">12</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="mi">13</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="mi">14</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="mi">15</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="mi">16</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="mi">17</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">18</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">92</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">}</span>
+
+<div class="viewcode-block" id="AlignMixin">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin">[docs]</a>
+<span class="k">class</span> <span class="nc">AlignMixin</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling alignment of configuration.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AlignMixin.RMSD">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin.RMSD">[docs]</a>
+    <span class="k">def</span> <span class="nf">RMSD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the RMSD between configurations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Configuration or iterable of Configurations</span>
+<span class="sd">            A single configuration or e.g. list of configurations to match</span>
+
+<span class="sd">        include_h : bool = True</span>
+<span class="sd">            Whether to include hydrogen atoms in the RMSD</span>
+
+<span class="sd">        symmetry : bool = False</span>
+<span class="sd">            Whether to detect symmetric flips. Note this requires a lot of memory for</span>
+<span class="sd">            larger systems.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float or [float]</span>
+<span class="sd">            The RMS between the current configuration and the target(s).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">_Configuration</span>
+
+        <span class="n">align</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBAlign</span><span class="p">(</span><span class="n">include_h</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">)</span>
+        <span class="n">align</span><span class="o">.</span><span class="n">SetRefMol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSD can&#39;t handle </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration.RMSD </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="RDKitMixin">
-<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin">[docs]</a>
-<span class="k">class</span> <span class="nc">RDKitMixin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling RDKit via its Python interface.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AlignMixin.align">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin.align">[docs]</a>
+    <span class="k">def</span> <span class="nf">align</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align configurations.</span>
 
-<div class="viewcode-block" id="RDKitMixin.to_RDKMol">
-<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an RDKMol object for the configuration, template, or subset.&quot;&quot;&quot;</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">rdk_mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">atno</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">):</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">AddAtom</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="n">atno</span><span class="p">))</span>
-            <span class="n">index</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
-            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Configuration or iterable of Configurations</span>
+<span class="sd">            A single configuration or e.g. list of configurations to match</span>
 
-        <span class="n">bond_types</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="mi">1</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">,</span>
-            <span class="mi">2</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">,</span>
-            <span class="mi">3</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">TRIPLE</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-            <span class="n">rdk_mol</span><span class="o">.</span><span class="n">AddBond</span><span class="p">(</span>
-                <span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]],</span> <span class="n">bond_types</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]]</span>
-            <span class="p">)</span>
+<span class="sd">        include_h : bool = True</span>
+<span class="sd">            Whether to include hydrogen atoms in the RMSD</span>
 
-        <span class="c1"># Check for NH4+ type groups and set their charge</span>
-        <span class="n">rdk_mol</span><span class="o">.</span><span class="n">UpdatePropertyCache</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
-            <span class="n">atno</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">atno</span> <span class="ow">in</span> <span class="n">valence</span><span class="p">:</span>
-                <span class="n">charge</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">GetExplicitValence</span><span class="p">()</span> <span class="o">-</span> <span class="n">valence</span><span class="p">[</span><span class="n">atno</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">charge</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">at</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">at</span><span class="o">.</span><span class="n">SetFormalCharge</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span>
+<span class="sd">        symmetry : bool = False</span>
+<span class="sd">            Whether to detect symmetric flips. Note this requires a lot of memory for</span>
+<span class="sd">            larger systems.</span>
 
-        <span class="n">natom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">n_atoms</span>
-        <span class="n">conf</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Conformer</span><span class="p">(</span><span class="n">natom</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span><span class="p">):</span>
-            <span class="n">conf</span><span class="o">.</span><span class="n">SetAtomPosition</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float or [float]</span>
+<span class="sd">            The RMS between the current configuration and the target(s).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">_Configuration</span>
 
-        <span class="n">rdk_mol</span><span class="o">.</span><span class="n">AddConformer</span><span class="p">(</span><span class="n">conf</span><span class="p">)</span>
-        <span class="n">Chem</span><span class="o">.</span><span class="n">rdmolops</span><span class="o">.</span><span class="n">SanitizeMol</span><span class="p">(</span><span class="n">rdk_mol</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBAlign</span><span class="p">(</span><span class="n">include_h</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">)</span>
+        <span class="n">align</span><span class="o">.</span><span class="n">SetRefMol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
 
-        <span class="k">return</span> <span class="n">rdk_mol</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">other</span><span class="o">.</span><span class="n">coordinates_from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+            <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="RDKitMixin.from_RDKMol">
-<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdk_mol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform an RDKit molecule into the current object.&quot;&quot;&quot;</span>
-
-        <span class="n">atnos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
-            <span class="n">atnos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;atom </span><span class="si">{</span><span class="n">atnos</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="c1"># TODO: Generalize to handling multiple conformers</span>
-        <span class="c1"># in a rdk_mol object, if necessary</span>
-        <span class="n">Xs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">Ys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">Zs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rdk_conf</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">atom_coords</span> <span class="ow">in</span> <span class="n">rdk_conf</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">():</span>
-                <span class="n">Xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">Ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">Zs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="n">Is</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">Js</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">BondOrders</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">bond_types</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">TRIPLE</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="n">rdk_bond</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">():</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetBeginAtom</span><span class="p">()</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">()</span>
-            <span class="n">j</span> <span class="o">=</span> <span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetEndAtom</span><span class="p">()</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">()</span>
-            <span class="n">bondorder</span> <span class="o">=</span> <span class="n">bond_types</span><span class="p">[</span><span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetBondType</span><span class="p">()]</span>
-            <span class="n">Is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="n">Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-            <span class="n">BondOrders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bondorder</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bond </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">bondorder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Is</span><span class="p">]</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Js</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">bondorder</span><span class="o">=</span><span class="n">BondOrders</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+                    <span class="n">mol</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                    <span class="n">target</span><span class="o">.</span><span class="n">coordinates_from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+                    <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSD can&#39;t handle </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration.RMSD </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 </div>
 
 </pre></div>
