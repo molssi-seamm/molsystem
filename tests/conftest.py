@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from molsystem import SystemDB
+from molsystem.system_db import SystemDB
 
 path = Path(__file__).resolve().parent
 data_path = path / "data"
