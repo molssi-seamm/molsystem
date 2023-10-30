@@ -133,7 +133,11 @@ class CIFMixin:
                 lines.append("space_group_name_H-M_full   'P 1'")
             else:
                 spgname_system = symmetry.spacegroup_names_to_system[spgname]
-                lines.append(f"_space_group_{spgname_system}   '{spgname}'")
+                lines.append(f"_space_group_{spgname_system}       '{spgname}'")
+                hall = symmetry.hall_symbol
+                lines.append(f"_symmetry_space_group_name_Hall '{hall}'")
+                it_number = symmetry.IT_number
+                lines.append(f"_space_group_IT_number          {it_number}")
             lines.append(f"_cell_length_a   {a}")
             lines.append(f"_cell_length_b   {b}")
             lines.append(f"_cell_length_c   {c}")
@@ -231,6 +235,7 @@ class CIFMixin:
         None
         """
 
+        print("entering from_cif_text")
         result = ""
         cif = CifFile.ReadCif(io.StringIO(text))
 
@@ -264,12 +269,15 @@ class CIFMixin:
 
             # Where is the symmetry info?
             spgname = None
+            used_symops = False
             if "_space_group_symop" + dot + "operation_xyz" in data_block:
                 symdata = "_space_group_symop" + dot + "operation_xyz"
                 self.symmetry.symops = data_block[symdata]
+                used_symops = True
             elif "_symmetry_equiv" + dot + "pos_as_xyz" in data_block:
                 symdata = "_symmetry_equiv" + dot + "pos_as_xyz"
                 self.symmetry.symops = data_block[symdata]
+                used_symops = True
             else:
                 for section in (
                     "_space_group" + dot + "name_Hall",
@@ -515,6 +523,28 @@ class CIFMixin:
                 symop1=symop1s,
                 symop2=symop2s,
             )
+
+        # If used symops, need to find the spacegroup name(s)
+        if used_symops:
+            before = self.symmetry.symops
+            international_name = self.symmetry.find_spacegroup_from_operators()
+            self.symmetry.update_group(international_name)
+            after = self.symmetry.symops
+            if before != after:
+                print("!!!!!!!!!!!!!!!!!!!! SYMOPS CHANGED !!!!!!!!!!!!!!!!!!!!!")
+
+        import pprint
+
+        print("Reading CIF file")
+        print(f"{self.symmetry.hall_number=}")
+        print(f"{self.symmetry.hall_symbol=}")
+        print(f"{self.symmetry.group=}")
+        pprint.pprint(self.atoms.get_coordinates(asymmetric=True))
+        print("all atoms")
+        pprint.pprint(self.atoms.get_coordinates(asymmetric=False))
+
+        print("\n\nSymmetry info")
+        pprint.pprint(self.get_symmetry_data(self.symmetry.hall_number))
 
         return result
 

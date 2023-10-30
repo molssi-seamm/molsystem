@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from fractions import Fraction
-import json  # noqa: F401
 import logging
+import pprint
 import re
 
 import numpy as np
 import spglib
 
 logger = logging.getLogger(__name__)
-# logger.setLevel("DEBUG")
+logger.setLevel("INFO")
 
 
 class _Symmetry(object):
@@ -18,6 +18,9 @@ class _Symmetry(object):
     spgno_to_hall = None
     spgname_to_hall = None
     spgname_to_system = None
+    hall_to_spgname = None
+    hall_to_hall_symbol = None
+    hall_to_IT_symbol = None
 
     def __init__(self, configuration):
         """Initialize from the database.
@@ -172,6 +175,22 @@ class _Symmetry(object):
         self.db.commit()
 
     @property
+    def hall_number(self):
+        if self.configuration.periodicity == 0:
+            return ""
+        else:
+            return self.to_hall(self.group)
+
+    @property
+    def hall_symbol(self):
+        if self.configuration.periodicity == 0:
+            return ""
+        else:
+            if _Symmetry.hall_to_hall_symbol is None:
+                self.spacegroup_names_to_hall
+            return _Symmetry.hall_to_hall_symbol[self.to_hall(self.group)]
+
+    @property
     def id(self):
         """The id of this cell."""
         return self._id
@@ -180,6 +199,15 @@ class _Symmetry(object):
     def inverse_operations(self):
         """The list of inverse symmetry operations for each symop."""
         return [x.index(0) for x in self.symop_products]
+
+    @property
+    def IT_number(self):
+        if self.configuration.periodicity == 0:
+            return ""
+        else:
+            if _Symmetry.hall_to_hall_symbol is None:
+                self.spacegroup_names_to_hall
+            return _Symmetry.hall_to_IT_number[self.to_hall(self.group)]
 
     @property
     def loglevel(self):
@@ -298,12 +326,6 @@ class _Symmetry(object):
         """Return the SystemDB object that contains this cell."""
         return self._system_db
 
-    def to_hall(self, name):
-        """Hall number given full spacegroup name or number."""
-        if isinstance(name, int):
-            return self.spacegroup_numbers_to_hall[name]
-        return self.spacegroup_names_to_hall[name]
-
     @property
     def spacegroup_numbers_to_hall(self):
         """List of the Hall spacegroup names for the IT number."""
@@ -334,11 +356,16 @@ class _Symmetry(object):
             }
             # Initialize the symmetry data
             _Symmetry.spgname_to_hall = {}
+            _Symmetry.hall_to_spgname = {}
+            _Symmetry.hall_to_hall_symbol = {}
+            _Symmetry.hall_to_IT_number = {}
             if _Symmetry.spgname_to_system is None:
                 _Symmetry.spgname_to_system = {}
             for hall in range(1, 530):
                 data = spglib.get_spacegroup_type(hall)
                 choice = data["choice"]
+                _Symmetry.hall_to_hall_symbol[hall] = data["hall_symbol"]
+                _Symmetry.hall_to_IT_number[hall] = data["number"]
                 for key in (
                     "international_full",
                     "international",
@@ -355,6 +382,8 @@ class _Symmetry(object):
                                 f"{hall=} {key} --> {name} exists: "
                                 f"{_Symmetry.spgname_to_hall[name]}"
                             )
+                        if key == "international":
+                            _Symmetry.hall_to_spgname[hall] = name
                         _Symmetry.spgname_to_hall[name] = hall
                         _Symmetry.spgname_to_system[name] = system_name[key]
                         for txt in ("_", " "):
@@ -371,6 +400,8 @@ class _Symmetry(object):
                             f"{hall=} {key} --> {name} exists: "
                             f"{_Symmetry.spgname_to_hall[name]}"
                         )
+                    if key == "international" and hall not in _Symmetry.spgname_to_hall:
+                        _Symmetry.hall_to_spgname[hall] = name
                     _Symmetry.spgname_to_hall[name] = hall
                     _Symmetry.spgname_to_system[name] = system_name[key]
                     for txt in ("_", " "):
@@ -388,6 +419,39 @@ class _Symmetry(object):
             self.spacegroup_numbers_to_hall
 
         return _Symmetry.spgname_to_system
+
+    def find_spacegroup_from_operators(self):
+        """Find the spacegroup from the symmetry operators."""
+        if self.configuration.periodicity > 0:
+            rotations = self.symmetry_matrices[:, 0:3, 0:3]
+            translations = self.symmetry_matrices[:, 0:3, 3]
+            data = spglib.get_spacegroup_type_from_symmetry(
+                rotations.tolist(),
+                translations.tolist(),
+                self.configuration.cell.vectors(),
+            )
+            hall_number = data["hall_number"]
+            international_number = data["number"]
+            while True:
+                data = self.configuration.get_symmetry_data(hall_number)
+                if data is None:
+                    raise RuntimeError("Error finding spacegroup from operators.")
+                if data["number"] != international_number:
+                    raise RuntimeError(
+                        "Error finding setting for spacegroup number "
+                        f"{international_number}."
+                    )
+                if all(abs(data["origin_shift"]) < 0.001):
+                    break
+                hall_number += 1
+            return self.hall_to_spacegroup_name(hall_number)
+
+    def hall_to_spacegroup_name(self, hall):
+        """Return the International name including setting for a hall number."""
+        if _Symmetry.hall_to_spgname is None:
+            _Symmetry.spgname_to_hall = None
+            self.spacegroup_names_to_hall
+        return _Symmetry.hall_to_spgname[hall]
 
     def reset_atoms(self):
         """The atoms have changed, so need to recalculate the symmetric atoms."""
@@ -426,12 +490,15 @@ class _Symmetry(object):
             return v_sym, None
 
         v_in = np.array(v_sym)
+        print(f"{v_in=}")
         generators = self.atom_generators
         v = np.ndarray((len(generators),), dtype=float)
         delta = np.zeros_like(v_in)
         start = 0
         for asym_atom, ops in enumerate(generators):
+            print(f"{asym_atom=} {ops}")
             n = len(ops)
+            print(f"{n=}")
             v[asym_atom] = np.average(v_in[start : start + n], axis=0)
             delta[start : start + n] = v_in[start : start + n] - v[asym_atom]
             start += n
@@ -543,6 +610,21 @@ class _Symmetry(object):
                 tmp = self.configuration.cell.to_cartesians(uvw, as_array=True)
                 return tmp.round(8).tolist(), delta.round(8).tolist()
 
+    def to_hall(self, name):
+        """Hall number given full spacegroup name or number."""
+        if isinstance(name, int):
+            return self.spacegroup_numbers_to_hall[name]
+        return self.spacegroup_names_to_hall[name]
+
+    def update_group(self, value):
+        if self.configuration.periodicity == 0:
+            if value != "C1":
+                raise NotImplementedError("Point groups not implemented yet!")
+        self.db.execute(
+            'UPDATE symmetry SET "group" = ? WHERE id = ?', (value, self.id)
+        )
+        self.db.commit()
+
     def vector_x_symop(self, vector, symop, translation=True):
         """Multiply a vector by a symmetry matrix."""
         sym_mat = self.symmetry_matrices[symop]
@@ -579,9 +661,9 @@ class _Symmetry(object):
                         f"Mismatch of number of atoms in symmetry: {uvw0.shape[0]} != "
                         f"{n_atoms}"
                     )
-                logger.debug("Original coordinates")
-                logger.debug(uvw0)
-                logger.debug(f"{uvw0.shape=}")
+                logger.info("Original coordinates")
+                logger.info(uvw0)
+                logger.info(f"{uvw0.shape=}")
 
                 logger.debug(f"{n_atoms=}")
                 uvw = np.ndarray((n_atoms, 4))
@@ -607,6 +689,7 @@ class _Symmetry(object):
                 logger.debug(tmp)
 
                 n_sym_atoms = 0
+                print(f"{n_atoms=}")
                 for i in range(n_atoms):
                     values, I1, I2 = np.unique(
                         np.round(tmp[:, :3, i], 4),
@@ -614,13 +697,15 @@ class _Symmetry(object):
                         return_index=True,
                         return_inverse=True,
                     )
-                    logger.debug(i)
-                    logger.debug("")
+                    logger.info(f"{i=}")
+                    pprint.pprint(np.round(tmp[:, :3, i], 4).tolist())
+                    logger.info("values")
+                    pprint.pprint(values.tolist())
                     logger.debug(values)
-                    logger.debug("")
-                    logger.debug(I1)
-                    logger.debug("")
-                    logger.debug(I2)
+                    logger.info("I1")
+                    logger.info(I1)
+                    logger.info("I2")
+                    logger.info(I2)
                     I2 += n_sym_atoms
                     self._atom_generators.append(I1.tolist())
                     self._symop_to_atom.append(I2.tolist())

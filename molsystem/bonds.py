@@ -33,8 +33,6 @@ class _Bonds(_Table):
 
         self._system = None
 
-        self._bondset = self._configuration.bondset
-
         super().__init__(configuration._system_db, "bond")
 
     def __enter__(self):
@@ -78,7 +76,7 @@ class _Bonds(_Table):
     @property
     def bondset(self):
         """The bondset for these bonds."""
-        return self._bondset
+        return self._configuration.bondset
 
     @property
     def bonds_for_asymmetric_bonds(self):

@@ -9,8 +9,8 @@ A general implementation for molecular and periodic systems.
 # the molsystem package.
 
 import molsystem.elements  # noqa: F401
-from molsystem.system_db import SystemDB  # noqa: F401
-from molsystem.cell import Cell  # noqa: F401
+from .system_db import SystemDB  # noqa: F401
+from .cell import Cell  # noqa: F401
 from .properties import standard_properties, add_properties_from_file  # noqa: F401
 
 # Handle versioneer

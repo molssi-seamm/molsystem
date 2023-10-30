@@ -1,6 +1,17 @@
 =======
 History
 =======
+2023.10.30 -- Support for InChI improved, RMSD and PubChem added...
+    * Adds support for aligning structures and calculating RMSD
+    * Adds support for working directly with PubChem to get structures, IUPAC names,
+      etc.
+    * Improves support for InChI, working around issues in both OpenBabel and RDKit.
+    * Added substantial new functionality for spacegroups and primitive cell handling,
+      but still not complete.
+
+2023.9.20 -- Better support for primitive cells and spacegroups
+    * Added getting the spacegroup from the symmetry operators
+    * Fixed updating the coordinates from the primitive cell
 
 2023.9.5 -- Support for velocities of atoms.
 

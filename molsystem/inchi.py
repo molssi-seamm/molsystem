@@ -6,7 +6,7 @@ import logging
 import requests
 
 try:
-    from openbabel import openbabel
+    from openbabel import openbabel as OB
 except ModuleNotFoundError:
     print(
         "Please install openbabel using conda:\n"
@@ -15,6 +15,7 @@ except ModuleNotFoundError:
     raise
 try:
     from rdkit import Chem
+    from rdkit.Chem import AllChem
 except ModuleNotFoundError:
     print("Please install RDKit using conda:\n     conda install -c conda-forge rdkit")
     raise
@@ -35,15 +36,15 @@ class InChIMixin:
         """Return the InChIKey string for this object."""
         return self.to_inchi(key=True)
 
-    def to_inchi(self, key=False, rdkit=False):
+    def to_inchi(self, key=False, openbabel=False):
         """Create the InChI string from the system.
 
         Parameters
         ----------
         key : bool = False
             Whether to create the InChIKey
-        rdkit : bool = False
-            Whether to use RDKit rather than default of OpenBabel
+        openbabel : bool = False
+            Whether to use OpenBabel rather than default of RDkit
 
         Returns
         -------
@@ -52,14 +53,8 @@ class InChIMixin:
         """
         logger.info("to_inchi")
 
-        if rdkit:
-            mol = self.to_RDKMol()
-            if key:
-                inchi = Chem.inchi.MolToInchiKey(mol)
-            else:
-                inchi = Chem.inchi.MolToInchi(mol)
-        else:
-            obConversion = openbabel.OBConversion()
+        if openbabel:
+            obConversion = OB.OBConversion()
             if key:
                 obConversion.SetOutFormat("inchikey")
             else:
@@ -68,12 +63,18 @@ class InChIMixin:
             mol = self.to_OBMol()
 
             inchi = obConversion.WriteString(mol)
+        else:
+            mol = self.to_RDKMol()
+            if key:
+                inchi = Chem.inchi.MolToInchiKey(mol)
+            else:
+                inchi = Chem.inchi.MolToInchi(mol)
 
         logger.info(f"inchi = '{inchi}'")
 
         return inchi.strip()
 
-    def from_inchi(self, inchi, name=None, rdkit=False):
+    def from_inchi(self, inchi, name=None, openbabel=True):
         """Create the system from a InChI string.
 
         Parameters
@@ -82,8 +83,8 @@ class InChIMixin:
             The InChI string
         name : str = None
             The name of the molecule
-        rdkit : bool = False
-            Whether to use RDKit rather than default of OpenBabel
+        openbabel : bool = False
+            Whether to use Openbabel rather than default of RDKit
 
         Returns
         -------
@@ -92,23 +93,31 @@ class InChIMixin:
 
         save = self.name
 
-        if rdkit:
-            mol = Chem.inchi.MolFromInchi(inchi, sanitize=True, removeHs=False)
-            self.from_RDKMol(mol)
-        else:
-            obConversion = openbabel.OBConversion()
+        if openbabel:
+            obConversion = OB.OBConversion()
             obConversion.SetInAndOutFormats("inchi", "mdl")
-            mol = openbabel.OBMol()
+            mol = OB.OBMol()
             obConversion.ReadString(mol, inchi)
 
             # Add hydrogens
             mol.AddHydrogens()
 
             # Get coordinates for a 3-D structure
-            builder = openbabel.OBBuilder()
+            builder = OB.OBBuilder()
             builder.Build(mol)
 
             self.from_OBMol(mol)
+        else:
+            raise NotImplementedError("RDKit from InChI doesn't seem to work!")
+            mol = Chem.MolFromInchi(
+                inchi, sanitize=False, removeHs=False, treatWarningAsError=True
+            )
+            mol = Chem.AddHs(mol)
+            AllChem.EmbedMolecule(mol)
+            self.from_RDKMol(mol)
+
+            print(f"{self.n_atoms=}")
+            print(f"{self.atoms.symbols=}")
 
         if name is not None:
             self.name = name
@@ -133,16 +142,16 @@ class InChIMixin:
 
         save = self.name
 
-        obConversion = openbabel.OBConversion()
+        obConversion = OB.OBConversion()
         obConversion.SetInAndOutFormats("inchi", "mdl")
-        mol = openbabel.OBMol()
+        mol = OB.OBMol()
         obConversion.ReadString(mol, inchi)
 
         # Add hydrogens
         mol.AddHydrogens()
 
         # Get coordinates for a 3-D structure
-        builder = openbabel.OBBuilder()
+        builder = OB.OBBuilder()
         builder.Build(mol)
 
         self.from_OBMol(mol)
