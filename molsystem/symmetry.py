@@ -2,14 +2,14 @@
 
 from fractions import Fraction
 import logging
-import pprint
+import pprint  # noqa: F401
 import re
 
 import numpy as np
 import spglib
 
 logger = logging.getLogger(__name__)
-logger.setLevel("INFO")
+# logger.setLevel("INFO")
 
 
 class _Symmetry(object):
@@ -246,6 +246,7 @@ class _Symmetry(object):
                     [0.0, 0.0, 0.0, 1.0],
                 ]
                 for row, op in enumerate(line.split(",")):
+                    op = op.strip()
                     match = regexp.fullmatch(op)
                     if match is None:
                         raise ValueError(
@@ -661,9 +662,9 @@ class _Symmetry(object):
                         f"Mismatch of number of atoms in symmetry: {uvw0.shape[0]} != "
                         f"{n_atoms}"
                     )
-                logger.info("Original coordinates")
-                logger.info(uvw0)
-                logger.info(f"{uvw0.shape=}")
+                logger.debug("Original coordinates")
+                logger.debug(uvw0)
+                logger.debug(f"{uvw0.shape=}")
 
                 logger.debug(f"{n_atoms=}")
                 uvw = np.ndarray((n_atoms, 4))
@@ -689,7 +690,6 @@ class _Symmetry(object):
                 logger.debug(tmp)
 
                 n_sym_atoms = 0
-                print(f"{n_atoms=}")
                 for i in range(n_atoms):
                     values, I1, I2 = np.unique(
                         np.round(tmp[:, :3, i], 4),
@@ -697,15 +697,15 @@ class _Symmetry(object):
                         return_index=True,
                         return_inverse=True,
                     )
-                    logger.info(f"{i=}")
-                    pprint.pprint(np.round(tmp[:, :3, i], 4).tolist())
-                    logger.info("values")
-                    pprint.pprint(values.tolist())
+                    logger.debug(f"{i=}")
+                    # pprint.pprint(np.round(tmp[:, :3, i], 4).tolist())
+                    logger.debug("values")
+                    # pprint.pprint(values.tolist())
                     logger.debug(values)
-                    logger.info("I1")
-                    logger.info(I1)
-                    logger.info("I2")
-                    logger.info(I2)
+                    logger.debug("I1")
+                    logger.debug(I1)
+                    logger.debug("I2")
+                    logger.debug(I2)
                     I2 += n_sym_atoms
                     self._atom_generators.append(I1.tolist())
                     self._symop_to_atom.append(I2.tolist())
