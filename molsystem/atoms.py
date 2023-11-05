@@ -5,6 +5,7 @@
 
 from itertools import zip_longest
 import logging
+import pprint  # noqa: F401
 from typing import Any, Dict, TypeVar
 
 import numpy as np
@@ -772,7 +773,7 @@ class _Atoms(_Table):
 
         return result
 
-    def get_as_dict(self, *args):
+    def get_as_dict(self, *args, asymmetric=False):
         """Return the atom data as a Python dictionary of lists.
 
         Parameters
@@ -785,12 +786,29 @@ class _Atoms(_Table):
         dict(str: [])
             A dictionary whose keys are the column names and values as lists
         """
-        rows = self.atoms(*args)
-        columns = [x[0] for x in rows.description]
-        data = {key: [] for key in columns}
-        for row in rows:
-            for key, value in zip(columns, row):
-                data[key].append(value)
+        if asymmetric:
+            rows = self.atoms(*args)
+            columns = [x[0] for x in rows.description]
+            data = {key: [] for key in columns}
+            for row in rows:
+                for key, value in zip(columns, row):
+                    data[key].append(value)
+        else:
+            data = {}
+            properties = [*self.attributes.keys()]
+            for name in properties:
+                if name in ("id", "x", "y", "z", "vx", "vy", "vz", "name"):
+                    continue
+                data[name] = self.get_property(name)
+
+            if "name" in properties:
+                data["name"] = self.get_names()
+
+            xyz = self.get_coordinates()
+            data["x"] = [v[0] for v in xyz]
+            data["y"] = [v[1] for v in xyz]
+            data["z"] = [v[2] for v in xyz]
+            data["id"] = [*range(len(xyz))]
 
         return data
 
@@ -1106,6 +1124,34 @@ class _Atoms(_Table):
         self.cursor.execute(sql, parameters)
         return self.cursor.fetchone()[0]
 
+    def get_property(self, name, asymmetric=False):
+        """Return the property from the atoms, expanded to symmetric atoms.
+
+        Parameters
+        ----------
+        name : str
+            The property (attribute) to return
+
+        asymmetric : bool = False
+            Return just the names for the asymmetric atoms.
+
+        Returns
+        -------
+        [any]
+            The values of the property on the symmetric atoms
+        """
+        if name == "name":
+            return self.get_names(asymmetric=asymmetric)
+
+        data = self.get_column_data(name)
+
+        symmetry = self.configuration.symmetry
+        if asymmetric or symmetry.n_symops == 1:
+            return data
+
+        # Expand to the asymmetric atoms
+        return [data[i] for i in symmetry.atom_to_asymmetric_atom]
+
     def get_velocities(
         self,
         fractionals=True,
@@ -1180,9 +1226,13 @@ class _Atoms(_Table):
 
         # May need to handle symmetry
         if n_coords != self.n_asymmetric_atoms and n_coords == self.n_atoms:
+            # print("set_coordinates: symmetrizing the coordinates")
+            # pprint.pprint(xyz)
             xyz, error = self.configuration.symmetry.symmetrize_coordinates(
                 xyz, fractionals=fractionals
             )
+            # print("results in")
+            # pprint.pprint(xyz)
 
         x_column = self.get_column("x")
         y_column = self.get_column("y")

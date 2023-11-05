@@ -1,6 +1,12 @@
 =======
 History
 =======
+2023.11.5 -- Bugfix and improved symmetry handling
+    * Fixed bug with symmetry operators containing blanks, e.g. 'x, y, z' rather than
+      'x,y,z'
+    * Added handling of symmetry when get properties of atoms
+    * Added method to lower symmetry to P1/C1
+
 2023.10.30 -- Support for InChI improved, RMSD and PubChem added...
     * Adds support for aligning structures and calculating RMSD
     * Adds support for working directly with PubChem to get structures, IUPAC names,
