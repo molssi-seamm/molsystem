@@ -679,6 +679,69 @@ class _Configuration(
         tmp = spglib.get_symmetry_dataset(cell_in, hall_number=hall_number)
         return tmp
 
+    def lower_symmetry(self, other=None):
+        """Lower the symmetry to P1 or C1, optionally from another configuration.
+
+        Parameters
+        ----------
+        other : molsystem._Configuration = None
+            Another configuration to use as the source
+        """
+        if other is None:
+            other = self
+
+        periodicity = other.periodicity
+
+        if periodicity != 0:
+            cell_parameters = other.cell.parameters
+
+        # Get the atom and bond information for low symmetry
+        atom_data = other.atoms.get_as_dict()
+        del atom_data["id"]
+        bond_data = other.bonds.get_as_dict()
+        del bond_data["id"]
+
+        # It is not clear that it makes sense to handle velocities, so drop
+        if "vx" in atom_data:
+            del atom_data["vx"]
+            del atom_data["vy"]
+            del atom_data["vz"]
+
+        self.clear()
+        self.new_atomset()
+        self.new_bondset()
+        if periodicity != 0:
+            self.new_cell()
+            self.cell.parameters = cell_parameters
+        self.new_symmetry()
+        self.periodicity = periodicity
+
+        ids = self.atoms.append(**atom_data)
+
+        iatoms = bond_data["i"]
+        jatoms = bond_data["j"]
+        bond_data["i"] = [ids[i] for i in iatoms]
+        bond_data["j"] = [ids[j] for j in jatoms]
+
+        self.bonds.append(**bond_data)
+
+        # Finally, copy over the charge multiplicity, etc.
+        if self is not other:
+            self.charge = other.charge
+            self.spin_multiplicity = other.spin_multiplicity
+            self.n_active_electrons = other.n_active_electrons
+            self.n_active_orbitals = other.n_active_orbitals
+
+    def new_atomset(self):
+        """Setup a new, empty atomset for this configuration."""
+        self._atomset = self.system_db["atomset"].append(n=1)[0]
+        self.db.execute(
+            "UPDATE configuration SET atomset = ? WHERE id = ?",
+            (self._atomset, self.id),
+        )
+        self.db.commit()
+        return self._atomset
+
     def new_bondset(self):
         """Setup a new, empty bondset for this configuration."""
         self._bondset = self.system_db["bondset"].append(n=1)[0]
@@ -688,6 +751,29 @@ class _Configuration(
         )
         self.db.commit()
         return self._bondset
+
+    def new_cell(self):
+        """Setup a new cell for this configuration."""
+        self._cell_id = self.system_db["cell"].append(n=1)[0]
+        sql = "UPDATE configuration SET cell = ? WHERE id = ?"
+        self.db.execute(sql, (self._cell_id, self.id))
+        self.db.commit()
+
+        return self.cell
+
+    def new_symmetry(self):
+        """Create a new symmetry object for this configuration."""
+        self._symmetry_id = None
+
+        table = _Table(self.system_db, "symmetry")
+        self._symmetry_id = table.append()[0]
+        self.cursor.execute(
+            "UPDATE configuration SET symmetry = ? WHERE id = ?",
+            (self._symmetry_id, self.id),
+        )
+        self.db.commit()
+
+        return self.symmetry
 
     def primitive_cell(self, symprec=1.0e-05, spg=True):
         """Find the symmetry of periodic systems and transform to conventional cell.
