@@ -220,6 +220,7 @@ class CIFMixin:
                     lines.append(f"  {names[i]} {names[j]} {r:.4f} {op1} {op2}")
 
         # And that is it!
+        lines.append("")
         return "\n".join(lines)
 
     def from_cif_text(self, text):
@@ -235,7 +236,6 @@ class CIFMixin:
         None
         """
 
-        print("entering from_cif_text")
         result = ""
         cif = CifFile.ReadCif(io.StringIO(text))
 
@@ -533,18 +533,18 @@ class CIFMixin:
             if before != after:
                 print("!!!!!!!!!!!!!!!!!!!! SYMOPS CHANGED !!!!!!!!!!!!!!!!!!!!!")
 
-        import pprint
+        # import pprint
 
-        print("Reading CIF file")
-        print(f"{self.symmetry.hall_number=}")
-        print(f"{self.symmetry.hall_symbol=}")
-        print(f"{self.symmetry.group=}")
-        pprint.pprint(self.atoms.get_coordinates(asymmetric=True))
-        print("all atoms")
-        pprint.pprint(self.atoms.get_coordinates(asymmetric=False))
+        # print("Reading CIF file")
+        # print(f"{self.symmetry.hall_number=}")
+        # print(f"{self.symmetry.hall_symbol=}")
+        # print(f"{self.symmetry.group=}")
+        # pprint.pprint(self.atoms.get_coordinates(asymmetric=True))
+        # print("all atoms")
+        # pprint.pprint(self.atoms.get_coordinates(asymmetric=False))
 
-        print("\n\nSymmetry info")
-        pprint.pprint(self.get_symmetry_data(self.symmetry.hall_number))
+        # print("\n\nSymmetry info")
+        # pprint.pprint(self.get_symmetry_data(self.symmetry.hall_number))
 
         return result
 
@@ -659,6 +659,7 @@ class CIFMixin:
                 lines.append(f"MOL1 {nm1} {nm2} {order}")
 
         # And that is it!
+        lines.append("")
         return "\n".join(lines)
 
     def from_mmcif_text(self, text):
