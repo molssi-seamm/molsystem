@@ -268,7 +268,6 @@ class CIFMixin:
             self.cell.parameters = (a, b, c, alpha, beta, gamma)
 
             # Where is the symmetry info?
-            spgname = None
             used_symops = False
             if "_space_group_symop" + dot + "operation_xyz" in data_block:
                 symdata = "_space_group_symop" + dot + "operation_xyz"
@@ -288,14 +287,15 @@ class CIFMixin:
                 ):
                     if section in data_block:
                         self.symmetry.group = data_block[section]
-                if spgname is None:
+                        break
+                else:
                     raise RuntimeError(
                         "CIF file does not contain required symmetry information. "
                         "Neither "
                         "'_symmetry_equiv" + dot + "pos_as_xyz' or "
                         "'_space_group_symop" + dot + "operation_xyz' or "
-                        "_symmetry" + dot + "space_group_name_*  or "
-                        "_symmetry" + dot + "space_group_name_* "
+                        "_symmetry" + dot + "space_group_name_Hall  or "
+                        "_symmetry" + dot + "space_group_name_H-M "
                         "is present."
                     )
 
