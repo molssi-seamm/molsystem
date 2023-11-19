@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2023.11.5 documentation</title>
+    <title>History &#8212; MolSystem 2023.11.19 documentation</title>
   
   
   
@@ -46,7 +46,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=67b0312d"></script>
+    <script src="_static/documentation_options.js?v=f123545e"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -495,6 +495,17 @@ document.write(`
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2023.11.19 – Bugfixes in symmetry and CIF files</dt><dd><ul class="simple">
+<li><p>Reading CIF files could fail if the symmetry operators were given</p></li>
+<li><p>The symmetry handling did not recognize hexagonal spacegroups without :H. Changed
+so if the hexagonal group name has neither :H or :R, the hexagonal setting is
+assumed.</p></li>
+<li><p>When finding the spacegroup from the symmetry operators, hard-coded to the P1 case
+to avoid what seems like a bug in spglib.</p></li>
+<li><p>Enhanced to use the full International Tables HM name for spacegroups, translating
+the input to that standard name.</p></li>
+</ul>
+</dd>
 <dt>2023.11.5 – Bugfix and improved symmetry handling</dt><dd><ul class="simple">
 <li><p>Fixed bug with symmetry operators containing blanks, e.g. ‘x, y, z’ rather than
 ‘x,y,z’</p></li>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2023.11.5 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2023.11.19 documentation</title>
   
   
   
@@ -45,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=67b0312d"></script>
+    <script src="../../_static/documentation_options.js?v=f123545e"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -614,6 +614,8 @@ document.write(`
 
         <span class="k">if</span> <span class="n">rdkit</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdmolfiles</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SMILES &#39;</span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">&#39; is not valid.&quot;</span><span class="p">)</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
             <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
