@@ -120,7 +120,6 @@ class PubChemMixin:
             if response.status_code == 200:
                 self.from_sdf_text(response.text)
                 return
-            print(f"{response.status_code=}")
 
         # An error!
         if fallback is None:
