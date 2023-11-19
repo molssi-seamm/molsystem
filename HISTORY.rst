@@ -1,6 +1,16 @@
 =======
 History
 =======
+2023.11.19 -- Bugfixes in symmetry and CIF files
+    * Reading CIF files could fail if the symmetry operators were given
+    * The symmetry handling did not recognize hexagonal spacegroups without :H. Changed
+      so if the hexagonal group name has neither :H or :R, the hexagonal setting is
+      assumed.
+    * When finding the spacegroup from the symmetry operators, hard-coded to the P1 case
+      to avoid what seems like a bug in spglib.
+    * Enhanced to use the full International Tables HM name for spacegroups, translating
+      the input to that standard name.
+      
 2023.11.5 -- Bugfix and improved symmetry handling
     * Fixed bug with symmetry operators containing blanks, e.g. 'x, y, z' rather than
       'x,y,z'

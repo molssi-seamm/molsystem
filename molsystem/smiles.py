@@ -115,6 +115,8 @@ class SMILESMixin:
 
         if rdkit:
             mol = Chem.rdmolfiles.MolFromSmiles(smiles)
+            if mol is None:
+                raise ValueError(f"SMILES '{smiles}' is not valid.")
             mol = Chem.AddHs(mol)
             AllChem.EmbedMolecule(mol)
             self.from_RDKMol(mol)

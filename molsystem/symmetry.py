@@ -131,6 +131,7 @@ class _Symmetry(object):
             else:
                 # Get the 4x4 augmented matrices
                 hall = self.to_hall(value)
+                value = self.hall_to_spacegroup_name(hall)
                 data = spglib.get_symmetry_from_database(hall)
                 W4s = []
                 for W, w in zip(
@@ -409,6 +410,10 @@ class _Symmetry(object):
                         tmp = name.replace(txt, "")
                         _Symmetry.spgname_to_hall[tmp] = hall
                         _Symmetry.spgname_to_system[tmp] = system_name[key]
+                        if tmp[-2:] == ":H":
+                            tmp = tmp[:-2].strip()
+                            _Symmetry.spgname_to_hall[tmp] = hall
+                            _Symmetry.spgname_to_system[tmp] = system_name[key]
         return _Symmetry.spgname_to_hall
 
     @property
@@ -424,27 +429,32 @@ class _Symmetry(object):
     def find_spacegroup_from_operators(self):
         """Find the spacegroup from the symmetry operators."""
         if self.configuration.periodicity > 0:
-            rotations = self.symmetry_matrices[:, 0:3, 0:3]
-            translations = self.symmetry_matrices[:, 0:3, 3]
-            data = spglib.get_spacegroup_type_from_symmetry(
-                rotations.tolist(),
-                translations.tolist(),
-                self.configuration.cell.vectors(),
-            )
-            hall_number = data["hall_number"]
-            international_number = data["number"]
-            while True:
-                data = self.configuration.get_symmetry_data(hall_number)
-                if data is None:
-                    raise RuntimeError("Error finding spacegroup from operators.")
-                if data["number"] != international_number:
-                    raise RuntimeError(
-                        "Error finding setting for spacegroup number "
-                        f"{international_number}."
-                    )
-                if all(abs(data["origin_shift"]) < 0.001):
-                    break
-                hall_number += 1
+            # Treat P1 as special to avoid bug in spglib...
+            if self.n_symops == 1:
+                hall_number = 1
+                international_number = 1
+            else:
+                rotations = self.symmetry_matrices[:, 0:3, 0:3]
+                translations = self.symmetry_matrices[:, 0:3, 3]
+                data = spglib.get_spacegroup_type_from_symmetry(
+                    rotations.tolist(),
+                    translations.tolist(),
+                    self.configuration.cell.vectors(),
+                )
+                hall_number = data["hall_number"]
+                international_number = data["number"]
+                while True:
+                    data = self.configuration.get_symmetry_data(hall_number)
+                    if data is None:
+                        raise RuntimeError("Error finding spacegroup from operators.")
+                    if data["number"] != international_number:
+                        raise RuntimeError(
+                            "Error finding setting for spacegroup number "
+                            f"{international_number}."
+                        )
+                    if all(abs(data["origin_shift"]) < 0.001):
+                        break
+                    hall_number += 1
             return self.hall_to_spacegroup_name(hall_number)
 
     def hall_to_spacegroup_name(self, hall):
