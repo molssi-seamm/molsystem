@@ -8,7 +8,7 @@ History
       assumed.
     * When finding the spacegroup from the symmetry operators, hard-coded to the P1 case
       to avoid what seems like a bug in spglib.
-    * Enahced to use the full International Tables HM name for spacegroups, translating
+    * Enhanced to use the full International Tables HM name for spacegroups, translating
       the input to that standard name.
       
 2023.11.5 -- Bugfix and improved symmetry handling
