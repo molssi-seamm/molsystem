@@ -3,7 +3,7 @@ History
 =======
 2023.11.19 -- Bugfixes in symmetry and CIF files
     * Reading CIF files could fail if the symmetry operators were given
-    * The symmmetry handling did not recognize hexagonal spacegroups without :H. Chaged
+    * The symmetry handling did not recognize hexagonal spacegroups without :H. Changed
       so if the hexagonal group name has neither :H or :R, the hexagonal setting is
       assumed.
     * When finding the spacegroup from the symmetry operators, hard-coded to the P1 case
