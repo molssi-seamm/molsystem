@@ -17,6 +17,7 @@ Bond Orders
 import io
 import json
 import logging
+import re
 
 import CifFile
 
@@ -268,7 +269,6 @@ class CIFMixin:
             self.cell.parameters = (a, b, c, alpha, beta, gamma)
 
             # Where is the symmetry info?
-            spgname = None
             used_symops = False
             if "_space_group_symop" + dot + "operation_xyz" in data_block:
                 symdata = "_space_group_symop" + dot + "operation_xyz"
@@ -279,6 +279,7 @@ class CIFMixin:
                 self.symmetry.symops = data_block[symdata]
                 used_symops = True
             else:
+                found = False
                 for section in (
                     "_space_group" + dot + "name_Hall",
                     "_space_group" + dot + "name_H-M_full",
@@ -287,8 +288,9 @@ class CIFMixin:
                     "_symmetry" + dot + "space_group_name_H-M",
                 ):
                     if section in data_block:
+                        found = True
                         self.symmetry.group = data_block[section]
-                if spgname is None:
+                if not found:
                     raise RuntimeError(
                         "CIF file does not contain required symmetry information. "
                         "Neither "
@@ -447,9 +449,42 @@ class CIFMixin:
                 symbol = "H"
 
             # May have uncertainties in ()
-            x = float(x.split("(")[0])
-            y = float(y.split("(")[0])
-            z = float(z.split("(")[0])
+            x = x.split("(")[0]
+            y = y.split("(")[0]
+            z = z.split("(")[0]
+
+            # Check for 1/3 and 2/3
+            if "." in x:
+                xx, dx = x.split(".")
+                if re.fullmatch(r"333+", dx):
+                    x = float(xx) - 1.0 / 3.0 if "-" in xx else float(xx) + 1.0 / 3.0
+                elif re.fullmatch(r"66+(6|7)?", dx):
+                    x = float(xx) - 2.0 / 3.0 if "-" in xx else float(xx) + 2.0 / 3.0
+                else:
+                    x = float(x)
+            else:
+                x = float(x)
+            if "." in y:
+                yy, dy = y.split(".")
+                if re.fullmatch(r"333+", dy):
+                    y = float(yy) - 1.0 / 3.0 if "-" in yy else float(yy) + 1.0 / 3.0
+                elif re.fullmatch(r"66+(6|7)?", dy):
+                    y = float(yy) - 2.0 / 3.0 if "-" in yy else float(yy) + 2.0 / 3.0
+                else:
+                    y = float(y)
+            else:
+                y = float(y)
+            if "." in z:
+                zz, dz = z.split(".")
+                if re.fullmatch(r"333+", dz):
+                    z = float(zz) - 1.0 / 3.0 if "-" in zz else float(zz) + 1.0 / 3.0
+                elif re.fullmatch(r"66+(6|7)?", dz):
+                    z = float(zz) - 2.0 / 3.0 if "-" in zz else float(zz) + 2.0 / 3.0
+                else:
+                    z = float(z)
+            else:
+                z = float(z)
+
             logger.debug(f"xyz = {x:7.3f} {y:7.3f} {z:7.3f}")
             if self.periodicity == 3:
                 if not have_fractionals:
