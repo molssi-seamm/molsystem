@@ -1,6 +1,10 @@
 =======
 History
 =======
+2023.12.5 -- Bugfixes for symmetry
+    * Fixed issue #72, where symmetry was not correctly handled for trigonal and
+      hexagonal cells where atoms had coordinates of 1/3 or 2/3.
+      
 2023.11.5 -- Bugfix and improved symmetry handling
     * Fixed bug with symmetry operators containing blanks, e.g. 'x, y, z' rather than
       'x,y,z'
