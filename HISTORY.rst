@@ -1,6 +1,10 @@
 =======
 History
 =======
+2023.12.5 -- Bugfixes for symmetry
+    * Fixed issue #72, where symmetry was not correctly handled for trigonal and
+      hexagonal cells where atoms had coordinates of 1/3 or 2/3.
+
 2023.11.19 -- Bugfixes in symmetry and CIF files
     * Reading CIF files could fail if the symmetry operators were given
     * The symmetry handling did not recognize hexagonal spacegroups without :H. Changed
