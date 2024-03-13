@@ -296,8 +296,10 @@ class _Symmetry(object):
             text = ""
         else:
             text = " | ".join(ops)
-
-        self.db.execute("UPDATE symmetry SET symops = ? WHERE id = ?", (text, self.id))
+        # Ensure the lower case letters are used! x, y, z not X, Y, Z
+        self.db.execute(
+            "UPDATE symmetry SET symops = ? WHERE id = ?", (text.lower(), self.id)
+        )
         # Unset the group
         self.db.execute('UPDATE symmetry SET "group" = "" WHERE id = ?', (self.id,))
         self.db.commit()
