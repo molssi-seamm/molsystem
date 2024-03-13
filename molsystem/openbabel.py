@@ -77,6 +77,7 @@ class OpenBabelMixin:
         Xs = []
         Ys = []
         Zs = []
+        qs = []
         for ob_atom in ob.OBMolAtomIter(ob_mol):
             atno = ob_atom.GetAtomicNum()
             atnos.append(atno)
@@ -84,6 +85,7 @@ class OpenBabelMixin:
             Ys.append(ob_atom.y())
             Zs.append(ob_atom.z())
             logger.debug(f"atom {atno} {ob_atom.x()} {ob_atom.z()} {ob_atom.z()}")
+            qs.append(ob_atom.GetFormalCharge())
 
         Is = []
         Js = []
@@ -105,7 +107,12 @@ class OpenBabelMixin:
             self.charge = ob_mol.GetTotalCharge()
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
 
-        ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+        if any([i != 0.0 for i in qs]):
+            if "formal_charge" not in self.atoms:
+                self.atoms.add_attribute("formal_charge", coltype="int", default=0)
+            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
+        else:
+            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
         i = [ids[x - 1] for x in Is]
         j = [ids[x - 1] for x in Js]
         self.bonds.append(i=i, j=j, bondorder=BondOrders)
