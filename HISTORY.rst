@@ -5,6 +5,10 @@ History
     * Added gradient on atoms as a separate table alongside atoms, so they take no space
       unless actually used.
       
+2024.3.13 -- Handle uppercase X, Y, Z in strings for symmetry operators
+    * the Crystallographic Open Database CIF files seems to use upper case X, Y, Z in
+      explicit symmetry operators. These need to be lowercased in the code.
+
 2023.12.5 -- Bugfixes for symmetry
     * Fixed issue #72, where symmetry was not correctly handled for trigonal and
       hexagonal cells where atoms had coordinates of 1/3 or 2/3.
