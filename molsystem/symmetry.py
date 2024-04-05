@@ -9,7 +9,8 @@ import numpy as np
 import spglib
 
 logger = logging.getLogger(__name__)
-logger.setLevel("INFO")
+# logger.setLevel("INFO")
+logger.setLevel("WARNING")
 
 
 class _Symmetry(object):
@@ -92,9 +93,9 @@ class _Symmetry(object):
                     "Cannot specify both operators and group or sym_ops."
                 )
         else:
-            raise RuntimeError(
-                "Must specify either group or sym_ops or operators."
-            )
+            raise RuntimeError("Must specify either group or sym_ops or operators.")
+
+        self = _Symmetry()
 
         symbols = self.configuration.atoms.asymmetric_symbols
         n_atoms = self.configuration.n_asymmetric_atoms
@@ -246,11 +247,11 @@ I2
         return operators
 
     @staticmethod
-    def hall_to_spacegroup_name(self, hall):
+    def hall_to_spacegroup_name(hall):
         """Return the International name including setting for a hall number."""
         if _Symmetry.hall_to_spgname is None:
             _Symmetry.spgname_to_hall = None
-            _Symmetry.spacegroup_names_to_hall
+            _Symmetry.spacegroup_names_to_hall()
         return _Symmetry.hall_to_spgname[hall]
 
     @staticmethod
@@ -272,9 +273,37 @@ I2
                 _Symmetry.spgname_to_system = {}
             for hall in range(1, 530):
                 data = spglib.get_spacegroup_type(hall)
+                # pws pprint.pprint(data)
                 choice = data["choice"]
                 _Symmetry.hall_to_hall_symbol[hall] = data["hall_symbol"]
                 _Symmetry.hall_to_IT_number[hall] = data["number"]
+
+                # Handle Hall to spacegroup using the full H-M name
+                key = "international_full"
+                name = data[key]
+
+                # Default setting if there are multiple, leave unadorned
+                if choice in ("2", "b", "b1", "H"):
+                    if (
+                        hall in _Symmetry.hall_to_spgname
+                        and name != _Symmetry.hall_to_spgname[hall]
+                    ):
+                        raise RuntimeError(
+                            f"{hall=} {key} --> {name} exists: "
+                            f"{_Symmetry.hall_to_spgname[hall]}"
+                        )
+                    else:
+                        _Symmetry.hall_to_spgname[hall] = name
+                else:
+                    # Add other settings to the spacegroup name
+                    if choice != "":
+                        name += f" :{choice}"
+                    if hall not in _Symmetry.hall_to_spgname:
+                        # pws if choice != "":
+                        # pws print(f"{hall} = {name}   QQQQQQQQQQQQQQQQQQQQQQ")
+                        _Symmetry.hall_to_spgname[hall] = name
+
+                # Now handle all the rest
                 for key in (
                     "international_full",
                     "international",
@@ -282,35 +311,27 @@ I2
                     "hall_symbol",
                 ):
                     name = data[key]
-                    if "international" in key and choice in ("2",):
-                        if (
-                            name in _Symmetry.spgname_to_hall
-                            and hall != _Symmetry.spgname_to_hall[name]
-                        ):
-                            raise RuntimeError(
-                                f"{hall=} {key} --> {name} exists: "
-                                f"{_Symmetry.spgname_to_hall[name]}"
-                            )
-                        if key == "international":
-                            _Symmetry.hall_to_spgname[hall] = name
+
+                    # SPGLib encodes the international name: 'C 2/c = B 2/n 1 1',
+                    if key == "international":
+                        name = name.split("=")[0].strip()
+
+                    # Default setting if there are multiple, leave unadorned
+                    if choice in ("2", "b", "b1", "H"):
                         _Symmetry.spgname_to_hall[name] = hall
                         _Symmetry.spgname_to_system[name] = system_name[key]
                         for txt in ("_", " "):
                             tmp = name.replace(txt, "")
                             _Symmetry.spgname_to_hall[tmp] = hall
                             _Symmetry.spgname_to_system[tmp] = system_name[key]
-                    if choice != "":
+                            if tmp[-2:] == ":H":
+                                tmp = tmp[:-2].strip()
+                                _Symmetry.spgname_to_hall[tmp] = hall
+                                _Symmetry.spgname_to_system[tmp] = system_name[key]
+
+                    if key in ("international", "international_short") and choice != "":
                         name += f" :{choice}"
-                    if (
-                        name in _Symmetry.spgname_to_hall
-                        and hall != _Symmetry.spgname_to_hall[name]
-                    ):
-                        raise RuntimeError(
-                            f"{hall=} {key} --> {name} exists: "
-                            f"{_Symmetry.spgname_to_hall[name]}"
-                        )
-                    if key == "international" and hall not in _Symmetry.spgname_to_hall:
-                        _Symmetry.hall_to_spgname[hall] = name
+
                     _Symmetry.spgname_to_hall[name] = hall
                     _Symmetry.spgname_to_system[name] = system_name[key]
                     for txt in ("_", " "):
@@ -342,11 +363,21 @@ I2
         return _Symmetry.spgno_to_hall
 
     @staticmethod
-    def to_hall(self, name):
+    def to_hall(name):
         """Hall number given full spacegroup name or number."""
         if isinstance(name, int):
-            return self.spacegroup_numbers_to_hall[name]
-        return self.spacegroup_names_to_hall[name]
+            return _Symmetry.spacegroup_numbers_to_hall()[name]
+        return _Symmetry.spacegroup_names_to_hall()[name]
+
+    @staticmethod
+    def spacegroup_names_to_system():
+        """Dictionary of system (name_Hall, name_H-M_full,...) for spacegroup names."""
+        if _Symmetry.spgname_to_hall is None:
+            _Symmetry.spacegroup_names_to_hall()
+        if _Symmetry.spgno_to_hall is None:
+            _Symmetry.spacegroup_numbers_to_hall()
+
+        return _Symmetry.spgname_to_system
 
     @property
     def configuration(self):
@@ -629,16 +660,6 @@ I2
         """Return the SystemDB object that contains this cell."""
         return self._system_db
 
-    @property
-    def spacegroup_names_to_system(self):
-        """Dictionary of system (name_Hall, name_H-M_full,...) for spacegroup names."""
-        if _Symmetry.spgname_to_hall is None:
-            self.spacegroup_names_to_hall
-        if _Symmetry.spgno_to_hall is None:
-            self.spacegroup_numbers_to_hall
-
-        return _Symmetry.spgname_to_system
-
     def find_spacegroup_from_operators(self):
         """Find the spacegroup from the symmetry operators."""
         if self.configuration.periodicity > 0:
@@ -654,13 +675,10 @@ I2
                     translations.tolist(),
                     self.configuration.cell.vectors(),
                 )
-                # pprint.pprint(data)
                 hall_number = data["hall_number"]
                 international_number = data["number"]
                 while True:
                     data = self.configuration.get_symmetry_data(hall_number)
-                    # print(f"{hall_number=}")
-                    # pprint.pprint(data)
                     if data is None:
                         raise RuntimeError("Error finding spacegroup from operators.")
                     if data["number"] != international_number:

@@ -177,7 +177,7 @@ def test_atoms_data(gly):
         ],
     }
     for column in gly.atoms:
-        if column in ("vx", "vy", "vz"):
+        if column in ("gx", "gy", "gz", "vx", "vy", "vz"):
             continue
         result = gly.atoms.get_column_data(column)
         if column not in answer:

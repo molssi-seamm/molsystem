@@ -133,7 +133,7 @@ class CIFMixin:
             elif symmetry.n_symops == 1:
                 lines.append("space_group_name_H-M_full   'P 1'")
             else:
-                spgname_system = symmetry.spacegroup_names_to_system[spgname]
+                spgname_system = symmetry.spacegroup_names_to_system()[spgname]
                 lines.append(f"_space_group_{spgname_system}       '{spgname}'")
                 hall = symmetry.hall_symbol
                 lines.append(f"_symmetry_space_group_name_Hall '{hall}'")
@@ -296,8 +296,8 @@ class CIFMixin:
                         "Neither "
                         "'_symmetry_equiv" + dot + "pos_as_xyz' or "
                         "'_space_group_symop" + dot + "operation_xyz' or "
-                        "_symmetry" + dot + "space_group_name_*  or "
-                        "_symmetry" + dot + "space_group_name_* "
+                        "_symmetry" + dot + "space_group_name_Hall  or "
+                        "_symmetry" + dot + "space_group_name_H-M "
                         "is present."
                     )
 
