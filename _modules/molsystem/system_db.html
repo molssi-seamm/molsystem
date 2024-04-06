@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.system_db &#8212; MolSystem 2024.3.13 documentation</title>
+    <title>molsystem.system_db &#8212; MolSystem 2024.4.5 documentation</title>
   
   
   
@@ -45,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=0eab0fa3"></script>
+    <script src="../../_static/documentation_options.js?v=ad7f1340"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1515,6 +1515,21 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
                 <span class="s2">&quot;CREATE INDEX idx_velocities_atom_configuration &quot;</span>
                 <span class="s2">&quot;    ON velocities(atom, configuration)&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Keep the gradients separate from coordinates to keep the size down</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;gradients&quot;</span><span class="p">]</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+                <span class="s2">&quot;configuration&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;configuration&quot;</span>
+            <span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;atom&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;atom&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;gx&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;gy&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE INDEX &#39;idx_gradients_atom&#39; ON gradients (</span><span class="se">\&quot;</span><span class="s2">atom</span><span class="se">\&quot;</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">&quot;CREATE INDEX idx_gradients_atom_configuration &quot;</span>
+                <span class="s2">&quot;    ON gradients(atom, configuration)&quot;</span>
             <span class="p">)</span>
 
             <span class="c1"># The definition of the subsets -- templates</span>

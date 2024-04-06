@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.atoms &#8212; MolSystem 2024.3.13 documentation</title>
+    <title>molsystem.atoms &#8212; MolSystem 2024.4.5 documentation</title>
   
   
   
@@ -45,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=0eab0fa3"></script>
+    <script src="../../_static/documentation_options.js?v=ad7f1340"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -540,6 +540,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span> <span class="o">=</span> <span class="n">_Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">,</span> <span class="s2">&quot;atom&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span> <span class="o">=</span> <span class="n">_Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span> <span class="o">=</span> <span class="n">_Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">,</span> <span class="s2">&quot;velocities&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span> <span class="o">=</span> <span class="n">_Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">,</span> <span class="s2">&quot;gradients&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_system_db</span><span class="p">,</span> <span class="s2">&quot;atom&quot;</span><span class="p">)</span>
 
@@ -564,6 +565,8 @@ document.write(`
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">iter</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow iteration over the object&quot;&quot;&quot;</span>
@@ -678,8 +681,8 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The definitions of the attributes.</span>
-<span class="sd">        Combine the attributes of the atom, coordinates, and velocities tables to</span>
-<span class="sd">        make it look like a single larger table.</span>
+<span class="sd">        Combine the attributes of the atom, coordinates, velocities, and gradients</span>
+<span class="sd">        tables to make it look like a single larger table.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span><span class="o">.</span><span class="n">attributes</span>
@@ -689,6 +692,10 @@ document.write(`
                 <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;atom&quot;</span><span class="p">:</span>  <span class="c1"># atom key links the tables together, so ignore</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;atom&quot;</span><span class="p">:</span>  <span class="c1"># atom key links the tables together, so ignore</span>
                 <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -720,6 +727,16 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="o">.</span><span class="n">db</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The gradients as list of lists.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gradients</span><span class="p">()</span>
+
+    <span class="nd">@gradients</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The gradients as list of lists.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_gradients</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The space or point group of the configuration.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">symmetry</span><span class="o">.</span><span class="n">group</span>
@@ -727,6 +744,19 @@ document.write(`
     <span class="nd">@group</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">symmetry</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">have_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether there are any gradients for this configuration.&quot;&quot;&quot;</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SELECT COUNT(*)&quot;</span>
+            <span class="s2">&quot; FROM atomset_atom AS aa, gradients AS ve &quot;</span>
+            <span class="s2">&quot;WHERE aa.atomset = ?&quot;</span>
+            <span class="s2">&quot;  AND ve.atom = aa.atom AND ve.configuration = ?&quot;</span>
+        <span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">have_velocities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -970,6 +1000,16 @@ document.write(`
         <span class="k">if</span> <span class="n">have_velocities</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
 
+        <span class="c1"># And gradients table</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;configuration&quot;</span><span class="p">:</span> <span class="n">configuration</span><span class="p">,</span> <span class="s2">&quot;atom&quot;</span><span class="p">:</span> <span class="n">ids</span><span class="p">}</span>
+        <span class="n">have_gradients</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="o">!=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">and</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+                <span class="n">have_gradients</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">have_gradients</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
         <span class="c1"># And to the atomset</span>
         <span class="n">table</span> <span class="o">=</span> <span class="n">_Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">,</span> <span class="s2">&quot;atomset_atom&quot;</span><span class="p">)</span>
         <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="p">,</span> <span class="n">atom</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
@@ -991,88 +1031,79 @@ document.write(`
 <span class="sd">        sqlite3.Cursor</span>
 <span class="sd">            A cursor that returns sqlite3.Row objects for the atoms.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_velocities</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">have_velocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_velocities</span>
+        <span class="n">have_gradients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_gradients</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="n">have_velocities</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="n">have_gradients</span><span class="p">)</span>
+        <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
 
-            <span class="c1"># What tables are requested in the extra arguments?</span>
-            <span class="n">tables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">atom_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="n">coordinates_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="n">velocities_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">atom_columns</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;at&quot;</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">coordinates_columns</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">velocities_columns</span><span class="p">:</span>
+        <span class="c1"># What tables are requested in the extra arguments?</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;at&quot;</span><span class="p">)</span>
+            <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">have_velocities</span><span class="p">:</span>
+                <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;ve&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">have_gradients</span><span class="p">:</span>
+                <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;gr&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">atom_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
+            <span class="n">coordinates_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
+            <span class="n">velocities_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
+            <span class="n">gradients_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
+                    <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">atom_columns</span><span class="p">:</span>
+                    <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;at&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">coordinates_columns</span><span class="p">:</span>
+                    <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">velocities_columns</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">have_velocities</span><span class="p">:</span>
                         <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;ve&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; is not available&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Build the query based on the tables needed</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; FROM atomset_atom AS aa, atom AS at, coordinates AS co, &quot;</span>
-                <span class="s2">&quot;      velocities AS ve &quot;</span>
-                <span class="s2">&quot;WHERE aa.atomset = ?&quot;</span>
-                <span class="s2">&quot;  AND at.id = aa.atom&quot;</span>
-                <span class="s2">&quot;  AND co.atom = at.id AND co.configuration = ?&quot;</span>
-                <span class="s2">&quot;  AND ve.atom = at.id AND ve.configuration = ?&quot;</span>
-            <span class="p">)</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
-
-            <span class="c1"># And any extra selection criteria</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
-                        <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
-
-            <span class="c1"># What tables are requested in the extra arguments?</span>
-            <span class="n">tables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">atom_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="n">coordinates_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="n">velocities_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">atom_columns</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;at&quot;</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">coordinates_columns</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">velocities_columns</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                             <span class="s2">&quot;Query for atom has velocities, but the atoms don&#39;t&quot;</span>
                         <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gradients_columns</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">have_gradients</span><span class="p">:</span>
+                        <span class="n">tables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;gr&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; is not available&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;Query for atom has gradients, but the atoms don&#39;t&quot;</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; is not available&quot;</span><span class="p">)</span>
 
-            <span class="c1"># Build the query based on the tables needed</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; FROM atomset_atom AS aa, atom AS at, coordinates AS co &quot;</span>
-                <span class="s2">&quot;WHERE aa.atomset = ?&quot;</span>
-                <span class="s2">&quot;  AND at.id = aa.atom&quot;</span>
-                <span class="s2">&quot;  AND co.atom = at.id AND co.configuration = ?&quot;</span>
-            <span class="p">)</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="c1"># Build the query based on the tables needed</span>
+        <span class="n">from_string</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;atomset_atom AS aa&quot;</span><span class="p">,</span> <span class="s2">&quot;atom AS at&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates AS co&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;ve&quot;</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">from_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;velocities AS ve&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;gr&quot;</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">from_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;gradients AS gr&quot;</span><span class="p">)</span>
+        <span class="n">from_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">from_string</span><span class="p">)</span>
 
-            <span class="c1"># And any extra selection criteria</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
-                        <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; FROM </span><span class="si">{</span><span class="n">from_string</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;WHERE aa.atomset = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  AND at.id = aa.atom</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  AND co.atom = at.id AND co.configuration = ?&quot;</span>
+        <span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;ve&quot;</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  AND ve.atom = at.id AND ve.configuration = ?&quot;</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;gr&quot;</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  AND gr.atom = at.id AND gr.configuration = ?&quot;</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="c1"># And any extra selection criteria</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
+                    <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
+                <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;atoms query:&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
@@ -1084,7 +1115,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Difference between these atoms and another</span>
 
-<span class="sd">        Currently ignores velocities. Not sure what we want to do....</span>
+<span class="sd">        Currently ignores velocities and gradients. Not sure what we want to do....</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1099,8 +1130,8 @@ document.write(`
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Check the columns</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">other_columns</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">other_columns</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">other_column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">other_columns</span><span class="p">)</span>
@@ -1646,6 +1677,58 @@ document.write(`
         <span class="c1"># Expand to the asymmetric atoms</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">symmetry</span><span class="o">.</span><span class="n">atom_to_asymmetric_atom</span><span class="p">]</span>
 
+    <span class="k">def</span> <span class="nf">get_gradients</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fractionals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the gradients.</span>
+
+<span class="sd">        Symmetry is not supported, because it makes no (little?) sense for gradients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fractionals : bool = True</span>
+<span class="sd">            Return the gradients as fractional gradients for periodic</span>
+<span class="sd">            systems. Non-periodic systems always use Cartesian gradients.</span>
+<span class="sd">        as_array : bool = False</span>
+<span class="sd">            Whether to return the results as a np array or as a list of</span>
+<span class="sd">            lists (the default).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        abc : [N][float*3]</span>
+<span class="sd">            The gradients, either Cartesian or fractional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gxs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">&quot;gx&quot;</span><span class="p">)</span>
+        <span class="n">gys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">&quot;gy&quot;</span><span class="p">)</span>
+        <span class="n">gzs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">&quot;gz&quot;</span><span class="p">)</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="p">[[</span><span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span><span class="p">]</span> <span class="k">for</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gxs</span><span class="p">,</span> <span class="n">gys</span><span class="p">,</span> <span class="n">gzs</span><span class="p">)]</span>
+
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">periodicity</span>
+        <span class="k">if</span> <span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">as_array</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">xyz</span>
+
+        <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">cell</span>
+
+        <span class="k">if</span> <span class="n">fractionals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">==</span> <span class="s2">&quot;Cartesian&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_fractionals</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="n">as_array</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">as_array</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">xyz</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">coordinate_system</span> <span class="o">==</span> <span class="s2">&quot;fractional&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_cartesians</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="n">as_array</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">as_array</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">xyz</span>
+
     <span class="k">def</span> <span class="nf">get_velocities</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fractionals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1770,6 +1853,77 @@ document.write(`
         <span class="n">y_column</span><span class="p">[</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">ys</span>
         <span class="n">z_column</span><span class="p">[</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">zs</span>
 
+    <span class="k">def</span> <span class="nf">set_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gxyz</span><span class="p">,</span> <span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the gradients to new values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fractionals : bool = False</span>
+<span class="sd">            The gradients are fractional gradients for periodic</span>
+<span class="sd">            systems. Ignored for non-periodic systems.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_symops</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t handle gradients with symmetry.&quot;</span><span class="p">)</span>
+
+        <span class="n">as_array</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gxyz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+
+        <span class="n">gxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">gys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">gzs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">periodicity</span>
+        <span class="n">coordinate_system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">coordinate_system</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">coordinate_system</span> <span class="o">==</span> <span class="s2">&quot;Cartesian&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fractionals</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">coordinate_system</span> <span class="o">==</span> <span class="s2">&quot;fractional&quot;</span> <span class="ow">and</span> <span class="n">fractionals</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">as_array</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="ow">in</span> <span class="n">gxyz</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
+                    <span class="n">gxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gx</span><span class="p">)</span>
+                    <span class="n">gys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gy</span><span class="p">)</span>
+                    <span class="n">gzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="ow">in</span> <span class="n">gxyz</span><span class="p">:</span>
+                    <span class="n">gxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gx</span><span class="p">)</span>
+                    <span class="n">gys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gy</span><span class="p">)</span>
+                    <span class="n">gzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gz</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">cell</span>
+            <span class="k">if</span> <span class="n">coordinate_system</span> <span class="o">==</span> <span class="s2">&quot;fractional&quot;</span><span class="p">:</span>
+                <span class="c1"># Convert gradients to fractionals</span>
+                <span class="k">for</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_fractionals</span><span class="p">(</span><span class="n">gxyz</span><span class="p">):</span>
+                    <span class="n">gxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gx</span><span class="p">)</span>
+                    <span class="n">gys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gy</span><span class="p">)</span>
+                    <span class="n">gzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gz</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_cartesians</span><span class="p">(</span><span class="n">gxyz</span><span class="p">):</span>
+                    <span class="n">gxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gx</span><span class="p">)</span>
+                    <span class="n">gys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gy</span><span class="p">)</span>
+                    <span class="n">gzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gz</span><span class="p">)</span>
+
+        <span class="n">gx_column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;gx&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gx_column</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># No gradients in the database, so need to add rather than setFormatter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">gxs</span><span class="p">),</span>
+                <span class="n">gx</span><span class="o">=</span><span class="n">gxs</span><span class="p">,</span>
+                <span class="n">gy</span><span class="o">=</span><span class="n">gys</span><span class="p">,</span>
+                <span class="n">gz</span><span class="o">=</span><span class="n">gzs</span><span class="p">,</span>
+                <span class="n">atom</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                <span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gy_column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;gy&quot;</span><span class="p">)</span>
+            <span class="n">gz_column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;gz&quot;</span><span class="p">)</span>
+            <span class="n">gx_column</span><span class="p">[</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">gxs</span>
+            <span class="n">gy_column</span><span class="p">[</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">gys</span>
+            <span class="n">gz_column</span><span class="p">[</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">gzs</span>
+
     <span class="k">def</span> <span class="nf">set_velocities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vxyz</span><span class="p">,</span> <span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the velocities to new values.</span>
 
@@ -1885,6 +2039,18 @@ document.write(`
                 <span class="sa">f</span><span class="s2">&quot;   AND aa.atomset = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">_Column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">sql</span><span class="o">=</span><span class="n">sql</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;SELECT gr.rowid, gr.&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                <span class="s2">&quot;   FROM atom as at,&quot;</span>
+                <span class="s2">&quot;        gradients as gr,&quot;</span>
+                <span class="s2">&quot;        atomset_atom as aa&quot;</span>
+                <span class="s2">&quot;  WHERE gr.atom = at.id&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;   AND gr.configuration = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;    AND at.id = aa.atom&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;   AND aa.atomset = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">_Column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">sql</span><span class="o">=</span><span class="n">sql</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not in atoms&quot;</span><span class="p">)</span>
 
@@ -1928,6 +2094,18 @@ document.write(`
                 <span class="s2">&quot;        atomset_atom as aa&quot;</span>
                 <span class="s2">&quot;  WHERE ve.atom = at.id&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;   AND ve.configuration = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;    AND at.id = aa.atom&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;   AND aa.atomset = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;SELECT gr.&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                <span class="s2">&quot;   FROM atom as at,&quot;</span>
+                <span class="s2">&quot;        gradients as gr,&quot;</span>
+                <span class="s2">&quot;        atomset_atom as aa&quot;</span>
+                <span class="s2">&quot;  WHERE gr.atom = at.id&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;   AND gr.configuration = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;    AND at.id = aa.atom&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;   AND aa.atomset = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">atomset</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
@@ -1995,8 +2173,8 @@ document.write(`
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Delete the listed atoms, which will cascade to delete coordinates and</span>
-        <span class="c1"># velocities</span>
+        <span class="c1"># Delete the listed atoms, which will cascade to delete coordinates,</span>
+        <span class="c1"># velocities, and gradients</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">atoms</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
             <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            DELETE FROM atom</span>
@@ -2028,10 +2206,11 @@ document.write(`
 
         <span class="k">return</span> <span class="n">df</span>
 
-    <span class="k">def</span> <span class="nf">_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocities</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The list of columns across the atom, coordinates and velocities tables.</span>
+    <span class="k">def</span> <span class="nf">_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The list of columns across the atom, coordinates, velocities, and gradients</span>
+<span class="sd">        tables.</span>
 
-<span class="sd">        Uses &#39;at&#39;, &#39;co&#39;, and &#39;ve&#39; as the shorthand for the full table names.</span>
+<span class="sd">        Uses &#39;at&#39;, &#39;co&#39;, &#39;ve&#39;, and &#39;gr&#39; as the shorthand for the full table names.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">atom_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
         <span class="n">coordinates_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
@@ -2042,6 +2221,10 @@ document.write(`
             <span class="n">velocities_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocities_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
             <span class="n">velocities_columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;atom&quot;</span><span class="p">)</span>
             <span class="n">columns</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;ve.&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&quot;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">velocities_columns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">gradients</span><span class="p">:</span>
+            <span class="n">gradients_columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_gradients_table</span><span class="o">.</span><span class="n">attributes</span><span class="p">]</span>
+            <span class="n">gradients_columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;atom&quot;</span><span class="p">)</span>
+            <span class="n">columns</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;gr.&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&quot;&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gradients_columns</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">columns</span>
 
@@ -2219,51 +2402,43 @@ document.write(`
 <span class="sd">        sqlite3.Cursor</span>
 <span class="sd">            A cursor that returns sqlite3.Row objects for the atoms.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_velocities</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">()</span>
-            <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">have_velocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_velocities</span>
+        <span class="n">have_gradients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_gradients</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="n">have_velocities</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="n">have_gradients</span><span class="p">)</span>
+        <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
 
-            <span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span>
-<span class="s2">              FROM atom as at, coordinates as co, velocities as ve, subset_atom as sa</span>
-<span class="s2">             WHERE co.atom = at.id</span>
-<span class="s2">               AND co.configuration = ?</span>
-<span class="s2">               AND ve.atom = at.id</span>
-<span class="s2">               AND ve.configuration = ?</span>
-<span class="s2">               AND at.id = sa.atom</span>
-<span class="s2">               AND sa.subset = ?</span>
-<span class="s2">            &quot;&quot;&quot;</span>
+        <span class="n">from_string</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;atom as at&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates as co&quot;</span><span class="p">,</span> <span class="s2">&quot;subset_atom as sa&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">have_velocities</span><span class="p">:</span>
+            <span class="n">from_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;velocities AS ve&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">have_gradients</span><span class="p">:</span>
+            <span class="n">from_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;gradients AS gr&quot;</span><span class="p">)</span>
+        <span class="n">from_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">from_string</span><span class="p">)</span>
 
-            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_id</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
-                        <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">(</span><span class="n">velocities</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">column_defs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span>
+<span class="s2">          FROM </span><span class="si">{</span><span class="n">from_string</span><span class="si">}</span>
+<span class="s2">         WHERE co.atom = at.id</span>
+<span class="s2">           AND co.configuration = ?</span>
+<span class="s2">           AND at.id = sa.atom</span>
+<span class="s2">           AND sa.subset = ?</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">have_velocities</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  AND ve.atom = at.id AND ve.configuration = ?&quot;</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">have_gradients</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  AND gr.atom = at.id AND gr.configuration = ?&quot;</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
-            <span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            SELECT </span><span class="si">{</span><span class="n">column_defs</span><span class="si">}</span>
-<span class="s2">              FROM atom as at, coordinates as co, subset_atom as sa</span>
-<span class="s2">             WHERE co.atom = at.id</span>
-<span class="s2">               AND co.configuration = ?</span>
-<span class="s2">               AND at.id = sa.atom</span>
-<span class="s2">               AND sa.subset = ?</span>
-<span class="s2">            &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
+                    <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
+                <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_id</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;==&quot;</span><span class="p">:</span>
-                        <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> ?&#39;</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">is_full</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_order</span><span class="p">:</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;ORDER BY sa.templateatom&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">is_full</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_order</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ORDER BY sa.templateatom&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 
