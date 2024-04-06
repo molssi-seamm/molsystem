@@ -970,6 +970,21 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "    ON velocities(atom, configuration)"
             )
 
+            # Keep the gradients separate from coordinates to keep the size down
+            table = self["gradients"]
+            table.add_attribute(
+                "configuration", coltype="int", references="configuration"
+            )
+            table.add_attribute("atom", coltype="int", references="atom")
+            table.add_attribute("gx", coltype="float")
+            table.add_attribute("gy", coltype="float")
+            table.add_attribute("gz", coltype="float")
+            self.db.execute("CREATE INDEX 'idx_gradients_atom' ON gradients (\"atom\")")
+            self.db.execute(
+                "CREATE INDEX idx_gradients_atom_configuration "
+                "    ON gradients(atom, configuration)"
+            )
+
             # The definition of the subsets -- templates
             table = self["template"]
             table.add_attribute("id", coltype="int", pk=True)

@@ -139,7 +139,7 @@ class CIFMixin:
             elif symmetry.n_symops == 1:
                 lines.append("_space_group_name_H-M_full   'P 1'")
             else:
-                spgname_system = symmetry.spacegroup_names_to_system[spgname]
+                spgname_system = symmetry.spacegroup_names_to_system()[spgname]
                 lines.append(f"_space_group_{spgname_system}       '{spgname}'")
                 hall = symmetry.hall_symbol
                 lines.append(f"_symmetry_space_group_name_Hall '{hall}'")
@@ -285,6 +285,7 @@ class CIFMixin:
                 self.symmetry.symops = data_block[symdata]
                 used_symops = True
             else:
+                found = False
                 for section in (
                     "_space_group" + dot + "name_Hall",
                     "_space_group" + dot + "name_H-M_full",
@@ -293,9 +294,9 @@ class CIFMixin:
                     "_symmetry" + dot + "space_group_name_H-M",
                 ):
                     if section in data_block:
+                        found = True
                         self.symmetry.group = data_block[section]
-                        break
-                else:
+                if not found:
                     raise RuntimeError(
                         "CIF file does not contain required symmetry information. "
                         "Neither "

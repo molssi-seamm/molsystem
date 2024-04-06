@@ -23,7 +23,20 @@ def test_construction(configuration):
 
 def test_keys(atoms):
     """Test the default keys in an Atoms object"""
-    result = ["atno", "configuration", "id", "vx", "vy", "vz", "x", "y", "z"]
+    result = [
+        "atno",
+        "configuration",
+        "gx",
+        "gy",
+        "gz",
+        "id",
+        "vx",
+        "vy",
+        "vz",
+        "x",
+        "y",
+        "z",
+    ]
 
     if sorted([*atoms.keys()]) != result:
         print(sorted([*atoms.keys()]))
@@ -80,7 +93,21 @@ def test_append_error(atoms):
 
 def test_add_attribute(atoms):
     """Test adding an attribute"""
-    result = ["atno", "configuration", "id", "name", "vx", "vy", "vz", "x", "y", "z"]
+    result = [
+        "atno",
+        "configuration",
+        "gx",
+        "gy",
+        "gz",
+        "id",
+        "name",
+        "vx",
+        "vy",
+        "vz",
+        "x",
+        "y",
+        "z",
+    ]
     with atoms as tmp:
         tmp.add_attribute("name")
     assert sorted([*atoms.keys()]) == result
@@ -88,7 +115,21 @@ def test_add_attribute(atoms):
 
 def test_add_duplicate_attribute(atoms):
     """Test duplicate adding an attribute"""
-    result = ["atno", "configuration", "id", "name", "vx", "vy", "vz", "x", "y", "z"]
+    result = [
+        "atno",
+        "configuration",
+        "gx",
+        "gy",
+        "gz",
+        "id",
+        "name",
+        "vx",
+        "vy",
+        "vz",
+        "x",
+        "y",
+        "z",
+    ]
     with atoms as tmp:
         tmp.add_attribute("name")
     with pytest.raises(RuntimeError) as e:
@@ -103,13 +144,34 @@ def test_add_duplicate_attribute(atoms):
 
 def test_add_coordinates_attribute(atoms):
     """Test adding an attribute"""
-    result = ["atno", "configuration", "id", "spin", "vx", "vy", "vz", "x", "y", "z"]
+    correct = [
+        "atno",
+        "configuration",
+        "gx",
+        "gy",
+        "gz",
+        "id",
+        "spin",
+        "vx",
+        "vy",
+        "vz",
+        "x",
+        "y",
+        "z",
+    ]
     with atoms as tmp:
         tmp.add_attribute("spin", configuration_dependent=True)
-    assert sorted([*atoms.keys()]) == result
+    result = sorted([*atoms.keys()])
+    if result != correct:
+        print(result)
+    assert result == correct
+
     del atoms["spin"]
-    result.remove("spin")
-    assert sorted([*atoms.keys()]) == result
+    correct.remove("spin")
+    result = sorted([*atoms.keys()])
+    if result != correct:
+        print(result)
+    assert result == correct
 
 
 def test_add_attribute_with_values(atoms):
@@ -186,6 +248,9 @@ def test_deleting_column(atoms):
         del tmp["atno"]
     assert sorted([*atoms.keys()]) == [
         "configuration",
+        "gx",
+        "gy",
+        "gz",
         "id",
         "vx",
         "vy",
@@ -519,3 +584,52 @@ def test_periodic_velocities_cartesians(vanadium):
 
     vxyz = configuration.atoms.get_velocities(fractionals=False)
     assert np.allclose(vxyz, vxyz0)
+
+
+def test_have_gradients(AceticAcid):
+    """Test whether there are gradients."""
+    assert not AceticAcid.atoms.have_gradients
+
+
+def test_set_gradients(AceticAcid):
+    """Test setting gradients."""
+    configuration = AceticAcid
+
+    xs = [1.08, 0.58, 0.72, 0.71, 0.57, -0.13, 0.98, 2.17]
+    ys = [0.02, 3.14, -0.67, -0.31, 1.39, 1.71, 2.30, 0.02]
+    zs = [-0.02, 0.28, -0.79, 0.95, -0.32, -1.26, 0.59, -0.03]
+    gxyz0 = [[x, y, z] for x, y, z in zip(xs, ys, zs)]
+
+    configuration.atoms.set_gradients(gxyz0)
+
+    gxyz = configuration.atoms.gradients
+    if not np.allclose(gxyz, gxyz0):
+        print(gxyz)
+        print(" != ", gxyz0)
+    assert np.allclose(gxyz, gxyz0)
+
+
+def test_periodic_gradients(vanadium):
+    """Test getting gradients."""
+    configuration = vanadium
+
+    gxs = [0.0, 0.02]
+    gys = [0.01, -0.02]
+    gzs = [-0.01, 0.01]
+    gxyz0 = [[gx, gy, gz] for gx, gy, gz in zip(gxs, gys, gzs)]
+
+    gxyz = configuration.atoms.gradients
+    assert np.allclose(gxyz, gxyz0)
+
+
+def test_periodic_gradients_cartesians(vanadium):
+    """Test getting gradients in Cartesian gradients."""
+    configuration = vanadium
+
+    gxs = [0.0, 0.02]
+    gys = [0.01, -0.02]
+    gzs = [-0.01, 0.01]
+    gxyz0 = [[gx * 3.03, gy * 3.03, gz * 3.03] for gx, gy, gz in zip(gxs, gys, gzs)]
+
+    gxyz = configuration.atoms.get_gradients(fractionals=False)
+    assert np.allclose(gxyz, gxyz0)

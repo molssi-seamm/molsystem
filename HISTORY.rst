@@ -1,6 +1,10 @@
 =======
 History
 =======
+2023.4.6 -- Added gradients
+    * Added gradient on atoms as a separate table alongside atoms, so they take no space
+      unless actually used.
+      
 2024.3.13 -- Handle uppercase X, Y, Z in strings for symmetry operators
     * the Crystallographic Open Database CIF files seems to use upper case X, Y, Z in
       explicit symmetry operators. These need to be lowercased in the code.

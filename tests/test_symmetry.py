@@ -24,7 +24,7 @@ def test_spacegroup_names(symmetry):
     path = Path(__file__).parent / "data" / "spacegroup_names.json"
     with path.open() as fd:
         correct = json.load(fd)
-    answer = symmetry.spacegroup_names_to_hall
+    answer = symmetry.spacegroup_names_to_hall()
     if answer != correct:
         print(json.dumps(answer, indent=3))
     assert answer == correct
