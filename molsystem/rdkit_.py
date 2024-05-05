@@ -13,6 +13,7 @@ except ModuleNotFoundError:
     raise
 
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
 
 # Valence
 valence = {
@@ -119,8 +120,8 @@ class RDKitMixin:
 
         self.clear()
         ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
-        i = [ids[x - 1] for x in Is]
-        j = [ids[x - 1] for x in Js]
+        i = [ids[x] for x in Is]
+        j = [ids[x] for x in Js]
         self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
         return self
