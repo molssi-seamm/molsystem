@@ -136,6 +136,12 @@ class SMILESMixin:
 
             self.from_OBMol(mol)
 
+        # Rotate to standard orientation
+        rdkMol = self.to_RDKMol()
+        rdkConf = rdkMol.GetConformers()[0]
+        Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
+        self.from_RDKMol(rdkMol)
+
         if name is not None:
             self.name = name
         else:

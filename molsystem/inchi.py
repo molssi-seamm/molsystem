@@ -116,8 +116,11 @@ class InChIMixin:
             AllChem.EmbedMolecule(mol)
             self.from_RDKMol(mol)
 
-            print(f"{self.n_atoms=}")
-            print(f"{self.atoms.symbols=}")
+        # Rotate to standard orientation
+        rdkMol = self.to_RDKMol()
+        rdkConf = rdkMol.GetConformers()[0]
+        Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
+        self.from_RDKMol(rdkMol)
 
         if name is not None:
             self.name = name
@@ -139,27 +142,7 @@ class InChIMixin:
         None
         """
         inchi = self._get_inchi(inchikey)
-
-        save = self.name
-
-        obConversion = OB.OBConversion()
-        obConversion.SetInAndOutFormats("inchi", "mdl")
-        mol = OB.OBMol()
-        obConversion.ReadString(mol, inchi)
-
-        # Add hydrogens
-        mol.AddHydrogens()
-
-        # Get coordinates for a 3-D structure
-        builder = OB.OBBuilder()
-        builder.Build(mol)
-
-        self.from_OBMol(mol)
-
-        if name is not None:
-            self.name = name
-        else:
-            self.name = save
+        self.from_inchi(inchi)
 
     def _get_inchi(self, inchikey):
         """Get the InChI from PubChem given the InChIKey."""
