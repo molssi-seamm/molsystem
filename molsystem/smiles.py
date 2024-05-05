@@ -94,7 +94,7 @@ class SMILESMixin:
 
         return smiles.strip()
 
-    def from_smiles(self, smiles, name=None, rdkit=False):
+    def from_smiles(self, smiles, name=None, reorient=True, rdkit=False):
         """Create the system from a SMILES string.
 
         Parameters
@@ -103,6 +103,8 @@ class SMILESMixin:
             The SMILES string
         name : str = None
             The name of the molecule
+        reorient : bool = True
+            Whether to reorient to the standard orientation
         rdkit : bool = False
             Whether to use RDKit rather than default of OpenBabel
 
@@ -137,10 +139,11 @@ class SMILESMixin:
             self.from_OBMol(mol)
 
         # Rotate to standard orientation
-        rdkMol = self.to_RDKMol()
-        rdkConf = rdkMol.GetConformers()[0]
-        Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
-        self.from_RDKMol(rdkMol)
+        if reorient:
+            rdkMol = self.to_RDKMol()
+            rdkConf = rdkMol.GetConformers()[0]
+            Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
+            self.from_RDKMol(rdkMol)
 
         if name is not None:
             self.name = name

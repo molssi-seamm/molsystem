@@ -56,6 +56,7 @@ class RDKitMixin:
             1: Chem.BondType.SINGLE,
             2: Chem.BondType.DOUBLE,
             3: Chem.BondType.TRIPLE,
+            5: Chem.BondType.AROMATIC,
         }
         for row in self.bonds.bonds():
             rdk_mol.AddBond(
@@ -108,6 +109,7 @@ class RDKitMixin:
             Chem.BondType.SINGLE: 1,
             Chem.BondType.DOUBLE: 2,
             Chem.BondType.TRIPLE: 3,
+            Chem.BondType.AROMATIC: 5,
         }
         for rdk_bond in rdk_mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
