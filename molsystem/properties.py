@@ -254,7 +254,7 @@ class _Properties(object):
         )
         self.db.execute("CREATE INDEX str_data_idx_system ON str_data(system)")
 
-        # Integer facts
+        # Array facts
         table = self.system_db["json_data"]
         table.add_attribute("id", coltype="int", pk=True)
         table.add_attribute("configuration", coltype="int", references="configuration")
