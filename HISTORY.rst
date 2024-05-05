@@ -1,6 +1,11 @@
 =======
 History
 =======
+2024.5.6 -- Rotated molecule from SMILES, InChI, or InChIKey to standard orientation
+    * Molecules created from line notation are created in an random orientation. This
+      enhancement rotates them to the standard orientation, which will look nice for
+      small, symmetric molecules.
+      
 2024.5.5 -- Bugfix: bonds in RDKit
     * There was an indexing bug translating bonds back from RDKit to SEAMM. The famous
       0/1 problem!

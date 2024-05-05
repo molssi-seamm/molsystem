@@ -74,7 +74,7 @@ class InChIMixin:
 
         return inchi.strip()
 
-    def from_inchi(self, inchi, name=None, openbabel=True):
+    def from_inchi(self, inchi, name=None, reorient=True, openbabel=True):
         """Create the system from a InChI string.
 
         Parameters
@@ -83,6 +83,8 @@ class InChIMixin:
             The InChI string
         name : str = None
             The name of the molecule
+        reorient : bool = True
+            Whether to reorient to the standard orientation
         openbabel : bool = False
             Whether to use Openbabel rather than default of RDKit
 
@@ -116,15 +118,18 @@ class InChIMixin:
             AllChem.EmbedMolecule(mol)
             self.from_RDKMol(mol)
 
-            print(f"{self.n_atoms=}")
-            print(f"{self.atoms.symbols=}")
+        # Rotate to standard orientation
+        rdkMol = self.to_RDKMol()
+        rdkConf = rdkMol.GetConformers()[0]
+        Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
+        self.from_RDKMol(rdkMol)
 
         if name is not None:
             self.name = name
         else:
             self.name = save
 
-    def from_inchikey(self, inchikey, name=None):
+    def from_inchikey(self, inchikey, name=None, reorient=True):
         """Create the system from an InChIKey string.
 
         Parameters
@@ -133,33 +138,15 @@ class InChIMixin:
             The InChIKey string
         name : str = None
             The name of the molecule
+        reorient : bool = True
+            Whether to reorient to the standard orientation
 
         Returns
         -------
         None
         """
         inchi = self._get_inchi(inchikey)
-
-        save = self.name
-
-        obConversion = OB.OBConversion()
-        obConversion.SetInAndOutFormats("inchi", "mdl")
-        mol = OB.OBMol()
-        obConversion.ReadString(mol, inchi)
-
-        # Add hydrogens
-        mol.AddHydrogens()
-
-        # Get coordinates for a 3-D structure
-        builder = OB.OBBuilder()
-        builder.Build(mol)
-
-        self.from_OBMol(mol)
-
-        if name is not None:
-            self.name = name
-        else:
-            self.name = save
+        self.from_inchi(inchi, reorient=reorient)
 
     def _get_inchi(self, inchikey):
         """Get the InChI from PubChem given the InChIKey."""
