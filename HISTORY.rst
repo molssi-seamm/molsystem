@@ -1,7 +1,11 @@
 =======
 History
 =======
-2023.4.6 -- Added gradients
+2024.5.5 -- Bugfix: bonds in RDKit
+    * There was an indexing bug translating bonds back from RDKit to SEAMM. The famous
+      0/1 problem!
+      
+2024.4.6 -- Added gradients
     * Added gradient on atoms as a separate table alongside atoms, so they take no space
       unless actually used.
       
