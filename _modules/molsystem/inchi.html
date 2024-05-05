@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.inchi &#8212; MolSystem 2024.5.5 documentation</title>
+    <title>molsystem.inchi &#8212; MolSystem 2024.5.6 documentation</title>
   
   
   
@@ -45,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=dcaa5919"></script>
+    <script src="../../_static/documentation_options.js?v=eb52d373"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -572,7 +572,7 @@ document.write(`
 
 <div class="viewcode-block" id="InChIMixin.from_inchi">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">openbabel</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openbabel</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from a InChI string.</span>
 
 <span class="sd">        Parameters</span>
@@ -581,6 +581,8 @@ document.write(`
 <span class="sd">            The InChI string</span>
 <span class="sd">        name : str = None</span>
 <span class="sd">            The name of the molecule</span>
+<span class="sd">        reorient : bool = True</span>
+<span class="sd">            Whether to reorient to the standard orientation</span>
 <span class="sd">        openbabel : bool = False</span>
 <span class="sd">            Whether to use Openbabel rather than default of RDKit</span>
 
@@ -614,8 +616,11 @@ document.write(`
             <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">symbols</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Rotate to standard orientation</span>
+        <span class="n">rdkMol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+        <span class="n">rdkConf</span> <span class="o">=</span> <span class="n">rdkMol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">rdMolTransforms</span><span class="o">.</span><span class="n">CanonicalizeConformer</span><span class="p">(</span><span class="n">rdkConf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">rdkMol</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -625,7 +630,7 @@ document.write(`
 
 <div class="viewcode-block" id="InChIMixin.from_inchikey">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchikey">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from an InChIKey string.</span>
 
 <span class="sd">        Parameters</span>
@@ -634,33 +639,15 @@ document.write(`
 <span class="sd">            The InChIKey string</span>
 <span class="sd">        name : str = None</span>
 <span class="sd">            The name of the molecule</span>
+<span class="sd">        reorient : bool = True</span>
+<span class="sd">            Whether to reorient to the standard orientation</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inchi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_inchi</span><span class="p">(</span><span class="n">inchikey</span><span class="p">)</span>
-
-        <span class="n">save</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="n">obConversion</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-        <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">,</span> <span class="s2">&quot;mdl&quot;</span><span class="p">)</span>
-        <span class="n">mol</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
-        <span class="n">obConversion</span><span class="o">.</span><span class="n">ReadString</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">inchi</span><span class="p">)</span>
-
-        <span class="c1"># Add hydrogens</span>
-        <span class="n">mol</span><span class="o">.</span><span class="n">AddHydrogens</span><span class="p">()</span>
-
-        <span class="c1"># Get coordinates for a 3-D structure</span>
-        <span class="n">builder</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBBuilder</span><span class="p">()</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">save</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_inchi</span><span class="p">(</span><span class="n">inchi</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="n">reorient</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">_get_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">):</span>

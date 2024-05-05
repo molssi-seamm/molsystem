@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2024.5.5 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2024.5.6 documentation</title>
   
   
   
@@ -46,7 +46,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=dcaa5919"></script>
+    <script src="../_static/documentation_options.js?v=eb52d373"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1050,13 +1050,14 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>A mixin for handling InChI.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.from_inchi">
-<span class="sig-name descname"><span class="pre">from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openbabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchi" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openbabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchi" title="Link to this definition">#</a></dt>
 <dd><p>Create the system from a InChI string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inchi</strong> (<em>str</em>) – The InChI string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+<li><p><strong>reorient</strong> (<em>bool = True</em>) – Whether to reorient to the standard orientation</p></li>
 <li><p><strong>openbabel</strong> (<em>bool = False</em>) – Whether to use Openbabel rather than default of RDKit</p></li>
 </ul>
 </dd>
@@ -1068,13 +1069,14 @@ configuration will point to it; otherwise to the last conformer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.from_inchikey">
-<span class="sig-name descname"><span class="pre">from_inchikey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchikey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchikey" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_inchikey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin.from_inchikey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin.from_inchikey" title="Link to this definition">#</a></dt>
 <dd><p>Create the system from an InChIKey string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inchikey</strong> (<em>str</em>) – The InChIKey string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+<li><p><strong>reorient</strong> (<em>bool = True</em>) – Whether to reorient to the standard orientation</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1615,13 +1617,14 @@ aliased to it for backwards compatibility.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.from_smiles">
-<span class="sig-name descname"><span class="pre">from_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.from_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.from_smiles" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdkit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin.from_smiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin.from_smiles" title="Link to this definition">#</a></dt>
 <dd><p>Create the system from a SMILES string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smiles</strong> (<em>str</em>) – The SMILES string</p></li>
 <li><p><strong>name</strong> (<em>str = None</em>) – The name of the molecule</p></li>
+<li><p><strong>reorient</strong> (<em>bool = True</em>) – Whether to reorient to the standard orientation</p></li>
 <li><p><strong>rdkit</strong> (<em>bool = False</em>) – Whether to use RDKit rather than default of OpenBabel</p></li>
 </ul>
 </dd>

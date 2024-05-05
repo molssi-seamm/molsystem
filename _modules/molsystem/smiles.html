@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2024.5.5 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2024.5.6 documentation</title>
   
   
   
@@ -45,7 +45,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=dcaa5919"></script>
+    <script src="../../_static/documentation_options.js?v=eb52d373"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -592,7 +592,7 @@ document.write(`
 
 <div class="viewcode-block" id="SMILESMixin.from_smiles">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.smiles.SMILESMixin.from_smiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from a SMILES string.</span>
 
 <span class="sd">        Parameters</span>
@@ -601,6 +601,8 @@ document.write(`
 <span class="sd">            The SMILES string</span>
 <span class="sd">        name : str = None</span>
 <span class="sd">            The name of the molecule</span>
+<span class="sd">        reorient : bool = True</span>
+<span class="sd">            Whether to reorient to the standard orientation</span>
 <span class="sd">        rdkit : bool = False</span>
 <span class="sd">            Whether to use RDKit rather than default of OpenBabel</span>
 
@@ -633,6 +635,13 @@ document.write(`
             <span class="n">builder</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+
+        <span class="c1"># Rotate to standard orientation</span>
+        <span class="k">if</span> <span class="n">reorient</span><span class="p">:</span>
+            <span class="n">rdkMol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+            <span class="n">rdkConf</span> <span class="o">=</span> <span class="n">rdkMol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Chem</span><span class="o">.</span><span class="n">rdMolTransforms</span><span class="o">.</span><span class="n">CanonicalizeConformer</span><span class="p">(</span><span class="n">rdkConf</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">rdkMol</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
