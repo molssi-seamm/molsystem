@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.5.8 -- Added more control over RDKit and OpenBabel creating systems
+    * Added control to from_RDKMol and from_OBMol to allow selectively updating
+      the atoms, coordinates, and bonds
+      
 2024.5.6 -- Rotated molecule from SMILES, InChI, or InChIKey to standard orientation
     * Molecules created from line notation are created in an random orientation. This
       enhancement rotates them to the standard orientation, which will look nice for

@@ -3,6 +3,8 @@
 """Interface to RDKit."""
 
 import logging
+import pprint
+
 
 try:
     from rdkit import Chem
@@ -82,8 +84,26 @@ class RDKitMixin:
 
         return rdk_mol
 
-    def from_RDKMol(self, rdk_mol):
-        """Transform an RDKit molecule into the current object."""
+    def from_RDKMol(self, rdk_mol, atoms=True, coordinates=True, bonds=True):
+        """Transform an RDKit molecule into the current object.
+
+        Parameters
+        ----------
+        rdk_mol : rdkit.chem.molecule
+            The RDKit molecule object
+
+        atoms : bool = True
+            Recreate the atoms
+
+        coordinates : bool = True
+            Update the coordinates
+
+        bonds : bool = True
+            Recreate the bonds from the RDKit molecule
+        """
+
+        # print("from_RDKMol before")
+        # self.debug_print()
 
         atnos = []
         for rdk_atom in rdk_mol.GetAtoms():
@@ -120,10 +140,27 @@ class RDKitMixin:
             BondOrders.append(bondorder)
             logger.debug(f"bond {i} - {j} {bondorder}")
 
-        self.clear()
-        ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
-        i = [ids[x] for x in Is]
-        j = [ids[x] for x in Js]
-        self.bonds.append(i=i, j=j, bondorder=BondOrders)
+        if atoms:
+            self.clear()
+            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+        else:
+            ids = self.atoms.ids
+
+            if coordinates:
+                xyz = [[x, y, z] for x, y, z in zip(Xs, Ys, Zs)]
+                self.atoms.coordinates = xyz
+
+        if atoms or bonds:
+            i = [ids[x] for x in Is]
+            j = [ids[x] for x in Js]
+            self.bonds.append(i=i, j=j, bondorder=BondOrders)
+
+        # print("from_RDKMol after")
+        # self.debug_print()
 
         return self
+
+    def debug_print(self):
+        pprint.pprint(str(self.atoms._atom_table))
+        pprint.pprint(str(self.atoms._coordinates_table))
+        pprint.pprint(str(self.bonds))
