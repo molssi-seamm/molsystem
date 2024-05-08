@@ -71,7 +71,9 @@ class OpenBabelMixin:
 
         return ob_mol
 
-    def from_OBMol(self, ob_mol, properties="all"):
+    def from_OBMol(
+        self, ob_mol, properties="all", atoms=True, coordinates=True, bonds=True
+    ):
         """Transform an Open Babel molecule into the current object."""
         atnos = []
         Xs = []
@@ -101,21 +103,31 @@ class OpenBabelMixin:
             BondOrders.append(bondorder)
             logger.debug(f"bond {i} - {j} {bondorder}")
 
-        self.clear()
+        if atoms:
+            self.clear()
 
         if self.__class__.__name__ == "_Configuration":
             self.charge = ob_mol.GetTotalCharge()
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
 
-        if any([i != 0.0 for i in qs]):
-            if "formal_charge" not in self.atoms:
-                self.atoms.add_attribute("formal_charge", coltype="int", default=0)
-            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
+        if atoms:
+            if any([i != 0.0 for i in qs]):
+                if "formal_charge" not in self.atoms:
+                    self.atoms.add_attribute("formal_charge", coltype="int", default=0)
+                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
+            else:
+                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
         else:
-            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
-        i = [ids[x - 1] for x in Is]
-        j = [ids[x - 1] for x in Js]
-        self.bonds.append(i=i, j=j, bondorder=BondOrders)
+            ids = self.atoms.ids
+
+            if coordinates:
+                xyz = [[x, y, z] for x, y, z in zip(Xs, Ys, Zs)]
+                self.atoms.coordinates = xyz
+
+        if atoms or bonds:
+            i = [ids[x - 1] for x in Is]
+            j = [ids[x - 1] for x in Js]
+            self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
         # Record any properties in the database if desired
         if properties == "all":
