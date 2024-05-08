@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2024.5.6 documentation</title>
+    <title>History &#8212; MolSystem 2024.5.8 documentation</title>
   
   
   
@@ -46,7 +46,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=eb52d373"></script>
+    <script src="_static/documentation_options.js?v=a730f4a8"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -501,6 +501,11 @@ document.write(`
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2024.5.8 – Added more control over RDKit and OpenBabel creating systems</dt><dd><ul class="simple">
+<li><p>Added control to from_RDKMol and from_OBMol to allow selectively updating
+the atoms, coordinates, and bonds</p></li>
+</ul>
+</dd>
 <dt>2024.5.6 – Rotated molecule from SMILES, InChI, or InChIKey to standard orientation</dt><dd><ul class="simple">
 <li><p>Molecules created from line notation are created in an random orientation. This
 enhancement rotates them to the standard orientation, which will look nice for
