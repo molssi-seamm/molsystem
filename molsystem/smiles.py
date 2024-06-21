@@ -40,7 +40,7 @@ class SMILESMixin:
         """Return the SMILES string for this object."""
         return self.to_smiles()
 
-    def to_smiles(self, canonical=False, hydrogens=False, isomeric=True, rdkit=False):
+    def to_smiles(self, canonical=False, hydrogens=False, isomeric=True, rdkit=True):
         """Create the SMILES string from the system.
 
         Parameters
@@ -94,7 +94,7 @@ class SMILESMixin:
 
         return smiles.strip()
 
-    def from_smiles(self, smiles, name=None, reorient=True, rdkit=False):
+    def from_smiles(self, smiles, name=None, reorient=True, rdkit=True):
         """Create the system from a SMILES string.
 
         Parameters

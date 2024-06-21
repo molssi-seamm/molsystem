@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.6.21 -- Switching default for SMILES to RDKit rather than OpenBabel
+    * RDKit seems more robust, and also the atom typing uses RDkit, so compatibility is
+      important.
+      
 2024.5.8 -- Added more control over RDKit and OpenBabel creating systems
     * Added control to from_RDKMol and from_OBMol to allow selectively updating
       the atoms, coordinates, and bonds

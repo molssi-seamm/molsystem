@@ -458,7 +458,7 @@ def test_all_residue_search(configuration):
         "PHE_LL": [(64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75)],
     }
 
-    configuration.from_smiles(SMILES, reorient=False)
+    configuration.from_smiles(SMILES, reorient=False, rdkit=False)
 
     for name, sc in sidechains.items():
         smarts = f"[NH1X3][C@@H]({sc})[CX3]=[OX1]"

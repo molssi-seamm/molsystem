@@ -1,14 +1,37 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from .align import AlignMixin
+from .cif import CIFMixin
+from .cms_schema import CMSSchemaMixin
 from .inchi import InChIMixin
+from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
+from .pubchem import PubChemMixin
+from .rdkit_ import RDKitMixin
+from .pdb import PDBMixin
+from .qcschema import QCSchemaMixin
 from .smiles import SMILESMixin
+from .topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
 
 
-class _Template(InChIMixin, SMILESMixin, OpenBabelMixin, object):
+class _Template(
+    PDBMixin,
+    MolFileMixin,
+    CIFMixin,
+    CMSSchemaMixin,
+    InChIMixin,
+    SMILESMixin,
+    TopologyMixin,
+    OpenBabelMixin,
+    PubChemMixin,
+    RDKitMixin,
+    QCSchemaMixin,
+    AlignMixin,
+    object,
+):
     """A class providing the API for templates.
 
     There are two types of templates:

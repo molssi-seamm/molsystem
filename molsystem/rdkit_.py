@@ -80,7 +80,14 @@ class RDKitMixin:
             conf.SetAtomPosition(idx, xyz)
 
         rdk_mol.AddConformer(conf)
-        Chem.rdmolops.SanitizeMol(rdk_mol)
+        try:
+            Chem.SanitizeMol(rdk_mol)
+        except Chem.KekulizeException as e:
+            logger.warning(f"Kekulization failed: {e}")
+            flags = (
+                Chem.SanitizeFlags.SANITIZE_ALL ^ Chem.SanitizeFlags.SANITIZE_KEKULIZE
+            )
+            Chem.rdmolops.SanitizeMol(rdk_mol, sanitizeOps=flags)
 
         return rdk_mol
 
