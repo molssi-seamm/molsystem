@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.8.5 -- Bugfix: creating H2 from SMILES failed
+    * Fixed bug where creating molecules consisting of just hydrogen failed because
+      RDKit by default ignores all hydrogens when reorienting the molecule.
+
 2024.6.21 -- Switching default for SMILES to RDKit rather than OpenBabel
     * RDKit seems more robust, and also the atom typing uses RDkit, so compatibility is
       important.
