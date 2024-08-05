@@ -142,7 +142,7 @@ class SMILESMixin:
         if reorient:
             rdkMol = self.to_RDKMol()
             rdkConf = rdkMol.GetConformers()[0]
-            Chem.rdMolTransforms.CanonicalizeConformer(rdkConf)
+            Chem.rdMolTransforms.CanonicalizeConformer(rdkConf, ignoreHs=False)
             self.from_RDKMol(rdkMol)
 
         if name is not None:
