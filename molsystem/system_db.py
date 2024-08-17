@@ -878,6 +878,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table = self["system"]
             table.add_attribute("id", coltype="int", pk=True)
             table.add_attribute("name", coltype="str", notnull=True, default="default")
+            table.add_attribute("default_configuration", coltype="int")
 
             # The atoms, and the sets of atoms
             table = self["atom"]

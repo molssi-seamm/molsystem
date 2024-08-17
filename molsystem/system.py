@@ -93,7 +93,6 @@ class _System(CIFMixin, MutableMapping):
         self._system_db = system_db
         self._id = _id
         self.logger = logger
-        self._current_configuration_id = None  # The current configuration
         self._checkpoints = []
         self._items = {}
 
@@ -207,11 +206,15 @@ class _System(CIFMixin, MutableMapping):
         """The configuration object for the current configuration."""
         if self.n_configurations == 0:
             return None
-        if self._current_configuration_id is None:
-            self._current_configuration_id = self.configuration_ids[-1]
-        return _Configuration(
-            _id=self._current_configuration_id, system_db=self.system_db
+        self.cursor.execute(
+            "SELECT default_configuration FROM system WHERE id = ?",
+            (self.id,),
         )
+        result = self.cursor.fetchone()[0]
+        if result is None:
+            result = self.configuration_ids[-1]
+            self.configuration = result
+        return _Configuration(_id=result, system_db=self.system_db)
 
     @configuration.setter
     def configuration(self, value):
@@ -223,7 +226,11 @@ class _System(CIFMixin, MutableMapping):
 
         if value not in self.configuration_ids:
             raise KeyError(f"configuration '{value}' does not exist.")
-        self._current_configuration_id = value
+        self.db.execute(
+            "UPDATE system SET default_configuration = ? WHERE id = ?",
+            (value, self.id),
+        )
+        self.db.commit()
 
     @property
     def configuration_names(self):
@@ -451,7 +458,7 @@ class _System(CIFMixin, MutableMapping):
             configuration.cell.parameters = cell_parameters
 
         if make_current:
-            self._current_configuration_id = cid
+            self.configuration = cid
 
         return configuration
 
