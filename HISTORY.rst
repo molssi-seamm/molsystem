@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.8.17 -- Bugfix: current configuration not updated properly
+    * Existing instances of systems did not correctly update when the default
+      configuration was changed. This is release fixes the problem.
+      
 2024.8.5 -- Bugfix: creating H2 from SMILES failed
     * Fixed bug where creating molecules consisting of just hydrogen failed because
       RDKit by default ignores all hydrogens when reorienting the molecule.
