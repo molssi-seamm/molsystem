@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.10.1 -- Bugfix: Incorrect coordinates from PubChem
+    * Fixed bug where the coordinates from PubChem were accidentally the 2-D rather than
+      3-D coordinates.
+
 2024.8.17 -- Bugfix: current configuration not updated properly
     * Existing instances of systems did not correctly update when the default
       configuration was changed. This is release fixes the problem.

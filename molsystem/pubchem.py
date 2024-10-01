@@ -115,7 +115,8 @@ class PubChemMixin:
 
         for namespace in namespaces:
             response = requests.get(
-                f"{pug_url}/compound/{namespace}/{url_quote(identifier)}/SDF"
+                f"{pug_url}/compound/{namespace}/{url_quote(identifier)}/"
+                "SDF?record_type=3d"
             )
             if response.status_code == 200:
                 self.from_sdf_text(response.text)
