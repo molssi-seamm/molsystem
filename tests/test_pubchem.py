@@ -50,3 +50,37 @@ def test_from_name(configuration):
     if name != correct:
         print(name)
     assert name == correct
+
+
+def test_coordinates_from_name(configuration):
+    """Get the system from a name"""
+    correct = [
+        [0.0, 0.0, 0.0],
+        [-0.4417, 0.2906, 0.8711],
+        [0.7256, 0.6896, -0.1907],
+        [0.4875, -0.8701, 0.2089],
+    ]
+
+    configuration.PC_from_identifier("ammonia")
+
+    coordinates = configuration.coordinates
+    if coordinates != correct:
+        print(coordinates)
+    assert coordinates == correct
+
+
+def test_coordinates_from_smiles(configuration):
+    """Get the system from SMILES"""
+    correct = [
+        [0.0, 0.0, 0.0],
+        [-0.4417, 0.2906, 0.8711],
+        [0.7256, 0.6896, -0.1907],
+        [0.4875, -0.8701, 0.2089],
+    ]
+
+    configuration.PC_from_identifier("N", namespace="smiles")
+
+    coordinates = configuration.coordinates
+    if coordinates != correct:
+        print(coordinates)
+    assert coordinates == correct
