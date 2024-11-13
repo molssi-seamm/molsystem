@@ -1,6 +1,11 @@
 =======
 History
 =======
+2024.11.12 -- Added units to properties in Openbabel molecules
+    * Any properties on the system and configuration are optionally added to the
+      Openbabel Molecule object for e.g. writing to an SDF file. This adds the units of
+      the properties explicitly
+      
 2024.10.1 -- Bugfix: Incorrect coordinates from PubChem
     * Fixed bug where the coordinates from PubChem were accidentally the 2-D rather than
       3-D coordinates.
