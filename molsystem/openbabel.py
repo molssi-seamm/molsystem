@@ -69,6 +69,12 @@ class OpenBabelMixin:
                 pair.SetValue(str(value))
                 ob_mol.CloneData(pair)
 
+                # Units, if any
+                units = self.properties.units(key)
+                if units is not None and units != "":
+                    pair.SetAttribute(key + ",units")
+                    pair.SetValue(units)
+                    ob_mol.CloneData(pair)
         return ob_mol
 
     def from_OBMol(
