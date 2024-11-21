@@ -44,7 +44,7 @@ valence = {
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 
-    def to_RDKMol(self):
+    def to_RDKMol(self, properties=None):
         """Return an RDKMol object for the configuration, template, or subset."""
         index = {}
         indices = []
@@ -89,15 +89,44 @@ class RDKitMixin:
             )
             Chem.rdmolops.SanitizeMol(rdk_mol, sanitizeOps=flags)
 
+        # Add the net charge and spin multiplicity as properties for configurations
+        if self.__class__.__name__ == "_Configuration":
+            rdk_mol.SetIntProp("net charge", self.charge)
+            rdk_mol.SetIntProp("spin multiplicity", self.spin_multiplicity)
+
+        if properties == "all":
+            data = self.properties.get("all", include_system_properties=True)
+            for key, value in data.items():
+                if isinstance(value, int):
+                    rdk_mol.SetIntProp(key, value)
+                elif isinstance(value, float):
+                    rdk_mol.SetDoubleProp(key, value)
+                else:
+                    rdk_mol.SetProp(key, str(value))
+
+                # Units, if any
+                units = self.properties.units(key)
+                if units is not None and units != "":
+                    tmp = key.split("#", maxsplit=1)
+                    if len(tmp) > 1:
+                        rdk_mol.SetProp(tmp[0] + ",units" + "#" + tmp[1], units)
+                    else:
+                        rdk_mol.SetProp(key + ",units", units)
+
         return rdk_mol
 
-    def from_RDKMol(self, rdk_mol, atoms=True, coordinates=True, bonds=True):
+    def from_RDKMol(
+        self, rdk_mol, properties="all", atoms=True, coordinates=True, bonds=True
+    ):
         """Transform an RDKit molecule into the current object.
 
         Parameters
         ----------
         rdk_mol : rdkit.chem.molecule
             The RDKit molecule object
+
+        properties : str = "all"
+            Whether to include all properties or none
 
         atoms : bool = True
             Recreate the atoms
@@ -107,11 +136,11 @@ class RDKitMixin:
 
         bonds : bool = True
             Recreate the bonds from the RDKit molecule
+
+        Returns
+        -------
+        molsystem._Configuration
         """
-
-        # print("from_RDKMol before")
-        # self.debug_print()
-
         atnos = []
         for rdk_atom in rdk_mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
@@ -162,9 +191,34 @@ class RDKitMixin:
             j = [ids[x] for x in Js]
             self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
-        # print("from_RDKMol after")
-        # self.debug_print()
+        data = rdk_mol.GetPropsAsDict()
+        if self.__class__.__name__ == "_Configuration":
+            # Check for property items for charge and multiplicity
+            if "net charge" in data:
+                self.charge = int(data["net charge"])
+            if "spin multiplicity" in data:
+                self.spin_multiplicity = int(data["spin multiplicity"])
 
+        # Record any properties in the database if desired
+        if properties == "all":
+            for key, value in data.items():
+                if ",units" not in key and key not in [
+                    "net charge",
+                    "spin multiplicity",
+                ]:
+                    if not self.properties.exists(key):
+                        tmp = key.split("#", maxsplit=1)
+                        if len(tmp) > 1:
+                            units_key = tmp[0] + ",units" + "#" + tmp[1]
+                        else:
+                            units_key = key + ",units"
+                        _type = value.__class__.__name__
+                        if units_key in data:
+                            units = data[units_key]
+                            self.properties.add(key, _type, units=units)
+                        else:
+                            self.properties.add(key, _type)
+                    self.properties.put(key, value)
         return self
 
     def debug_print(self):

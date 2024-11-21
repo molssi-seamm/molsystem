@@ -40,9 +40,6 @@ class OpenEyeMixin:
         if self.__class__.__name__ == "_Configuration":
             oe_mol.SetIntData("net charge", self.charge)
             oe_mol.SetIntData("spin multiplicity", self.spin_multiplicity)
-        else:
-            oe_mol.SetIntData("net charge", 0)
-            oe_mol.SetIntData("spin multiplicity", 1)
 
         # Create the atoms
         oe_atoms = []
@@ -129,9 +126,20 @@ class OpenEyeMixin:
         if atoms:
             self.clear()
 
+        # Get the property data, cast to correct type
+        data = {}
+        for tmp in oe_mol.GetDataIter():
+            tag = tmp.GetTag()
+            attribute = oechem.OEGetTag(tag)
+            value = oe_mol.GetData(tag)
+            data[attribute] = value
+
+        # Check for property items for charge and multiplicity
         if self.__class__.__name__ == "_Configuration":
-            self.charge = oe_mol.GetIntData("net charge")
-            self.spin_multiplicity = oe_mol.GetIntData("spin multiplicity")
+            if "net charge" in data:
+                self.charge = int(data["net charge"])
+            if "spin multiplicity" in data:
+                self.spin_multiplicity = int(data["spin multiplicity"])
 
         if atoms:
             if any([i != 0.0 for i in qs]):
@@ -154,24 +162,23 @@ class OpenEyeMixin:
 
         # Record any properties in the database if desired
         if properties == "all":
-            for data in oe_mol.GetDataIter():
-                tag = data.GetTag()
-                attribute = oechem.OEGetTag(tag)
-                value = oe_mol.GetData(tag)
-                if not self.properties.exists(attribute):
-                    try:
-                        int(value)
-                        _type = "int"
-                    except Exception:
-                        try:
-                            float(value)
-                            _type = "float"
-                        except Exception:
-                            _type = "str"
-                    self.properties.add(
-                        attribute,
-                        _type,
-                        description="Imported from SDF file",
-                    )
-                self.properties.put(attribute, value)
+            for key, value in data.items():
+                if ",units" not in key and key not in [
+                    "",
+                    "net charge",
+                    "spin multiplicity",
+                ]:
+                    if not self.properties.exists(key):
+                        tmp = key.split("#", maxsplit=1)
+                        if len(tmp) > 1:
+                            units_key = tmp[0] + ",units" + "#" + tmp[1]
+                        else:
+                            units_key = key + ",units"
+                        _type = value.__class__.__name__
+                        if units_key in data:
+                            units = data[units_key]
+                            self.properties.add(key, _type, units=units)
+                        else:
+                            self.properties.add(key, _type)
+                    self.properties.put(key, value)
         return self
