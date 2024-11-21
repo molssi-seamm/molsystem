@@ -61,9 +61,20 @@ class OpenBabelMixin:
         # Set local radical character
         ob_mol.AssignSpinMultiplicity(True)
 
+        # Add the net charge and spin multiplicity as properties for configurations
+        pair = ob.OBPairData()
+
+        if self.__class__.__name__ == "_Configuration":
+            pair.SetAttribute("net charge")
+            pair.SetValue(str(self.charge))
+            ob_mol.CloneData(pair)
+
+            pair.SetAttribute("spin multiplicity")
+            pair.SetValue(str(self.spin_multiplicity))
+            ob_mol.CloneData(pair)
+
         if properties == "all":
             data = self.properties.get("all", include_system_properties=True)
-            pair = ob.OBPairData()
             for key, value in data.items():
                 pair.SetAttribute(key)
                 pair.SetValue(str(value))
@@ -84,7 +95,29 @@ class OpenBabelMixin:
     def from_OBMol(
         self, ob_mol, properties="all", atoms=True, coordinates=True, bonds=True
     ):
-        """Transform an Open Babel molecule into the current object."""
+        """Transform an Open Babel molecule into the current object.
+
+        Parameters
+        ----------
+        rdk_mol : rdkit.chem.molecule
+            The RDKit molecule object
+
+        properties : str = "all"
+            Whether to include all properties or none
+
+        atoms : bool = True
+            Recreate the atoms
+
+        coordinates : bool = True
+            Update the coordinates
+
+        bonds : bool = True
+            Recreate the bonds from the RDKit molecule
+
+        Returns
+        -------
+        molsystem._Configuration
+        """
         atnos = []
         Xs = []
         Ys = []
@@ -116,9 +149,27 @@ class OpenBabelMixin:
         if atoms:
             self.clear()
 
+        # Get the property data, cast to correct type
+        data = {}
+        for item in ob_mol.GetData():
+            value = item.GetValue()
+            try:
+                value = int(value)
+            except Exception:
+                try:
+                    value = float(value)
+                except Exception:
+                    pass
+            data[item.GetAttribute()] = value
+
+        # Check for property items for charge and multiplicity
         if self.__class__.__name__ == "_Configuration":
             self.charge = ob_mol.GetTotalCharge()
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
+            if "net charge" in data:
+                self.charge = int(data["net charge"])
+            if "spin multiplicity" in data:
+                self.spin_multiplicity = int(data["spin multiplicity"])
 
         if atoms:
             if any([i != 0.0 for i in qs]):
@@ -141,26 +192,24 @@ class OpenBabelMixin:
 
         # Record any properties in the database if desired
         if properties == "all":
-            data = ob_mol.GetData()
-            for item in data:
-                attribute = item.GetAttribute()
-                value = item.GetValue()
-                if not self.properties.exists(attribute):
-                    try:
-                        int(value)
-                        _type = "int"
-                    except Exception:
-                        try:
-                            float(value)
-                            _type = "float"
-                        except Exception:
-                            _type = "str"
-                    self.properties.add(
-                        attribute,
-                        _type,
-                        description="Imported from SDF file",
-                    )
-                self.properties.put(attribute, value)
+            for key, value in data.items():
+                if ",units" not in key and key not in [
+                    "net charge",
+                    "spin multiplicity",
+                ]:
+                    if not self.properties.exists(key):
+                        tmp = key.split("#", maxsplit=1)
+                        if len(tmp) > 1:
+                            units_key = tmp[0] + ",units" + "#" + tmp[1]
+                        else:
+                            units_key = key + ",units"
+                        _type = value.__class__.__name__
+                        if units_key in data:
+                            units = data[units_key]
+                            self.properties.add(key, _type, units=units)
+                        else:
+                            self.properties.add(key, _type)
+                    self.properties.put(key, value)
         return self
 
     def coordinates_from_OBMol(self, ob_mol):

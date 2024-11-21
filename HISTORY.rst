@@ -1,6 +1,12 @@
 =======
 History
 =======
+2024.11.21 -- Added access to OpenEye mols and SMILES
+    * Added the ability to create a system from an OpenEye molecule and vice versa.
+      This gives access to the OpenEye toolkit for generating conformers, etc.
+    * Added the ability to create a system from a SMILES string and create the SMILES
+      string from a system using OpenEye.
+      
 2024.11.12 -- Added units to properties in Openbabel molecules
     * Any properties on the system and configuration are optionally added to the
       Openbabel Molecule object for e.g. writing to an SDF file. This adds the units of

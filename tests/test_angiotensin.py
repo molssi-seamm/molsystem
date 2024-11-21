@@ -118,7 +118,7 @@ def testdb():
     # Angiotensin II from SMILES
     system = db.create_system("angiotensin")
     configuration = system.create_configuration("SMILES")
-    configuration.from_smiles(SMILES, reorient=False, rdkit=False)
+    configuration.from_smiles(SMILES, reorient=False, flavor="openbabel")
 
     # And read in
     system.read_cif_file(data_path / "1n9v.cif")

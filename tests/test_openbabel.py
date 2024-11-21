@@ -458,7 +458,7 @@ def test_all_residue_search(configuration):
         "PHE_LL": [(64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75)],
     }
 
-    configuration.from_smiles(SMILES, reorient=False, rdkit=False)
+    configuration.from_smiles(SMILES, reorient=False, flavor="openbabel")
 
     for name, sc in sidechains.items():
         smarts = f"[NH1X3][C@@H]({sc})[CX3]=[OX1]"
@@ -491,22 +491,44 @@ def test_all_residue_search(configuration):
             assert result == c_terminal[name]
 
 
-def test_to_OBMol(configuration):
+def test_to_OBMol(Acetate):
     """Test creating an OBMol object from a structure."""
-    mol = configuration.to_OBMol()
+    correct = {
+        "float property": 3.14,
+        "float property,units": "kcal/mol",
+        "int property": 2,
+        "net charge": -1,
+        "spin multiplicity": 1,
+        "str property": "Hi!",
+    }
+
+    mol = Acetate.to_OBMol(properties="all")
 
     bondorder_list = []
     for bond in openbabel.OBMolBondIter(mol):
         bondorder_list.append(bond.GetBondOrder())
 
     atno_list = []
-    for atno in openbabel.OBMolAtomIter(mol):
-        atno_list.append(mol.GetAtmoicNum())
+    for atom in openbabel.OBMolAtomIter(mol):
+        atno_list.append(atom.GetAtomicNum())
 
-    assert configuration.atoms.atomic_numbers == atno_list
-    assert configuration.bonds.bondorders == bondorder_list
-    # assert configuration.n_atoms == mol.NumAtoms()
-    # assert configuration.n_bonds == mol.NumBonds()
+    assert Acetate.atoms.atomic_numbers == atno_list
+    assert Acetate.bonds.bondorders == bondorder_list
+
+    data = {}
+    for item in mol.GetData():
+        value = item.GetValue()
+        try:
+            value = int(value)
+        except Exception:
+            try:
+                value = float(value)
+            except Exception:
+                pass
+        data[item.GetAttribute()] = value
+    if data != correct:
+        pprint.pprint(data)
+    assert data == correct
 
 
 def test_from_OBMol(configuration):

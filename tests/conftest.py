@@ -17,10 +17,16 @@ def pytest_addoption(parser):
     parser.addoption(
         "--run-timing", action="store_true", default=False, help="run timing tests"
     )
+    parser.addoption(
+        "--openeye", action="store_true", default=False, help="run openeye tests"
+    )
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "timing: mark test as timing to run")
+    config.addinivalue_line(
+        "markers", "openeye: mark test as using OpenEye functionality"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -31,6 +37,14 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "timing" in item.keywords:
             item.add_marker(skip_timing)
+
+    if config.getoption("--openeye"):
+        # --openeye given in cli: include the openeye tests
+        return
+    skip_openeye = pytest.mark.skip(reason="need --openeye option to run")
+    for item in items:
+        if "openeye" in item.keywords:
+            item.add_marker(skip_openeye)
 
 
 def mk_table(db, name="table1"):
@@ -278,6 +292,44 @@ def AceticAcid(configuration):
     j = [ids[x] for x in j_atom]
 
     configuration.bonds.append(i=i, j=j, bondorder=order)
+
+    return configuration
+
+
+@pytest.fixture()
+def Acetate(configuration):
+    """An configuration object for an acetate acid molecule"""
+    # yapf: disable
+    #       C       H        H        H        C        =O      O
+    x = [ 1.0797, 0.5782,  0.7209,  0.7052,  0.5713, -0.1323, 0.9757]  # noqa: E221, E501, E201
+    y = [ 0.0181, 3.1376, -0.6736, -0.3143,  1.3899,  1.7142, 2.2970]  # noqa: E221, E501, E201
+    z = [-0.0184, 0.2813, -0.7859,  0.9529, -0.3161, -1.2568, 0.5919]  # noqa: E221, E501
+    atno = [6, 1, 1, 1, 6, 8, 8]  # noqa: E221
+
+    #       C  H  H  H  C =O  O
+    i_atom = [0, 0, 0, 0, 4, 4]
+    j_atom = [1, 2, 3, 4, 5, 6]
+    order =  [1, 1, 1, 1, 2, 1]  # noqa: E222
+    # yapf: enable
+
+    configuration.system.name = "acetate"
+    configuration.name = "acetate"
+    ids = configuration.atoms.append(x=x, y=y, z=z, atno=atno)
+
+    i = [ids[x] for x in i_atom]
+    j = [ids[x] for x in j_atom]
+
+    configuration.bonds.append(i=i, j=j, bondorder=order)
+    configuration.charge = -1
+
+    properties = configuration.properties
+    properties.add("float property", "float", units="kcal/mol")
+    properties.add("int property", "int")
+    properties.add("str property", "str")
+
+    properties.put("float property", 3.14)
+    properties.put("int property", 2)
+    properties.put("str property", "Hi!")
 
     return configuration
 

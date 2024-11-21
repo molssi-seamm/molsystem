@@ -10,9 +10,18 @@ import rdkit.Chem.AllChem
 import pytest  # noqa: F401
 
 
-def test_to_RDKMol(configuration):
+def test_to_RDKMol(Acetate):
     """Test creating a RDKMol object from a structure."""
-    mol = configuration.to_RDKMol()
+    correct = {
+        "float property": 3.14,
+        "float property,units": "kcal/mol",
+        "int property": 2,
+        "net charge": -1,
+        "spin multiplicity": 1,
+        "str property": "Hi!",
+    }
+
+    mol = Acetate.to_RDKMol(properties="all")
 
     bond_types = {
         rdkit.Chem.rdchem.BondType.SINGLE: 1,
@@ -21,8 +30,13 @@ def test_to_RDKMol(configuration):
     }
     bond_list = [bond_types[bt.GetBondType()] for bt in mol.GetBonds()]
 
-    assert configuration.n_atoms == mol.GetNumAtoms()
-    assert configuration.bonds.bondorders == bond_list
+    assert Acetate.n_atoms == mol.GetNumAtoms()
+    assert Acetate.bonds.bondorders == bond_list
+
+    data = mol.GetPropsAsDict()
+    if data != correct:
+        pprint.pprint(data)
+    assert data == correct
 
 
 def test_from_RDKMol(configuration):
