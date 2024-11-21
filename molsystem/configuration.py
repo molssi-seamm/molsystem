@@ -23,6 +23,7 @@ from .cms_schema import CMSSchemaMixin
 from .inchi import InChIMixin
 from .molfile import MolFileMixin
 from .openbabel import OpenBabelMixin
+from .openeye import OpenEyeMixin
 from .pubchem import PubChemMixin
 from .rdkit_ import RDKitMixin
 from .pdb import PDBMixin
@@ -42,6 +43,7 @@ class _Configuration(
     SMILESMixin,
     TopologyMixin,
     OpenBabelMixin,
+    OpenEyeMixin,
     PubChemMixin,
     RDKitMixin,
     QCSchemaMixin,

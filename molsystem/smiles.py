@@ -5,6 +5,24 @@
 import logging
 
 try:
+    from openeye import oechem
+except ModuleNotFoundError:
+    oechem_available = False
+    oechem_licensed = False
+else:
+    oechem_available = True
+    oechem_licensed = oechem.OEChemIsLicensed()
+
+try:
+    from openeye import oeomega
+except ModuleNotFoundError:
+    oeomega_available = False
+    oeomega_licensed = False
+else:
+    oeomega_available = True
+    oeomega_licensed = oeomega.OEOmegaIsLicensed()
+
+try:
     from openbabel import openbabel
 except ModuleNotFoundError:
     print(
@@ -20,6 +38,29 @@ except ModuleNotFoundError:
     raise
 
 logger = logging.getLogger(__name__)
+
+
+def check_openeye_license():
+    if not oechem_available:
+        raise RuntimeError(
+            "OpenEye OEChem is not installed! See "
+            "https://docs.eyesopen.com/toolkits/python/index.html for detail"
+        )
+    if not oechem_licensed:
+        raise RuntimeError(
+            "Cannot find a license for OpenEye OEChem! See "
+            "https://docs.eyesopen.com/toolkits/python/index.html for detail"
+        )
+    if not oeomega_available:
+        raise RuntimeError(
+            "OpenEye OEOmega is not installed! See "
+            "https://docs.eyesopen.com/toolkits/python/index.html for detail"
+        )
+    if not oeomega_licensed:
+        raise RuntimeError(
+            "Cannot find a license for OpenEye OEOmega! See "
+            "https://docs.eyesopen.com/toolkits/python/index.html for detail"
+        )
 
 
 class SMILESMixin:
@@ -40,7 +81,13 @@ class SMILESMixin:
         """Return the SMILES string for this object."""
         return self.to_smiles()
 
-    def to_smiles(self, canonical=False, hydrogens=False, isomeric=True, rdkit=True):
+    def to_smiles(
+        self,
+        canonical=False,
+        hydrogens=False,
+        isomeric=True,
+        flavor="rdkit",
+    ):
         """Create the SMILES string from the system.
 
         Parameters
@@ -61,7 +108,7 @@ class SMILESMixin:
         """
         logger.info("to_smiles")
 
-        if rdkit:
+        if flavor == "rdkit":
             mol = self.to_RDKMol()
             if isomeric:
                 Chem.FindPotentialStereo(mol)
@@ -75,7 +122,7 @@ class SMILESMixin:
                 smiles = Chem.MolToSmiles(
                     mol2, isomericSmiles=isomeric, canonical=False
                 )
-        else:
+        elif flavor == "openbabel":
             obConversion = openbabel.OBConversion()
             if canonical:
                 obConversion.SetOutFormat("can")
@@ -89,12 +136,19 @@ class SMILESMixin:
             if not isomeric:
                 obConversion.AddOption("i")
             smiles = obConversion.WriteString(mol)
+        elif flavor == "openeye":
+            check_openeye_license()
+
+            mol = self.to_OEGraphMol()
+            smiles = oechem.OECreateSmiString(mol)
+        else:
+            raise ValueError(f"flavor of SMILES '{flavor}' not supported")
 
         logger.info(f"smiles = '{smiles}'")
 
         return smiles.strip()
 
-    def from_smiles(self, smiles, name=None, reorient=True, rdkit=True):
+    def from_smiles(self, smiles, name=None, reorient=True, flavor="rdkit"):
         """Create the system from a SMILES string.
 
         Parameters
@@ -115,14 +169,14 @@ class SMILESMixin:
 
         save = self.name
 
-        if rdkit:
+        if flavor == "rdkit":
             mol = Chem.rdmolfiles.MolFromSmiles(smiles)
             if mol is None:
                 raise ValueError(f"SMILES '{smiles}' is not valid.")
             mol = Chem.AddHs(mol)
             AllChem.EmbedMolecule(mol)
             self.from_RDKMol(mol)
-        else:
+        elif flavor == "openbabel":
             obConversion = openbabel.OBConversion()
             obConversion.SetInAndOutFormats("smi", "mdl")
             obConversion.AddOption("3")
@@ -137,6 +191,20 @@ class SMILESMixin:
             builder.Build(mol)
 
             self.from_OBMol(mol)
+        elif flavor == "openeye":
+            check_openeye_license()
+            mol = oechem.OEGraphMol()
+            if not oechem.OESmilesToMol(mol, smiles):
+                raise ValueError(f"SMILES '{smiles}' is not valid.")
+            omega = oeomega.OEOmega()
+            omega.SetMaxConfs(1)
+            omega.SetStrictStereo(False)
+            omega.SetStrictAtomTypes(False)
+
+            # Add hydrogens
+            oechem.OEAddExplicitHydrogens(mol)
+
+            self.from_OEMol(mol)
 
         # Rotate to standard orientation
         if reorient:

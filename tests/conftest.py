@@ -17,10 +17,16 @@ def pytest_addoption(parser):
     parser.addoption(
         "--run-timing", action="store_true", default=False, help="run timing tests"
     )
+    parser.addoption(
+        "--openeye", action="store_true", default=False, help="run openeye tests"
+    )
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "timing: mark test as timing to run")
+    config.addinivalue_line(
+        "markers", "openeye: mark test as using OpenEye functionality"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -31,6 +37,14 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "timing" in item.keywords:
             item.add_marker(skip_timing)
+
+    if config.getoption("--openeye"):
+        # --openeye given in cli: include the openeye tests
+        return
+    skip_openeye = pytest.mark.skip(reason="need --openeye option to run")
+    for item in items:
+        if "openeye" in item.keywords:
+            item.add_marker(skip_openeye)
 
 
 def mk_table(db, name="table1"):

@@ -5,6 +5,18 @@ molsystem
 A general implementation for molecular and periodic systems.
 """
 
+# Temporary fix for issue with openeye and openbabel conflicting
+# Seems to work if we import openeye first
+# May not have openeye or openbabel installed, so take care
+try:
+    from openeye import oechem  # noqa: F401
+except ImportError:
+    pass
+try:
+    from openbabel import openbabel as ob  # noqa: F401
+except ImportError:
+    pass
+
 # Bring up the classes so that they appear to be directly in
 # the molsystem package.
 
