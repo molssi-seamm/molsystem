@@ -6,8 +6,10 @@
 import pprint  # noqa: F401
 import pytest  # noqa: F401
 
-from openeye import oechem
-from openeye import oeomega
+try:
+    from openeye import oechem, oeomega
+else:
+    pass
 
 
 @pytest.mark.openeye
