@@ -116,6 +116,14 @@ molsystem.openbabel module
    :undoc-members:
    :show-inheritance:
 
+molsystem.openeye module
+------------------------
+
+.. automodule:: molsystem.openeye
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 molsystem.pdb module
 --------------------
 
