@@ -8,7 +8,7 @@ import pytest  # noqa: F401
 
 try:
     from openeye import oechem, oeomega
-else:
+except ImportError:
     pass
 
 
