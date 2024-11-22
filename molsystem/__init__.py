@@ -24,6 +24,10 @@ import molsystem.elements  # noqa: F401
 from .system_db import SystemDB  # noqa: F401
 from .cell import Cell  # noqa: F401
 from .properties import standard_properties, add_properties_from_file  # noqa: F401
+from .openbabel import openbabel_version  # noqa: F401
+from .openeye import openeye_version  # noqa: F401
+from .rdkit_ import rdkit_version  # noqa: F401
+
 
 # Handle versioneer
 from ._version import get_versions

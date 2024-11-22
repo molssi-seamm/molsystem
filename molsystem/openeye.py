@@ -29,6 +29,13 @@ def check_openeye_license():
         )
 
 
+def openeye_version():
+    """The version of the OpenEye OEChem toolkit."""
+    if not oechem_available:
+        return None
+    return oechem.OEChemGetVersion()
+
+
 class OpenEyeMixin:
     """A mixin for handling OpenEye's software via its Python interface."""
 

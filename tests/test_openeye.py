@@ -11,6 +11,14 @@ try:
 except ImportError:
     pass
 
+from molsystem import openeye_version
+
+
+@pytest.mark.openeye
+def test_version():
+    """Test the version of the OpenEye toolkit."""
+    openeye_version()
+
 
 @pytest.mark.openeye
 def test_to_OEGraphMol(Acetate):

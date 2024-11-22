@@ -18,6 +18,11 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+def openbabel_version():
+    """Return the version of openbabel."""
+    return ob.OBReleaseVersion()
+
+
 class OpenBabelMixin:
     """A mixin for handling OpenBabel via its Python interface."""
 
