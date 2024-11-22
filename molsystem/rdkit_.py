@@ -41,6 +41,11 @@ valence = {
 }
 
 
+def rdkit_version():
+    """Return the RDKit version."""
+    return Chem.rdBase.rdkitVersion
+
+
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 

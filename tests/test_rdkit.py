@@ -9,6 +9,13 @@ import rdkit.Chem
 import rdkit.Chem.AllChem
 import pytest  # noqa: F401
 
+from molsystem import rdkit_version
+
+
+def test_version():
+    """Test the version of RDKit."""
+    rdkit_version()
+
 
 def test_to_RDKMol(Acetate):
     """Test creating a RDKMol object from a structure."""

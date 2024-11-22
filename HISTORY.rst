@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.11.21.1 -- Versions of openbabel, openeye, and rdkit
+    * Added functions to get the versions of openbabel, openeye, and rdkit that are
+      installed.
+      
 2024.11.21 -- Added access to OpenEye mols and SMILES
     * Added the ability to create a system from an OpenEye molecule and vice versa.
       This gives access to the OpenEye toolkit for generating conformers, etc.

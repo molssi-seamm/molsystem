@@ -9,6 +9,8 @@ import platform
 
 import pytest  # noqa: F401
 
+from molsystem import openbabel_version
+
 # H-Asp-Arg-Val-Tyr-Ile-His-Pro-Phe-OH
 SMILES = (
     "[NH2][C@@H](CC(=O)O)C(=O)"
@@ -364,6 +366,11 @@ known_input_formats["Linux"] = (
     "yob -- YASARA.org YOB format",
 )
 known_input_formats["Windows"] = known_input_formats["Darwin"]
+
+
+def test_version():
+    """Test the version number of Open Babel."""
+    openbabel_version()
 
 
 def test_substructure(CH3COOH_3H2O):
