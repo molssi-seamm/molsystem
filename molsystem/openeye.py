@@ -6,7 +6,7 @@ import logging
 
 try:
     from openeye import oechem
-except ModuleNotFoundError:
+except ImportError:
     oechem_available = False
     oechem_licensed = False
 else:
