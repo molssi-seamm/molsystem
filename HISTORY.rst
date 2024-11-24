@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.11.23 -- Bugfix: error if OpenEye not available
+    * Fixed an issue with the import of OpenEye that caused an error if OpenEye was not
+      available.
+      
 2024.11.21.1 -- Versions of openbabel, openeye, and rdkit
     * Added functions to get the versions of openbabel, openeye, and rdkit that are
       installed.

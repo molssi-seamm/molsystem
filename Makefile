@@ -63,7 +63,8 @@ format: ## reformat with with yapf and isort
 	black --extend-exclude '_version.py' $(MODULE) tests
 
 test: ## run tests quickly with the default Python
-	pytest --disable-warnings -rP --openeye tests/
+	#	pytest --disable-warnings -rP --openeye tests/
+	pytest --disable-warnings -rP tests/
 
 coverage: ## check code coverage quickly with the default Python
 	pytest -v --cov=$(MODULE) --cov-report term --color=yes tests/
