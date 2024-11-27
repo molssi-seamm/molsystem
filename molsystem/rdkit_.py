@@ -55,7 +55,8 @@ class RDKitMixin:
         indices = []
         rdk_mol = Chem.RWMol()
         for atno, _id in zip(self.atoms.atomic_numbers, self.atoms.ids):
-            idx = rdk_mol.AddAtom(Chem.Atom(atno))
+            atom = Chem.Atom(atno)
+            idx = rdk_mol.AddAtom(atom)
             index[_id] = idx
             indices.append(idx)
 
@@ -198,6 +199,15 @@ class RDKitMixin:
 
         data = rdk_mol.GetPropsAsDict()
         if self.__class__.__name__ == "_Configuration":
+            # Charge
+            self.charge = int(Chem.GetFormalCharge(rdk_mol))
+
+            # Calculate spin multiplicity assuming maximal spin
+            n_electrons = 0
+            for rdk_atom in rdk_mol.GetAtoms():
+                n_electrons += rdk_atom.GetNumRadicalElectrons()
+            self.spin_multiplicity = n_electrons + 1
+
             # Check for property items for charge and multiplicity
             if "net charge" in data:
                 self.charge = int(data["net charge"])
