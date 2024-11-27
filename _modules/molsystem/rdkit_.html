@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2024.11.23 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2024.11.27 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=9dbbb384"></script>
+    <script src="../../_static/documentation_options.js?v=61caa923"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2024.11.23" />
+  <meta name="docsearch:version" content="2024.11.27" />
   </head>
   
   
@@ -526,7 +526,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">rdk_mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">atno</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">):</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">AddAtom</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="n">atno</span><span class="p">))</span>
+            <span class="n">atom</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="n">atno</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">AddAtom</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
             <span class="n">index</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
             <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
@@ -672,6 +673,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetPropsAsDict</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;_Configuration&quot;</span><span class="p">:</span>
+            <span class="c1"># Charge</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(</span><span class="n">rdk_mol</span><span class="p">))</span>
+
+            <span class="c1"># Calculate spin multiplicity assuming maximal spin</span>
+            <span class="n">n_electrons</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+                <span class="n">n_electrons</span> <span class="o">+=</span> <span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetNumRadicalElectrons</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="n">n_electrons</span> <span class="o">+</span> <span class="mi">1</span>
+
             <span class="c1"># Check for property items for charge and multiplicity</span>
             <span class="k">if</span> <span class="s2">&quot;net charge&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;net charge&quot;</span><span class="p">])</span>
