@@ -1,6 +1,9 @@
 =======
 History
 =======
+2024.11.27.1 -- Added support for charge in chemical formulae
+    * Added support for charge in chemical formulae, e.g. [H2 O]+.
+
 2024.11.27 -- Bugfix: error with charge and multiplicity
     * The charge and multiplicity of the system were not correctly set when creating a
       system from a SMILES string using RDKit. More generally, the charge and
