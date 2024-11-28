@@ -354,6 +354,22 @@ class _Configuration(
             else:
                 formula.append(element)
 
+        formula = " ".join(formula)
+
+        # Handle any charge
+        if self.charge == -1:
+            formula = f"[{formula}]-"
+            counts.append(1)
+        elif self.charge == 1:
+            formula = f"[{formula}]+"
+            counts.append(1)
+        elif self.charge < 0:
+            formula = f"[{formula}]-{-self.charge}"
+            counts.append(-self.charge)
+        elif self.charge > 0:
+            formula = f"[{formula}]+{self.charge}"
+            counts.append(self.charge)
+
         # And the empirical formula
         Z = reduce(math.gcd, counts)
         empirical_formula_list = []
@@ -367,7 +383,20 @@ class _Configuration(
             else:
                 empirical_formula.append(element)
 
-        return " ".join(formula), " ".join(empirical_formula), Z
+        empirical_formula = " ".join(empirical_formula)
+
+        # Handle any charge
+        charge = self.charge / Z
+        if charge == -1:
+            empirical_formula = f"[{empirical_formula}]-"
+        elif charge == 1:
+            empirical_formula = f"[{empirical_formula}]+"
+        elif charge < 0:
+            empirical_formula = f"[{empirical_formula}]-{-charge}"
+        elif charge > 0:
+            empirical_formula = f"[{empirical_formula}]+{charge}"
+
+        return formula, empirical_formula, Z
 
     @property
     def group(self):
