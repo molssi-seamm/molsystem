@@ -1,6 +1,12 @@
 =======
 History
 =======
+2024.12.7 -- Significant internal enhancement to property handling.
+    * An internal change, allowing listing and getting properties with wildcards,
+      working with multiple values at once. This is a significant change, but should
+      not affect the user interface. Also consolidated the property handling code for
+      configurations vs systems.
+      
 2024.11.27.1 -- Added support for charge in chemical formulae
     * Added support for charge in chemical formulae, e.g. [H2 O]+.
 
