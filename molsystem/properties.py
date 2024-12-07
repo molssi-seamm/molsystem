@@ -317,241 +317,131 @@ class _Properties(object):
         self.cursor.execute("SELECT COUNT(*) FROM property WHERE name = ?", (name,))
         return self.cursor.fetchone()[0] != 0
 
-    def get(self, configuration_id, _property="all", include_system_properties=False):
-        """Get the given property value for the configuration.
-
-        Parameters
-        ----------
-        configuration_id : int
-            The id of the configuration.
-        _property : int or str, or "all"
-            The id or name of the property, or all properties if "all".
-        include_system_properties : bool=False
-            Whether to include properties that are on the system, not any configuration
-
-        Returns
-        -------
-        int, float, or str
-            The value of the property.
-        """
-        if include_system_properties:
-            self.cursor.execute(
-                "SELECT system FROM configuration WHERE id = ?", (configuration_id,)
-            )
-            system_id = self.cursor.fetchone()[0]
-
-        if _property == "all":
-            sql = (
-                "SELECT name, type, value\n"
-                "  FROM property, float_data\n"
-                " WHERE float_data.property = property.id AND configuration = ?\n"
-                " UNION \n"
-                "SELECT name, type, value\n"
-                "  FROM property, int_data\n"
-                " WHERE int_data.property = property.id AND configuration = ?\n"
-                " UNION \n"
-                "SELECT name, type, value\n"
-                "  FROM property, str_data\n"
-                " WHERE str_data.property = property.id AND configuration = ?\n"
-                " UNION \n"
-                "SELECT name, type, value\n"
-                "  FROM property, json_data\n"
-                " WHERE json_data.property = property.id AND configuration = ?"
-            )
-            if include_system_properties:
-                sql += (
-                    "\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, float_data\n"
-                    " WHERE float_data.property = property.id"
-                    "   AND configuration IS NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, int_data\n"
-                    " WHERE int_data.property = property.id"
-                    "   AND configuration IS NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, str_data\n"
-                    " WHERE str_data.property = property.id"
-                    "   AND configuration IS NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, json_data\n"
-                    " WHERE json_data.property = property.id"
-                    "   AND configuration IS NULL AND system = ? \n"
-                )
-                self.cursor.execute(
-                    sql,
-                    (
-                        configuration_id,
-                        configuration_id,
-                        configuration_id,
-                        configuration_id,
-                        system_id,
-                        system_id,
-                        system_id,
-                        system_id,
-                    ),
-                )
-            else:
-                self.cursor.execute(
-                    sql,
-                    (
-                        configuration_id,
-                        configuration_id,
-                        configuration_id,
-                        configuration_id,
-                    ),
-                )
-
-            result = {}
-            for row in self.cursor:
-                name, _type, value = row
-                if _type == "float":
-                    result[name] = float(value)
-                elif _type == "int":
-                    result[name] = int(value)
-                elif _type == "json":
-                    result[name] = json.loads(value)
-                else:
-                    result[name] = value
-            return result
-        else:
-            if isinstance(_property, str):
-                if self.exists(_property):
-                    pid = self.id(_property)
-                else:
-                    raise ValueError(f"Property '{_property}' does not exist.")
-            else:
-                pid = _property
-
-            ptype = self.type(pid)
-            sql = (
-                f"SELECT value FROM {ptype}_data\n"
-                "  WHERE configuration = ? AND property = ?"
-            )
-            if include_system_properties:
-                sql += (
-                    "\n"
-                    "  UNION \n"
-                    f"SELECT value FROM {ptype}_data\n"
-                    "  WHERE configuration IS NULL and system = ? AND property = ?"
-                )
-                self.cursor.execute(sql, (configuration_id, pid, system_id, pid))
-            else:
-                self.cursor.execute(sql, (configuration_id, pid))
-            result = self.cursor.fetchone()
-            if result is None:
-                raise ValueError(
-                    f"Property {_property} does not exist for configuration "
-                    f"{configuration_id}"
-                )
-            if ptype == "json":
-                return json.loads(result[0])
-            else:
-                return result[0]
-
-    def get_for_system(
-        self, system_id, _property="all", include_configuration_properties=False
+    def get(
+        self,
+        _id,
+        pattern="*",
+        match="glob",
+        is_system=False,
+        include_system_properties=False,
+        include_configuration_properties=False,
+        types=["float", "int", "str", "json"],
     ):
-        """Get the given property value(s) for the system.
+        """Get the property value(s)
 
         Parameters
         ----------
-        system_id : int
-            The id of the system.
-        _property : int or str of "all"
-            The id or name of the property, or "all" for all properties.
+        _id : int
+            The id of the configuration or system.
+        is_system : bool=False
+            Whether the ID is for a system, not a configuration.
+        pattern : str = "*"
+            The pattern of the property.
+        match : str="glob"
+            Whether to use exact, glob, or 'like' matching.
+        include_system_properties : bool=False
+            For a configuration, whether to include properties that are on the system.
         include_configuration_properties : bool=False
-            Whether to include properties from any configuration in the system.
+            For a system, whether to include properties that are on the configurations
+            of the system.
+        types : [str] = ["float", "int", "str", "json"]
+            The type of results to return.
 
         Returns
         -------
-        [int, float, or str]
-            The value(s) of the property.
+        {str: {str: value}}
+            The matching property values.
         """
-        if _property == "all":
-            if include_configuration_properties:
-                sql = (
-                    "SELECT name, type, value\n"
-                    "  FROM property, float_data\n"
-                    " WHERE float_data.property = property.id AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, int_data\n"
-                    " WHERE int_data.property = property.id AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, str_data\n"
-                    " WHERE str_data.property = property.id AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, json_data\n"
-                    " WHERE json_data.property = property.id AND system = ?\n"
-                )
-            else:
-                sql = (
-                    "SELECT name, type, value\n"
-                    "  FROM property, float_data\n"
-                    " WHERE float_data.property = property.id"
-                    "   AND configuration is NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, int_data\n"
-                    " WHERE int_data.property = property.id"
-                    "   AND configuration is NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, str_data\n"
-                    " WHERE str_data.property = property.id"
-                    "   AND configuration is NULL AND system = ?\n"
-                    " UNION \n"
-                    "SELECT name, type, value\n"
-                    "  FROM property, json_data\n"
-                    " WHERE json_data.property = property.id"
-                    "   AND configuration is NULL AND system = ?\n"
-                )
-            self.cursor.execute(sql, (system_id, system_id, system_id, system_id))
-
-            result = {}
-            for row in self.cursor:
-                name, _type, value = row
-                if _type == "float":
-                    result[name] = float(value)
-                elif _type == "int":
-                    result[name] = int(value)
-                elif _type == "json":
-                    result[name] = json.loads(value)
-                else:
-                    result[name] = value
+        if match == "glob":
+            op = "GLOB"
+        elif match == "like":
+            op = "LIKE"
+        elif match == "exact":
+            op = "="
         else:
-            if isinstance(_property, str):
-                if self.exists(_property):
-                    pid = self.id(_property)
-                else:
-                    raise ValueError(f"Property '{_property}' does not exist.")
-            else:
-                pid = _property
-            ptype = self.type(pid)
+            raise ValueError(f"Unknown match type '{match}'.")
 
+        sql = ""
+        args = []
+
+        if is_system:
+            # Handle properties of systems
             if include_configuration_properties:
-                sql = (
-                    f"SELECT value FROM {ptype}_data WHERE system = ? AND property = ?"
-                )
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                    sql += (
+                        "       SELECT name, type, value, system, configuration\n"
+                        f"         FROM property, {_type}_data\n"
+                        "        WHERE system = ?\n"
+                        f"          AND {_type}_data.property = property.id\n"
+                        f"          AND name {op} ?\n"
+                    )
+                    args.append(_id)
+                    args.append(pattern)
             else:
-                sql = (
-                    f"SELECT value FROM {ptype}_data"
-                    "  WHERE configuration ISNULL AND system = ? AND property = ?"
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                    sql += (
+                        "       SELECT name, type, value, system, configuration\n"
+                        f"         FROM property, {_type}_data\n"
+                        "        WHERE system = ?\n"
+                        "          AND configuration is Null\n"
+                        f"          AND {_type}_data.property = property.id\n"
+                        f"          AND name {op} ?\n"
+                    )
+                    args.append(_id)
+                    args.append(pattern)
+        else:
+            for _type in types:
+                if len(args) > 1:
+                    sql += "        UNION\n"
+                sql += (
+                    "       SELECT name, type, value, system, configuration\n"
+                    f"         FROM property, {_type}_data\n"
+                    "        WHERE configuration = ?\n"
+                    f"          AND {_type}_data.property = property.id\n"
+                    f"          AND name {op} ?\n"
                 )
-            result = []
-            for row in self.db.execute(sql, (system_id, pid)):
-                if ptype == "json":
-                    result.append(json.loads(row[0]))
-                else:
-                    result.append(row[0])
+                args.append(_id)
+                args.append(pattern)
+            if include_system_properties:
+                self.cursor.execute(
+                    "SELECT system FROM configuration WHERE id = ?", (_id,)
+                )
+                system_id = self.cursor.fetchone()[0]
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                    sql += (
+                        "       SELECT name, type, value, system, configuration\n"
+                        f"         FROM property, {_type}_data\n"
+                        "        WHERE system = ?\n"
+                        "          AND configuration is Null\n"
+                        f"          AND {_type}_data.property = property.id\n"
+                        f"          AND name {op} ?\n"
+                    )
+                    args.append(system_id)
+                    args.append(pattern)
 
+        self.cursor.execute(sql, args)
+
+        result = {}
+        for row in self.cursor:
+            name, _type, value, sid, cid = row
+            result[name] = {
+                "sid": sid,
+                "cid": cid,
+            }
+            if _type == "float":
+                result[name]["value"] = float(value)
+            elif _type == "int":
+                result[name]["value"] = int(value)
+            elif _type == "json":
+                result[name]["value"] = json.loads(value)
+            else:
+                result[name]["value"] = value
         return result
 
     def id(self, name):
@@ -578,6 +468,106 @@ class _Properties(object):
         """List the known properties."""
         self.cursor.execute("SELECT name FROM property")
         return [row[0] for row in self.cursor.fetchall()]
+
+    def list(
+        self,
+        _id,
+        pattern="*",
+        match="glob",
+        is_system=False,
+        include_system_properties=False,
+        include_configuration_properties=False,
+        as_ids=False,
+        types=["float", "int", "str", "json"],
+    ):
+        """Get the list of matching properties for the configuration.
+
+        Parameters
+        ----------
+        _id : int
+            The id of the configuration.
+        is_system : bool=False
+            Whether the ID is for a system, not a configuration.
+        pattern : str = "*"
+            The pattern of the property.
+        match : str="glob"
+            Whether to use exact, glob, or 'like' matching.
+        include_system_properties : bool=False
+            For a configuration, whether to include properties that are on the system.
+        include_configuration_properties : bool=False
+            For a system, whether to include properties that are on the configurations
+            of the system.
+        as_ids : bool=False
+            Whether to return the ids rather than names
+        types : [str] = ["float", "int", "str", "json"]
+            The type of results to return.
+
+        Returns
+        -------
+        [str] or [int]
+            The matching properties.
+        """
+        if match == "glob":
+            op = "GLOB"
+        elif match == "like":
+            op = "LIKE"
+        elif match == "exact":
+            op = "="
+        else:
+            raise ValueError(f"Unknown match type '{match}'.")
+
+        if as_ids:
+            sql = "SELECT id FROM property\n"
+        else:
+            sql = "SELECT name FROM property\n"
+        sql += f" WHERE name {op} ?\n" "    AND id IN (\n"
+
+        args = [pattern]
+
+        if is_system:
+            # Handle properties of systems
+            if include_configuration_properties:
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                        f"       SELECT property FROM {_type}_data WHERE system = ?\n"
+                    args.append(_id)
+            else:
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                    sql += (
+                        "       SELECT property\n"
+                        f"         FROM {_type}_data\n"
+                        "        WHERE system = ? AND configuration is Null\n"
+                    )
+                    args.append(_id)
+        else:
+            for _type in types:
+                if len(args) > 1:
+                    sql += "        UNION\n"
+                sql += f"  SELECT property FROM {_type}_data WHERE configuration = ?\n"
+                args.append(_id)
+            if include_system_properties:
+                self.cursor.execute(
+                    "SELECT system FROM configuration WHERE id = ?", (_id,)
+                )
+                system_id = self.cursor.fetchone()[0]
+                for _type in types:
+                    if len(args) > 1:
+                        sql += "        UNION\n"
+                    sql += (
+                        "       SELECT property\n"
+                        f"         FROM {_type}_data\n"
+                        "        WHERE configuration is Null AND system = ?\n"
+                    )
+                    args.append(system_id)
+
+        sql += "    )"
+
+        self.cursor.execute(sql, args)
+
+        return [row[0] for row in self.cursor]
 
     def metadata(self, _property):
         """The metadata for a property
@@ -644,17 +634,19 @@ class _Properties(object):
         "Obsolete routine kept for compatibility"
         return self.type(_property)
 
-    def put(self, configuration_id, _property, value):
-        """Store the given property value for the configuration.
+    def put(self, _id, _property, value, is_system=False):
+        """Store the given property value for the configuration or system
 
         Parameters
         ----------
-        configuration_id : int
+        _id : int
             The id of the configuration.
         _property : int or str
             The id or name of the property.
         value : int, float, or str
             The value to store.
+        is_system : bool=False
+            Whether the ID is for a system, not a configuration.
         """
         # Get the property id and type
         if isinstance(_property, str):
@@ -671,50 +663,22 @@ class _Properties(object):
         if ptype == "json":
             value = json.dumps(value, separators=(",", ":"))
 
-        # Get the system id
-        self.cursor.execute(
-            "SELECT system FROM configuration WHERE id = ?", (configuration_id,)
-        )
-        system_id = self.cursor.fetchone()[0]
-
-        sql = (
-            f"INSERT INTO {ptype}_data (configuration, system, property, value)"
-            "      VALUES(?, ?, ?, ?)"
-        )
-        self.db.execute(sql, (configuration_id, system_id, pid, value))
-
-    def put_for_system(self, system_id, _property, value):
-        """Store the given property value for the system.
-
-        Parameters
-        ----------
-        system_id : int
-            The id of the system.
-        _property : int or str
-            The id or name of the property.
-        value : int, float, or str
-            The value to store.
-        """
-        # Get the property id and type
-        if isinstance(_property, str):
-            if not self.exists(_property):
-                if _property in self.standard_properties:
-                    self.add(_property)
-                else:
-                    raise ValueError(f"Property '{_property}' does not exist.")
-            pid = self.id(_property)
+        if is_system:
+            sql = (
+                f"INSERT INTO {ptype}_data (system, property, value)"
+                "      VALUES(?, ?, ?)"
+            )
+            self.db.execute(sql, (_id, pid, value))
         else:
-            pid = _property
-        ptype = self.type(pid)
+            # Get the system id
+            self.cursor.execute("SELECT system FROM configuration WHERE id = ?", (_id,))
+            sid = self.cursor.fetchone()[0]
 
-        if ptype == "json":
-            value = json.dumps(value, separators=(",", ":"))
-
-        sql = (
-            f"INSERT INTO {ptype}_data (system, property, value)"
-            "      VALUES(?, ?, ?)"
-        )
-        self.db.execute(sql, (system_id, pid, value))
+            sql = (
+                f"INSERT INTO {ptype}_data (configuration, system, property, value)"
+                "      VALUES(?, ?, ?, ?)"
+            )
+            self.db.execute(sql, (_id, sid, pid, value))
 
     def query(self, *args, what=["configuration"]):
         """Find configurations that match the query defined by the args.

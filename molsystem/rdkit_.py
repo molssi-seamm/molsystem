@@ -100,8 +100,8 @@ class RDKitMixin:
             rdk_mol.SetIntProp("net charge", self.charge)
             rdk_mol.SetIntProp("spin multiplicity", self.spin_multiplicity)
 
-        if properties == "all":
-            data = self.properties.get("all", include_system_properties=True)
+        if properties is not None:
+            data = self.properties.get(properties, include_system_properties=True)
             for key, value in data.items():
                 if isinstance(value, int):
                     rdk_mol.SetIntProp(key, value)

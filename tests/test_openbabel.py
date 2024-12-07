@@ -501,15 +501,15 @@ def test_all_residue_search(configuration):
 def test_to_OBMol(Acetate):
     """Test creating an OBMol object from a structure."""
     correct = {
-        "float property": 3.14,
+        "float property": "{'sid': 1, 'cid': 1, 'value': 3.14}",
         "float property,units": "kcal/mol",
-        "int property": 2,
+        "int property": "{'sid': 1, 'cid': 1, 'value': 2}",
         "net charge": -1,
         "spin multiplicity": 1,
-        "str property": "Hi!",
+        "str property": "{'sid': 1, 'cid': 1, 'value': 'Hi!'}",
     }
 
-    mol = Acetate.to_OBMol(properties="all")
+    mol = Acetate.to_OBMol(properties="*")
 
     bondorder_list = []
     for bond in openbabel.OBMolBondIter(mol):

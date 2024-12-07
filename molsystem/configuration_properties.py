@@ -58,25 +58,37 @@ class _ConfigurationProperties(object):
         """A thin wrapper of the _Properties method."""
         return self.properties.exists(name)
 
-    def get(self, _property="all", include_system_properties=False):
-        """Get the given property value for this configuration.
+    def get(
+        self,
+        pattern="*",
+        match="glob",
+        include_system_properties=False,
+        types=["float", "int", "str", "json"],
+    ):
+        """Get the property value(s)
 
         Parameters
         ----------
-        _property : int or str
-            The id or name of the property.
+        pattern : str = "*"
+            The pattern of the property.
+        match : str="glob"
+            Whether to use exact, glob, or 'like' matching.
         include_system_properties : bool=False
-            Whether to include properties that are on the system, not any configuration
+            For a configuration, whether to include properties that are on the system.
+        types : [str] = ["float", "int", "str", "json"]
+            The type of results to return.
 
         Returns
         -------
-        int, float, or str
-            The value of the property.
+        {str: {str: value}}
+            The matching property values.
         """
         return self.properties.get(
             self._cid,
-            _property,
+            pattern=pattern,
+            match=match,
             include_system_properties=include_system_properties,
+            types=types,
         )
 
     def id(self, name):
@@ -98,35 +110,43 @@ class _ConfigurationProperties(object):
         """List the known properties."""
         return self.properties.known_properties()
 
-    def list(self):
-        """Return all of the property names for the current configuration.
+    def list(
+        self,
+        pattern="*",
+        match="glob",
+        include_system_properties=False,
+        as_ids=False,
+        types=["float", "int", "str", "json"],
+    ):
+        """Get the list of matching properties for the configuration.
+
+        Parameters
+        ----------
+        pattern : str = "*"
+            The pattern of the property.
+        match : str="glob"
+            Whether to use exact, glob, or 'like' matching.
+        include_system_properties : bool=False
+            Whether to include properties that are on the system, not any configuration
+        as_ids : bool=False
+            Whether to return the ids rather than names
+        types : [str] = ["float", "int", "str", "json"]
+            The type of results to return.
+
         Returns
         -------
-        [str]
-            The names of the properties for the configuration.
+        [str] or [int]
+            The matching properties.
         """
-        sql = "SELECT name FROM property WHERE id IN ("
-        sql += "SELECT property FROM float_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM int_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM str_data WHERE configuration = ?"
-        sql += ")"
-
-        self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
-        return [row[0] for row in self.properties.cursor]
-
-    def list_ids(self):
-        """Return all of the property ids for the current configuration.
-        Returns
-        -------
-        [int]
-            The names of the properties for the configuration.
-        """
-        sql = "SELECT property FROM float_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM int_data WHERE configuration = ?"
-        sql += "UNION SELECT property FROM str_data WHERE configuration = ?"
-
-        self.properties.cursor.execute(sql, (self._cid, self._cid, self._cid))
-        return [row[0] for row in self.properties.cursor]
+        return self.properties.list(
+            self._cid,
+            is_system=False,
+            pattern=pattern,
+            match=match,
+            include_system_properties=include_system_properties,
+            as_ids=as_ids,
+            types=types,
+        )
 
     def metadata(self, _property):
         """The metadata for a property

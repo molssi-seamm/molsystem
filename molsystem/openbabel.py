@@ -78,8 +78,8 @@ class OpenBabelMixin:
             pair.SetValue(str(self.spin_multiplicity))
             ob_mol.CloneData(pair)
 
-        if properties == "all":
-            data = self.properties.get("all", include_system_properties=True)
+        if properties is not None:
+            data = self.properties.get(properties, include_system_properties=True)
             for key, value in data.items():
                 pair.SetAttribute(key)
                 pair.SetValue(str(value))
@@ -318,7 +318,7 @@ class OpenBabelMixin:
         """
         obConversion = ob.OBConversion()
         obConversion.SetOutFormat("sdf")
-        obMol = self.to_OBMol(properties="all")
+        obMol = self.to_OBMol(properties="*")
         title = f"SEAMM={self.system.name}/{self.name}"
         obMol.SetTitle(title)
         text = obConversion.WriteString(obMol)
