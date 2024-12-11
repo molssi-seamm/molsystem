@@ -81,6 +81,7 @@ class OpenBabelMixin:
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
             for key, value in data.items():
+                value = value["value"]
                 pair.SetAttribute(key)
                 pair.SetValue(str(value))
                 ob_mol.CloneData(pair)
