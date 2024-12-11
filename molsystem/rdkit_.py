@@ -103,6 +103,7 @@ class RDKitMixin:
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
             for key, value in data.items():
+                value = value["value"]
                 if isinstance(value, int):
                     rdk_mol.SetIntProp(key, value)
                 elif isinstance(value, float):

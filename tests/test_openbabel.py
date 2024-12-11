@@ -501,12 +501,12 @@ def test_all_residue_search(configuration):
 def test_to_OBMol(Acetate):
     """Test creating an OBMol object from a structure."""
     correct = {
-        "float property": "{'sid': 1, 'cid': 1, 'value': 3.14}",
+        "float property": 3.14,
         "float property,units": "kcal/mol",
-        "int property": "{'sid': 1, 'cid': 1, 'value': 2}",
+        "int property": 2,
         "net charge": -1,
         "spin multiplicity": 1,
-        "str property": "{'sid': 1, 'cid': 1, 'value': 'Hi!'}",
+        "str property": "Hi!",
     }
 
     mol = Acetate.to_OBMol(properties="*")

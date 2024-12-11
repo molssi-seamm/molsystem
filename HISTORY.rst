@@ -1,6 +1,11 @@
 =======
 History
 =======
+2024.12.11 -- Bugfix: Properties in SDF files
+    * Transferring properties to the Open Babel and RDKit molecules was incorrect after
+      recent changes to the handling of properties. This fixes the problem, and now SDF
+      files have the properties correctly.
+      
 2024.12.7 -- Significant internal enhancement to property handling.
     * An internal change, allowing listing and getting properties with wildcards,
       working with multiple values at once. This is a significant change, but should
