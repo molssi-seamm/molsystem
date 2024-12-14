@@ -3,6 +3,7 @@
 """Interface to RDKit."""
 
 import logging
+import json
 import pprint
 
 
@@ -97,28 +98,27 @@ class RDKitMixin:
 
         # Add the net charge and spin multiplicity as properties for configurations
         if self.__class__.__name__ == "_Configuration":
-            rdk_mol.SetIntProp("net charge", self.charge)
-            rdk_mol.SetIntProp("spin multiplicity", self.spin_multiplicity)
+            rdk_mol.SetIntProp("SEAMM|net charge|int|", self.charge)
+            rdk_mol.SetIntProp("SEAMM|spin multiplicity|int|", self.spin_multiplicity)
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
-            for key, value in data.items():
+            for _property, value in data.items():
+                _type = self.properties.type(_property)
+                units = self.properties.units(_property)
                 value = value["value"]
-                if isinstance(value, int):
+                key = f"SEAMM|{_property}|{_type}|"
+                if units is not None and units != "":
+                    key += units
+
+                if _type == "int":
                     rdk_mol.SetIntProp(key, value)
-                elif isinstance(value, float):
+                elif _type == "float":
                     rdk_mol.SetDoubleProp(key, value)
+                elif _type == "json":
+                    rdk_mol.SetProp(key, json.dumps(value))
                 else:
                     rdk_mol.SetProp(key, str(value))
-
-                # Units, if any
-                units = self.properties.units(key)
-                if units is not None and units != "":
-                    tmp = key.split("#", maxsplit=1)
-                    if len(tmp) > 1:
-                        rdk_mol.SetProp(tmp[0] + ",units" + "#" + tmp[1], units)
-                    else:
-                        rdk_mol.SetProp(key + ",units", units)
 
         return rdk_mol
 
@@ -210,31 +210,34 @@ class RDKitMixin:
             self.spin_multiplicity = n_electrons + 1
 
             # Check for property items for charge and multiplicity
-            if "net charge" in data:
-                self.charge = int(data["net charge"])
-            if "spin multiplicity" in data:
-                self.spin_multiplicity = int(data["spin multiplicity"])
+            if "SEAMM|net charge|int|" in data:
+                self.charge = int(data["SEAMM|net charge|int|"])
+            if "SEAMM|spin multiplicity" in data:
+                self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
 
         # Record any properties in the database if desired
         if properties == "all":
             for key, value in data.items():
-                if ",units" not in key and key not in [
-                    "net charge",
-                    "spin multiplicity",
-                ]:
-                    if not self.properties.exists(key):
-                        tmp = key.split("#", maxsplit=1)
-                        if len(tmp) > 1:
-                            units_key = tmp[0] + ",units" + "#" + tmp[1]
-                        else:
-                            units_key = key + ",units"
-                        _type = value.__class__.__name__
-                        if units_key in data:
-                            units = data[units_key]
-                            self.properties.add(key, _type, units=units)
-                        else:
+                if ",units" not in key and key not in (
+                    "SEAMM|net charge|int|",
+                    "SEAMM|spin multiplicity|int|",
+                ):
+                    if key.startswith("SEAMM|"):
+                        _, _property, _type, units = key.split("|", 4)
+                        units = None if units.strip() == "" else units
+                        if not self.properties.exists(_property):
+                            self.properties.add(_property, _type=_type, units=units)
+
+                        if _type == "json":
+                            value = json.dumps(value)
+
+                        self.properties.put(key, value)
+                    else:
+                        if not self.properties.exists(key):
+                            _type = value.__class__.__name__
                             self.properties.add(key, _type)
-                    self.properties.put(key, value)
+
+                        self.properties.put(key, value)
         return self
 
     def debug_print(self):

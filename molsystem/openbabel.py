@@ -3,6 +3,7 @@
 """Interface to openbabel."""
 
 import logging
+import json
 from pathlib import Path
 
 try:
@@ -70,32 +71,30 @@ class OpenBabelMixin:
         pair = ob.OBPairData()
 
         if self.__class__.__name__ == "_Configuration":
-            pair.SetAttribute("net charge")
+            pair.SetAttribute("SEAMM|net charge|int|")
             pair.SetValue(str(self.charge))
             ob_mol.CloneData(pair)
 
-            pair.SetAttribute("spin multiplicity")
+            pair.SetAttribute("SEAMM|spin multiplicity|int|")
             pair.SetValue(str(self.spin_multiplicity))
             ob_mol.CloneData(pair)
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
-            for key, value in data.items():
+            for _property, value in data.items():
+                _type = self.properties.type(_property)
+                units = self.properties.units(_property)
                 value = value["value"]
+                key = f"SEAMM|{_property}|{_type}|"
+                if units is not None and units != "":
+                    key += units
+
+                if _type == "json":
+                    value = json.dumps(value)
+
                 pair.SetAttribute(key)
                 pair.SetValue(str(value))
                 ob_mol.CloneData(pair)
-
-                # Units, if any
-                units = self.properties.units(key)
-                if units is not None and units != "":
-                    tmp = key.split("#", maxsplit=1)
-                    if len(tmp) > 1:
-                        pair.SetAttribute(tmp[0] + ",units" + "#" + tmp[1])
-                    else:
-                        pair.SetAttribute(key + ",units")
-                    pair.SetValue(units)
-                    ob_mol.CloneData(pair)
         return ob_mol
 
     def from_OBMol(
@@ -159,23 +158,27 @@ class OpenBabelMixin:
         data = {}
         for item in ob_mol.GetData():
             value = item.GetValue()
-            try:
-                value = int(value)
-            except Exception:
+            key = item.GetAttribute()
+            if key.startswith("SEAMM|"):
+                data[key] = value
+            else:
                 try:
-                    value = float(value)
+                    value = int(value)
                 except Exception:
-                    pass
-            data[item.GetAttribute()] = value
+                    try:
+                        value = float(value)
+                    except Exception:
+                        pass
+                data[key] = value
 
         # Check for property items for charge and multiplicity
         if self.__class__.__name__ == "_Configuration":
             self.charge = ob_mol.GetTotalCharge()
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
-            if "net charge" in data:
-                self.charge = int(data["net charge"])
-            if "spin multiplicity" in data:
-                self.spin_multiplicity = int(data["spin multiplicity"])
+            if "SEAMM|net charge|int|" in data:
+                self.charge = int(data["SEAMM|net charge|int|"])
+            if "SEAMM|spin multiplicity|int|" in data:
+                self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
 
         if atoms:
             if any([i != 0.0 for i in qs]):
@@ -199,21 +202,26 @@ class OpenBabelMixin:
         # Record any properties in the database if desired
         if properties == "all":
             for key, value in data.items():
-                if ",units" not in key and key not in [
-                    "net charge",
-                    "spin multiplicity",
-                ]:
-                    if not self.properties.exists(key):
-                        tmp = key.split("#", maxsplit=1)
-                        if len(tmp) > 1:
-                            units_key = tmp[0] + ",units" + "#" + tmp[1]
+                if key not in (
+                    "SEAMM|net charge|int|",
+                    "SEAMM|spin multiplicity|int|",
+                ):
+                    if key.startswith("SEAMM|"):
+                        _, _property, _type, units = key.split("|", 4)
+                        units = None if units.strip() == "" else units
+                        if not self.properties.exists(_property):
+                            self.properties.add(_property, _type=_type, units=units)
+                        if _type == "int":
+                            value = int(value)
+                        elif _type == "float":
+                            value = float(value)
+                        elif _type == "json":
+                            value = json.dumps(value)
                         else:
-                            units_key = key + ",units"
-                        _type = value.__class__.__name__
-                        if units_key in data:
-                            units = data[units_key]
-                            self.properties.add(key, _type, units=units)
-                        else:
+                            pass
+                    else:
+                        if not self.properties.exists(key):
+                            _type = value.__class__.__name__
                             self.properties.add(key, _type)
                     self.properties.put(key, value)
         return self
