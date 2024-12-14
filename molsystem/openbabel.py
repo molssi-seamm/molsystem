@@ -207,7 +207,7 @@ class OpenBabelMixin:
                     "SEAMM|spin multiplicity|int|",
                 ):
                     if key.startswith("SEAMM|"):
-                        _, _property, _type, units = key.split("|")
+                        _, _property, _type, units = key.split("|", 4)
                         units = None if units.strip() == "" else units
                         if not self.properties.exists(_property):
                             self.properties.add(_property, _type=_type, units=units)
