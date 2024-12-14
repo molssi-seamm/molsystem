@@ -1,6 +1,11 @@
 =======
 History
 =======
+2024.12.14 -- Bugfix: more issues with property handling.
+    * The types of properties were not kept when using Open Babel or RDKit, so when
+      properties were reread from an SDF file the JSON properties were converted into
+      strings, causing various errors. This is fixed.
+      
 2024.12.11 -- Bugfix: Properties in SDF files
     * Transferring properties to the Open Babel and RDKit molecules was incorrect after
       recent changes to the handling of properties. This fixes the problem, and now SDF

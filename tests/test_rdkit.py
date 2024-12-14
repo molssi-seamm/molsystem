@@ -20,12 +20,11 @@ def test_version():
 def test_to_RDKMol(Acetate):
     """Test creating a RDKMol object from a structure."""
     correct = {
-        "float property": 3.14,
-        "float property,units": "kcal/mol",
-        "int property": 2,
-        "net charge": -1,
-        "spin multiplicity": 1,
-        "str property": "Hi!",
+        "SEAMM|float property|float|kcal/mol": 3.14,
+        "SEAMM|int property|int|": 2,
+        "SEAMM|net charge|int|": -1,
+        "SEAMM|spin multiplicity|int|": 1,
+        "SEAMM|str property|str|": "Hi!",
     }
 
     mol = Acetate.to_RDKMol(properties="*")
