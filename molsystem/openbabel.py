@@ -219,11 +219,16 @@ class OpenBabelMixin:
                             value = json.dumps(value)
                         else:
                             pass
+
+                        if not self.properties.exists(_property):
+                            self.properties.add(_property, _type=_type, units=units)
+
+                        self.properties.put(_property, value)
                     else:
                         if not self.properties.exists(key):
                             _type = value.__class__.__name__
                             self.properties.add(key, _type)
-                    self.properties.put(key, value)
+                        self.properties.put(key, value)
         return self
 
     def coordinates_from_OBMol(self, ob_mol):
