@@ -231,7 +231,7 @@ class RDKitMixin:
                         if _type == "json":
                             value = json.dumps(value)
 
-                        self.properties.put(key, value)
+                        self.properties.put(_property, value)
                     else:
                         if not self.properties.exists(key):
                             _type = value.__class__.__name__

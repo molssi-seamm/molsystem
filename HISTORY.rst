@@ -1,6 +1,10 @@
 =======
 History
 =======
+2024.12.14 -- Bugfix: yet more issues with property handling
+    * This release ensures that types of properties are correctly handled when reading
+      SDF files.
+
 2024.12.14 -- Bugfix: more issues with property handling.
     * The types of properties were not kept when using Open Babel or RDKit, so when
       properties were reread from an SDF file the JSON properties were converted into
