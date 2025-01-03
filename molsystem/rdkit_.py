@@ -100,6 +100,7 @@ class RDKitMixin:
         if self.__class__.__name__ == "_Configuration":
             rdk_mol.SetIntProp("SEAMM|net charge|int|", self.charge)
             rdk_mol.SetIntProp("SEAMM|spin multiplicity|int|", self.spin_multiplicity)
+            rdk_mol.SetProp("SEAMM|XYZ|json|", json.dumps(self.coordinates))
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
@@ -212,32 +213,35 @@ class RDKitMixin:
             # Check for property items for charge and multiplicity
             if "SEAMM|net charge|int|" in data:
                 self.charge = int(data["SEAMM|net charge|int|"])
+                del data["SEAMM|net charge|int|"]
             if "SEAMM|spin multiplicity" in data:
                 self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
+                del data["SEAMM|spin multiplicity|int|"]
+
+            # Coordinates
+            if "SEAMM|XYZ|json|" in data:
+                self.coordinates = json.loads(data["SEAMM|XYZ|json|"])
+                del data["SEAMM|XYZ|json|"]
 
         # Record any properties in the database if desired
         if properties == "all":
             for key, value in data.items():
-                if ",units" not in key and key not in (
-                    "SEAMM|net charge|int|",
-                    "SEAMM|spin multiplicity|int|",
-                ):
-                    if key.startswith("SEAMM|"):
-                        _, _property, _type, units = key.split("|", 4)
-                        units = None if units.strip() == "" else units
-                        if not self.properties.exists(_property):
-                            self.properties.add(_property, _type=_type, units=units)
+                if key.startswith("SEAMM|"):
+                    _, _property, _type, units = key.split("|", 4)
+                    units = None if units.strip() == "" else units
+                    if not self.properties.exists(_property):
+                        self.properties.add(_property, _type=_type, units=units)
 
-                        if _type == "json":
-                            value = json.dumps(value)
+                    if _type == "json":
+                        value = json.dumps(value)
 
-                        self.properties.put(_property, value)
-                    else:
-                        if not self.properties.exists(key):
-                            _type = value.__class__.__name__
-                            self.properties.add(key, _type)
+                    self.properties.put(_property, value)
+                else:
+                    if not self.properties.exists(key):
+                        _type = value.__class__.__name__
+                        self.properties.add(key, _type)
 
-                        self.properties.put(key, value)
+                    self.properties.put(key, value)
         return self
 
     def debug_print(self):

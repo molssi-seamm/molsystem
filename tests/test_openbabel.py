@@ -501,6 +501,10 @@ def test_all_residue_search(configuration):
 def test_to_OBMol(Acetate):
     """Test creating an OBMol object from a structure."""
     correct = {
+        "SEAMM|XYZ|json|": "[[1.0797, 0.0181, -0.0184], [0.5782, 3.1376, 0.2813], "
+        "[0.7209, -0.6736, -0.7859], [0.7052, -0.3143, 0.9529], "
+        "[0.5713, 1.3899, -0.3161], [-0.1323, 1.7142, -1.2568], "
+        "[0.9757, 2.297, 0.5919]]",
         "SEAMM|float property|float|kcal/mol": 3.14,
         "SEAMM|int property|int|": 2,
         "SEAMM|net charge|int|": -1,
