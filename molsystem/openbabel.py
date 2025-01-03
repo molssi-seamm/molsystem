@@ -79,6 +79,11 @@ class OpenBabelMixin:
             pair.SetValue(str(self.spin_multiplicity))
             ob_mol.CloneData(pair)
 
+            # Add the coordinates to keep more precision than e.g. SDF files keep.
+            pair.SetAttribute("SEAMM|XYZ|json|")
+            pair.SetValue(json.dumps(self.coordinates))
+            ob_mol.CloneData(pair)
+
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
             for _property, value in data.items():
@@ -177,8 +182,16 @@ class OpenBabelMixin:
             self.spin_multiplicity = ob_mol.GetTotalSpinMultiplicity()
             if "SEAMM|net charge|int|" in data:
                 self.charge = int(data["SEAMM|net charge|int|"])
+                del data["SEAMM|net charge|int|"]
             if "SEAMM|spin multiplicity|int|" in data:
                 self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
+                del data["SEAMM|spin multiplicity|int|"]
+            if "SEAMM|XYZ|json|" in data:
+                XYZ = json.loads(data["SEAMM|XYZ|json|"])
+                Xs = [x for x, y, z in XYZ]
+                Ys = [y for x, y, z in XYZ]
+                Zs = [z for x, y, z in XYZ]
+                del data["SEAMM|XYZ|json|"]
 
         if atoms:
             if any([i != 0.0 for i in qs]):
@@ -202,33 +215,29 @@ class OpenBabelMixin:
         # Record any properties in the database if desired
         if properties == "all":
             for key, value in data.items():
-                if key not in (
-                    "SEAMM|net charge|int|",
-                    "SEAMM|spin multiplicity|int|",
-                ):
-                    if key.startswith("SEAMM|"):
-                        _, _property, _type, units = key.split("|", 4)
-                        units = None if units.strip() == "" else units
-                        if not self.properties.exists(_property):
-                            self.properties.add(_property, _type=_type, units=units)
-                        if _type == "int":
-                            value = int(value)
-                        elif _type == "float":
-                            value = float(value)
-                        elif _type == "json":
-                            value = json.dumps(value)
-                        else:
-                            pass
-
-                        if not self.properties.exists(_property):
-                            self.properties.add(_property, _type=_type, units=units)
-
-                        self.properties.put(_property, value)
+                if key.startswith("SEAMM|"):
+                    _, _property, _type, units = key.split("|", 4)
+                    units = None if units.strip() == "" else units
+                    if not self.properties.exists(_property):
+                        self.properties.add(_property, _type=_type, units=units)
+                    if _type == "int":
+                        value = int(value)
+                    elif _type == "float":
+                        value = float(value)
+                    elif _type == "json":
+                        value = json.dumps(value)
                     else:
-                        if not self.properties.exists(key):
-                            _type = value.__class__.__name__
-                            self.properties.add(key, _type)
-                        self.properties.put(key, value)
+                        pass
+
+                    if not self.properties.exists(_property):
+                        self.properties.add(_property, _type=_type, units=units)
+
+                    self.properties.put(_property, value)
+                else:
+                    if not self.properties.exists(key):
+                        _type = value.__class__.__name__
+                        self.properties.add(key, _type)
+                    self.properties.put(key, value)
         return self
 
     def coordinates_from_OBMol(self, ob_mol):

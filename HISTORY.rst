@@ -1,6 +1,10 @@
 =======
 History
 =======
+2025.1.3 -- Enhanced coordinate precision in SDF files
+    * The full precision coordinates are added as a property to the SDF file. If the
+      full-precision coordinates are aavailable they are used when reading the SDF file.
+      
 2024.12.14 -- Bugfix: yet more issues with property handling
     * This release ensures that types of properties are correctly handled when reading
       SDF files.
