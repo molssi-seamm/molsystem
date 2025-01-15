@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2025.1.3 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2025.1.14 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=520f5dae"></script>
+    <script src="../../_static/documentation_options.js?v=7fec73c0"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.1.3" />
+  <meta name="docsearch:version" content="2025.1.14" />
   </head>
   
   
@@ -473,13 +473,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="sd">&quot;&quot;&quot;Interface to RDKit.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
         <span class="s2">&quot;Please install rdkit using conda:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="s2">&quot;     conda install -c conda-forge rdkit&quot;</span>
@@ -515,7 +515,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="rdkit_version">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.rdkit_version">[docs]</a>
-<span class="k">def</span> <span class="nf">rdkit_version</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rdkit_version</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the RDKit version.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdBase</span><span class="o">.</span><span class="n">rdkitVersion</span></div>
 
@@ -523,12 +523,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="RDKitMixin">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin">[docs]</a>
-<span class="k">class</span> <span class="nc">RDKitMixin</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RDKitMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling RDKit via its Python interface.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RDKitMixin.to_RDKMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an RDKMol object for the configuration, template, or subset.&quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
@@ -604,7 +604,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="RDKitMixin.from_RDKMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_RDKMol</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_RDKMol</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">rdk_mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform an RDKit molecule into the current object.</span>
@@ -728,7 +728,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="RDKitMixin.debug_print">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.debug_print">[docs]</a>
-    <span class="k">def</span> <span class="nf">debug_print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">debug_print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">_atom_table</span><span class="p">))</span>
         <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">_coordinates_table</span><span class="p">))</span>
         <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="p">))</span></div>
