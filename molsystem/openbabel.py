@@ -225,7 +225,7 @@ class OpenBabelMixin:
                     elif _type == "float":
                         value = float(value)
                     elif _type == "json":
-                        value = json.dumps(value)
+                        value = json.loads(value)
                     else:
                         pass
 

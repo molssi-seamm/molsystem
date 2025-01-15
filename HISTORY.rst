@@ -1,6 +1,9 @@
 =======
 History
 =======
+2025.1.14 -- Bugfix: error reading JSON properties from SDF files
+    * JSON properties were read as strings, not as JSON objects. This is fixed.
+      
 2025.1.3 -- Enhanced coordinate precision in SDF files
     * The full precision coordinates are added as a property to the SDF file. If the
       full-precision coordinates are aavailable they are used when reading the SDF file.
