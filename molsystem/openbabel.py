@@ -16,6 +16,8 @@ except ModuleNotFoundError:
     )
     raise
 
+from seamm_util import CompactJSONEncoder
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,7 +83,18 @@ class OpenBabelMixin:
 
             # Add the coordinates to keep more precision than e.g. SDF files keep.
             pair.SetAttribute("SEAMM|XYZ|json|")
-            pair.SetValue(json.dumps(self.coordinates))
+            pair.SetValue(
+                json.dumps(self.coordinates, indent=4, cls=CompactJSONEncoder)
+            )
+            ob_mol.CloneData(pair)
+
+            # Add the system and configuration names.
+            pair.SetAttribute("SEAMM|system name|str|")
+            pair.SetValue(self.system.name)
+            ob_mol.CloneData(pair)
+
+            pair.SetAttribute("SEAMM|configuration name|str|")
+            pair.SetValue(self.name)
             ob_mol.CloneData(pair)
 
         if properties is not None:
@@ -126,8 +139,11 @@ class OpenBabelMixin:
 
         Returns
         -------
-        molsystem._Configuration
+        (str, str) : system_name, configuration_name
         """
+        system_name = None
+        configuration_name = None
+
         atnos = []
         Xs = []
         Ys = []
@@ -192,6 +208,12 @@ class OpenBabelMixin:
                 Ys = [y for x, y, z in XYZ]
                 Zs = [z for x, y, z in XYZ]
                 del data["SEAMM|XYZ|json|"]
+            if "SEAMM|system name|str|" in data:
+                system_name = data["SEAMM|system name|str|"]
+                del data["SEAMM|system name|str|"]
+            if "SEAMM|configuration name|str|" in data:
+                configuration_name = data["SEAMM|configuration name|str|"]
+                del data["SEAMM|configuration name|str|"]
 
         if atoms:
             if any([i != 0.0 for i in qs]):
@@ -238,7 +260,7 @@ class OpenBabelMixin:
                         _type = value.__class__.__name__
                         self.properties.add(key, _type)
                     self.properties.put(key, value)
-        return self
+        return system_name, configuration_name
 
     def coordinates_from_OBMol(self, ob_mol):
         """Update the coordinates from an Open Babel molecule."""
@@ -281,13 +303,16 @@ class OpenBabelMixin:
 
         return [x for x in maplist]
 
-    def from_sdf_text(self, text):
+    def from_sdf_text(self, text, properties="all"):
         """Get the text of an SDF file for the configuration.
 
         Parameters
         ----------
         text : str
             The text of an SDF file
+
+        properties : str = "all"
+            Whether to include all properties or none
 
         Returns
         -------
@@ -299,7 +324,7 @@ class OpenBabelMixin:
         obMol = ob.OBMol()
         obConversion.ReadString(obMol, text)
 
-        self.from_OBMol(obMol)
+        self.from_OBMol(obMol, properties=properties)
 
         # See if the system and configuration names are encoded in the tit
         result = (None, None)
