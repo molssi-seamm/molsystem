@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A class providing a convenient interface for subsets
-"""
+"""A class providing a convenient interface for subsets"""
 
 from itertools import zip_longest
 import logging
