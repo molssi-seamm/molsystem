@@ -33,11 +33,52 @@ except ModuleNotFoundError:
 try:
     from rdkit import Chem
     from rdkit.Chem import AllChem
+    from rdkit.Chem import rdDistGeom
+    from rdkit.Chem import rdmolops
 except ModuleNotFoundError:
     print("Please install RDKit using conda:\n     conda install -c conda-forge rdkit")
     raise
 
 logger = logging.getLogger(__name__)
+
+
+RDKit_Embedding_Error = {
+    "INITIAL_COORDS": """
+generation of the initial coordinates from the random distance matrix (default)
+or from a set of random coordinates (when using random coordinate embedding) failed.
+""",
+    "FIRST_MINIMIZATION": """
+the initial optimization of the atom positions using the distance-geometry force field
+failed to produce a low-enough energy conformer. The check here has thresholds for both
+average energy per atom and the individual atom energies.
+""",
+    "CHECK_TETRAHEDRAL_CENTERS": """
+at least one tetrahedral C and N centers either has a volume around it which is too
+small or is outside the volume defined by its neighbors
+""",
+    "MINIMIZE_FOURTH_DIMENSION": """
+the minimization to force the values of the fourth-dimensional component of each atom
+position failed
+""",
+    "ETK_MINIMIZATION": """
+after the minimization with the ET and/or K terms, at least one atom which should have
+been planar was not
+""",
+    "FINAL_CHIRAL_BOUNDS": """
+the neighborhood of an atom with specified chirality was too distorted
+(it violated distance constraints)
+""",
+    "FINAL_CENTER_IN_VOLUME": """
+an atom with specified chirality was outside of the volume defined by its neighbors
+""",
+    "LINEAR_DOUBLE_BOND": """
+one of the end atoms of a double bond had a linear geometry
+""",
+    "BAD_DOUBLE_BOND_STEREO": """
+the stereochemistry of a double bond with specified stereochemistry was wrong in the
+generated conformer
+""",
+}
 
 
 def check_openeye_license():
@@ -70,6 +111,11 @@ class SMILESMixin:
     def canonical_smiles(self):
         """Return the canonical SMILES string for this object."""
         return self.to_smiles(canonical=True)
+
+    @property
+    def isomeric_smiles(self):
+        """Return the canonical, isomeric SMILES string for this object."""
+        return self.to_smiles(canonical=True, isomeric=True)
 
     @property
     def smarts(self):
@@ -111,7 +157,7 @@ class SMILESMixin:
         if flavor == "rdkit":
             mol = self.to_RDKMol()
             if isomeric:
-                Chem.FindPotentialStereo(mol)
+                rdmolops.AssignStereochemistryFrom3D(mol)
             if hydrogens:
                 mol2 = mol
             else:
@@ -174,8 +220,27 @@ class SMILESMixin:
             if mol is None:
                 raise ValueError(f"SMILES '{smiles}' is not valid.")
             mol = Chem.AddHs(mol)
-            AllChem.EmbedMolecule(mol)
-            self.from_RDKMol(mol)
+            conformer = AllChem.EmbedMolecule(mol)
+            if conformer == -1:
+                # Check if there are small rings
+                for ring in rdmolops.GetSSSR(mol):
+                    if len(ring) <= 4:
+                        ps = rdDistGeom.srETKDGv3()
+                        break
+                else:
+                    ps = rdDistGeom.ETKDGv3()
+                ps.trackFailures = True
+                conformer = rdDistGeom.EmbedMolecule(mol, ps)
+            if conformer == -1:
+                counts = ps.GetFailureCounts()
+                for i, k in enumerate(rdDistGeom.EmbedFailureCauses.names):
+                    if counts[i] > 0:
+                        logger.warning(
+                            f" {counts[i]:5} {k} errors in embedding"
+                            f"{RDKit_Embedding_Error[k]}"
+                        )
+                raise RuntimeError(f"RDKit unable to embed SMILES structure {smiles}")
+            self.from_RDKMol(mol, properties=None)
         elif flavor == "openbabel":
             obConversion = openbabel.OBConversion()
             obConversion.SetInAndOutFormats("smi", "mdl")
@@ -190,7 +255,7 @@ class SMILESMixin:
             builder = openbabel.OBBuilder()
             builder.Build(mol)
 
-            self.from_OBMol(mol)
+            self.from_OBMol(mol, properties=None)
         elif flavor == "openeye":
             check_openeye_license()
             mol = oechem.OEGraphMol()
@@ -204,7 +269,7 @@ class SMILESMixin:
             # Add hydrogens
             oechem.OEAddExplicitHydrogens(mol)
 
-            self.from_OEMol(mol)
+            self.from_OEMol(mol, properties=None)
 
         # Rotate to standard orientation
         if reorient:
