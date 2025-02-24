@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.align &#8212; MolSystem 2025.1.14 documentation</title>
+    <title>molsystem.align &#8212; MolSystem 2025.2.23 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=7fec73c0"></script>
+    <script src="../../_static/documentation_options.js?v=2e7fd7ef"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.1.14" />
+  <meta name="docsearch:version" content="2025.2.23" />
   </head>
   
   
@@ -474,6 +474,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">&quot;&quot;&quot;Alignment methods for configurations&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">sqrt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">openbabel</span>  <span class="c1"># noqa: F401</span>
@@ -481,11 +484,300 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
         <span class="s2">&quot;Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;     conda install -c conda-forge openbabel&quot;</span>
+        <span class="s2">&quot;conda install -c conda-forge openbabel&quot;</span>
     <span class="p">)</span>
     <span class="k">raise</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdMolAlign</span><span class="p">,</span> <span class="n">rdmolops</span><span class="p">,</span> <span class="n">AllChem</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please install rdkit using conda:</span><span class="se">\n</span><span class="s2">     conda install -c conda-forge rdkit&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RMSD">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.RMSD">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">RMSD</span><span class="p">(</span>
+    <span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the RMSD between configurations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    structure : Configuration, RDKMol, or OBMol</span>
+
+<span class="sd">    reference : Configuration, RDKMol, or OBMol</span>
+<span class="sd">        A single configuration to match. if &#39;structure&#39; is not a configuration,</span>
+<span class="sd">        this must match the type of &#39;structure&#39;.</span>
+
+<span class="sd">    include_h : bool = True</span>
+<span class="sd">        Whether to include hydrogen atoms in the RMSD</span>
+
+<span class="sd">    symmetry : bool = False</span>
+<span class="sd">        Whether to detect symmetric flips. Note this requires a lot of memory for</span>
+<span class="sd">        larger systems.</span>
+
+<span class="sd">    align : bool = False</span>
+<span class="sd">        Whether to transform the structure to the best alignment with</span>
+<span class="sd">        the reference.</span>
+
+<span class="sd">    flavor : str = None</span>
+<span class="sd">        The flavor to use. Currently &#39;rdkit&#39; or &#39;openbabel&#39;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    {str: float|int}</span>
+<span class="sd">        RMSD: The RMS between the structure and the reference.</span>
+<span class="sd">        maximum displacement: The maximum displacement of any atom.</span>
+<span class="sd">        displaced atom: The index of the atom with the maximum displacement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Configuration</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">flavor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span>
+                <span class="n">_structure</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+                <span class="n">_reference</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;openbabel&quot;</span><span class="p">:</span>
+                <span class="n">_structure</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+                <span class="n">_reference</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot handle flavor &#39;</span><span class="si">{</span><span class="n">flavor</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">flavor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span>
+                <span class="n">_structure</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+                <span class="n">_reference</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot use flavor &#39;</span><span class="si">{</span><span class="n">flavor</span><span class="si">}</span><span class="s2">&#39; with an RDKMol reference&quot;</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">flavor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;openbabel&quot;</span><span class="p">:</span>
+                <span class="n">_structure</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+                <span class="n">_reference</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot use flavor &#39;</span><span class="si">{</span><span class="n">flavor</span><span class="si">}</span><span class="s2">&#39; with an OBMol reference&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Reference must be a Configuration, RDKMol, or OBMol, not &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">flavor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flavor</span> <span class="o">!=</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot use flavor &#39;</span><span class="si">{</span><span class="n">flavor</span><span class="si">}</span><span class="s2">&#39; with an RDKMol structure&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+            <span class="n">_structure</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">_reference</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">):</span>
+            <span class="n">_structure</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">_reference</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;If the structure is an RDKMol, the reference &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;must be a Configuration or RDKMol, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Reference must be a Configuration, RDKMol, or OBMol, not &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">flavor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flavor</span> <span class="o">!=</span> <span class="s2">&quot;openbabel&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot use flavor &#39;</span><span class="si">{</span><span class="n">flavor</span><span class="si">}</span><span class="s2">&#39; with an OBMol structure&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+            <span class="n">_structure</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">_reference</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;If the structure is an OBMol, the reference &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;must be a Configuration or OBMol, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+            <span class="n">_structure</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">_reference</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Reference must be a Configuration, or OBMol, not &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_structure</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">RDK_RMSD</span><span class="p">(</span>
+            <span class="n">_structure</span><span class="p">,</span>
+            <span class="n">_reference</span><span class="p">,</span>
+            <span class="n">include_h</span><span class="o">=</span><span class="n">include_h</span><span class="p">,</span>
+            <span class="n">symmetry</span><span class="o">=</span><span class="n">symmetry</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">align</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">_structure</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">SetPositions</span><span class="p">(</span>
+                    <span class="n">_structure</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span>
+                <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_structure</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">OB_RMSD</span><span class="p">(</span>
+            <span class="n">_structure</span><span class="p">,</span>
+            <span class="n">_reference</span><span class="p">,</span>
+            <span class="n">include_h</span><span class="o">=</span><span class="n">include_h</span><span class="p">,</span>
+            <span class="n">symmetry</span><span class="o">=</span><span class="n">symmetry</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">align</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">_structure</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">at1</span><span class="p">,</span> <span class="n">at2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">ob</span><span class="o">.</span><span class="n">OBMolAtomIter</span><span class="p">(</span><span class="n">structure</span><span class="p">),</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMolAtomIter</span><span class="p">(</span><span class="n">_structure</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">at1</span><span class="o">.</span><span class="n">SetVector</span><span class="p">(</span><span class="n">at2</span><span class="o">.</span><span class="n">GetVector</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="RDK_RMSD">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.RDK_RMSD">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">RDK_RMSD</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the RMSD between configurations using RDKit.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    structure: RDKMol</span>
+<span class="sd">        The structure to align</span>
+
+<span class="sd">    reference : RDKMol</span>
+<span class="sd">        The structure to compare to.</span>
+
+<span class="sd">    include_h : bool = True</span>
+<span class="sd">        Whether to include hydrogen atoms in the RMSD</span>
+
+<span class="sd">    symmetry : bool = False</span>
+<span class="sd">        Whether to detect symmetric flips. Note this requires a lot of memory for</span>
+<span class="sd">        larger systems.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    {str: float|int}</span>
+<span class="sd">        RMSD: The RMS between the structure and the reference.</span>
+<span class="sd">        maximum displacement: The maximum displacement of any atom.</span>
+<span class="sd">        displaced atom: The index of the atom with the maximum displacement.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    The structure is modified in place to be optimally aligned with the</span>
+<span class="sd">    reference.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_h</span><span class="p">:</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">rdmolops</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">rdmolops</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">symmetry</span><span class="p">:</span>
+        <span class="n">rmsd</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">atom_map</span> <span class="o">=</span> <span class="n">rdMolAlign</span><span class="o">.</span><span class="n">GetBestAlignmentTransform</span><span class="p">(</span>
+            <span class="n">structure</span><span class="p">,</span> <span class="n">reference</span>
+        <span class="p">)</span>
+        <span class="n">AllChem</span><span class="o">.</span><span class="n">TransformMol</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+
+        <span class="n">max_displacement</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="n">displaced_atom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">XYZ1</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span>
+        <span class="n">XYZ2</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">at1</span><span class="p">,</span> <span class="n">at2</span> <span class="ow">in</span> <span class="n">atom_map</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">XYZ1</span><span class="p">[</span><span class="n">at1</span><span class="p">]</span> <span class="o">-</span> <span class="n">XYZ2</span><span class="p">[</span><span class="n">at2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">max_displacement</span><span class="p">:</span>
+                <span class="n">max_displacement</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+                <span class="n">displaced_atom</span> <span class="o">=</span> <span class="n">at1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rmsd</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">rdMolAlign</span><span class="o">.</span><span class="n">GetAlignmentTransform</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
+        <span class="n">AllChem</span><span class="o">.</span><span class="n">TransformMol</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+
+        <span class="n">max_displacement</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">displaced_atom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">XYZ1</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span>
+        <span class="n">XYZ2</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">XYZ1_XYZ2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">XYZ1</span><span class="p">,</span> <span class="n">XYZ2</span><span class="p">)):</span>
+            <span class="n">XYZ1</span><span class="p">,</span> <span class="n">XYZ2</span> <span class="o">=</span> <span class="n">XYZ1_XYZ2</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">XYZ1</span><span class="p">[</span><span class="n">at1</span><span class="p">]</span> <span class="o">-</span> <span class="n">XYZ2</span><span class="p">[</span><span class="n">at2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">max_displacement</span><span class="p">:</span>
+                <span class="n">max_displacement</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+                <span class="n">displaced_atom</span> <span class="o">=</span> <span class="n">count</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;RMSD&quot;</span><span class="p">:</span> <span class="n">rmsd</span><span class="p">,</span>
+        <span class="s2">&quot;maximum displacement&quot;</span><span class="p">:</span> <span class="n">max_displacement</span><span class="p">,</span>
+        <span class="s2">&quot;displaced atom&quot;</span><span class="p">:</span> <span class="n">displaced_atom</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="OB_RMSD">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.OB_RMSD">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">OB_RMSD</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the RMSD between configurations using OpenBabel.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    structure: OBMol</span>
+<span class="sd">        The structure to align</span>
+
+<span class="sd">    reference : OBMol</span>
+<span class="sd">        The structure to compare to.</span>
+
+<span class="sd">    include_h : bool = True</span>
+<span class="sd">        Whether to include hydrogen atoms in the RMSD</span>
+
+<span class="sd">    symmetry : bool = False</span>
+<span class="sd">        Whether to detect symmetric flips. Note this requires a lot of memory for</span>
+<span class="sd">        larger systems.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    {str: float|int}</span>
+<span class="sd">        RMSD: The RMS between the structure and the reference.</span>
+<span class="sd">        maximum displacement: The maximum displacement of any atom.</span>
+<span class="sd">        displaced atom: The index of the atom with the maximum displacement.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    The structure is modified in place to be optimally aligned with the</span>
+<span class="sd">    reference.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">align</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBAlign</span><span class="p">(</span><span class="n">include_h</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">)</span>
+    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">align</span><span class="o">.</span><span class="n">SetRefMol</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+        <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
+        <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="n">rmsd</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
+
+        <span class="n">max_displacement</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="n">displaced_atom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">at1_at2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">ob</span><span class="o">.</span><span class="n">OBMolAtomIter</span><span class="p">(</span><span class="n">structure</span><span class="p">),</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMolAtomIter</span><span class="p">(</span><span class="n">reference</span><span class="p">))</span>
+        <span class="p">):</span>
+            <span class="n">at1</span><span class="p">,</span> <span class="n">at2</span> <span class="o">=</span> <span class="n">at1_at2</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">at1</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">at2</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">at1</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="n">at2</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">at1</span><span class="o">.</span><span class="n">z</span><span class="p">()</span> <span class="o">-</span> <span class="n">at2</span><span class="o">.</span><span class="n">z</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">max_displacement</span><span class="p">:</span>
+                <span class="n">max_displacement</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+                <span class="n">displaced_atom</span> <span class="o">=</span> <span class="n">count</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration.RMSD </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;RMSD&quot;</span><span class="p">:</span> <span class="n">rmsd</span><span class="p">,</span>
+        <span class="s2">&quot;maximum displacement&quot;</span><span class="p">:</span> <span class="n">max_displacement</span><span class="p">,</span>
+        <span class="s2">&quot;displaced atom&quot;</span><span class="p">:</span> <span class="n">displaced_atom</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
 
 
 <div class="viewcode-block" id="AlignMixin">
@@ -495,13 +787,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="AlignMixin.RMSD">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin.RMSD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">RMSD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RMSD</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">&quot;rdkit&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the RMSD between configurations.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        other : Configuration or iterable of Configurations</span>
-<span class="sd">            A single configuration or e.g. list of configurations to match</span>
+<span class="sd">        reference : Configuration|OBMol|RDKMol</span>
+<span class="sd">            The structure to compare and possibly align to</span>
 
 <span class="sd">        include_h : bool = True</span>
 <span class="sd">            Whether to include hydrogen atoms in the RMSD</span>
@@ -510,109 +804,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            Whether to detect symmetric flips. Note this requires a lot of memory for</span>
 <span class="sd">            larger systems.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float or [float]</span>
-<span class="sd">            The RMS between the current configuration and the target(s).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Configuration</span>
+<span class="sd">        align : bool = False</span>
+<span class="sd">            Whether to transform the structure to the best alignment with</span>
+<span class="sd">            the target.</span>
 
-        <span class="n">align</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBAlign</span><span class="p">(</span><span class="n">include_h</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">)</span>
-        <span class="n">align</span><span class="o">.</span><span class="n">SetRefMol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSD can&#39;t handle </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="k">raise</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration.RMSD </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">raise</span>
-        <span class="k">return</span> <span class="n">result</span></div>
-
-
-<div class="viewcode-block" id="AlignMixin.align">
-<a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin.align">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">align</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align configurations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        other : Configuration or iterable of Configurations</span>
-<span class="sd">            A single configuration or e.g. list of configurations to match</span>
-
-<span class="sd">        include_h : bool = True</span>
-<span class="sd">            Whether to include hydrogen atoms in the RMSD</span>
-
-<span class="sd">        symmetry : bool = False</span>
-<span class="sd">            Whether to detect symmetric flips. Note this requires a lot of memory for</span>
-<span class="sd">            larger systems.</span>
+<span class="sd">        flavor : str = &quot;rdkit&quot;</span>
+<span class="sd">            The flavor to use. Currently &#39;rdkit&#39; or &#39;openbabel&#39;</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        float or [float]</span>
-<span class="sd">            The RMS between the current configuration and the target(s).</span>
+<span class="sd">            The RMS between the structure configuration and the target(s).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Configuration</span>
-
-        <span class="n">align</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBAlign</span><span class="p">(</span><span class="n">include_h</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">)</span>
-        <span class="n">align</span><span class="o">.</span><span class="n">SetRefMol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">())</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
-            <span class="n">mol</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">coordinates_from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-            <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">()</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
-                    <span class="n">mol</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-                    <span class="n">target</span><span class="o">.</span><span class="n">coordinates_from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">):</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">SetTargetMol</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">Align</span><span class="p">()</span>
-                    <span class="n">align</span><span class="o">.</span><span class="n">UpdateCoords</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">align</span><span class="o">.</span><span class="n">GetRMSD</span><span class="p">())</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSD can&#39;t handle </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="k">raise</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration.RMSD </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">raise</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+        <span class="k">return</span> <span class="n">RMSD</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">reference</span><span class="p">,</span>
+            <span class="n">include_h</span><span class="o">=</span><span class="n">include_h</span><span class="p">,</span>
+            <span class="n">symmetry</span><span class="o">=</span><span class="n">symmetry</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+            <span class="n">flavor</span><span class="o">=</span><span class="n">flavor</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

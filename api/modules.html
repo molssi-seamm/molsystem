@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem &#8212; MolSystem 2025.1.14 documentation</title>
+    <title>molsystem &#8212; MolSystem 2025.2.23 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=7fec73c0"></script>
+    <script src="../_static/documentation_options.js?v=2e7fd7ef"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="API Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.1.14" />
+  <meta name="docsearch:version" content="2025.2.23" />
   </head>
   
   
@@ -497,9 +497,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.align">molsystem.align module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.align.AlignMixin"><code class="docutils literal notranslate"><span class="pre">AlignMixin</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.align.AlignMixin.RMSD"><code class="docutils literal notranslate"><span class="pre">AlignMixin.RMSD()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.align.AlignMixin.align"><code class="docutils literal notranslate"><span class="pre">AlignMixin.align()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.align.OB_RMSD"><code class="docutils literal notranslate"><span class="pre">OB_RMSD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.align.RDK_RMSD"><code class="docutils literal notranslate"><span class="pre">RDK_RMSD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.align.RMSD"><code class="docutils literal notranslate"><span class="pre">RMSD()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.atoms">molsystem.atoms module</a><ul>
@@ -647,8 +649,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </li>
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.rdkit_">molsystem.rdkit_ module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin"><code class="docutils literal notranslate"><span class="pre">RDKitMixin</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin.debug_print"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.debug_print()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.from_RDKMol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin.get_SSSR"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.get_SSSR()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.to_RDKMol()</span></code></a></li>
 </ul>
 </li>
@@ -663,6 +665,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin"><code class="docutils literal notranslate"><span class="pre">SMILESMixin</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.canonical_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.canonical_smiles</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.from_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.from_smiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.isomeric_smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.isomeric_smiles</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.smarts"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.smarts</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.smiles"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.smiles</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.smiles.SMILESMixin.to_smarts"><code class="docutils literal notranslate"><span class="pre">SMILESMixin.to_smarts()</span></code></a></li>

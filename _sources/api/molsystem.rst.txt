@@ -9,253 +9,253 @@ molsystem.align module
 
 .. automodule:: molsystem.align
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.atoms module
 ----------------------
 
 .. automodule:: molsystem.atoms
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.bonds module
 ----------------------
 
 .. automodule:: molsystem.bonds
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.cell module
 ---------------------
 
 .. automodule:: molsystem.cell
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.cif module
 --------------------
 
 .. automodule:: molsystem.cif
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.cms\_schema module
 ----------------------------
 
 .. automodule:: molsystem.cms_schema
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.column module
 -----------------------
 
 .. automodule:: molsystem.column
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.configuration module
 ------------------------------
 
 .. automodule:: molsystem.configuration
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.configuration\_properties module
 ------------------------------------------
 
 .. automodule:: molsystem.configuration_properties
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.elements module
 -------------------------
 
 .. automodule:: molsystem.elements
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.frozencolumn module
 -----------------------------
 
 .. automodule:: molsystem.frozencolumn
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.inchi module
 ----------------------
 
 .. automodule:: molsystem.inchi
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.molfile module
 ------------------------
 
 .. automodule:: molsystem.molfile
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.openbabel module
 --------------------------
 
 .. automodule:: molsystem.openbabel
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.openeye module
 ------------------------
 
 .. automodule:: molsystem.openeye
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.pdb module
 --------------------
 
 .. automodule:: molsystem.pdb
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.properties module
 ---------------------------
 
 .. automodule:: molsystem.properties
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.pubchem module
 ------------------------
 
 .. automodule:: molsystem.pubchem
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.qcschema module
 -------------------------
 
 .. automodule:: molsystem.qcschema
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.rdkit\_ module
 ------------------------
 
 .. automodule:: molsystem.rdkit_
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.smiles module
 -----------------------
 
 .. automodule:: molsystem.smiles
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.subset module
 -----------------------
 
 .. automodule:: molsystem.subset
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.subsets module
 ------------------------
 
 .. automodule:: molsystem.subsets
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.symmetry module
 -------------------------
 
 .. automodule:: molsystem.symmetry
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.system module
 -----------------------
 
 .. automodule:: molsystem.system
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.system\_db module
 ---------------------------
 
 .. automodule:: molsystem.system_db
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.system\_properties module
 -----------------------------------
 
 .. automodule:: molsystem.system_properties
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.table module
 ----------------------
 
 .. automodule:: molsystem.table
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.template module
 -------------------------
 
 .. automodule:: molsystem.template
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.templates module
 --------------------------
 
 .. automodule:: molsystem.templates
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 molsystem.topology module
 -------------------------
 
 .. automodule:: molsystem.topology
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: molsystem
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

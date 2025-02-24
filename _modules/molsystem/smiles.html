@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2025.1.14 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2025.2.23 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=7fec73c0"></script>
+    <script src="../../_static/documentation_options.js?v=2e7fd7ef"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.1.14" />
+  <meta name="docsearch:version" content="2025.2.23" />
   </head>
   
   
@@ -504,11 +504,52 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">AllChem</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdDistGeom</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdmolops</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please install RDKit using conda:</span><span class="se">\n</span><span class="s2">     conda install -c conda-forge rdkit&quot;</span><span class="p">)</span>
     <span class="k">raise</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">RDKit_Embedding_Error</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;INITIAL_COORDS&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">generation of the initial coordinates from the random distance matrix (default)</span>
+<span class="s2">or from a set of random coordinates (when using random coordinate embedding) failed.</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FIRST_MINIMIZATION&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">the initial optimization of the atom positions using the distance-geometry force field</span>
+<span class="s2">failed to produce a low-enough energy conformer. The check here has thresholds for both</span>
+<span class="s2">average energy per atom and the individual atom energies.</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHECK_TETRAHEDRAL_CENTERS&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">at least one tetrahedral C and N centers either has a volume around it which is too</span>
+<span class="s2">small or is outside the volume defined by its neighbors</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MINIMIZE_FOURTH_DIMENSION&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">the minimization to force the values of the fourth-dimensional component of each atom</span>
+<span class="s2">position failed</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ETK_MINIMIZATION&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">after the minimization with the ET and/or K terms, at least one atom which should have</span>
+<span class="s2">been planar was not</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FINAL_CHIRAL_BOUNDS&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">the neighborhood of an atom with specified chirality was too distorted</span>
+<span class="s2">(it violated distance constraints)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FINAL_CENTER_IN_VOLUME&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">an atom with specified chirality was outside of the volume defined by its neighbors</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LINEAR_DOUBLE_BOND&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">one of the end atoms of a double bond had a linear geometry</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BAD_DOUBLE_BOND_STEREO&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">the stereochemistry of a double bond with specified stereochemistry was wrong in the</span>
+<span class="s2">generated conformer</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">}</span>
 
 
 <div class="viewcode-block" id="check_openeye_license">
@@ -546,6 +587,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <span class="k">def</span><span class="w"> </span><span class="nf">canonical_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the canonical SMILES string for this object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_smiles</span><span class="p">(</span><span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isomeric_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the canonical, isomeric SMILES string for this object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_smiles</span><span class="p">(</span><span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isomeric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">smarts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -589,7 +635,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">if</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">isomeric</span><span class="p">:</span>
-                <span class="n">Chem</span><span class="o">.</span><span class="n">FindPotentialStereo</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                <span class="n">rdmolops</span><span class="o">.</span><span class="n">AssignStereochemistryFrom3D</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">hydrogens</span><span class="p">:</span>
                 <span class="n">mol2</span> <span class="o">=</span> <span class="n">mol</span>
             <span class="k">else</span><span class="p">:</span>
@@ -655,8 +701,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="k">if</span> <span class="n">mol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SMILES &#39;</span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">&#39; is not valid.&quot;</span><span class="p">)</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">conformer</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Check if there are small rings</span>
+                <span class="k">for</span> <span class="n">ring</span> <span class="ow">in</span> <span class="n">rdmolops</span><span class="o">.</span><span class="n">GetSSSR</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ring</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="n">ps</span> <span class="o">=</span> <span class="n">rdDistGeom</span><span class="o">.</span><span class="n">srETKDGv3</span><span class="p">()</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ps</span> <span class="o">=</span> <span class="n">rdDistGeom</span><span class="o">.</span><span class="n">ETKDGv3</span><span class="p">()</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">trackFailures</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">conformer</span> <span class="o">=</span> <span class="n">rdDistGeom</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">ps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">conformer</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">counts</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">GetFailureCounts</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rdDistGeom</span><span class="o">.</span><span class="n">EmbedFailureCauses</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">5</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> errors in embedding&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RDKit_Embedding_Error</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RDKit unable to embed SMILES structure </span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_RDKMol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;openbabel&quot;</span><span class="p">:</span>
             <span class="n">obConversion</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
             <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">&quot;smi&quot;</span><span class="p">,</span> <span class="s2">&quot;mdl&quot;</span><span class="p">)</span>
@@ -671,7 +736,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">builder</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBBuilder</span><span class="p">()</span>
             <span class="n">builder</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">flavor</span> <span class="o">==</span> <span class="s2">&quot;openeye&quot;</span><span class="p">:</span>
             <span class="n">check_openeye_license</span><span class="p">()</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OEGraphMol</span><span class="p">()</span>
@@ -685,7 +750,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="c1"># Add hydrogens</span>
             <span class="n">oechem</span><span class="o">.</span><span class="n">OEAddExplicitHydrogens</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">from_OEMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_OEMol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Rotate to standard orientation</span>
         <span class="k">if</span> <span class="n">reorient</span><span class="p">:</span>
