@@ -995,8 +995,8 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "configuration", coltype="int", references="configuration"
             )
             self.db.execute(
-                "CREATE UNIQUE INDEX 'idx_template_name_type'"
-                '    ON template ("name", "type")'
+                "CREATE UNIQUE INDEX 'idx_template_name_category'"
+                "    ON template (name, category)"
             )
 
             # The subsets
