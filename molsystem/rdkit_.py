@@ -15,6 +15,8 @@ except ModuleNotFoundError:
     )
     raise
 
+from seamm_util import CompactJSONEncoder
+
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
@@ -100,7 +102,12 @@ class RDKitMixin:
         if self.__class__.__name__ == "_Configuration":
             rdk_mol.SetIntProp("SEAMM|net charge|int|", self.charge)
             rdk_mol.SetIntProp("SEAMM|spin multiplicity|int|", self.spin_multiplicity)
-            rdk_mol.SetProp("SEAMM|XYZ|json|", json.dumps(self.coordinates))
+            rdk_mol.SetProp(
+                "SEAMM|XYZ|json|",
+                json.dumps(self.coordinates, indent=4, cls=CompactJSONEncoder),
+            )
+            rdk_mol.SetProp("SEAMM|system name|str|", self.system.name)
+            rdk_mol.SetProp("SEAMM|configuration name|str|", self.name)
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
@@ -147,8 +154,14 @@ class RDKitMixin:
 
         Returns
         -------
-        molsystem._Configuration
+        (str, str) : system_name, configuration_name
         """
+        system_name = None
+        configuration_name = None
+
+        if rdk_mol.GetNumConformers() == 0:
+            raise ValueError("RDKit molecule has no conformers")
+
         atnos = []
         for rdk_atom in rdk_mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
@@ -186,7 +199,18 @@ class RDKitMixin:
 
         if atoms:
             self.clear()
-            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+            try:
+                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+            except Exception:
+                print("Xs=")
+                pprint.pp(Xs)
+                print("Ys=")
+                pprint.pp(Ys)
+                print("Zs=")
+                pprint.pp(Zs)
+                print("atnos=")
+                pprint.pp(atnos)
+                raise
         else:
             ids = self.atoms.ids
 
@@ -219,9 +243,16 @@ class RDKitMixin:
                 del data["SEAMM|spin multiplicity|int|"]
 
             # Coordinates
-            if "SEAMM|XYZ|json|" in data:
+            if coordinates and "SEAMM|XYZ|json|" in data:
                 self.coordinates = json.loads(data["SEAMM|XYZ|json|"])
                 del data["SEAMM|XYZ|json|"]
+
+            if "SEAMM|system name|str|" in data:
+                system_name = data["SEAMM|system name|str|"]
+                del data["SEAMM|system name|str|"]
+            if "SEAMM|configuration name|str|" in data:
+                configuration_name = data["SEAMM|configuration name|str|"]
+                del data["SEAMM|configuration name|str|"]
 
         # Record any properties in the database if desired
         if properties == "all":
@@ -242,9 +273,21 @@ class RDKitMixin:
                         self.properties.add(key, _type)
 
                     self.properties.put(key, value)
-        return self
+        return system_name, configuration_name
 
-    def debug_print(self):
-        pprint.pprint(str(self.atoms._atom_table))
-        pprint.pprint(str(self.atoms._coordinates_table))
-        pprint.pprint(str(self.bonds))
+    def get_SSSR(self, symmetrized=False):
+        """Calculate the smallest set of smallest rings.
+
+        Parameters
+        ----------
+        symmetrized : bool = False
+            Whether to return the symmetrized SSSR
+
+        Returns
+        -------
+        list of list of int
+        """
+        if symmetrized:
+            return Chem.rdmolops.GetSymSSSR(self.to_RDKMol())
+
+        return Chem.rdmolops.GetSSSR(self.to_RDKMol())

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A dictionary-like object for holding a system
-"""
+"""A dictionary-like object for holding a system"""
 
 import collections.abc
 import logging
@@ -996,8 +995,8 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 "configuration", coltype="int", references="configuration"
             )
             self.db.execute(
-                "CREATE UNIQUE INDEX 'idx_template_name_type'"
-                '    ON template ("name", "type")'
+                "CREATE UNIQUE INDEX 'idx_template_name_category'"
+                "    ON template (name, category)"
             )
 
             # The subsets
@@ -1034,7 +1033,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             table.add_attribute("system", coltype="int", references="system")
             self.db.execute(
                 "CREATE INDEX 'idx_system_collection_system' "
-                'ON atomset_atom ("system_collection", "system")'
+                'ON system_collection_system ("system_collection", "system")'
             )
 
             # Collections of configurations
@@ -1053,7 +1052,8 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             )
             self.db.execute(
                 "CREATE INDEX 'idx_configuration_collection_configuration' "
-                'ON atomset_atom ("configuration_collection", "configuration")'
+                "ON configuration_collection_configuration "
+                '("configuration_collection", "configuration")'
             )
 
             #####################################################

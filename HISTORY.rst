@@ -1,6 +1,12 @@
 =======
 History
 =======
+2025.2.23 -- Bugfix in SMILES and enhancements to SMILES and SDF files
+    * Fixed bug in isomeric SMILES and generally improved the handling of SMILES using
+      RDKit.
+    * Improved error checking for types when saving properties to the database.
+    * Added control of properties when going to/from RDKit and OpenBabel.
+	
 2025.1.14 -- Bugfix: error reading JSON properties from SDF files
     * JSON properties were read as strings, not as JSON objects. This is fixed.
       

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A dictionary-like object for holding templates
-"""
+"""A dictionary-like object for holding templates"""
 
 from collections.abc import Sequence
 import logging

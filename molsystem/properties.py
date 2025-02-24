@@ -435,11 +435,23 @@ class _Properties(object):
                 "cid": cid,
             }
             if _type == "float":
-                result[name]["value"] = float(value)
+                try:
+                    result[name]["value"] = float(value)
+                except Exception as e:
+                    logger.warning(f"Error with value of property '{name}': {str(e)}")
+                    del result[name]
             elif _type == "int":
-                result[name]["value"] = int(value)
+                try:
+                    result[name]["value"] = int(value)
+                except Exception as e:
+                    logger.warning(f"Error with value of property '{name}': {str(e)}")
+                    del result[name]
             elif _type == "json":
-                result[name]["value"] = json.loads(value)
+                try:
+                    result[name]["value"] = json.loads(value)
+                except Exception as e:
+                    logger.warning(f"Error with value of property '{name}': {str(e)}")
+                    del result[name]
             else:
                 result[name]["value"] = value
         return result

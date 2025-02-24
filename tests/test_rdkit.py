@@ -20,15 +20,22 @@ def test_version():
 def test_to_RDKMol(Acetate):
     """Test creating a RDKMol object from a structure."""
     correct = {
-        "SEAMM|XYZ|json|": "[[1.0797, 0.0181, -0.0184], [0.5782, 3.1376, 0.2813], "
-        "[0.7209, -0.6736, -0.7859], [0.7052, -0.3143, 0.9529], "
-        "[0.5713, 1.3899, -0.3161], [-0.1323, 1.7142, -1.2568], "
-        "[0.9757, 2.297, 0.5919]]",
+        "SEAMM|XYZ|json|": "[\n"
+        "    [1.0797, 0.0181, -0.0184],\n"
+        "    [0.5782, 3.1376, 0.2813],\n"
+        "    [0.7209, -0.6736, -0.7859],\n"
+        "    [0.7052, -0.3143, 0.9529],\n"
+        "    [0.5713, 1.3899, -0.3161],\n"
+        "    [-0.1323, 1.7142, -1.2568],\n"
+        "    [0.9757, 2.297, 0.5919]\n"
+        "]",
+        "SEAMM|configuration name|str|": "acetate",
         "SEAMM|float property|float|kcal/mol": 3.14,
         "SEAMM|int property|int|": 2,
         "SEAMM|net charge|int|": -1,
         "SEAMM|spin multiplicity|int|": 1,
         "SEAMM|str property|str|": "Hi!",
+        "SEAMM|system name|str|": "acetate",
     }
 
     mol = Acetate.to_RDKMol(properties="*")

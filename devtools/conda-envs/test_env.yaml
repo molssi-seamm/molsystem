@@ -9,6 +9,7 @@ dependencies:
   - pip
   - numpy
   - pandas
+  - libsqlite!=3.49.1
 
   # molsystem requires, and only available via Conda.
   - seamm-util

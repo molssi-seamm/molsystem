@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A dictionary-like object for holding a system
-"""
+"""A dictionary-like object for holding a system"""
 
 from collections.abc import MutableMapping
 import logging

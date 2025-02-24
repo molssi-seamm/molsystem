@@ -82,7 +82,9 @@ class PubChemMixin:
             self.from_smiles(fallback)
             return
 
-    def PC_from_identifier(self, identifier, namespace="detect", fallback=None):
+    def PC_from_identifier(
+        self, identifier, namespace="detect", fallback=None, properties="all"
+    ):
         """Create the configuration from the PubChem 3-D structure, if available.
 
         Parameters
@@ -93,6 +95,8 @@ class PubChemMixin:
             The PubChem namespace: cid, name, smiles, inchi, inchikey
         fallback : str
             A fallback SMILES, InChI, etc. to use if PubChem fails
+        properties : str = "all"
+            Whether to include all properties or none
         """
         if namespace == "detect":
             # Work through the possibilities
@@ -119,7 +123,7 @@ class PubChemMixin:
                 "SDF?record_type=3d"
             )
             if response.status_code == 200:
-                self.from_sdf_text(response.text)
+                self.from_sdf_text(response.text, properties=properties)
                 return
 
         # An error!

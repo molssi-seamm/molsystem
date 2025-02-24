@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A dictionary-like object for holding atoms.
-"""
+"""A dictionary-like object for holding atoms."""
 
 from itertools import zip_longest
 import logging
