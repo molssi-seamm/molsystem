@@ -143,7 +143,9 @@ def RMSD(
             if isinstance(structure, _Configuration):
                 structure.from_RDKMol(_structure)
             else:
-                structure.SetPosition(_structure.GetPositions())
+                structure.GetConformer(0).SetPositions(
+                    _structure.GetConformer(0).GetPositions()
+                )
     elif isinstance(_structure, ob.OBMol):
         result = OB_RMSD(
             _structure,
