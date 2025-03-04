@@ -18,6 +18,7 @@ except ModuleNotFoundError:
     raise
 
 try:
+    import rdkit
     from rdkit import Chem
     from rdkit.Chem import rdMolAlign, rdmolops, AllChem
 except ModuleNotFoundError:
@@ -94,15 +95,15 @@ def RMSD(
                 "Reference must be a Configuration, RDKMol, or OBMol, not "
                 f"{type(reference)}"
             )
-    elif isinstance(structure, Chem.RWMol):
+    elif isinstance(structure, rdkit.Chem.rdchem.RWMol):
         if flavor is not None and flavor != "rdkit":
             raise ValueError(f"Cannot use flavor '{flavor}' with an RDKMol structure")
         if isinstance(reference, _Configuration):
-            _structure = Chem.RWMol(structure)
+            _structure = Chem.rdchem.RWMol(structure)
             _reference = reference.to_RDKMol()
-        elif isinstance(reference, Chem.RWMol):
-            _structure = Chem.RWMol(structure)
-            _reference = Chem.RWMol(reference)
+        elif isinstance(reference, rdkit.Chem.rdchem.RWMol):
+            _structure = Chem.rdchem.RWMol(structure)
+            _reference = Chem.rdchem.RWMol(reference)
         elif isinstance(reference, ob.OBMol):
             raise ValueError(
                 "If the structure is an RDKMol, the reference "
@@ -119,7 +120,7 @@ def RMSD(
         if isinstance(reference, _Configuration):
             _structure = ob.OBMol(structure)
             _reference = reference.to_OBMol()
-        elif isinstance(reference, Chem.RWMol):
+        elif isinstance(reference, rdkit.Chem.rdchem.RWMol):
             raise ValueError(
                 "If the structure is an OBMol, the reference "
                 f"must be a Configuration or OBMol, not {type(reference)}"
@@ -129,10 +130,15 @@ def RMSD(
             _reference = ob.OBMol(reference)
         else:
             raise ValueError(
-                "Reference must be a Configuration, or OBMol, not " f"{type(reference)}"
+                f"Reference must be a Configuration, or OBMol, not {type(reference)}"
             )
+    else:
+        raise ValueError(
+            "Structure must be a Configuration, RDKMol, or OBMol, "
+            f"not {type(structure)}"
+        )
 
-    if isinstance(_structure, Chem.RWMol):
+    if isinstance(_structure, rdkit.Chem.rdchem.RWMol):
         result = RDK_RMSD(
             _structure,
             _reference,
