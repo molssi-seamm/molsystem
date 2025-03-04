@@ -1,6 +1,12 @@
 =======
 History
 =======
+2025.3.4 -- Generalized the alignment/RMSD code
+    * Generalized the alignment/RMSD code to make it easier to do berofe and after
+      comparisons in optimizations and similar applications.
+    * Fixed a bug in the handling of spacegroup names. The full inetrnational symbols
+      with added setting information were not properly recognized.
+      
 2025.2.23 -- Bugfix in SMILES and enhancements to SMILES and SDF files
     * Fixed bug in isomeric SMILES and generally improved the handling of SMILES using
       RDKit.

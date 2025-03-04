@@ -273,7 +273,7 @@ I2
                 _Symmetry.spgname_to_system = {}
             for hall in range(1, 530):
                 data = spglib.get_spacegroup_type(hall)
-                # pws pprint.pprint(data)
+                # pprint.pprint(data)
                 choice = data["choice"]
                 _Symmetry.hall_to_hall_symbol[hall] = data["hall_symbol"]
                 _Symmetry.hall_to_IT_number[hall] = data["number"]
@@ -329,7 +329,15 @@ I2
                                 _Symmetry.spgname_to_hall[tmp] = hall
                                 _Symmetry.spgname_to_system[tmp] = system_name[key]
 
-                    if key in ("international", "international_short") and choice != "":
+                    if (
+                        key
+                        in (
+                            "international",
+                            "international_short",
+                            "international_full",
+                        )
+                        and choice != ""
+                    ):
                         name += f" :{choice}"
 
                     _Symmetry.spgname_to_hall[name] = hall
@@ -342,6 +350,8 @@ I2
                             tmp = tmp[:-2].strip()
                             _Symmetry.spgname_to_hall[tmp] = hall
                             _Symmetry.spgname_to_system[tmp] = system_name[key]
+            # print("spgname_to_hall")
+            # pprint.pprint(_Symmetry.spgname_to_hall)
         return _Symmetry.spgname_to_hall
 
     @staticmethod
