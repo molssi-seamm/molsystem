@@ -1,6 +1,10 @@
 =======
 History
 =======
+2025.3.16 -- Bugfix: Error if system of configuration name is None
+    * This fixes an error in toRDKMol and toOBMol when the system or configuration name
+      is None.
+      
 2025.3.4 -- Generalized the alignment/RMSD code
     * Generalized the alignment/RMSD code to make it easier to do berofe and after
       comparisons in optimizations and similar applications.
