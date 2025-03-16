@@ -89,13 +89,15 @@ class OpenBabelMixin:
             ob_mol.CloneData(pair)
 
             # Add the system and configuration names.
-            pair.SetAttribute("SEAMM|system name|str|")
-            pair.SetValue(self.system.name)
-            ob_mol.CloneData(pair)
+            if self.system.name is not None:
+                pair.SetAttribute("SEAMM|system name|str|")
+                pair.SetValue(self.system.name)
+                ob_mol.CloneData(pair)
 
-            pair.SetAttribute("SEAMM|configuration name|str|")
-            pair.SetValue(self.name)
-            ob_mol.CloneData(pair)
+            if self.name is not None:
+                pair.SetAttribute("SEAMM|configuration name|str|")
+                pair.SetValue(self.name)
+                ob_mol.CloneData(pair)
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)

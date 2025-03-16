@@ -106,8 +106,10 @@ class RDKitMixin:
                 "SEAMM|XYZ|json|",
                 json.dumps(self.coordinates, indent=4, cls=CompactJSONEncoder),
             )
-            rdk_mol.SetProp("SEAMM|system name|str|", self.system.name)
-            rdk_mol.SetProp("SEAMM|configuration name|str|", self.name)
+            if self.system.name is not None:
+                rdk_mol.SetProp("SEAMM|system name|str|", self.system.name)
+            if self.name is not None:
+                rdk_mol.SetProp("SEAMM|configuration name|str|", self.name)
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
