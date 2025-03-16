@@ -436,7 +436,7 @@ def test_substructure_ordering(disordered):
     assert result == answer2
 
     # With hydrogens
-    smiles = templates[0].to_smiles(hydrogens=True)
+    smiles = templates[0].to_smiles(hydrogens=True, flavor="openbabel")
     if smiles != answer3:
         pprint.pprint(smiles)
     assert smiles == answer3
