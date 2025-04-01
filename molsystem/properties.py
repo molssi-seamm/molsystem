@@ -38,7 +38,6 @@ def add_properties_from_file(path):
     that it is indeed the same, it can be replaced by the standard form, and also
     aliased to it for backwards compatibility.
     """
-    global standard_properties
     with open(path, newline="", encoding="utf-8-sig") as fd:
         data = csv.reader(fd)
         line = 0
@@ -87,7 +86,6 @@ class _Properties(object):
 
     @property
     def standard_properties(self):
-        global standard_properties
         return standard_properties
 
     @property
