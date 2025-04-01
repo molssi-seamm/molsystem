@@ -116,7 +116,7 @@ class _System(CIFMixin, MutableMapping):
         table : Table or Atom, Template, Templateatoms, ...
         """
         if key not in self._items:
-            self._items[key] = _Table(self, key)
+            self._items[key] = _Table(self.system_db, key)
         return self._items[key]
 
     def __setitem__(self, key, value):
@@ -190,7 +190,7 @@ class _System(CIFMixin, MutableMapping):
         # Check the tables in both systems
         result = True
         for table in in_common:
-            if _Table(self, table) != _Table(other, table):
+            if _Table(self.system_db, table) != _Table(other.system_db, table):
                 result = False
                 break
 
@@ -504,25 +504,25 @@ class _System(CIFMixin, MutableMapping):
 
         # Need the contents of the tables. See if they are in the same
         # database or if we need to attach the other database temporarily.
-        name = self.nickname
-        other_name = other.nickname
-        detach = False
-        if name != other_name and not self.is_attached(other_name):
-            # Attach the other system in order to do comparisons.
-            self.attach(other)
-            detach = True
+        # name = self.nickname
+        # other_name = other.nickname
+        # detach = False
+        # if name != other_name and not self.is_attached(other_name):
+        #     # Attach the other system in order to do comparisons.
+        #     self.attach(other)
+        #     detach = True
 
         # Check the tables in both systems
         for table in in_common:
-            table1 = _Table(self, table)
-            table2 = _Table(other, table)
+            table1 = _Table(self.system_db, table)
+            table2 = _Table(other.system_db, table)
             tmp = table1.diff(table2)
-            if len(tmp) > 0:
+            if tmp is not None:
                 result[f"table '{table}' diffs"] = tmp
 
         # Detach the other database if needed
-        if detach:
-            self.detach(other)
+        # if detach:
+        #     self.detach(other)
 
         return result
 

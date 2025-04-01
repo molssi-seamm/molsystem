@@ -272,6 +272,7 @@ class Cell(object):
         T = self.to_cartesians_transform(as_array=True)
         XYZ = UVW @ T
 
+        XYZ[numpy.abs(XYZ) < 1.0e-6] = 0
         if as_array:
             return XYZ
         else:
@@ -311,10 +312,12 @@ class Cell(object):
             [c * cb, c * (ca - cb * cg) / sg, V / (a * b * sg)],
         ]  # yapf: disable
 
+        T = numpy.array(T)
+        T[numpy.abs(T) < 1.0e-6] = 0
         if as_array:
-            return numpy.array(T)
-        else:
             return T
+        else:
+            return T.tolist()
 
     def to_fractionals(self, xyz, as_array=False):
         """Convert Cartesian coordinates to fractional.

@@ -269,7 +269,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     def __eq__(self, other):
         """Return a boolean if this object is equal to another"""
         # LGTM doesn't like using 'is', but this is equivalent.
-        if self.id() == other.id():
+        if self is other:
             return True
 
         tables = set(self.list())
@@ -350,9 +350,9 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._filename = value
         if self._filename is not None:
             if self._filename[0:5] == "file:":
-                self._db = sqlite3.connect(self._filename, uri=True)
+                self._db = sqlite3.connect(self._filename, uri=True, timeout=10.0)
             else:
-                self._db = sqlite3.connect(self._filename)
+                self._db = sqlite3.connect(self._filename, timeout=10.0)
             self._db.row_factory = sqlite3.Row
             self._db.execute("PRAGMA foreign_keys = ON")
             self._db.execute("PRAGMA synchronous = normal")
@@ -589,7 +589,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         """Differences between this system and another."""
         result = {}
 
-        if self.id() == other.id():
+        if self is other:
             return result
 
         tables = set(self.list())
@@ -617,12 +617,15 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         # Check the tables in both systems
         for table in in_common:
             tmp = self[table].diff(other[table])
-            if len(tmp) > 0:
+            if tmp is not None:
                 result[f"table '{table}' diffs"] = tmp
 
         # Detach the other database if needed
         if detach:
-            self.detach(other)
+            try:
+                self.detach(other)
+            except sqlite3.OperationalError:
+                pass
 
         return result
 

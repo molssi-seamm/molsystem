@@ -39,7 +39,10 @@ class OpenBabelMixin:
             spin = None
 
         ob_mol = ob.OBMol()
-        for atno, xyz in zip(self.atoms.atomic_numbers, self.atoms.coordinates):
+        for atno, xyz in zip(
+            self.atoms.atomic_numbers,
+            self.atoms.get_coordinates(fractionals=False, in_cell="molecule"),
+        ):
             ob_atom = ob_mol.NewAtom()
             ob_atom.SetAtomicNum(atno)
             ob_atom.SetVector(*xyz)
@@ -84,9 +87,21 @@ class OpenBabelMixin:
             # Add the coordinates to keep more precision than e.g. SDF files keep.
             pair.SetAttribute("SEAMM|XYZ|json|")
             pair.SetValue(
-                json.dumps(self.coordinates, indent=4, cls=CompactJSONEncoder)
+                json.dumps(
+                    self.atoms.get_coordinates(fractionals=False),
+                    indent=4,
+                    cls=CompactJSONEncoder,
+                )
             )
             ob_mol.CloneData(pair)
+
+            # If periodic, add cell
+            if self.periodicity != 0:
+                pair.SetAttribute("SEAMM|cell|json|")
+                pair.SetValue(
+                    json.dumps(self.cell.parameters, indent=4, cls=CompactJSONEncoder)
+                )
+                ob_mol.CloneData(pair)
 
             # Add the system and configuration names.
             if self.system.name is not None:
@@ -210,6 +225,12 @@ class OpenBabelMixin:
                 Ys = [y for x, y, z in XYZ]
                 Zs = [z for x, y, z in XYZ]
                 del data["SEAMM|XYZ|json|"]
+            if "SEAMM|cell|json|" in data:
+                if atoms or coordinates:
+                    self.periodicity = 3
+                    self.cell.parameters = json.loads(data["SEAMM|cell|json|"])
+                    self.coordinate_system = "fractional"
+                del data["SEAMM|cell|json|"]
             if "SEAMM|system name|str|" in data:
                 system_name = data["SEAMM|system name|str|"]
                 del data["SEAMM|system name|str|"]
@@ -224,12 +245,15 @@ class OpenBabelMixin:
                 ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
             else:
                 ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+            if self.periodicity != 0:
+                xyz = [[x, y, z] for x, y, z in zip(Xs, Ys, Zs)]
+                self.atoms.set_coordinates(xyz, fractionals=False)
         else:
             ids = self.atoms.ids
 
             if coordinates:
                 xyz = [[x, y, z] for x, y, z in zip(Xs, Ys, Zs)]
-                self.atoms.coordinates = xyz
+                self.atoms.set_coordinates(xyz, fractionals=False)
 
         if atoms or bonds:
             i = [ids[x - 1] for x in Is]
@@ -326,19 +350,19 @@ class OpenBabelMixin:
         obMol = ob.OBMol()
         obConversion.ReadString(obMol, text)
 
-        self.from_OBMol(obMol, properties=properties)
+        sysname, confname = self.from_OBMol(obMol, properties=properties)
 
-        # See if the system and configuration names are encoded in the tit
-        result = (None, None)
-        title = obMol.GetTitle()
-        if "SEAMM=" in title:
-            for tmp in title.split("|"):
-                if "SEAMM=" in tmp and "/" in tmp:
-                    sysname, confname = tmp.split("=", 1)[1].split("/")
-                    sysname = sysname.strip()
-                    confname = confname.strip()
-                    result = (sysname, confname)
-        return result
+        if sysname is None and confname is None:
+            # See if the system and configuration names are encoded in the tit
+            title = obMol.GetTitle()
+            if "SEAMM=" in title:
+                for tmp in title.split("|"):
+                    if "SEAMM=" in tmp and "/" in tmp:
+                        sysname, confname = tmp.split("=", 1)[1].split("/")
+                        sysname = sysname.strip()
+                        confname = confname.strip()
+
+        return sysname, confname
 
     def from_sdf(self, path):
         """Directly read an SDF file for the configuration.
@@ -366,11 +390,12 @@ class OpenBabelMixin:
         str
             The text of the SDF file
         """
-        obConversion = ob.OBConversion()
-        obConversion.SetOutFormat("sdf")
         obMol = self.to_OBMol(properties="*")
         title = f"SEAMM={self.system.name}/{self.name}"
         obMol.SetTitle(title)
+
+        obConversion = ob.OBConversion()
+        obConversion.SetOutFormat("sdf")
         text = obConversion.WriteString(obMol)
 
         return text

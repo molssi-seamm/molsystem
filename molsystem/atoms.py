@@ -1260,7 +1260,14 @@ class _Atoms(_Table):
         vxs = self.get_column_data("vx")
         vys = self.get_column_data("vy")
         vzs = self.get_column_data("vz")
-        xyz = [[vx, vy, vz] for vx, vy, vz in zip(vxs, vys, vzs)]
+        xyz = [
+            [
+                vx if abs(vx) > 1.0e-6 else 0,
+                vy if abs(vy) > 1.0e-6 else 0,
+                vz if abs(vz) > 1.0e-6 else 0,
+            ]
+            for vx, vy, vz in zip(vxs, vys, vzs)
+        ]
 
         periodicity = self.configuration.periodicity
         if periodicity == 0:
