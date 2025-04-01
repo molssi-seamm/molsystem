@@ -518,7 +518,6 @@ def test_substructure_ordering(disordered):
 
 
 def test_all_residue_search(configuration):
-    return
     """Testing locating residues in a peptide."""
     residues = {
         "ARG_LL": [(9, 10, 11, 12, 13, 14, 15, 17, 16, 18, 19)],
