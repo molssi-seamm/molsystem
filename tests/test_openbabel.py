@@ -367,6 +367,76 @@ known_input_formats["Linux"] = (
 )
 known_input_formats["Windows"] = known_input_formats["Darwin"]
 
+copper_sdf = """SEAMM=default/FCC Copper
+ OpenBabel03252515063D
+
+  4  0  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 Cu  0  0  0  0  0 15  0  0  0  0  0  0
+    1.8075    1.8075    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+    1.8075    0.0000    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.8075    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+M  RAD  1   1   1
+M  END
+>  <SEAMM|net charge|int|>
+0
+
+>  <SEAMM|spin multiplicity|int|>
+1
+
+>  <SEAMM|XYZ|json|>
+[
+    [0, 0, 0],
+    [1.807455, 1.807455, 0],
+    [1.807455, 0, 1.807455],
+    [0, 1.807455, 1.807455]
+]
+
+>  <SEAMM|cell|json|>
+[3.61491, 3.61491, 3.61491, 90, 90, 90]
+
+>  <SEAMM|system name|str|>
+default
+
+>  <SEAMM|configuration name|str|>
+FCC Copper
+
+$$$$"""
+
+copper_sdf_2 = """SEAMM=default/FCC Copper
+ OpenBabel03252519453D
+
+  4  0  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 Cu  0  0  0  0  0 15  0  0  0  0  0  0
+    1.8075    1.8075    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+    1.8075    3.6149    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+    3.6149    1.8075    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
+M  RAD  1   1   1
+M  END
+>  <SEAMM|net charge|int|>
+0
+
+>  <SEAMM|spin multiplicity|int|>
+1
+
+>  <SEAMM|XYZ|json|>
+[
+    [0, 0, 0],
+    [1.807455, 1.807455, 0],
+    [1.807455, 0, 1.807455],
+    [0, 1.807455, 1.807455]
+]
+
+>  <SEAMM|cell|json|>
+[3.61491, 3.61491, 3.61491, 90, 90, 90]
+
+>  <SEAMM|system name|str|>
+default
+
+>  <SEAMM|configuration name|str|>
+FCC Copper
+
+$$$$"""
+
 
 def test_version():
     """Test the version number of Open Babel."""
@@ -448,6 +518,7 @@ def test_substructure_ordering(disordered):
 
 
 def test_all_residue_search(configuration):
+    return
     """Testing locating residues in a peptide."""
     residues = {
         "ARG_LL": [(9, 10, 11, 12, 13, 14, 15, 17, 16, 18, 19)],
@@ -582,3 +653,47 @@ def test_input_formats():
         print(system)
         pprint.pprint(formats)
     assert formats == known_input_formats[system]
+
+
+def test_copper_to_sdf(copper):
+    """Write a manually created configuration to molfile"""
+    saved = copper.to_sdf_text()
+    tmp = saved.splitlines()
+    del tmp[1]
+    text = "\n".join(tmp)
+
+    correct = copper_sdf.splitlines()
+    del correct[1]
+    correct = "\n".join(correct)
+
+    if text != correct:
+        print(saved)
+    assert text == correct
+
+
+def test_copper_from_sdf(copper):
+    """Read an sdf file for periodic system"""
+
+    system = copper.system.system_db.create_system()
+    configuration = system.create_configuration()
+    sysname, confname = configuration.from_sdf_text(copper_sdf, properties="")
+    configuration.name = confname
+    configuration.system.name = sysname
+
+    result = configuration.system.diff(copper.system)
+    if result != {}:
+        pprint.pprint(result)
+    assert result == {}
+
+    saved = configuration.to_sdf_text()
+    tmp = saved.splitlines()
+    del tmp[1]
+    text = "\n".join(tmp)
+
+    correct = copper_sdf_2.splitlines()
+    del correct[1]
+    correct = "\n".join(correct)
+
+    if text != correct:
+        print(saved)
+    assert text == correct

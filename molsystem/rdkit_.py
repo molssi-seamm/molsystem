@@ -52,6 +52,28 @@ def rdkit_version():
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 
+    def coordinates_from_RDKMol(self, rdkmol):
+        """Update the coordinates from an RDKMol.
+
+        Parameters
+        ----------
+        rdkmol : rdkit.Chem.RWMol
+            The RDKMol to use.
+        """
+        rdkconf = rdkmol.GetConformers()[0]
+        self.atoms.coordinates = rdkconf.GetPositions()
+
+    def coordinates_to_RDKMol(self, rdkmol):
+        """Update the coordinates of an RDKMol from this configuration.
+
+        Parameters
+        ----------
+        rdkmol : rdkit.Chem.RWMol
+            The RDKMol to use.
+        """
+        rdkconf = rdkmol.GetConformers()[0]
+        rdkconf.SetPositions(self.atoms.coordinates)
+
     def to_RDKMol(self, properties=None):
         """Return an RDKMol object for the configuration, template, or subset."""
         index = {}

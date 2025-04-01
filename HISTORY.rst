@@ -1,6 +1,18 @@
 =======
 History
 =======
+2025.4.1 -- Enhancement to OpenBabel/SDF to handle periodic systems
+    * Enhanced the OpenBabel molecule interface to handle periodic systems better, which
+      in turn supports using SDF files for periodic systems using SEAMM-specific
+      customization. The coordinates are always stored as Cartesians, and the cell
+      information is added as a property, and used when reading periodic systems written
+      by SEAMM.
+    * Added code to the RDKit interface to allow setting/getting just the coordinates
+      to/from a RDKit Molecule object. This is in analogy to the implementation in
+      OpenBabel.
+    * Added code to truncate near zero coordinates and cell parameters (< 1.0e-6) to make
+      coordinates and the cell parameters easier to read.
+      
 2025.3.16 -- Bugfix: Error if system of configuration name is None
     * This fixes an error in toRDKMol and toOBMol when the system or configuration name
       is None.
