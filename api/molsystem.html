@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2025.3.16 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2025.4.1 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=c9e00587"></script>
+    <script src="../_static/documentation_options.js?v=ac7e36a1"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="molsystem" href="modules.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.3.16" />
+  <meta name="docsearch:version" content="2025.4.1" />
   </head>
   
   
@@ -1680,6 +1680,28 @@ aliased to it for backwards compatibility.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling RDKit via its Python interface.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin.coordinates_from_RDKMol">
+<span class="sig-name descname"><span class="pre">coordinates_from_RDKMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdkmol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin.coordinates_from_RDKMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin.coordinates_from_RDKMol" title="Link to this definition">#</a></dt>
+<dd><p>Update the coordinates from an RDKMol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rdkmol</strong> (<em>rdkit.Chem.RWMol</em>) – The RDKMol to use.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin.coordinates_to_RDKMol">
+<span class="sig-name descname"><span class="pre">coordinates_to_RDKMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdkmol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin.coordinates_to_RDKMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin.coordinates_to_RDKMol" title="Link to this definition">#</a></dt>
+<dd><p>Update the coordinates of an RDKMol from this configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rdkmol</strong> (<em>rdkit.Chem.RWMol</em>) – The RDKMol to use.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin.from_RDKMol">
 <span class="sig-name descname"><span class="pre">from_RDKMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdk_mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin.from_RDKMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin.from_RDKMol" title="Link to this definition">#</a></dt>
 <dd><p>Transform an RDKit molecule into the current object.</p>
@@ -2737,6 +2759,8 @@ A general implementation for molecular and periodic systems.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.rdkit_">molsystem.rdkit_ module</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin"><code class="docutils literal notranslate"><span class="pre">RDKitMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.coordinates_from_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.coordinates_from_RDKMol()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.coordinates_to_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.coordinates_to_RDKMol()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.from_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.from_RDKMol()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.get_SSSR"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.get_SSSR()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.rdkit_.RDKitMixin.to_RDKMol"><code class="docutils literal notranslate"><span class="pre">RDKitMixin.to_RDKMol()</span></code></a></li>

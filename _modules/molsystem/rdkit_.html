@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2025.3.16 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2025.4.1 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=c9e00587"></script>
+    <script src="../../_static/documentation_options.js?v=ac7e36a1"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.3.16" />
+  <meta name="docsearch:version" content="2025.4.1" />
   </head>
   
   
@@ -527,6 +527,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RDKitMixin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling RDKit via its Python interface.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RDKitMixin.coordinates_from_RDKMol">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.coordinates_from_RDKMol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdkmol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the coordinates from an RDKMol.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rdkmol : rdkit.Chem.RWMol</span>
+<span class="sd">            The RDKMol to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rdkconf</span> <span class="o">=</span> <span class="n">rdkmol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">rdkconf</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RDKitMixin.coordinates_to_RDKMol">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.coordinates_to_RDKMol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_to_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdkmol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the coordinates of an RDKMol from this configuration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rdkmol : rdkit.Chem.RWMol</span>
+<span class="sd">            The RDKMol to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rdkconf</span> <span class="o">=</span> <span class="n">rdkmol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rdkconf</span><span class="o">.</span><span class="n">SetPositions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="RDKitMixin.to_RDKMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.to_RDKMol">[docs]</a>

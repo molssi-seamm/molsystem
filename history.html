@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2025.3.16 documentation</title>
+    <title>History &#8212; MolSystem 2025.4.1 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=c9e00587"></script>
+    <script src="_static/documentation_options.js?v=ac7e36a1"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.3.16" />
+  <meta name="docsearch:version" content="2025.4.1" />
   </head>
   
   
@@ -481,6 +481,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2025.4.1 – Enhancement to OpenBabel/SDF to handle periodic systems</dt><dd><ul class="simple">
+<li><p>Enhanced the OpenBabel molecule interface to handle periodic systems better, which
+in turn supports using SDF files for periodic systems using SEAMM-specific
+customization. The coordinates are always stored as Cartesians, and the cell
+information is added as a property, and used when reading periodic systems written
+by SEAMM.</p></li>
+<li><p>Added code to the RDKit interface to allow setting/getting just the coordinates
+to/from a RDKit Molecule object. This is in analogy to the implementation in
+OpenBabel.</p></li>
+<li><p>Added code to truncate near zero coordinates and cell parameters (&lt; 1.0e-6) to make
+coordinates and the cell parameters easier to read.</p></li>
+</ul>
+</dd>
 <dt>2025.3.16 – Bugfix: Error if system of configuration name is None</dt><dd><ul class="simple">
 <li><p>This fixes an error in toRDKMol and toOBMol when the system or configuration name
 is None.</p></li>
