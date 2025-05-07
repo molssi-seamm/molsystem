@@ -40,8 +40,6 @@ class _Atoms(_Table):
         self._system_db = self._configuration.system_db
         self._system = None
 
-        self._atomset = self._configuration.atomset
-
         self._atom_table = _Table(self.system_db, "atom")
         self._coordinates_table = _Table(self.system_db, "coordinates")
         self._velocities_table = _Table(self.system_db, "velocities")
@@ -176,7 +174,7 @@ class _Atoms(_Table):
     @property
     def atomset(self):
         """The atomset for these atoms."""
-        return self._atomset
+        return self._configuration.atomset
 
     @property
     def atom_generators(self):
