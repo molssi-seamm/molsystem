@@ -152,8 +152,6 @@ class SMILESMixin:
         str
             The SMILES string, or (SMILES, name) if the rname is requested
         """
-        logger.info("to_smiles")
-
         if flavor == "rdkit":
             mol = self.to_RDKMol()
             if isomeric:
@@ -189,8 +187,6 @@ class SMILESMixin:
             smiles = oechem.OECreateSmiString(mol)
         else:
             raise ValueError(f"flavor of SMILES '{flavor}' not supported")
-
-        logger.info(f"smiles = '{smiles}'")
 
         return smiles.strip()
 
@@ -276,7 +272,7 @@ class SMILESMixin:
             rdkMol = self.to_RDKMol()
             rdkConf = rdkMol.GetConformers()[0]
             Chem.rdMolTransforms.CanonicalizeConformer(rdkConf, ignoreHs=False)
-            self.from_RDKMol(rdkMol)
+            self.coordinates_from_RDKMol(rdkMol)
 
         if name is not None:
             self.name = name

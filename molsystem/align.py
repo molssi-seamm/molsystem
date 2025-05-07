@@ -147,7 +147,7 @@ def RMSD(
         )
         if align:
             if isinstance(structure, _Configuration):
-                structure.from_RDKMol(_structure)
+                structure.coordinates_from_RDKMol(_structure)
             else:
                 structure.GetConformer(0).SetPositions(
                     _structure.GetConformer(0).GetPositions()
@@ -161,7 +161,7 @@ def RMSD(
         )
         if align:
             if isinstance(structure, _Configuration):
-                structure.from_OBMol(_structure)
+                structure.coordinates_from_OBMol(_structure)
             else:
                 for at1, at2 in zip(
                     ob.OBMolAtomIter(structure), ob.OBMolAtomIter(_structure)
