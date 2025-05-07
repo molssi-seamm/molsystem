@@ -1,6 +1,12 @@
 =======
 History
 =======
+2025.5.7 -- Bugfix: accidentally deleting atoms in configurations
+    * Some parts of the code recreated the atoms in a configuration from a RDKMol
+      object, when all that was needed was updating the coordinates. Due to a bug in
+      handling the atoms shared between configurations this led to all the atoms being
+      deleted from some configurations. This has been fixed.
+      
 2025.4.1 -- Enhancement to OpenBabel/SDF to handle periodic systems
     * Enhanced the OpenBabel molecule interface to handle periodic systems better, which
       in turn supports using SDF files for periodic systems using SEAMM-specific
