@@ -230,7 +230,7 @@ def RDK_RMSD(structure, reference, include_h=True, symmetry=False):
         XYZ2 = reference.GetConformer(0).GetPositions()
         for count, XYZ1_XYZ2 in enumerate(zip(XYZ1, XYZ2)):
             XYZ1, XYZ2 = XYZ1_XYZ2
-            dist = np.linalg.norm(XYZ1[at1] - XYZ2[at2])
+            dist = np.linalg.norm(XYZ1 - XYZ2)
             if dist > max_displacement:
                 max_displacement = float(dist)
                 displaced_atom = count

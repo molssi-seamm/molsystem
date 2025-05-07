@@ -1,6 +1,9 @@
 =======
 History
 =======
+2025.5.7.1 -- Bugfix: Error aligning molecules in certain cases.
+    * Fixed an error that caused a crash in certain cases when aligning molecules.
+      
 2025.5.7 -- Bugfix: accidentally deleting atoms in configurations
     * Fixed an issue where atoms in a configuration were being deleted due to improper
       handling of shared atoms when updating coordinates from an RDKMol object. The code
