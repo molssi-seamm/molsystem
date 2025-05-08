@@ -30,7 +30,7 @@ setup(
     long_description=readme + '\n\n' + history,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    license='GNU Lesser General Public License v3 or later (LGPLv3+)',
+    license='GNU Lesser General Public License v3 or later',
     url='https://github.com/molssi-seamm/molsystem',
 
     # Which Python importable modules should be included when your package is
