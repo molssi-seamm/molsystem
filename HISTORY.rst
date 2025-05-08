@@ -1,6 +1,9 @@
 =======
 History
 =======
+2025.5.8 -- Release error
+    * Fixed an issue in the release due to a formatting error in this file.
+      
 2025.5.7.1 -- Bugfix: Error aligning molecules in certain cases.
     * Fixed an error that caused a crash in certain cases when aligning molecules.
       
@@ -10,7 +13,7 @@ History
       now updates the coordinates directly without recreating the atoms, ensuring that
       configurations retain their atoms as expected. This change prevents unintended
       data loss and ensures consistency when working with shared atoms across multiple
-     configurations.
+      configurations.
       
 2025.4.1 -- Enhancement to OpenBabel/SDF to handle periodic systems
     * Enhanced the OpenBabel molecule interface to handle periodic systems better, which
