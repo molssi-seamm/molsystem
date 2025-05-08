@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2025.5.7.1 documentation</title>
+    <title>History &#8212; MolSystem 2025.5.8 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=5bba9da5"></script>
+    <script src="_static/documentation_options.js?v=5a40cbee"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.5.7.1" />
+  <meta name="docsearch:version" content="2025.5.8" />
   </head>
   
   
@@ -480,7 +480,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
-<dl>
+<dl class="simple">
+<dt>2025.5.8 – Release error</dt><dd><ul class="simple">
+<li><p>Fixed an issue in the release due to a formatting error in this file.</p></li>
+</ul>
+</dd>
 <dt>2025.5.7.1 – Bugfix: Error aligning molecules in certain cases.</dt><dd><ul class="simple">
 <li><p>Fixed an error that caused a crash in certain cases when aligning molecules.</p></li>
 </ul>
@@ -490,11 +494,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 handling of shared atoms when updating coordinates from an RDKMol object. The code
 now updates the coordinates directly without recreating the atoms, ensuring that
 configurations retain their atoms as expected. This change prevents unintended
-data loss and ensures consistency when working with shared atoms across multiple</p></li>
+data loss and ensures consistency when working with shared atoms across multiple
+configurations.</p></li>
 </ul>
-<blockquote>
-<div><p>configurations.</p>
-</div></blockquote>
 </dd>
 <dt>2025.4.1 – Enhancement to OpenBabel/SDF to handle periodic systems</dt><dd><ul class="simple">
 <li><p>Enhanced the OpenBabel molecule interface to handle periodic systems better, which
