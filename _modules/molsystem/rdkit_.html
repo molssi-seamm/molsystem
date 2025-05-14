@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2025.5.8 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2025.5.14 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=5a40cbee"></script>
+    <script src="../../_static/documentation_options.js?v=34f483a8"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.5.8" />
+  <meta name="docsearch:version" content="2025.5.14" />
   </head>
   
   
@@ -476,6 +476,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 
 
 <span class="k">try</span><span class="p">:</span>
@@ -514,12 +515,50 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <span class="mi">92</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">}</span>
 
+<span class="n">references</span> <span class="o">=</span> <span class="p">[</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">@misc{rdkit,</span>
+<span class="sd">    title = {RDKit: Open-source cheminformatics.},</span>
+<span class="sd">    month = {$month},</span>
+<span class="sd">    year = {$year},</span>
+<span class="sd">    author = {Greg Landrum, et al.},</span>
+<span class="sd">    url = {https://www.rdkit.org},</span>
+<span class="sd">    doi = {10.5281/zenodo.591637},</span>
+<span class="sd">    version = {$version}</span>
+<span class="sd">}</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <div class="viewcode-block" id="rdkit_version">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.rdkit_version">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rdkit_version</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the RDKit version.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdBase</span><span class="o">.</span><span class="n">rdkitVersion</span></div>
+
+
+
+<div class="viewcode-block" id="rdkit_citations">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.rdkit_citations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rdkit_citations</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the BibTeX citations for RDKit&quot;&quot;&quot;</span>
+    <span class="n">citations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">rdkit_version</span><span class="p">()</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+
+        <span class="k">for</span> <span class="n">reference</span> <span class="ow">in</span> <span class="n">references</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+            <span class="n">citation</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">)</span>
+            <span class="n">citations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">citation</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">citations</span></div>
 
 
 
@@ -530,16 +569,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="RDKitMixin.coordinates_from_RDKMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.coordinates_from_RDKMol">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdkmol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coordinates_from_RDKMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_or_conformer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the coordinates from an RDKMol.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        rdkmol : rdkit.Chem.RWMol</span>
-<span class="sd">            The RDKMol to use.</span>
+<span class="sd">        mol_or_conformer : rdkit.Chem.Mol or rdkit.Chem.rdchem.Conformer</span>
+<span class="sd">            The RDKit molecule or conformer object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rdkconf</span> <span class="o">=</span> <span class="n">rdkmol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">rdkconf</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mol_or_conformer</span><span class="o">.</span><span class="n">GetNumConformers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;RDKit molecule has no conformers&quot;</span><span class="p">)</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">mol_or_conformer</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">Conformer</span><span class="p">):</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">mol_or_conformer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Don&#39;t recognize molecule/conformer argument </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">conformer</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="RDKitMixin.coordinates_to_RDKMol">
@@ -642,14 +690,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="RDKitMixin.from_RDKMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.rdkit_.RDKitMixin.from_RDKMol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_RDKMol</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">rdk_mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mol_or_conformer</span><span class="p">,</span>
+        <span class="n">properties</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bonds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform an RDKit molecule into the current object.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        rdk_mol : rdkit.chem.molecule</span>
-<span class="sd">            The RDKit molecule object</span>
+<span class="sd">        mol_or_conformer : rdkit.Chem.Mol or rdkit.Chem.rdchem.Conformer</span>
+<span class="sd">            The RDKit molecule or conformer object</span>
 
 <span class="sd">        properties : str = &quot;all&quot;</span>
 <span class="sd">            Whether to include all properties or none</span>
@@ -670,25 +723,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">system_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">configuration_name</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetNumConformers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;RDKit molecule has no conformers&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">):</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">mol_or_conformer</span>
+            <span class="k">if</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetNumConformers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;RDKit molecule has no conformers&quot;</span><span class="p">)</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetConformer</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">Conformer</span><span class="p">):</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">mol_or_conformer</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">conformer</span><span class="o">.</span><span class="n">GetOwningMol</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Don&#39;t recognize molecule/conformer argument </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mol_or_conformer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">atnos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
             <span class="n">atnos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;atom </span><span class="si">{</span><span class="n">atnos</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># TODO: Generalize to handling multiple conformers</span>
-        <span class="c1"># in a rdk_mol object, if necessary</span>
         <span class="n">Xs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">Ys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">Zs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rdk_conf</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetConformers</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">atom_coords</span> <span class="ow">in</span> <span class="n">rdk_conf</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">():</span>
-                <span class="n">Xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">Ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">Zs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom_coords</span> <span class="ow">in</span> <span class="n">conformer</span><span class="o">.</span><span class="n">GetPositions</span><span class="p">():</span>
+            <span class="n">Xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">Ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">Zs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">Is</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">Js</span> <span class="o">=</span> <span class="p">[]</span>
@@ -699,7 +759,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">TRIPLE</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">AROMATIC</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">rdk_bond</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rdk_bond</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">():</span>
             <span class="n">i</span> <span class="o">=</span> <span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetBeginAtom</span><span class="p">()</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">()</span>
             <span class="n">j</span> <span class="o">=</span> <span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetEndAtom</span><span class="p">()</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">()</span>
             <span class="n">bondorder</span> <span class="o">=</span> <span class="n">bond_types</span><span class="p">[</span><span class="n">rdk_bond</span><span class="o">.</span><span class="n">GetBondType</span><span class="p">()]</span>
@@ -734,14 +794,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">j</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Js</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">bondorder</span><span class="o">=</span><span class="n">BondOrders</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetPropsAsDict</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetPropsAsDict</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;_Configuration&quot;</span><span class="p">:</span>
             <span class="c1"># Charge</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(</span><span class="n">rdk_mol</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
             <span class="c1"># Calculate spin multiplicity assuming maximal spin</span>
             <span class="n">n_electrons</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">rdk_mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
                 <span class="n">n_electrons</span> <span class="o">+=</span> <span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetNumRadicalElectrons</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="n">n_electrons</span> <span class="o">+</span> <span class="mi">1</span>
 

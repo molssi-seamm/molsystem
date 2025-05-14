@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.openbabel &#8212; MolSystem 2025.5.8 documentation</title>
+    <title>molsystem.openbabel &#8212; MolSystem 2025.5.14 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=5a40cbee"></script>
+    <script src="../../_static/documentation_options.js?v=34f483a8"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.5.8" />
+  <meta name="docsearch:version" content="2025.5.14" />
   </head>
   
   
@@ -476,6 +476,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">openbabel</span>  <span class="c1"># noqa: F401</span>
@@ -491,12 +492,70 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="n">references</span> <span class="o">=</span> <span class="p">[</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">@Misc{openbabel1,</span>
+<span class="sd">    title = {The Open Babel Package},</span>
+<span class="sd">    month = {$month},</span>
+<span class="sd">    year = {$year},</span>
+<span class="sd">    author = {Geoffrey R. Hutchinson, et al.},</span>
+<span class="sd">    url = {http://openbabel.org},</span>
+<span class="sd">    version = {$version}</span>
+<span class="sd">}</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">@Article{openbabel2,</span>
+<span class="sd">    author={O&#39;Boyle, Noel M.</span>
+<span class="sd">    and Banck, Michael</span>
+<span class="sd">    and James, Craig A.</span>
+<span class="sd">    and Morley, Chris</span>
+<span class="sd">    and Vandermeersch, Tim</span>
+<span class="sd">    and Hutchison, Geoffrey R.},</span>
+<span class="sd">    title={Open Babel: An open chemical toolbox},</span>
+<span class="sd">    journal={Journal of Cheminformatics},</span>
+<span class="sd">    year={2011},</span>
+<span class="sd">    month={Oct},</span>
+<span class="sd">    day={07},</span>
+<span class="sd">    volume={3},</span>
+<span class="sd">    number={1},</span>
+<span class="sd">    pages={33},</span>
+<span class="sd">    issn={1758-2946},</span>
+<span class="sd">    doi={10.1186/1758-2946-3-33},</span>
+<span class="sd">    url={https://doi.org/10.1186/1758-2946-3-33}</span>
+<span class="sd">}</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <div class="viewcode-block" id="openbabel_version">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.openbabel_version">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">openbabel_version</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the version of openbabel.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBReleaseVersion</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="openbabel_citations">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.openbabel_citations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">openbabel_citations</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the BibTeX citations for OpenBabel&quot;&quot;&quot;</span>
+    <span class="n">citations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">openbabel_version</span><span class="p">()</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+
+        <span class="k">for</span> <span class="n">reference</span> <span class="ow">in</span> <span class="n">references</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+            <span class="n">citation</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">)</span>
+            <span class="n">citations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">citation</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">citations</span></div>
 
 
 
