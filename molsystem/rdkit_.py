@@ -72,7 +72,7 @@ def rdkit_citations():
         tmp = version.split(".")
         year = tmp[0]
         if len(tmp) > 1:
-            month = tmp[2]
+            month = tmp[1]
         else:
             month = "?"
 
