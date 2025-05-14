@@ -103,7 +103,7 @@ class RDKitMixin:
         elif isinstance(mol_or_conformer, Chem.rdchem.Conformer):
             conformer = mol_or_conformer
         else:
-            raise RuntimeError(
+            raise TypeError(
                 f"Don't recognize molecule/conformer argument {type(mol_or_conformer)}"
             )
         self.atoms.coordinates = conformer.GetPositions()
