@@ -5,6 +5,7 @@
 import logging
 import json
 from pathlib import Path
+import string
 
 try:
     import openbabel  # noqa: F401
@@ -20,10 +21,65 @@ from seamm_util import CompactJSONEncoder
 
 logger = logging.getLogger(__name__)
 
+references = [
+    """\
+@Misc{openbabel1,
+    title = {The Open Babel Package},
+    month = {$month},
+    year = {$year},
+    author = {Geoffrey R. Hutchinson, et al.},
+    url = {http://openbabel.org},
+    version = {$version}
+}
+    """,
+    """\
+@Article{openbabel2,
+    author={O'Boyle, Noel M.
+    and Banck, Michael
+    and James, Craig A.
+    and Morley, Chris
+    and Vandermeersch, Tim
+    and Hutchison, Geoffrey R.},
+    title={Open Babel: An open chemical toolbox},
+    journal={Journal of Cheminformatics},
+    year={2011},
+    month={Oct},
+    day={07},
+    volume={3},
+    number={1},
+    pages={33},
+    issn={1758-2946},
+    doi={10.1186/1758-2946-3-33},
+    url={https://doi.org/10.1186/1758-2946-3-33}
+}
+    """,
+]
+
 
 def openbabel_version():
     """Return the version of openbabel."""
     return ob.OBReleaseVersion()
+
+
+def openbabel_citations():
+    """Return the BibTeX citations for OpenBabel"""
+    citations = []
+    try:
+        version = openbabel_version()
+        tmp = version.split(".")
+        year = tmp[0]
+        if len(tmp) > 1:
+            month = tmp[2]
+        else:
+            month = "?"
+
+        for reference in references:
+            template = string.Template(reference)
+            citation = template.substitute(month=month, version=version, year=year)
+            citations.append(citation)
+    except Exception:
+        pass
+    return citations
 
 
 class OpenBabelMixin:

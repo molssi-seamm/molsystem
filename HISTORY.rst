@@ -1,6 +1,11 @@
 =======
 History
 =======
+2025.5.14 -- Enhanced handling of RDKit conformers
+    * Added the ability to translate a given conformer from a RDKit molecule to a SEAMM
+      configuration.
+    * Added a function to provide the correct citations for RDKit and OpenBabel
+      
 2025.5.8 -- Release error
     * Fixed an issue in the release due to a formatting error in this file.
       

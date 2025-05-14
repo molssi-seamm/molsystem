@@ -5,6 +5,7 @@
 import logging
 import json
 import pprint
+import string
 
 
 try:
@@ -43,25 +44,69 @@ valence = {
     92: 2,
 }
 
+references = [
+    """\
+@misc{rdkit,
+    title = {RDKit: Open-source cheminformatics.},
+    month = {$month},
+    year = {$year},
+    author = {Greg Landrum, et al.},
+    url = {https://www.rdkit.org},
+    doi = {10.5281/zenodo.591637},
+    version = {$version}
+}
+    """,
+]
+
 
 def rdkit_version():
     """Return the RDKit version."""
     return Chem.rdBase.rdkitVersion
 
 
+def rdkit_citations():
+    """Return the BibTeX citations for RDKit"""
+    citations = []
+    try:
+        version = rdkit_version()
+        tmp = version.split(".")
+        year = tmp[0]
+        if len(tmp) > 1:
+            month = tmp[2]
+        else:
+            month = "?"
+
+        for reference in references:
+            template = string.Template(reference)
+            citation = template.substitute(month=month, version=version, year=year)
+            citations.append(citation)
+    except Exception:
+        pass
+    return citations
+
+
 class RDKitMixin:
     """A mixin for handling RDKit via its Python interface."""
 
-    def coordinates_from_RDKMol(self, rdkmol):
+    def coordinates_from_RDKMol(self, mol_or_conformer):
         """Update the coordinates from an RDKMol.
 
         Parameters
         ----------
-        rdkmol : rdkit.Chem.RWMol
-            The RDKMol to use.
+        mol_or_conformer : rdkit.Chem.Mol or rdkit.Chem.rdchem.Conformer
+            The RDKit molecule or conformer object
         """
-        rdkconf = rdkmol.GetConformers()[0]
-        self.atoms.coordinates = rdkconf.GetPositions()
+        if isinstance(mol_or_conformer, Chem.Mol):
+            if mol_or_conformer.GetNumConformers() == 0:
+                raise ValueError("RDKit molecule has no conformers")
+            conformer = mol_or_conformer.GetConformer()
+        elif isinstance(mol_or_conformer, Chem.rdchem.Conformer):
+            conformer = mol_or_conformer
+        else:
+            raise RuntimeError(
+                f"Don't recognize molecule/conformer argument {type(mol_or_conformer)}"
+            )
+        self.atoms.coordinates = conformer.GetPositions()
 
     def coordinates_to_RDKMol(self, rdkmol):
         """Update the coordinates of an RDKMol from this configuration.
@@ -155,14 +200,19 @@ class RDKitMixin:
         return rdk_mol
 
     def from_RDKMol(
-        self, rdk_mol, properties="all", atoms=True, coordinates=True, bonds=True
+        self,
+        mol_or_conformer,
+        properties="all",
+        atoms=True,
+        coordinates=True,
+        bonds=True,
     ):
         """Transform an RDKit molecule into the current object.
 
         Parameters
         ----------
-        rdk_mol : rdkit.chem.molecule
-            The RDKit molecule object
+        mol_or_conformer : rdkit.Chem.Mol or rdkit.Chem.rdchem.Conformer
+            The RDKit molecule or conformer object
 
         properties : str = "all"
             Whether to include all properties or none
@@ -183,25 +233,32 @@ class RDKitMixin:
         system_name = None
         configuration_name = None
 
-        if rdk_mol.GetNumConformers() == 0:
-            raise ValueError("RDKit molecule has no conformers")
+        if isinstance(mol_or_conformer, Chem.Mol):
+            mol = mol_or_conformer
+            if mol.GetNumConformers() == 0:
+                raise ValueError("RDKit molecule has no conformers")
+            conformer = mol.GetConformer()
+        elif isinstance(mol_or_conformer, Chem.rdchem.Conformer):
+            conformer = mol_or_conformer
+            mol = conformer.GetOwningMol()
+        else:
+            raise RuntimeError(
+                f"Don't recognize molecule/conformer argument {type(mol_or_conformer)}"
+            )
 
         atnos = []
-        for rdk_atom in rdk_mol.GetAtoms():
+        for rdk_atom in mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
             logger.debug(f"atom {atnos}")
 
-        # TODO: Generalize to handling multiple conformers
-        # in a rdk_mol object, if necessary
         Xs = []
         Ys = []
         Zs = []
-        for rdk_conf in rdk_mol.GetConformers():
-            for atom_coords in rdk_conf.GetPositions():
-                Xs.append(atom_coords[0])
-                Ys.append(atom_coords[1])
-                Zs.append(atom_coords[2])
-                logger.debug(f"{atom_coords[0]} {atom_coords[1]} {atom_coords[2]}")
+        for atom_coords in conformer.GetPositions():
+            Xs.append(atom_coords[0])
+            Ys.append(atom_coords[1])
+            Zs.append(atom_coords[2])
+            logger.debug(f"{atom_coords[0]} {atom_coords[1]} {atom_coords[2]}")
 
         Is = []
         Js = []
@@ -212,7 +269,7 @@ class RDKitMixin:
             Chem.BondType.TRIPLE: 3,
             Chem.BondType.AROMATIC: 5,
         }
-        for rdk_bond in rdk_mol.GetBonds():
+        for rdk_bond in mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
             j = rdk_bond.GetEndAtom().GetIdx()
             bondorder = bond_types[rdk_bond.GetBondType()]
@@ -247,14 +304,14 @@ class RDKitMixin:
             j = [ids[x] for x in Js]
             self.bonds.append(i=i, j=j, bondorder=BondOrders)
 
-        data = rdk_mol.GetPropsAsDict()
+        data = mol.GetPropsAsDict()
         if self.__class__.__name__ == "_Configuration":
             # Charge
-            self.charge = int(Chem.GetFormalCharge(rdk_mol))
+            self.charge = int(Chem.GetFormalCharge(mol))
 
             # Calculate spin multiplicity assuming maximal spin
             n_electrons = 0
-            for rdk_atom in rdk_mol.GetAtoms():
+            for rdk_atom in mol.GetAtoms():
                 n_electrons += rdk_atom.GetNumRadicalElectrons()
             self.spin_multiplicity = n_electrons + 1
 
