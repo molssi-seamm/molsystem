@@ -60,11 +60,17 @@ def PC_standardize(structures):
 
                 # Check the throttling request
                 if "X-Throttling-Control" in response.headers:
-                    tmp = response.headers["X-Throttling-Control"].split()
-                    if len(tmp) >= 14:
-                        count = int(tmp[4][1:-3])
-                        time = int(tmp[9][1:-3])
-                        service = int(tmp[13][1:-2])
+                    throttling_header = response.headers["X-Throttling-Control"]
+                    match = re.search(
+                        r"Request Count status: \w+ \((\d+)%\), "
+                        r"Request Time status: \w+ \((\d+)%\), "
+                        r"Service status: \w+ \((\d+)%\)",
+                        throttling_header,
+                    )
+                    if match:
+                        count = int(match.group(1))
+                        time = int(match.group(2))
+                        service = int(match.group(3))
 
                         max_count = max(count, max_count)
                         max_time = max(time, max_time)
