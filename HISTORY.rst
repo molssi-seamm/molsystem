@@ -1,6 +1,11 @@
 =======
 History
 =======
+2025.5.19 -- Enhancements to SMILES and added PubChem standardization
+    * Added special handling for the valency of boron ions to handle compounds like BH4-,
+      which have a negative charge because boron only has 3 valence electrons.
+    * Added ability to use PubChem to standardize a molecule.
+      
 2025.5.14 -- Enhanced handling of RDKit conformers
     * Added the ability to translate a given conformer from a RDKit molecule to a SEAMM
       configuration.

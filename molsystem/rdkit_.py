@@ -146,7 +146,16 @@ class RDKitMixin:
         for at in rdk_mol.GetAtoms():
             atno = at.GetAtomicNum()
             if atno in valence:
-                charge = at.GetExplicitValence() - valence[atno]
+                if atno == 5:
+                    # Boron is a special case! Both BH4- and BH2- have a - charge.
+                    if at.GetExplicitValence() == 4:
+                        charge = -1
+                    elif at.GetExplicitValence() == 2:
+                        charge = -1
+                    else:
+                        charge = 0
+                else:
+                    charge = at.GetExplicitValence() - valence[atno]
                 if charge != 0 and at.GetFormalCharge() == 0:
                     at.SetFormalCharge(charge)
 
