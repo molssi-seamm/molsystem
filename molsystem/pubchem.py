@@ -25,7 +25,7 @@ except ModuleNotFoundError:
 
 
 def PC_standardize(structures):
-    """Use the PubChem standaridaztion service with SMILES.
+    """Use the PubChem standardization service with SMILES.
 
     Parameters
     ----------
