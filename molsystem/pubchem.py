@@ -3,6 +3,7 @@
 """Functions for handling PubChem"""
 
 import logging
+import re
 from time import perf_counter_ns, sleep
 from urllib.parse import quote as url_quote
 

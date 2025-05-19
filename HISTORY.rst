@@ -2,7 +2,7 @@
 History
 =======
 2025.5.19 -- Enhancements to SMILES and added PubChem standardization
-    * Add special handling for the valency of boron ions to handle compounds like BH4-,
+    * Added special handling for the valency of boron ions to handle compounds like BH4-,
       which have a negative charge because boron only has 3 valence electrons.
     * Added ability to use PubChem to standardize a molecule.
       
