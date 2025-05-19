@@ -3,6 +3,7 @@
 """Functions for handling PubChem"""
 
 import logging
+from time import perf_counter_ns, sleep
 from urllib.parse import quote as url_quote
 
 import requests
@@ -21,6 +22,110 @@ except ModuleNotFoundError:
         "To use PubChem, please install pubchempy using conda:\n"
         "     conda install -c conda-forge pubchempy"
     )
+
+
+def PC_standardize(structures):
+    """Use the PubChem standaridaztion service with SMILES.
+
+    Parameters
+    ----------
+    structures : [str]
+        The SMILES of the structures to standardize
+
+    Returns
+    -------
+    [{str: str}]
+        A list of dicts of the results.
+
+    Note:
+        The response contains information to throttle the requests, like this:
+
+        X-Throttling-Control: Request Count status: Green (0%),
+                              Request Time status: Green (0%),
+                              Service status: Green (20%)
+    """
+    results = []
+    max_count = 0
+    max_time = 0
+    max_service = 0
+    n_sleep = 0
+    with requests.Session() as session:
+        t0 = perf_counter_ns()
+        for SMILES in structures:
+            while True:
+                response = session.post(
+                    f"{pug_url}/standardize/SMILES/JSON",
+                    data={"smiles": SMILES, "include_components": False},
+                )
+
+                # Check the throttling request
+                if "X-Throttling-Control" in response.headers:
+                    tmp = response.headers["X-Throttling-Control"].split()
+                    if len(tmp) >= 14:
+                        count = int(tmp[4][1:-3])
+                        time = int(tmp[9][1:-3])
+                        service = int(tmp[13][1:-2])
+
+                        max_count = max(count, max_count)
+                        max_time = max(time, max_time)
+                        max_service = max(service, max_service)
+
+                        if count > 75 or time > 75 or service > 75:
+                            n_sleep += 1
+                            sleep(1)
+
+                if response.status_code == 503:
+                    print("status code = 503")
+                    continue
+
+                response.raise_for_status()
+
+                break
+
+            data = response.json()
+
+            # Pull out some info from the data
+            cmpds = data["PC_Compounds"]
+            if len(cmpds) > 1:
+                raise ValueError(
+                    f"There are {len(cmpds)} in the PubChem standardization!"
+                )
+
+            cmpd = cmpds[0]
+            result = {"original SMILES": SMILES}
+            if "id" in cmpd and "id" in cmpd["id"] and "cid" in cmpd["id"]["id"]:
+                result["cid"] = cmpd["id"]["id"]["cid"]
+
+            for props in cmpd["props"]:
+                if "urn" in props and "value" in props and "label" in props["urn"]:
+                    key = props["urn"]["label"]
+                    value = props["value"]
+                    _type = [*value.keys()][0]
+                    if _type == "sval":
+                        result[key] = value[_type]
+                    else:
+                        raise TypeError(f"Unknown type {_type} in compound properties.")
+
+            results.append(result)
+        t1 = perf_counter_ns()
+        t = (t1 - t0) / 1000000000
+        n = len(structures)
+        per = t / n
+
+    return {
+        "data": results,
+        "n_structures": len(structures),
+        "throttling": {
+            "maximum count": max_count,
+            "maximum time": max_time,
+            "maximum service": max_service,
+            "number of slowdowns": n_sleep,
+        },
+        "time": {
+            "total": t,
+            "per structure": per,
+        },
+    }
 
 
 class PubChemMixin:
