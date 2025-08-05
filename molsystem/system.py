@@ -282,6 +282,8 @@ class _System(CIFMixin, MutableMapping):
         if result is None:
             return None
         else:
+            if result[0] is None:
+                return ""
             return result[0]
 
     @name.setter
