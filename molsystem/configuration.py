@@ -460,6 +460,8 @@ class _Configuration(
                 "SELECT name FROM configuration WHERE id = ?", (self.id,)
             )
             self._name = self.cursor.fetchone()[0]
+            if self._name is None:
+                self._name = ""
         return self._name
 
     @name.setter

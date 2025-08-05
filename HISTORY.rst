@@ -1,6 +1,11 @@
 =======
 History
 =======
+2025.8.5 -- Bugfix: Ensure that the name of systems and configurations is a string.
+    * The name of a system or configuration could be None, not a string, which then
+      caused problems in other parts of the code. Now, if there is no name, it is
+      returned as an empty string.
+
 2025.5.19 -- Enhancements to SMILES and added PubChem standardization
     * Added special handling for the valency of boron ions to handle compounds like BH4-,
       which have a negative charge because boron only has 3 valence electrons.
