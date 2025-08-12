@@ -1,6 +1,13 @@
 =======
 History
 =======
+2025.8.12 -- Bugfix: fixed error with duplicate property values
+    * Fixed a bug where if a property value was put in the database more than once, it
+      created multiple entries rather than updating the original value. This led to
+      e.g. bad property values in SDF files.
+    * Added the 'spin_state' property to Configurations, which returns the spin
+      state, e.g. singlet, triplet,  corresponding to the spin multiplicity.
+
 2025.8.5 -- Bugfix: Ensure that the name of systems and configurations is a string.
     * The name of a system or configuration could be None, not a string, which then
       caused problems in other parts of the code. Now, if there is no name, it is

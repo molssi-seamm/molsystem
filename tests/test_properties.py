@@ -42,6 +42,38 @@ def test_query(AceticAcid):
     assert properties.query(what=["dipole moment"]) == {"dipole moment": [2.0]}
 
 
+def test_duplicate_put(AceticAcid):
+    """Test putting twice ... should only get one back with last value"""
+    cid = AceticAcid.id
+    properties = AceticAcid.system_db.properties
+    properties.add("dipole moment")
+    properties.put(cid, "dipole moment", 2.0)
+    properties.put(cid, "dipole moment", 3.0)
+
+    assert properties.query(what=["dipole moment"]) == {"dipole moment": [3.0]}
+
+
+def test_system_put(AceticAcid):
+    """Test putting some properties and values in a system."""
+    system = AceticAcid.system
+    properties = system.properties
+    properties.add("dipole moment")
+    properties.put("dipole moment", 2.0)
+    result = properties.get("dipole moment")
+    assert result["dipole moment"]["value"] == 2.0
+
+
+def test_duplicate_system_put(AceticAcid):
+    """Test putting some properties and values in a system twice."""
+    system = AceticAcid.system
+    properties = system.properties
+    properties.add("dipole moment")
+    properties.put("dipole moment", 2.0)
+    properties.put("dipole moment", 3.0)
+    result = properties.get("dipole moment")
+    assert result["dipole moment"]["value"] == 3.0
+
+
 def test_query2(properties):
     """Test a simple query"""
     result = properties.query(
