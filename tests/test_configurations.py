@@ -56,3 +56,11 @@ def test_copy_periodic(vanadium):
     copy.cell.parameters = [3.03, 3.03, 3.03, 90, 90, 91]
 
     assert original.cell.parameters != copy.cell.parameters
+
+
+def test_spin(AceticAcid):
+    """Test the spin multiplicity."""
+    assert AceticAcid.spin_multiplicity == 1
+    assert AceticAcid.spin_state == "singlet"
+    AceticAcid.spin_state = "Triplet"
+    assert AceticAcid.spin_multiplicity == 3

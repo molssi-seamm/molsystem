@@ -647,6 +647,8 @@ class _Properties(object):
     def put(self, _id, _property, value, is_system=False):
         """Store the given property value for the configuration or system
 
+        If the property value already exists, overwrite it in situ.
+
         Parameters
         ----------
         _id : int
@@ -674,21 +676,51 @@ class _Properties(object):
             value = json.dumps(value, separators=(",", ":"))
 
         if is_system:
+            # Check if a value already exists
             sql = (
-                f"INSERT INTO {ptype}_data (system, property, value)"
-                "      VALUES(?, ?, ?)"
+                f"SELECT COUNT(*) FROM {ptype}_data WHERE system = ? AND "
+                "configuration is Null AND property = ?"
             )
-            self.db.execute(sql, (_id, pid, value))
+            self.cursor.execute(sql, (_id, pid))
+            if self.cursor.fetchone()[0] == 0:
+                # Not there so add
+                sql = (
+                    f"INSERT INTO {ptype}_data (system, property, value)"
+                    "      VALUES(?, ?, ?)"
+                )
+                self.db.execute(sql, (_id, pid, value))
+            else:
+                # update in place
+                sql = (
+                    f"UPDATE {ptype}_data SET value = ? WHERE system = ? AND "
+                    "configuration is Null AND property = ?"
+                )
+                self.db.execute(sql, (value, _id, pid))
         else:
             # Get the system id
             self.cursor.execute("SELECT system FROM configuration WHERE id = ?", (_id,))
             sid = self.cursor.fetchone()[0]
 
+            # Check if a value already exists
             sql = (
-                f"INSERT INTO {ptype}_data (configuration, system, property, value)"
-                "      VALUES(?, ?, ?, ?)"
+                f"SELECT COUNT(*) FROM {ptype}_data WHERE system = ? AND "
+                "configuration = ? AND property = ?"
             )
-            self.db.execute(sql, (_id, sid, pid, value))
+            self.cursor.execute(sql, (sid, _id, pid))
+            if self.cursor.fetchone()[0] == 0:
+                # Not there so add
+                sql = (
+                    f"INSERT INTO {ptype}_data (configuration, system, property, value)"
+                    "      VALUES(?, ?, ?, ?)"
+                )
+                self.db.execute(sql, (_id, sid, pid, value))
+            else:
+                # update in place
+                sql = (
+                    f"UPDATE {ptype}_data SET value = ? WHERE system = ? AND "
+                    "configuration = ? AND property = ?"
+                )
+                self.db.execute(sql, (value, sid, _id, pid))
 
     def query(self, *args, what=["configuration"]):
         """Find configurations that match the query defined by the args.

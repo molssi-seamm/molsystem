@@ -33,6 +33,19 @@ from .topology import TopologyMixin
 
 logger = logging.getLogger(__name__)
 
+spin_states = (
+    "singlet",
+    "doublet",
+    "triplet",
+    "quartet",
+    "quintet",
+    "sextet",
+    "septet",
+    "octet",
+    "nonet",
+    "decet",
+)
+
 
 class _Configuration(
     PDBMixin,
@@ -588,6 +601,37 @@ class _Configuration(
         )
         self.db.commit()
         self._spin_multiplicity = value
+
+    @property
+    def spin_state(self):
+        """Return the text spin state, lke 'triplet'.
+
+        Returns
+        -------
+        state : str
+            The spin state as text, e.g. singlet, doublet, etc.
+        """
+        if self.spin_multiplicity < len(spin_states):
+            state = spin_states[self.spin_multiplicity - 1]
+        else:
+            state = f"{self.spin_multiplicity}-let"
+        return state
+
+    @spin_state.setter
+    def spin_state(self, value):
+        tmp = value.lower()
+        if tmp in spin_states:
+            self.spin_multiplicity = spin_states.index(tmp) + 1
+            return
+
+        if value.endswith("-let"):
+            try:
+                multiplicity = int(value[:-5])
+            except ValueError:
+                raise ValueError(f"Unknown spin state '{value}'")
+            self.spin_multiplicity = multiplicity
+
+        raise ValueError(f"Unknown spin state '{value}'")
 
     @property
     def subsets(self):
