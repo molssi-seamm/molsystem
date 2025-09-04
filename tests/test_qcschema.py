@@ -3,36 +3,127 @@
 
 """Tests for the QCSchema mixin of the class."""
 
+import json
 import pprint  # noqa: F401
 import pytest  # noqa: F401
 
 
 def test_water(H2O):
     """Test creating QCSchema for water."""
-    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["O", "H", "H"], "geometry": [0.0, 0.0, 0.0, 1.430428808, 0.0, 1.107157044, -1.430428808, 0.0, 1.107157044], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1]], "fragments": [[0, 1, 2]], "name": "water / TIP3P", "atom_labels": ["O", "H1", "H2"]}'  # noqa: E501
+    correct = {
+        "schema_name": "qcschema_molecule",
+        "schema_version": 2,
+        "symbols": ["O", "H", "H"],
+        "geometry": [0.0, 0.0, 0.0, 1.430429, 0.0, 1.107157, -1.430429, 0.0, 1.107157],
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "connectivity": [[0, 1, 1], [0, 2, 1]],
+        "fragments": [[0, 1, 2]],
+        "name": "water / TIP3P",
+        "atom_labels": ["O", "H1", "H2"],
+    }
 
     data = H2O.to_qcschema_json()
 
-    if correct != data:
-        print("----")
-        print(data)
-        print("----")
+    result = json.loads(data)
+    result["geometry"] = [round(v, 6) for v in result["geometry"]]
+    for key in correct.keys():
+        if key not in result:
+            print("----")
+            pprint.pp(result)
+            print("----")
 
-    assert data == correct
+            assert False, f"{key} missing from result"
+        elif correct[key] != result[key]:
+            print("----")
+            pprint.pp(result)
+            print("----")
+
+            print(f"values for {key} differ!")
+            assert correct[key] == result[key]
+
+    for key in result.keys():
+        if key not in correct:
+            print("----")
+            pprint.pp(result)
+            print("----")
+
+            assert False, f"extra key '{key}' in result"
 
 
 def test_acetic_acid(AceticAcid):
     """Test creating QCSchema for actic acid."""
-    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"], "geometry": [2.040337297, 0.034204043, -0.034770961, 1.092639645, 5.929204689, 0.531579959, 1.362303563, -1.272919518, -1.485135761, 1.332634863, -0.593940921, 1.800720024, 1.079600535, 2.626530341, -0.597342428, -0.250010766, 3.239368523, -2.375007793, 1.84380578, 4.340700908, 1.118528893, 4.105241033, 0.030424591, -0.057825619], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1], [4, 5, 2], [4, 6, 1], [6, 7, 1]], "fragments": [[0, 1, 2, 3, 4, 5, 6, 7]], "name": "acetic acid / acetic acid"}'  # noqa: E501
+    correct = {
+        "schema_name": "qcschema_molecule",
+        "schema_version": 2,
+        "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"],
+        "geometry": [
+            2.040337,
+            0.034204,
+            -0.034771,
+            1.09264,
+            5.929205,
+            0.53158,
+            1.362304,
+            -1.27292,
+            -1.485136,
+            1.332635,
+            -0.593941,
+            1.80072,
+            1.079601,
+            2.62653,
+            -0.597342,
+            -0.250011,
+            3.239369,
+            -2.375008,
+            1.843806,
+            4.340701,
+            1.118529,
+            4.105241,
+            0.030425,
+            -0.057826,
+        ],
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "connectivity": [
+            [0, 1, 1],
+            [0, 2, 1],
+            [0, 3, 1],
+            [0, 4, 1],
+            [4, 5, 2],
+            [4, 6, 1],
+            [6, 7, 1],
+        ],
+        "fragments": [[0, 1, 2, 3, 4, 5, 6, 7]],
+        "name": "acetic acid / acetic acid",
+    }
 
     data = AceticAcid.to_qcschema_json()
 
-    if correct != data:
-        print("----")
-        print(data)
-        print("----")
+    result = json.loads(data)
+    result["geometry"] = [round(v, 6) for v in result["geometry"]]
+    for key in correct.keys():
+        if key not in result:
+            print("----")
+            pprint.pp(result)
+            print("----")
 
-    assert data == correct
+            assert False, f"{key} missing from result"
+        elif correct[key] != result[key]:
+            print("----")
+            pprint.pp(result)
+            print("----")
+
+            print(f"values for {key} differ!")
+            assert correct[key] == result[key]
+
+    for key in result.keys():
+        if key not in correct:
+            print("----")
+            pprint.pp(result)
+            print("----")
+
+            assert False, f"extra key '{key}' in result"
 
 
 def test_from_schema(configuration, AceticAcid):

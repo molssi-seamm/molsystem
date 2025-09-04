@@ -137,9 +137,10 @@ class RDKitMixin:
             5: Chem.BondType.AROMATIC,
         }
         for row in self.bonds.bonds():
-            rdk_mol.AddBond(
-                index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
-            )
+            if row["bondorder"] > 0:
+                rdk_mol.AddBond(
+                    index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
+                )
 
         # Check for NH4+ type groups and set their charge
         rdk_mol.UpdatePropertyCache(strict=False)
