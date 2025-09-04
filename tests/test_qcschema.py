@@ -11,7 +11,6 @@ def test_water(H2O):
     """Test creating QCSchema for water."""
     correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["O", "H", "H"], "geometry": [0.0, 0.0, 0.0, 1.43042881, 0.0, 1.10715704, -1.43042881, 0.0, 1.10715704], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1]], "fragments": [[0, 1, 2]], "name": "water / TIP3P", "atom_labels": ["O", "H1", "H2"]}'
 
-
     data = H2O.to_qcschema_json()
 
     if correct != data:
