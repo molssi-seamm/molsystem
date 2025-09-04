@@ -11,10 +11,10 @@ import pytest  # noqa: F401
 def test_water(H2O):
     """Test creating QCSchema for water."""
     correct = {
-        'schema_name': 'qcschema_molecule',
-        'schema_version': 2,
-        'symbols': ['O', 'H', 'H'],
-        'geometry': [
+        "schema_name": "qcschema_molecule",
+        "schema_version": 2,
+        "symbols": ["O", "H", "H"],
+        "geometry": [
             0.0,
             0.0,
             0.0,
@@ -25,12 +25,12 @@ def test_water(H2O):
             0.0,
             1.10715704,
         ],
-        'molecular_charge': 0,
-        'molecular_multiplicity': 1,
-        'connectivity': [[0, 1, 1], [0, 2, 1]],
-        'fragments': [[0, 1, 2]],
-        'name': 'water / TIP3P',
-        'atom_labels': ['O', 'H1', 'H2'],
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "connectivity": [[0, 1, 1], [0, 2, 1]],
+        "fragments": [[0, 1, 2]],
+        "name": "water / TIP3P",
+        "atom_labels": ["O", "H1", "H2"],
     }
 
     data = H2O.to_qcschema_json()
@@ -63,10 +63,10 @@ def test_water(H2O):
 def test_acetic_acid(AceticAcid):
     """Test creating QCSchema for actic acid."""
     correct = {
-        'schema_name': 'qcschema_molecule',
-        'schema_version': 2,
-        'symbols': ['C', 'H', 'H', 'H', 'C', 'O', 'O', 'H'],
-        'geometry': [
+        "schema_name": "qcschema_molecule",
+        "schema_version": 2,
+        "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"],
+        "geometry": [
             2.0403373,
             0.03420404,
             -0.03477096,
@@ -92,9 +92,9 @@ def test_acetic_acid(AceticAcid):
             0.03042459,
             -0.05782562,
         ],
-        'molecular_charge': 0,
-        'molecular_multiplicity': 1,
-        'connectivity': [
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "connectivity": [
             [0, 1, 1],
             [0, 2, 1],
             [0, 3, 1],
@@ -103,8 +103,8 @@ def test_acetic_acid(AceticAcid):
             [4, 6, 1],
             [6, 7, 1],
         ],
-        'fragments': [[0, 1, 2, 3, 4, 5, 6, 7]],
-        'name': 'acetic acid / acetic acid'
+        "fragments": [[0, 1, 2, 3, 4, 5, 6, 7]],
+        "name": "acetic acid / acetic acid",
     }
 
     data = AceticAcid.to_qcschema_json()
