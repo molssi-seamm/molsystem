@@ -24,10 +24,10 @@ class QCSchemaMixin:
         result["symbols"] = [*self.atoms.symbols]
         factor = Q_(1.0, "Å").m_as("a_0")
         xyz = []
-        # round() below helps tests work across platforms. 9 digits are enough!
+        # round() below helps tests work across platforms. 8 digits are enough!
         for row in self.atoms.get_coordinates(fractionals=False):
             for val in row:
-                xyz.append(round(val * factor, 9))
+                xyz.append(round(val * factor, 8))
         result["geometry"] = xyz
 
         # Charge and multiplicity

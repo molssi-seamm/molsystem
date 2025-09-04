@@ -9,7 +9,8 @@ import pytest  # noqa: F401
 
 def test_water(H2O):
     """Test creating QCSchema for water."""
-    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["O", "H", "H"], "geometry": [0.0, 0.0, 0.0, 1.430428808, 0.0, 1.107157044, -1.430428808, 0.0, 1.107157044], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1]], "fragments": [[0, 1, 2]], "name": "water / TIP3P", "atom_labels": ["O", "H1", "H2"]}'  # noqa: E501
+    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["O", "H", "H"], "geometry": [0.0, 0.0, 0.0, 1.43042881, 0.0, 1.10715704, -1.43042881, 0.0, 1.10715704], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1]], "fragments": [[0, 1, 2]], "name": "water / TIP3P", "atom_labels": ["O", "H1", "H2"]}'
+
 
     data = H2O.to_qcschema_json()
 
@@ -23,7 +24,7 @@ def test_water(H2O):
 
 def test_acetic_acid(AceticAcid):
     """Test creating QCSchema for actic acid."""
-    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"], "geometry": [2.040337297, 0.034204043, -0.034770961, 1.092639645, 5.929204689, 0.531579959, 1.362303563, -1.272919518, -1.485135761, 1.332634863, -0.593940921, 1.800720024, 1.079600535, 2.626530341, -0.597342428, -0.250010766, 3.239368523, -2.375007793, 1.84380578, 4.340700908, 1.118528893, 4.105241033, 0.030424591, -0.057825619], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1], [4, 5, 2], [4, 6, 1], [6, 7, 1]], "fragments": [[0, 1, 2, 3, 4, 5, 6, 7]], "name": "acetic acid / acetic acid"}'  # noqa: E501
+    correct = '{"schema_name": "qcschema_molecule", "schema_version": 2, "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"], "geometry": [2.0403373, 0.03420404, -0.03477096, 1.09263965, 5.92920469, 0.53157996, 1.36230356, -1.27291952, -1.48513576, 1.33263486, -0.59394092, 1.80072002, 1.07960053, 2.62653034, -0.59734243, -0.25001077, 3.23936852, -2.37500779, 1.84380578, 4.34070091, 1.11852889, 4.10524103, 0.03042459, -0.05782562], "molecular_charge": 0, "molecular_multiplicity": 1, "connectivity": [[0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1], [4, 5, 2], [4, 6, 1], [6, 7, 1]], "fragments": [[0, 1, 2, 3, 4, 5, 6, 7]], "name": "acetic acid / acetic acid"}'
 
     data = AceticAcid.to_qcschema_json()
 
