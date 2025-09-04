@@ -559,6 +559,14 @@ class _Configuration(
     def periodicity(self, value):
         if value < 0 or value > 3:
             raise ValueError("The periodicity must be between 0 and 3.")
+
+        # If making non-periodic, need to convert fractionals to Cartesians
+        if self.periodicity != 0 and value == 0:
+            toCartesians = True
+            xyz = self.atoms.get_coordinates(fractionals=False, in_cell="molecule")
+        else:
+            toCartesians = False
+
         self.cursor.execute(
             "UPDATE configuration SET periodicity = ? WHERE id = ?", (value, self.id)
         )
@@ -568,6 +576,10 @@ class _Configuration(
             self.symmetry.group = "C1"
         else:
             self.symmetry.group = "P 1"
+
+        # And put the Cartesians back in
+        if toCartesians:
+            self.atoms.set_coordinates(xyz)
 
     @property
     def properties(self):

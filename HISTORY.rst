@@ -1,6 +1,13 @@
 =======
 History
 =======
+2025.9.4 -- Bugfixes: periodic cells and bonds
+    * Fixed an error reading periodic CIF files that have symmetry
+    * Corrected an error lowering the periodicity of a configuration from periodic to
+      molecular. The coordinates are now automatically converted from fractionals to
+      Cartesians
+    * Protected against an error using RDKit if a bond order was zero.
+
 2025.8.12 -- Bugfix: fixed error with duplicate property values
     * Fixed a bug where if a property value was put in the database more than once, it
       created multiple entries rather than updating the original value. This led to

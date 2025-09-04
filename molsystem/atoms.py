@@ -825,7 +825,19 @@ class _Atoms(_Table):
             data = {}
             properties = [*self.attributes.keys()]
             for name in properties:
-                if name in ("id", "x", "y", "z", "vx", "vy", "vz", "name"):
+                if name in (
+                    "id",
+                    "x",
+                    "y",
+                    "z",
+                    "vx",
+                    "vy",
+                    "vz",
+                    "gx",
+                    "gy",
+                    "gz",
+                    "name",
+                ):
                     continue
                 data[name] = self.get_property(name)
 
