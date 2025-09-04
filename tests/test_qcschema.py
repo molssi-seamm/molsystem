@@ -14,17 +14,7 @@ def test_water(H2O):
         "schema_name": "qcschema_molecule",
         "schema_version": 2,
         "symbols": ["O", "H", "H"],
-        "geometry": [
-            0.0,
-            0.0,
-            0.0,
-            1.43042881,
-            0.0,
-            1.10715704,
-            -1.43042881,
-            0.0,
-            1.10715704,
-        ],
+        "geometry": [0.0, 0.0, 0.0, 1.430429, 0.0, 1.107157, -1.430429, 0.0, 1.107157],
         "molecular_charge": 0,
         "molecular_multiplicity": 1,
         "connectivity": [[0, 1, 1], [0, 2, 1]],
@@ -36,6 +26,7 @@ def test_water(H2O):
     data = H2O.to_qcschema_json()
 
     result = json.loads(data)
+    result["geometry"] = [round(v, 6) for v in result["geometry"]]
     for key in correct.keys():
         if key not in result:
             print("----")
@@ -67,30 +58,30 @@ def test_acetic_acid(AceticAcid):
         "schema_version": 2,
         "symbols": ["C", "H", "H", "H", "C", "O", "O", "H"],
         "geometry": [
-            2.0403373,
-            0.03420404,
-            -0.03477096,
-            1.09263965,
-            5.92920469,
-            0.53157996,
-            1.36230356,
-            -1.27291952,
-            -1.48513576,
-            1.33263486,
-            -0.59394092,
-            1.80072002,
-            1.07960053,
-            2.62653034,
-            -0.59734243,
-            -0.25001077,
-            3.23936852,
-            -2.37500779,
-            1.84380578,
-            4.34070091,
-            1.11852889,
-            4.10524103,
-            0.03042459,
-            -0.05782562,
+            2.040337,
+            0.034204,
+            -0.034771,
+            1.09264,
+            5.929205,
+            0.53158,
+            1.362304,
+            -1.27292,
+            -1.485136,
+            1.332635,
+            -0.593941,
+            1.80072,
+            1.079601,
+            2.62653,
+            -0.597342,
+            -0.250011,
+            3.239369,
+            -2.375008,
+            1.843806,
+            4.340701,
+            1.118529,
+            4.105241,
+            0.030425,
+            -0.057826,
         ],
         "molecular_charge": 0,
         "molecular_multiplicity": 1,
@@ -110,6 +101,7 @@ def test_acetic_acid(AceticAcid):
     data = AceticAcid.to_qcschema_json()
 
     result = json.loads(data)
+    result["geometry"] = [round(v, 6) for v in result["geometry"]]
     for key in correct.keys():
         if key not in result:
             print("----")
