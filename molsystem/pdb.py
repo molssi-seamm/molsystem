@@ -160,6 +160,19 @@ class PDBMixin:
         lines.append("COMPND    UNNAMED")
         lines.append("AUTHOR    MolSSI SEAMM at " + date_time)
 
+        # Cell if periodic
+        #          1         2         3         4         5         6         7
+        # 123456789012345678901234567890123456789012345678901234567890123456789012345
+        # CRYST1   52.000   58.600   61.900  90.00  90.00  90.00 P 21 21 21    8
+        if self.periodicity == 3:
+            a, b, c, alpha, beta, gamma = self.cell.parameters
+            spcgrp = "P 1"
+            z = 1
+            lines.append(
+                f"CRYST1{a:9.3f}{b:9.3f}{c:9.3f}{alpha:7.2f}{beta:7.2f}{gamma:7.2f}"
+                f" {spcgrp:<11s}{z:4d}"
+            )
+
         # atoms
 
         if "resname" in atoms:
@@ -194,7 +207,7 @@ class PDBMixin:
 
         count = 0
         symbols = atoms.symbols
-        coordinates = atoms.coordinates
+        coordinates = atoms.get_coordinates(fractionals=False)
         if "name" in atoms:
             names = [
                 symbol if name is None else name

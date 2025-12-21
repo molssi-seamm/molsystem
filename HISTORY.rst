@@ -1,6 +1,11 @@
 =======
 History
 =======
+2025.12.21 -- Bugfix: Fixed errors writing PDB files
+    * No cell information (CRYST1) line was written for periodic systems.
+    * The code to write a PDB file did not enforce using Cartesian coordinates, which
+      caused problems with periodic systems.
+      
 2025.9.4 -- Bugfixes: periodic cells and bonds
     * Fixed an error reading periodic CIF files that have symmetry
     * Corrected an error lowering the periodicity of a configuration from periodic to
