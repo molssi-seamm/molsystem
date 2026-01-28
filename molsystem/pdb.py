@@ -207,7 +207,7 @@ class PDBMixin:
 
         count = 0
         symbols = atoms.symbols
-        coordinates = atoms.get_coordinates(fractionals=False)
+        coordinates = atoms.get_coordinates(fractionals=False, in_cell="molecule")
         if "name" in atoms:
             names = [
                 symbol if name is None else name

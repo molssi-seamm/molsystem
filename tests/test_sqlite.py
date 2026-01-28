@@ -5,6 +5,7 @@
 
 What is the version of SQLITE?
 """
+
 import sqlite3
 
 

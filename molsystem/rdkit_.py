@@ -7,7 +7,6 @@ import json
 import pprint
 import string
 
-
 try:
     from rdkit import Chem
 except ModuleNotFoundError:

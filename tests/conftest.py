@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Fixtures for testing the 'molsystem' package."""
+
 import math
 from pathlib import Path
 

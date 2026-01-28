@@ -1,6 +1,11 @@
 =======
 History
 =======
+2026.1.28 -- Bugfix: Ensured molecules are in the cell for PDB files.
+    * The code previously allowed molecules in PDB files to be outside the periodic
+      cell. It is not clear if this is a problem, but e.g. Packmol seems to assume that
+      they are in the cell.
+      
 2025.12.21 -- Bugfix: Fixed errors writing PDB files
     * No cell information (CRYST1) line was written for periodic systems.
     * The code to write a PDB file did not enforce using Cartesian coordinates, which
