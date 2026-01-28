@@ -178,25 +178,21 @@ class _Table(collections.abc.MutableMapping):
             other_table = other.table
         table = self.table
 
-        self.cursor.execute(
-            f"""
+        self.cursor.execute(f"""
             SELECT COUNT(*) FROM
             (SELECT rowid, * FROM {other_table}
             EXCEPT
             SELECT rowid, * FROM {table})
-            """
-        )
+            """)
         if self.cursor.fetchone()[0] != 0:
             is_same = False
         else:
-            self.cursor.execute(
-                f"""
+            self.cursor.execute(f"""
                 SELECT COUNT(*) FROM
                 (SELECT rowid, * FROM {table}
                 EXCEPT
                 SELECT rowid, * FROM {other_table})
-                """
-            )
+                """)
             if self.cursor.fetchone()[0] != 0:
                 is_same = False
 
@@ -592,20 +588,16 @@ class _Table(collections.abc.MutableMapping):
         # See about the rows added
         added = {}
         if "id" in self:
-            for row in self.db.execute(
-                f"""
+            for row in self.db.execute(f"""
                 SELECT * FROM {table}
                 WHERE rowid NOT IN (SELECT rowid FROM {other_table})
-                """
-            ):
+            """):
                 added[row["id"]] = row[1:]
         else:
-            for row in self.db.execute(
-                f"""
+            for row in self.db.execute(f"""
                 SELECT rowid, * FROM {table}
                 WHERE rowid NOT IN (SELECT rowid FROM {other_table})
-                """
-            ):
+            """):
                 added[row["rowid"]] = row[1:]
 
         if len(added) > 0:
@@ -617,20 +609,16 @@ class _Table(collections.abc.MutableMapping):
         # See about the rows deleted
         deleted = {}
         if "id" in self:
-            for row in self.db.execute(
-                f"""
+            for row in self.db.execute(f"""
                 SELECT * FROM {other_table}
                 WHERE rowid NOT IN (SELECT rowid FROM {table})
-                """
-            ):
+            """):
                 deleted[row["id"]] = row[1:]
         else:
-            for row in self.db.execute(
-                f"""
+            for row in self.db.execute(f"""
                 SELECT rowid, * FROM {other_table}
                 WHERE rowid NOT IN (SELECT rowid FROM {table})
-                """
-            ):
+            """):
                 deleted[row["rowid"]] = row[1:]
 
         if len(deleted) > 0:

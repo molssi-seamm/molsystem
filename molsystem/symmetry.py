@@ -120,14 +120,12 @@ class _Symmetry(object):
                         f"Mismatch of number of atoms in symmetry: {uvw0.shape[0]} != "
                         f"{n_atoms}"
                     )
-                logger.debug(
-                    f"""
+                logger.debug(f"""
 {n_atoms=}
 {uvw0.shape=}"
 Original coordinates
 {uvw0}
-                    """
-                )
+                    """)
 
                 uvw = np.ndarray((n_atoms, 4))
                 uvw[:, 0:3] = uvw0[:, :]
@@ -160,8 +158,7 @@ Original coordinates
                         return_inverse=True,
                     )
                     # pprint.pprint(np.round(tmp[:, :3, i], 4).tolist())
-                    logger.debug(
-                        f"""
+                    logger.debug(f"""
 {i=}: {symbols[i]}
 {np.round(tmp[:, :3, i], 4)}
 nvalues
@@ -170,8 +167,7 @@ I1
 {I1}
 I2
 {I2}
-                        """
-                    )
+                        """)
                     # Check for duplicates
                     if tuple(values[0]) in found:
                         if found[tuple(values[0])] != symbols[i]:
@@ -917,14 +913,12 @@ I2
                         f"Mismatch of number of atoms in symmetry: {uvw0.shape[0]} != "
                         f"{n_atoms}"
                     )
-                logger.debug(
-                    f"""
+                logger.debug(f"""
 {n_atoms=}
 {uvw0.shape=}"
 Original coordinates
 {uvw0}
-                    """
-                )
+                    """)
 
                 uvw = np.ndarray((n_atoms, 4))
                 uvw[:, 0:3] = uvw0[:, :]
@@ -957,8 +951,7 @@ Original coordinates
                         return_inverse=True,
                     )
                     # pprint.pprint(np.round(tmp[:, :3, i], 4).tolist())
-                    logger.debug(
-                        f"""
+                    logger.debug(f"""
 {i=}: {symbols[i]}
 {np.round(tmp[:, :3, i], 4)}
 nvalues
@@ -967,8 +960,7 @@ I1
 {I1}
 I2
 {I2}
-                        """
-                    )
+                        """)
                     # Check for duplicates
                     if tuple(values[0]) in found:
                         if found[tuple(values[0])] != symbols[i]:

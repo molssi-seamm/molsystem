@@ -35,7 +35,6 @@ except ImportError:
     pass
 from .rdkit_ import rdkit_version, rdkit_citations  # noqa: F401
 
-
 # Handle versioneer
 from ._version import get_versions
 
