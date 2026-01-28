@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2025.12.21 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.1.28 documentation</title>
   
   
   
@@ -49,9 +49,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=2934c117"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/documentation_options.js?v=77e8914b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="molsystem" href="modules.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2025.12.21" />
+  <meta name="docsearch:version" content="2026.1.28" />
   </head>
   
   
@@ -501,7 +501,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <p>Alignment methods for configurations</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.align.AlignMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">AlignMixin</span></span><a class="reference internal" href="../_modules/molsystem/align.html#AlignMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.AlignMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">AlignMixin</span></span><a class="reference internal" href="../_modules/molsystem/align.html#AlignMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.AlignMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling alignment of configuration.</p>
 <dl class="py method">
@@ -646,36 +646,36 @@ displaced atom: The index of the atom with the maximum displacement.</p>
 <span id="molsystem-cell-module"></span><h2>molsystem.cell module<a class="headerlink" href="#module-molsystem.cell" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.cell.Cell">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.cell.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/cell.html#Cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cell.Cell" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to handle cell parameters and their transformations.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.a">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#molsystem.cell.Cell.a" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#molsystem.cell.Cell.a" title="Link to this definition">#</a></dt>
 <dd><p>The length of the first cell vector.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.alpha">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#molsystem.cell.Cell.alpha" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#molsystem.cell.Cell.alpha" title="Link to this definition">#</a></dt>
 <dd><p>The angle between b and c.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.b">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#molsystem.cell.Cell.b" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#molsystem.cell.Cell.b" title="Link to this definition">#</a></dt>
 <dd><p>The length of the second cell vector.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.beta">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#molsystem.cell.Cell.beta" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#molsystem.cell.Cell.beta" title="Link to this definition">#</a></dt>
 <dd><p>The angle between a and c.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.c">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c</span></span><a class="headerlink" href="#molsystem.cell.Cell.c" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">c</span></span><a class="headerlink" href="#molsystem.cell.Cell.c" title="Link to this definition">#</a></dt>
 <dd><p>The length of the third cell vector.</p>
 </dd></dl>
 
@@ -712,13 +712,13 @@ displaced atom: The index of the atom with the maximum displacement.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.gamma">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gamma</span></span><a class="headerlink" href="#molsystem.cell.Cell.gamma" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">gamma</span></span><a class="headerlink" href="#molsystem.cell.Cell.gamma" title="Link to this definition">#</a></dt>
 <dd><p>The angle between a and b.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.parameters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#molsystem.cell.Cell.parameters" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#molsystem.cell.Cell.parameters" title="Link to this definition">#</a></dt>
 <dd><p>The cell parameters as a list.</p>
 </dd></dl>
 
@@ -859,7 +859,7 @@ description.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.cell.Cell.volume">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#molsystem.cell.Cell.volume" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#molsystem.cell.Cell.volume" title="Link to this definition">#</a></dt>
 <dd><p>The volume of the cell.</p>
 </dd></dl>
 
@@ -897,7 +897,7 @@ description.</p>
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.cif.CIFMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cif.</span></span><span class="sig-name descname"><span class="pre">CIFMixin</span></span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.cif.</span></span><span class="sig-name descname"><span class="pre">CIFMixin</span></span><a class="reference internal" href="../_modules/molsystem/cif.html#CIFMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cif.CIFMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling CIF files.</p>
 <dl class="py method">
@@ -1010,7 +1010,7 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>Interface to the CMS schema.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.cms_schema.CMSSchemaMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.cms_schema.</span></span><span class="sig-name descname"><span class="pre">CMSSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/cms_schema.html#CMSSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cms_schema.CMSSchemaMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.cms_schema.</span></span><span class="sig-name descname"><span class="pre">CMSSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/cms_schema.html#CMSSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.cms_schema.CMSSchemaMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling CMS Schema.</p>
 <dl class="py method">
@@ -1095,7 +1095,7 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>Functions for handling InChI</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.inchi.</span></span><span class="sig-name descname"><span class="pre">InChIMixin</span></span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.inchi.</span></span><span class="sig-name descname"><span class="pre">InChIMixin</span></span><a class="reference internal" href="../_modules/molsystem/inchi.html#InChIMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.inchi.InChIMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling InChI.</p>
 <dl class="py method">
@@ -1137,13 +1137,13 @@ configuration will point to it; otherwise to the last conformer.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.inchi">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchi</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchi" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">inchi</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchi" title="Link to this definition">#</a></dt>
 <dd><p>Return the InChI string for this object.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.inchi.InChIMixin.inchikey">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inchikey</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchikey" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">inchikey</span></span><a class="headerlink" href="#molsystem.inchi.InChIMixin.inchikey" title="Link to this definition">#</a></dt>
 <dd><p>Return the InChIKey string for this object.</p>
 </dd></dl>
 
@@ -1175,7 +1175,7 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>Functions for handling MDL molfiles</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.molfile.MolFileMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.molfile.</span></span><span class="sig-name descname"><span class="pre">MolFileMixin</span></span><a class="reference internal" href="../_modules/molsystem/molfile.html#MolFileMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.molfile.MolFileMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.molfile.</span></span><span class="sig-name descname"><span class="pre">MolFileMixin</span></span><a class="reference internal" href="../_modules/molsystem/molfile.html#MolFileMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.molfile.MolFileMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling MDL Molfiles.</p>
 <dl class="py method">
@@ -1217,7 +1217,7 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>Interface to openbabel.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.openbabel.</span></span><span class="sig-name descname"><span class="pre">OpenBabelMixin</span></span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.openbabel.</span></span><span class="sig-name descname"><span class="pre">OpenBabelMixin</span></span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling OpenBabel via its Python interface.</p>
 <dl class="py method">
@@ -1366,7 +1366,7 @@ configuration will point to it; otherwise to the last conformer.</p>
 <p>Interface to OpenEye OEChem.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.openeye.OpenEyeMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.openeye.</span></span><span class="sig-name descname"><span class="pre">OpenEyeMixin</span></span><a class="reference internal" href="../_modules/molsystem/openeye.html#OpenEyeMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openeye.OpenEyeMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.openeye.</span></span><span class="sig-name descname"><span class="pre">OpenEyeMixin</span></span><a class="reference internal" href="../_modules/molsystem/openeye.html#OpenEyeMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openeye.OpenEyeMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling OpenEye’s software via its Python interface.</p>
 <dl class="py method">
@@ -1517,7 +1517,7 @@ simulations.</p>
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.pdb.PDBMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.pdb.</span></span><span class="sig-name descname"><span class="pre">PDBMixin</span></span><a class="reference internal" href="../_modules/molsystem/pdb.html#PDBMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pdb.PDBMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.pdb.</span></span><span class="sig-name descname"><span class="pre">PDBMixin</span></span><a class="reference internal" href="../_modules/molsystem/pdb.html#PDBMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pdb.PDBMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling PDB files.</p>
 <dl class="py method">
@@ -1613,12 +1613,12 @@ Service status: Green (20%)</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.pubchem.PubChemMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.pubchem.</span></span><span class="sig-name descname"><span class="pre">PubChemMixin</span></span><a class="reference internal" href="../_modules/molsystem/pubchem.html#PubChemMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pubchem.PubChemMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.pubchem.</span></span><span class="sig-name descname"><span class="pre">PubChemMixin</span></span><a class="reference internal" href="../_modules/molsystem/pubchem.html#PubChemMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.pubchem.PubChemMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling the PubChem database.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.pubchem.PubChemMixin.PC_cid">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PC_cid</span></span><a class="headerlink" href="#molsystem.pubchem.PubChemMixin.PC_cid" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">PC_cid</span></span><a class="headerlink" href="#molsystem.pubchem.PubChemMixin.PC_cid" title="Link to this definition">#</a></dt>
 <dd><p>Return the PubChem CID for this structure, or None.</p>
 </dd></dl>
 
@@ -1671,7 +1671,7 @@ Service status: Green (20%)</p>
 <p>Interface to qcschema.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.qcschema.QCSchemaMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.qcschema.</span></span><span class="sig-name descname"><span class="pre">QCSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.qcschema.</span></span><span class="sig-name descname"><span class="pre">QCSchemaMixin</span></span><a class="reference internal" href="../_modules/molsystem/qcschema.html#QCSchemaMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.qcschema.QCSchemaMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling QCSchema.</p>
 <dl class="py method">
@@ -1706,7 +1706,7 @@ Service status: Green (20%)</p>
 <p>Interface to RDKit.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.rdkit_.RDKitMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.rdkit_.</span></span><span class="sig-name descname"><span class="pre">RDKitMixin</span></span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.rdkit_.</span></span><span class="sig-name descname"><span class="pre">RDKitMixin</span></span><a class="reference internal" href="../_modules/molsystem/rdkit_.html#RDKitMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.rdkit_.RDKitMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling RDKit via its Python interface.</p>
 <dl class="py method">
@@ -1794,7 +1794,7 @@ Service status: Green (20%)</p>
 <p>Functions for handling SMILES</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.smiles.GenSMARTS">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">GenSMARTS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#GenSMARTS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.GenSMARTS" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">GenSMARTS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/smiles.html#GenSMARTS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.GenSMARTS" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to generate SMARTS strings for an object.</p>
 <dl class="field-list simple">
@@ -1804,7 +1804,7 @@ Service status: Green (20%)</p>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.smiles.GenSMARTS.mol_object">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_object</span></span><a class="headerlink" href="#molsystem.smiles.GenSMARTS.mol_object" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">mol_object</span></span><a class="headerlink" href="#molsystem.smiles.GenSMARTS.mol_object" title="Link to this definition">#</a></dt>
 <dd><p>The molecular object to work with.</p>
 </dd></dl>
 
@@ -1812,12 +1812,12 @@ Service status: Green (20%)</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">SMILESMixin</span></span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.smiles.</span></span><span class="sig-name descname"><span class="pre">SMILESMixin</span></span><a class="reference internal" href="../_modules/molsystem/smiles.html#SMILESMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.smiles.SMILESMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling SMILES.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.canonical_smiles">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">canonical_smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.canonical_smiles" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">canonical_smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.canonical_smiles" title="Link to this definition">#</a></dt>
 <dd><p>Return the canonical SMILES string for this object.</p>
 </dd></dl>
 
@@ -1842,19 +1842,19 @@ Service status: Green (20%)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.isomeric_smiles">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isomeric_smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.isomeric_smiles" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">isomeric_smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.isomeric_smiles" title="Link to this definition">#</a></dt>
 <dd><p>Return the canonical, isomeric SMILES string for this object.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.smarts">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smarts</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smarts" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">smarts</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smarts" title="Link to this definition">#</a></dt>
 <dd><p>Return the SMARTS string for this object.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.smiles.SMILESMixin.smiles">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smiles" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">smiles</span></span><a class="headerlink" href="#molsystem.smiles.SMILESMixin.smiles" title="Link to this definition">#</a></dt>
 <dd><p>Return the SMILES string for this object.</p>
 </dd></dl>
 
@@ -1927,7 +1927,7 @@ Service status: Green (20%)</p>
 <p>A dictionary-like object for holding a system</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.system_db.</span></span><span class="sig-name descname"><span class="pre">SystemDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">molsystem.system_db</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.system_db.</span></span><span class="sig-name descname"><span class="pre">SystemDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;Logger</span> <span class="pre">molsystem.system_db</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#molsystem.cif.CIFMixin" title="molsystem.cif.CIFMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">CIFMixin</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></p>
 <p>A database of systems for SEAMM.</p>
 <p>A class based on a SQLite database for describing molecular and
@@ -2092,13 +2092,13 @@ descriptors</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.configuration_ids">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configuration_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configuration_ids" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">configuration_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configuration_ids" title="Link to this definition">#</a></dt>
 <dd><p>The list of configuration ids.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.configurations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configurations" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configurations" title="Link to this definition">#</a></dt>
 <dd><p>The list of configuration objects.</p>
 </dd></dl>
 
@@ -2124,7 +2124,7 @@ descriptors</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.create_table">
-<span class="sig-name descname"><span class="pre">create_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls=&lt;class</span> <span class="pre">'molsystem.table._Table'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.create_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.create_table" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;class</span> <span class="pre">'molsystem.table._Table'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.create_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.create_table" title="Link to this definition">#</a></dt>
 <dd><p>Create a new table with the given name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2144,19 +2144,19 @@ descriptors</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.cursor">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.cursor" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cursor</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.cursor" title="Link to this definition">#</a></dt>
 <dd><p>A database cursor.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.db">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">db</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db" title="Link to this definition">#</a></dt>
 <dd><p>The database connection.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.db_version">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db_version</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db_version" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">db_version</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db_version" title="Link to this definition">#</a></dt>
 <dd><p>The version string for the database.</p>
 </dd></dl>
 
@@ -2193,7 +2193,7 @@ descriptors</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.filename">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.filename" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.filename" title="Link to this definition">#</a></dt>
 <dd><p>The name of the file (or URI) for the database.</p>
 </dd></dl>
 
@@ -2345,43 +2345,43 @@ descriptors</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_configurations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_configurations" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_configurations</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_configurations" title="Link to this definition">#</a></dt>
 <dd><p>The number of configurations in the database.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_systems">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_systems" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_systems" title="Link to this definition">#</a></dt>
 <dd><p>The number of systems in the database.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.n_templates">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_templates" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.n_templates" title="Link to this definition">#</a></dt>
 <dd><p>The number of templates.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.names">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.names" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.names" title="Link to this definition">#</a></dt>
 <dd><p>The names of the system.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.parent">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.parent" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.parent" title="Link to this definition">#</a></dt>
 <dd><p>The parent of this, i.e. a Systems object.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.properties">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.properties" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.properties" title="Link to this definition">#</a></dt>
 <dd><p>The class to handle the properties.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.system">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">system</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">system</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system" title="Link to this definition">#</a></dt>
 <dd><p>The current system object.</p>
 </dd></dl>
 
@@ -2404,19 +2404,19 @@ descriptors</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.system_ids">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">system_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system_ids" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">system_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.system_ids" title="Link to this definition">#</a></dt>
 <dd><p>The list of system ids.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.systems">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.systems" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">systems</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.systems" title="Link to this definition">#</a></dt>
 <dd><p>The list of system objects.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.templates">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.templates" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">templates</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.templates" title="Link to this definition">#</a></dt>
 <dd><p>The defined templates.</p>
 </dd></dl>
 
@@ -2448,7 +2448,7 @@ descriptors</p>
 <p>Topological methods for the system</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="molsystem.topology.TopologyMixin">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">molsystem.topology.</span></span><span class="sig-name descname"><span class="pre">TopologyMixin</span></span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.topology.</span></span><span class="sig-name descname"><span class="pre">TopologyMixin</span></span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling topology in a configuration.</p>
 <dl class="py method">
