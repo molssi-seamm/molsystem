@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import csv
+import importlib
 import json
 import logging
 from pathlib import Path
-import pkg_resources
 
 logger = logging.getLogger(__name__)
 standard_properties = {}
@@ -64,7 +64,7 @@ def add_properties_from_file(path):
                     data[key] = value
 
 
-path = Path(pkg_resources.resource_filename(__name__, "data/"))
+path = Path(importlib.resources.files("molsystem")) / "data"
 csv_file = path / "standard_properties.csv"
 add_properties_from_file(csv_file)
 

@@ -229,4 +229,14 @@ class _Subsets(_Table):
             )
             return [[*x] for x in self.db.execute(sql)]
         else:
-            raise NotImplementedError("get_counts only take 'all' configurations")
+            if isinstance(configuration, int):
+                cid = configuration
+            else:
+                cid = configuration.id
+            sql = (
+                "SELECT subset.configuration, name, count(1) FROM subset, template "
+                " WHERE template = template.id and subset.configuration = ?"
+                " GROUP BY subset.configuration, name "
+                " ORDER BY subset.configuration"
+            )
+            return [[*x] for x in self.db.execute(sql, (cid,))]

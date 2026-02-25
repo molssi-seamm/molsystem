@@ -942,7 +942,7 @@ class _SubsetBonds(_Bonds):
            AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
            AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
         """
-        self.cursor.execute(sql, (self.bondset, self.subset_id))
+        self.cursor.execute(sql, (self.bondset, self._sid))
         return self.cursor.fetchone()[0]
 
     @property
@@ -984,7 +984,7 @@ class _SubsetBonds(_Bonds):
            AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
            AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
         """
-        return self.db.execute(sql, (self.bondset, self.subset_id))
+        return self.db.execute(sql, (self.bondset, self._sid, self._sid))
 
     def contains_bond(self, i, j):
         """Whether there is a bond between atoms i and j."""
@@ -998,7 +998,7 @@ class _SubsetBonds(_Bonds):
            AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
            AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
         """
-        self.cursor.execute(sql, (i, j, self.bondset, self.subset_id))
+        self.cursor.execute(sql, (i, j, self.bondset, self._sid))
         return self.cursor.fetchone()[0] == 1
 
     def delete_bond(self, i, j=None, force=False):
@@ -1045,7 +1045,7 @@ class _SubsetBonds(_Bonds):
                AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
                AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
             """
-            self.cursor.execute(sql, (i, self.bondset, self.subset_id, self.subset_id))
+            self.cursor.execute(sql, (i, self.bondset, self._sid, self._sid))
             row = self.cursor.fetchone()
             if row is None and not force:
                 raise KeyError(f"No bond id = {i} found")
@@ -1059,9 +1059,7 @@ class _SubsetBonds(_Bonds):
                AND i IN (SELECT atom FROM subset_atom WHERE subset = ?)
                AND j IN (SELECT atom FROM subset_atom WHERE subset = ?)
             """
-            self.cursor.execute(
-                sql, (i, j, self.bondset, self.subset_id, self.subset_id)
-            )
+            self.cursor.execute(sql, (i, j, self.bondset, self._sid, self._sid))
             row = self.cursor.fetchone()
             if row is None and not force:
                 raise KeyError(f"No bond from {i} to {j} found")
@@ -1087,10 +1085,10 @@ class _SubsetBonds(_Bonds):
                   SELECT bond FROM bondset_bond WHERE bondset = {self.bondset}
                )
                AND i IN (
-                  SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+                  SELECT atom FROM subset_atom WHERE subset = {self._sid}
                )
                AND j IN (
-                  SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+                  SELECT atom FROM subset_atom WHERE subset = {self._sid}
             )
             """
             return _FrozenColumn(self, key, sql)
@@ -1101,10 +1099,10 @@ class _SubsetBonds(_Bonds):
                   SELECT bond FROM bondset_bond WHERE bondset = {self.bondset}
                )
                AND i IN (
-                  SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+                  SELECT atom FROM subset_atom WHERE subset = {self._sid}
                )
                AND j IN (
-                  SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+                  SELECT atom FROM subset_atom WHERE subset = {self._sid}
             )
             """
             return _Column(self, key, sql)
@@ -1128,10 +1126,10 @@ class _SubsetBonds(_Bonds):
               SELECT bond FROM bondset_bond WHERE bondset = {self.bondset}
            )
            AND i IN (
-              SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+              SELECT atom FROM subset_atom WHERE subset = {self._sid}
            )
            AND j IN (
-              SELECT atom FROM subset_atom WHERE subset = {self.subset_id}
+              SELECT atom FROM subset_atom WHERE subset = {self._sid}
         )
         """
         return [row[0] for row in self.db.execute(sql)]

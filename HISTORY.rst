@@ -1,6 +1,9 @@
 =======
 History
 =======
+2026.2.25 -- Bugfix: Fixed issues getting atoms and bonds for subsets.
+    * Also replaced deprecated pkg_index module with the importlib module.
+      
 2026.1.28 -- Bugfix: Ensured molecules are in the cell for PDB files.
     * The code previously allowed molecules in PDB files to be outside the periodic
       cell. It is not clear if this is a problem, but e.g. Packmol seems to assume that
