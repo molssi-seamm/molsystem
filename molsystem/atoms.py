@@ -1855,6 +1855,17 @@ class _SubsetAtoms(_Atoms):
         return self.cursor.fetchone()[0]
 
     @property
+    def symbols(self):
+        """The element symbols for the atoms in this subset
+
+        Returns
+        -------
+        [str]
+            The element symbols
+        """
+        return elements.to_symbols(self.atomic_numbers)
+
+    @property
     def template(self):
         """The template for this subset."""
         if self._template is None:
@@ -2103,6 +2114,7 @@ class _SubsetAtoms(_Atoms):
         SELECT at.id
           FROM atom as at, coordinates as co, subset_atom as sa
          WHERE at.id = sa.atom
+           AND co.atom = sa.atom
            AND co.configuration = ?
            AND sa.subset = ?
         """
