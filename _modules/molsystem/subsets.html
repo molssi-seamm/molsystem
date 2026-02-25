@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.subsets &#8212; MolSystem 2026.1.28 documentation</title>
+    <title>molsystem.subsets &#8212; MolSystem 2026.2.25 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=77e8914b"></script>
+    <script src="../../_static/documentation_options.js?v=3b3878d4"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.1.28" />
+  <meta name="docsearch:version" content="2026.2.25" />
   </head>
   
   
@@ -703,7 +703,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="p">)</span>
             <span class="k">return</span> <span class="p">[[</span><span class="o">*</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;get_counts only take &#39;all&#39; configurations&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="n">configuration</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;SELECT subset.configuration, name, count(1) FROM subset, template &quot;</span>
+                <span class="s2">&quot; WHERE template = template.id and subset.configuration = ?&quot;</span>
+                <span class="s2">&quot; GROUP BY subset.configuration, name &quot;</span>
+                <span class="s2">&quot; ORDER BY subset.configuration&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[[</span><span class="o">*</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">cid</span><span class="p">,))]</span>
 </pre></div>
 
                 </article>
