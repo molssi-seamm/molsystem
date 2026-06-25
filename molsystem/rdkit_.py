@@ -20,6 +20,20 @@ from seamm_util import CompactJSONEncoder
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
+
+def _explicit_valence(atom):
+    """The atom's explicit valence, across RDKit's API rename.
+
+    Newer RDKit deprecates ``GetExplicitValence()`` in favor of
+    ``GetValence(Chem.ValenceType.EXPLICIT)``; use the new API when present and
+    fall back to the old method for older RDKit.
+    """
+    valence_type = getattr(Chem, "ValenceType", None)
+    if valence_type is not None:
+        return atom.GetValence(valence_type.EXPLICIT)
+    return atom.GetExplicitValence()
+
+
 # Valence
 valence = {
     1: 1,
@@ -148,14 +162,14 @@ class RDKitMixin:
             if atno in valence:
                 if atno == 5:
                     # Boron is a special case! Both BH4- and BH2- have a - charge.
-                    if at.GetExplicitValence() == 4:
+                    if _explicit_valence(at) == 4:
                         charge = -1
-                    elif at.GetExplicitValence() == 2:
+                    elif _explicit_valence(at) == 2:
                         charge = -1
                     else:
                         charge = 0
                 else:
-                    charge = at.GetExplicitValence() - valence[atno]
+                    charge = _explicit_valence(at) - valence[atno]
                 if charge != 0 and at.GetFormalCharge() == 0:
                     at.SetFormalCharge(charge)
 
