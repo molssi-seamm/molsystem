@@ -22,16 +22,28 @@ logger = logging.getLogger(__name__)
 
 
 def _explicit_valence(atom):
-    """The atom's explicit valence, across RDKit's API rename.
+    """The atom's explicit valence, across RDKit's API changes.
 
-    Newer RDKit deprecates ``GetExplicitValence()`` in favor of
-    ``GetValence(Chem.ValenceType.EXPLICIT)``; use the new API when present and
-    fall back to the old method for older RDKit.
+    RDKit's valence API has moved in two steps, and different installed
+    versions are at different points:
+
+    1. oldest -- ``GetExplicitValence()`` (no ``ValenceType``);
+    2. newer  -- ``GetValence(Chem.ValenceType.EXPLICIT)`` positional;
+    3. newest -- the positional form is deprecated too; it wants the keyword
+       ``GetValence(which=Chem.ValenceType.EXPLICIT)``.
+
+    Prefer the keyword form (warning-free on current RDKit), fall back to the
+    positional form, then to the old method -- so this stays quiet on every
+    version.
     """
     valence_type = getattr(Chem, "ValenceType", None)
-    if valence_type is not None:
+    if valence_type is None:
+        return atom.GetExplicitValence()
+    try:
+        return atom.GetValence(which=valence_type.EXPLICIT)
+    except TypeError:
+        # An RDKit binding with ValenceType but without the `which` keyword.
         return atom.GetValence(valence_type.EXPLICIT)
-    return atom.GetExplicitValence()
 
 
 # Valence
