@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2026.6.25 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2026.6.25.1 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=702088bc"></script>
+    <script src="../../_static/documentation_options.js?v=8af137bd"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.25" />
+  <meta name="docsearch:version" content="2026.6.25.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -510,16 +510,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_explicit_valence</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The atom&#39;s explicit valence, across RDKit&#39;s API rename.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The atom&#39;s explicit valence, across RDKit&#39;s API changes.</span>
 
-<span class="sd">    Newer RDKit deprecates ``GetExplicitValence()`` in favor of</span>
-<span class="sd">    ``GetValence(Chem.ValenceType.EXPLICIT)``; use the new API when present and</span>
-<span class="sd">    fall back to the old method for older RDKit.</span>
+<span class="sd">    RDKit&#39;s valence API has moved in two steps, and different installed</span>
+<span class="sd">    versions are at different points:</span>
+
+<span class="sd">    1. oldest -- ``GetExplicitValence()`` (no ``ValenceType``);</span>
+<span class="sd">    2. newer  -- ``GetValence(Chem.ValenceType.EXPLICIT)`` positional;</span>
+<span class="sd">    3. newest -- the positional form is deprecated too; it wants the keyword</span>
+<span class="sd">       ``GetValence(which=Chem.ValenceType.EXPLICIT)``.</span>
+
+<span class="sd">    Prefer the keyword form (warning-free on current RDKit), fall back to the</span>
+<span class="sd">    positional form, then to the old method -- so this stays quiet on every</span>
+<span class="sd">    version.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valence_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">Chem</span><span class="p">,</span> <span class="s2">&quot;ValenceType&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">valence_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">valence_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetExplicitValence</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetValence</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="n">valence_type</span><span class="o">.</span><span class="n">EXPLICIT</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c1"># An RDKit binding with ValenceType but without the `which` keyword.</span>
         <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetValence</span><span class="p">(</span><span class="n">valence_type</span><span class="o">.</span><span class="n">EXPLICIT</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetExplicitValence</span><span class="p">()</span>
 
 
 <span class="c1"># Valence</span>
