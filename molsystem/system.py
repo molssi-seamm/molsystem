@@ -6,8 +6,6 @@ from collections.abc import MutableMapping
 import logging
 import pprint  # noqa: F401
 
-import numpy as np
-
 from .cif import CIFMixin
 from .configuration import _Configuration
 from .system_properties import _SystemProperties
@@ -368,116 +366,6 @@ class _System(CIFMixin, MutableMapping):
         new.spin_multiplicity = previous.spin_multiplicity
         new.n_active_electrons = previous.n_active_electrons
         new.n_active_orbitals = previous.n_active_orbitals
-
-        return new
-
-    def create_combined_configuration(
-        self,
-        configurations,
-        transforms=None,
-        name=None,
-        make_current=False,
-    ):
-        """Create a new configuration by combining two or more configurations.
-
-        The atoms and bonds of each source configuration are concatenated into
-        a new configuration in this system, producing a single molecular system
-        that contains all the input molecules -- for example a dimer assembled
-        from two monomers, or an n-mer cluster. Each source's coordinates may be
-        transformed as it is added, which is how a partner molecule is rotated
-        and displaced into position. The source configurations are not modified.
-
-        Only non-periodic (molecular) configurations are supported; combining
-        with a periodic system (e.g. a molecule onto a surface) is not handled.
-
-        Parameters
-        ----------
-        configurations : [_Configuration]
-            The source configurations to combine, in order. They must belong to
-            the same system database as this system.
-        transforms : [array-like or None] = None
-            An optional list, parallel to ``configurations``, of 3x3 rotation or
-            4x4 affine matrices (RDKit ``TransformMol`` convention,
-            ``p' = R·p + t``) applied to each source's coordinates as it is
-            added. Use None for a source that should be placed unchanged. The
-            helpers in ``molsystem.transform`` build suitable matrices.
-        name : str = None
-            A textual name for the new configuration.
-        make_current : bool = False
-            Whether to make the new configuration the current one.
-
-        Returns
-        -------
-        _Configuration
-            The new, combined configuration.
-        """
-        configurations = list(configurations)
-        if len(configurations) == 0:
-            raise ValueError("Need at least one configuration to combine.")
-
-        if transforms is None:
-            transforms = [None] * len(configurations)
-        elif len(transforms) != len(configurations):
-            raise ValueError(
-                "'transforms' must be the same length as 'configurations'."
-            )
-
-        for cfg in configurations:
-            if cfg.periodicity != 0:
-                raise ValueError(
-                    "Combining configurations is only supported for non-periodic "
-                    "(molecular) systems."
-                )
-
-        new = self.create_configuration(
-            name=name, periodicity=0, make_current=make_current
-        )
-
-        total_charge = 0
-        for cfg, matrix in zip(configurations, transforms):
-            atnos = cfg.atoms.atomic_numbers
-            xyz = np.array(
-                cfg.atoms.get_coordinates(fractionals=False, as_array=True),
-                dtype=float,
-            )
-
-            if matrix is not None:
-                M = np.asarray(matrix, dtype=float)
-                if M.shape == (3, 3):
-                    R = M
-                    t = np.zeros(3)
-                elif M.shape == (4, 4):
-                    R = M[:3, :3]
-                    t = M[:3, 3]
-                else:
-                    raise ValueError(
-                        "Each transform must be a 3x3 or 4x4 matrix, not shape "
-                        f"{M.shape}."
-                    )
-                xyz = xyz @ R.T + t
-
-            new_ids = new.atoms.append(
-                atno=list(atnos),
-                x=xyz[:, 0].tolist(),
-                y=xyz[:, 1].tolist(),
-                z=xyz[:, 2].tolist(),
-            )
-
-            # Remap and copy this source's bonds onto the new atom ids.
-            i_ids = cfg.bonds.get_column_data("i")
-            if len(i_ids) > 0:
-                j_ids = cfg.bonds.get_column_data("j")
-                bondorders = cfg.bonds.get_column_data("bondorder")
-                id_map = dict(zip(cfg.atoms.ids, new_ids))
-                new.bonds.append(
-                    i=[id_map[a] for a in i_ids],
-                    j=[id_map[a] for a in j_ids],
-                    bondorder=bondorders,
-                )
-
-            total_charge += cfg.charge
-
-        new.charge = total_charge
 
         return new
 

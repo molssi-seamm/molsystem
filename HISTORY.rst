@@ -7,10 +7,11 @@ History
       centroid, origin, or an explicit point), and a general affine transform. Helpers
       are provided to build rotation matrices from an axis and angle, from a quaternion,
       or as a uniformly random orientation.
-    * Added a method to combine two or more configurations into a single new
-      configuration -- for example assembling a dimer or larger cluster from separate
-      molecules -- optionally rotating and displacing each molecule into place as it is
-      added.
+    * Added a method to combine two or more configurations into a new system -- for
+      example assembling a dimer or larger cluster from separate molecules -- optionally
+      rotating and displacing each molecule into place as it is added. Combining always
+      makes a new system, so further configurations added to it are conformers with the
+      same atoms and bonds.
     * These operations are supported for molecular (non-periodic) systems.
 
 2026.2.25 -- Bugfix: Fixed issues getting atoms and bonds for subsets.
