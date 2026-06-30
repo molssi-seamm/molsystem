@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.6.25.1 documentation</title>
+    <title>History &#8212; MolSystem 2026.6.29 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=8af137bd"></script>
+    <script src="_static/documentation_options.js?v=afc2a114"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.25.1" />
+  <meta name="docsearch:version" content="2026.6.29" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -505,6 +505,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.6.29 – Added geometric transforms and combining of configurations</dt><dd><ul class="simple">
+<li><p>Added rigid-body transforms for a (molecular) configuration: the center of mass
+or geometric centroid, and in-place translate, rotate (about the center of mass,
+centroid, origin, or an explicit point), and a general affine transform. Helpers
+are provided to build rotation matrices from an axis and angle, from a quaternion,
+or as a uniformly random orientation.</p></li>
+<li><p>Added a method to combine two or more configurations into a new system – for
+example assembling a dimer or larger cluster from separate molecules – optionally
+rotating and displacing each molecule into place as it is added. Combining always
+makes a new system, so further configurations added to it are conformers with the
+same atoms and bonds.</p></li>
+<li><p>These operations are supported for molecular (non-periodic) systems.</p></li>
+</ul>
+</dd>
 <dt>2026.2.25 – Bugfix: Fixed issues getting atoms and bonds for subsets.</dt><dd><ul class="simple">
 <li><p>Also replaced deprecated pkg_index module with the importlib module.</p></li>
 </ul>
