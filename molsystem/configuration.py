@@ -30,6 +30,7 @@ from .pdb import PDBMixin
 from .qcschema import QCSchemaMixin
 from .smiles import SMILESMixin
 from .topology import TopologyMixin
+from .transform import TransformMixin
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ class _Configuration(
     RDKitMixin,
     QCSchemaMixin,
     AlignMixin,
+    TransformMixin,
     object,
 ):
     """A configuration (conformer) of a system."""
