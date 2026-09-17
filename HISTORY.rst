@@ -1,6 +1,12 @@
 =======
 History
 =======
+2026.9.17.1 -- Bugfix: perceive_bonds failed with "No module named 'mendeleev'"
+    * ``perceive_bonds()`` (added in 2026.9.17) uses ``mendeleev`` for the covalent
+      radii and ``scipy`` for the neighbour search, but neither was declared as a
+      dependency, so a pip-installed molsystem raised ``ModuleNotFoundError`` on the
+      first call. Both are now install requirements (and in the conda recipe).
+
 2026.9.17 -- Added bond perception from the geometry
     * Added ``perceive_bonds()`` to configurations, which finds the bonds from the
       atomic positions and adds them, for structures read from formats that carry

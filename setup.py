@@ -49,10 +49,12 @@ setup(
     # Required packages, pulls from pip if needed; do not use for Conda
     # deployment
     install_requires=[
+        "mendeleev",
         "numpy",
         "pandas",
         "pathvalidate",
         "pycifrw",
+        "scipy",
     ],
     test_suite='tests',
 
