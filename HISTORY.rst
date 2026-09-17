@@ -1,6 +1,13 @@
 =======
 History
 =======
+2026.9.17.2 -- Bugfix: pip metadata was missing several dependencies
+    * ``pip install molsystem`` did not install ``seekpath``, ``spglib``, ``requests``,
+      ``seamm-util``, ``pubchempy`` or ``rdkit``, all of which molsystem imports, so it
+      failed to import outside a conda-forge environment (which supplied them through
+      the conda recipe). The install requirements now mirror the conda recipe, except
+      ``openbabel``, which has no usable PyPI wheels and still needs conda-forge.
+
 2026.9.17.1 -- Bugfix: perceive_bonds failed with "No module named 'mendeleev'"
     * ``perceive_bonds()`` (added in 2026.9.17) uses ``mendeleev`` for the covalent
       radii and ``scipy`` for the neighbour search, but neither was declared as a

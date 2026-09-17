@@ -48,13 +48,21 @@ setup(
 
     # Required packages, pulls from pip if needed; do not use for Conda
     # deployment
+    # Mirrors the conda recipe (conda/meta.yaml) except openbabel, which has no
+    # usable PyPI wheels and must come from conda-forge.
     install_requires=[
         "mendeleev",
         "numpy",
         "pandas",
         "pathvalidate",
+        "pubchempy",
         "pycifrw",
+        "rdkit",
+        "requests",
         "scipy",
+        "seamm-util",
+        "seekpath",
+        "spglib",
     ],
     test_suite='tests',
 

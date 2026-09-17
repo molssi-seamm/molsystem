@@ -31,8 +31,14 @@ requirements:
     - numpy
     - pandas
     - pathvalidate
+    - pubchempy
     - pycifrw
+    - rdkit
+    - requests
     - scipy
+    - seamm-util
+    - seekpath
+    - spglib
 
 test:
   imports:
