@@ -7,9 +7,11 @@ History
       no bonds such as extended XYZ trajectory frames. Atoms are bonded when closer
       than a tolerance (default 1.2) times the sum of their covalent radii; hydrogen
       is limited to one bond (the shortest); and alkali and alkaline-earth metals
-      are treated as ions and left unbonded unless requested. Periodic
-      configurations use the minimum image, so molecules straddling the cell
-      boundary are bonded correctly, and any cell shape is handled.
+      are treated as ions and left unbonded unless requested. In periodic
+      configurations every image within reach is considered and bonds carry their
+      cell offsets, so molecules straddling the cell boundary and covalent crystals
+      (e.g. diamond in any cell setting) are bonded correctly; any cell shape is
+      handled.
     * The method is designed to grow: ``method="covalent radii"`` is the first;
       others such as a Voronoi tessellation can be added behind the same call.
     * Internal: the test of Open Babel's format list now ignores formats that depend

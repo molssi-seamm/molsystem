@@ -158,3 +158,66 @@ def test_errors(configuration):
     _add(configuration, _water([0, 0, 0]), [8, 1, 1])
     with pytest.raises(ValueError):
         configuration.perceive_bonds(method="voronoi")
+
+
+def _diamond_conventional(configuration, a=3.567):
+    f = [(0, 0, 0), (0, 0.5, 0.5), (0.5, 0, 0.5), (0.5, 0.5, 0)]
+    f = f + [(x + 0.25, y + 0.25, z + 0.25) for x, y, z in f]
+    configuration.periodicity = 3
+    configuration.cell.parameters = [a, a, a, 90, 90, 90]
+    configuration.coordinate_system = "fractional"
+    configuration.atoms.append(
+        atno=[6] * 8, x=[p[0] for p in f], y=[p[1] for p in f], z=[p[2] for p in f]
+    )
+
+
+def test_diamond_conventional_cell(configuration):
+    """8-atom diamond: 16 bonds of 1.545 Å, some through the cell boundary."""
+    _diamond_conventional(configuration)
+    assert configuration.perceive_bonds() == 16
+    lengths = np.array(configuration.bonds.get_lengths())
+    assert len(lengths) == 16
+    assert np.allclose(lengths, 3.567 * math.sqrt(3) / 4, atol=1e-3)
+    # every carbon has four bonds
+    counts = np.zeros(8, dtype=int)
+    ids = list(configuration.atoms.ids)
+    for i, j in zip(*[configuration.bonds.get_column_data(k) for k in "ij"]):
+        counts[ids.index(i)] += 1
+        counts[ids.index(j)] += 1
+    assert counts.tolist() == [4] * 8
+    assert configuration.find_molecules(as_indices=True) == [list(range(8))]
+
+
+def test_diamond_primitive_cell(configuration):
+    """2-atom diamond: four bonds between the same two atoms via different images."""
+    a = 3.567 / math.sqrt(2)
+    configuration.periodicity = 3
+    configuration.cell.parameters = [a, a, a, 60, 60, 60]
+    configuration.coordinate_system = "fractional"
+    configuration.atoms.append(atno=[6, 6], x=[0, 0.25], y=[0, 0.25], z=[0, 0.25])
+    assert configuration.perceive_bonds() == 4
+    lengths = np.array(configuration.bonds.get_lengths())
+    assert np.allclose(lengths, 3.567 * math.sqrt(3) / 4, atol=1e-3)
+    symops = configuration.bonds.get_column_data("symop2")
+    assert len(set(symops)) == 4  # four distinct images
+
+
+def test_one_atom_cell_self_image_bonds(configuration):
+    """Simple-cubic polonium: each atom bonds to its own images, 3 unique bonds."""
+    a = 3.35
+    configuration.periodicity = 3
+    configuration.cell.parameters = [a, a, a, 90, 90, 90]
+    configuration.coordinate_system = "fractional"
+    configuration.atoms.append(atno=[84], x=[0.0], y=[0.0], z=[0.0])
+    assert configuration.perceive_bonds() == 3
+    assert np.allclose(configuration.bonds.get_lengths(), a, atol=1e-6)
+
+
+def test_offsets_with_unwrapped_coordinates(configuration):
+    """Stored coordinates outside [0,1) still give correct offsets and lengths."""
+    L = 10.0
+    coords = _water([L + 0.3, 5.0, 5.0])  # whole molecule sits past the far face
+    coords[1] = coords[1] - np.array([L, 0, 0])  # one H stored in the home cell
+    _add(configuration, coords, [8, 1, 1], cell=[L, L, L, 90, 90, 90])
+    assert configuration.perceive_bonds() == 2
+    assert np.allclose(configuration.bonds.get_lengths(), r_oh, atol=1e-6)

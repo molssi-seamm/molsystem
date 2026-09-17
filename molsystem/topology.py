@@ -43,9 +43,14 @@ class TopologyMixin:
     ):
         """Perceive the bonds from the geometry and add them to the configuration.
 
-        Bonds are single bonds; no attempt is made to assign bond orders. Periodic
-        configurations are handled with the minimum-image convention, so molecules
-        that straddle the cell boundary are bonded correctly. Symmetry other than
+        Bonds are single bonds; no attempt is made to assign bond orders. For a
+        periodic configuration every periodic image within reach is considered
+        and each bond is stored with the cell offset of its second atom (the
+        CIF-style ``symop2`` such as ``1_556``), so molecules that straddle the
+        cell boundary are bonded correctly and covalent crystals get all their
+        bonds -- including several bonds between the same two atoms through
+        different images (primitive diamond) and bonds from an atom to its own
+        image (a one-atom cell). Any cell shape is handled. Symmetry other than
         P1 is not supported.
 
         Parameters
@@ -97,7 +102,7 @@ class TopologyMixin:
                 )
 
         n_atoms = self.atoms.n_atoms
-        if n_atoms < 2:
+        if n_atoms == 0 or (n_atoms < 2 and self.periodicity == 0):
             return 0
 
         symbols = self.atoms.symbols
@@ -116,7 +121,7 @@ class TopologyMixin:
         if cutoff <= 0.0:
             return 0
 
-        pairs, dist = self._neighbor_pairs(cutoff)
+        pairs, dist, offsets = self._neighbor_pairs(cutoff)
 
         # Apply the criterion pair by pair.
         i, j = pairs[:, 0], pairs[:, 1]
@@ -126,27 +131,53 @@ class TopologyMixin:
             & (dist > min_distance)
             & (dist < tolerance * (r_atom[i] + r_atom[j]))
         )
-        i, j, dist = i[keep], j[keep], dist[keep]
+        i, j, dist, offsets = i[keep], j[keep], dist[keep], offsets[keep]
 
         # Enforce the per-element bond limits, keeping the shortest bonds.
         order = np.argsort(dist, kind="stable")
         count = np.zeros(n_atoms, dtype=int)
-        limit = np.array([limits.get(s, n_atoms) for s in symbols])
-        Is, Js = [], []
+        unlimited = 10**9
+        limit = np.array([limits.get(s, unlimited) for s in symbols])
+        Is, Js, Os = [], [], []
         for k in order:
             a, b = int(i[k]), int(j[k])
-            if count[a] < limit[a] and count[b] < limit[b]:
+            if a == b:
+                # A bond from an atom to its own periodic image counts twice.
+                if count[a] + 2 > limit[a]:
+                    continue
+                count[a] += 2
+            else:
+                if count[a] >= limit[a] or count[b] >= limit[b]:
+                    continue
                 count[a] += 1
                 count[b] += 1
-                Is.append(a)
-                Js.append(b)
+            Is.append(a)
+            Js.append(b)
+            Os.append(offsets[k])
 
         if len(Is) == 0:
             return 0
 
         ids = self.atoms.ids
+        kwargs = {}
+        if self.periodicity != 0:
+            # Cell offsets of the second atom, in the CIF-style '1_555' encoding
+            # (identity operator; each digit is 5 + the offset along that axis).
+            if np.abs(np.array(Os)).max() > 4:
+                raise ValueError(
+                    "A perceived bond spans more than 4 cell repeats; the cell is "
+                    "too small to encode the bond offsets."
+                )
+            kwargs["symop1"] = ["."] * len(Is)
+            kwargs["symop2"] = [
+                "." if not np.any(o) else "1_" + "".join(str(5 + int(x)) for x in o)
+                for o in Os
+            ]
         bonds.append(
-            i=[ids[a] for a in Is], j=[ids[b] for b in Js], bondorder=[1] * len(Is)
+            i=[ids[a] for a in Is],
+            j=[ids[b] for b in Js],
+            bondorder=[1] * len(Is),
+            **kwargs,
         )
         return len(Is)
 
@@ -167,24 +198,34 @@ class TopologyMixin:
         return result
 
     def _neighbor_pairs(self, cutoff):
-        """All atom pairs (i < j, as 0-based indices) within ``cutoff`` Å, using
-        the minimum image for periodic configurations.
+        """All atom pairs within ``cutoff`` Å, each periodic image separately.
+
+        For a periodic configuration every image of atom j within the cutoff of
+        atom i is a distinct candidate bond, so a small cell (e.g. primitive
+        diamond) gets all its bonds, including bonds from an atom to its own
+        image. Each bond is reported once: pairs have i <= j, and a self-image
+        bond is reported for one of the two opposite offsets only.
 
         Returns
         -------
-        (pairs, distances) : (ndarray (n,2) int, ndarray (n,) float)
+        (pairs, distances, offsets)
+            pairs : ndarray (n, 2) of 0-based atom indices, i <= j
+            distances : ndarray (n,) in Å
+            offsets : ndarray (n, 3) of int -- the cell offset of atom j
+                relative to the stored coordinates (all zero if not periodic)
         """
         from scipy.spatial import cKDTree
 
+        empty = (np.zeros((0, 2), dtype=int), np.zeros(0), np.zeros((0, 3), dtype=int))
         periodicity = self.periodicity
         if periodicity == 0:
             xyz = self.atoms.get_coordinates(fractionals=False, as_array=True)
-            tree = cKDTree(xyz)
-            pairs = tree.query_pairs(cutoff, output_type="ndarray")
+            pairs = cKDTree(xyz).query_pairs(cutoff, output_type="ndarray")
             if len(pairs) == 0:
-                return np.zeros((0, 2), dtype=int), np.zeros(0)
+                return empty
+            pairs = np.sort(pairs, axis=1)
             dist = np.linalg.norm(xyz[pairs[:, 0]] - xyz[pairs[:, 1]], axis=1)
-            return pairs, dist
+            return pairs, dist, np.zeros((len(pairs), 3), dtype=int)
 
         if periodicity != 3:
             raise NotImplementedError(
@@ -192,56 +233,55 @@ class TopologyMixin:
                 "non-periodic configurations."
             )
 
-        a, b, c, alpha, beta, gamma = self.cell.parameters
-        uvw = self.atoms.get_coordinates(fractionals=True, as_array=True) % 1.0
-        orthorhombic = all(abs(x - 90.0) < 1e-6 for x in (alpha, beta, gamma))
-        if orthorhombic:
-            L = np.array([a, b, c])
-            if cutoff >= L.min() / 2:
-                raise ValueError(
-                    f"The bond cutoff {cutoff:.2f} Å is more than half the shortest "
-                    "cell edge; the cell is too small for minimum-image perception."
-                )
-            xyz = np.minimum(uvw * L, np.nextafter(L, 0))
-            tree = cKDTree(xyz, boxsize=L)
-            pairs = tree.query_pairs(cutoff, output_type="ndarray")
-            if len(pairs) == 0:
-                return np.zeros((0, 2), dtype=int), np.zeros(0)
-            d = xyz[pairs[:, 0]] - xyz[pairs[:, 1]]
-            d -= L * np.round(d / L)
-            return pairs, np.linalg.norm(d, axis=1)
-
-        # General cell: a 3x3x3 supercell of images around the central cell.
         T = self.cell.to_cartesians_transform(as_array=True)  # xyz = uvw @ T
+        stored = self.atoms.get_coordinates(fractionals=True, as_array=True)
+        wrap = np.floor(stored).astype(int)
+        uvw = stored - wrap  # in [0, 1)
         n_atoms = len(uvw)
+
+        # How many image shells are needed along each axis: the cutoff divided
+        # by the spacing between the lattice planes perpendicular to that axis.
+        volume = abs(np.linalg.det(T))
+        spacing = [
+            volume / np.linalg.norm(np.cross(T[(k + 1) % 3], T[(k + 2) % 3]))
+            for k in range(3)
+        ]
+        shells = [int(np.ceil(cutoff / d)) for d in spacing]
+        ranges = [range(-n, n + 1) for n in shells]
         shifts = np.array(
-            [[i, j, k] for i in (-1, 0, 1) for j in (-1, 0, 1) for k in (-1, 0, 1)]
+            [[a, b, c] for a in ranges[0] for b in ranges[1] for c in ranges[2]]
         )
+
+        central = uvw @ T
         images = (uvw[None, :, :] + shifts[:, None, :]).reshape(-1, 3) @ T
         image_atom = np.tile(np.arange(n_atoms), len(shifts))
-        central = uvw @ T
+        image_shift = np.repeat(shifts, n_atoms, axis=0)
+
         tree = cKDTree(images)
         hits = tree.query_ball_point(central, cutoff)
-        Is, Js, D = [], [], []
+        Is, Js, D, Offs = [], [], [], []
         for i, neigh in enumerate(hits):
             for h in neigh:
                 j = int(image_atom[h])
-                if j <= i:
-                    continue
+                if j < i:
+                    continue  # reported from j's side with the opposite shift
+                s = image_shift[h]
+                if j == i:
+                    if not np.any(s):
+                        continue  # the atom itself
+                    # keep one of the two opposite offsets
+                    if tuple(s) < tuple(-s):
+                        continue
                 r = float(np.linalg.norm(images[h] - central[i]))
                 Is.append(i)
                 Js.append(j)
                 D.append(r)
+                # offset of j relative to the *stored* coordinates of i and j
+                Offs.append(s - wrap[j] + wrap[i])
         if len(Is) == 0:
-            return np.zeros((0, 2), dtype=int), np.zeros(0)
+            return empty
         pairs = np.stack([np.array(Is), np.array(Js)], axis=1)
-        dist = np.array(D)
-        # Keep the shortest image of each pair (minimum image).
-        order = np.lexsort((dist, pairs[:, 1], pairs[:, 0]))
-        pairs, dist = pairs[order], dist[order]
-        first = np.ones(len(pairs), dtype=bool)
-        first[1:] = np.any(pairs[1:] != pairs[:-1], axis=1)
-        return pairs[first], dist[first]
+        return pairs, np.array(D), np.array(Offs, dtype=int)
 
     def find_molecules(self, as_indices=False):
         """Find the separate molecules.

@@ -30,9 +30,12 @@ the configuration::
 Two atoms are bonded when their distance is less than ``tolerance`` (default 1.2) times
 the sum of their covalent radii (Pyykkö radii from ``mendeleev``). Hydrogen is limited
 to one bond, the shortest, so a hydrogen bond is never mistaken for a covalent one, and
-the alkali and alkaline-earth metals are treated as ions and left unbonded. Periodic
-configurations use the minimum image, so molecules straddling the cell boundary are
-bonded correctly. All bonds are single bonds; bond orders are not assigned.
+the alkali and alkaline-earth metals are treated as ions and left unbonded. In a
+periodic configuration every periodic image within reach is considered and each bond
+records the cell offset of its partner, so molecules straddling the cell boundary are
+bonded correctly and covalent crystals get all their bonds -- primitive diamond, for
+example, has four bonds between its two atoms through different images. All bonds are
+single bonds; bond orders are not assigned.
 
 The defaults can be adjusted per call::
 
