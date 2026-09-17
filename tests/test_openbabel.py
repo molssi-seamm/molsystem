@@ -641,17 +641,37 @@ def test_from_OBMol(configuration):
     assert configuration.bonds.bondorders == [2, 1, 1, 1, 1, 1]
 
 
+# Formats whose presence depends on how Open Babel was built (libxml2 for the
+# XML family; newer releases add JSON formats), so they may come and go.
+build_dependent_formats = {
+    "cdxml -- ChemDraw CDXML format",
+    "cjson -- Chemical JSON",
+    "cml -- Chemical Markup Language",
+    "cmlr -- CML Reaction format",
+    "ket -- Ketcher KET JSON format",
+    "mrv -- Chemical Markup Language",
+    "pc -- PubChem format",
+    "xml -- General XML format",
+}
+
+
 def test_input_formats():
-    """Check the list of input formats Open Babel handles"""
+    """Check the list of input formats Open Babel handles.
+
+    The list is compared to the known one for the platform, ignoring formats
+    that depend on the Open Babel build.
+    """
     obConversion = openbabel.OBConversion()
     formats = obConversion.GetSupportedInputFormat()
     system = platform.system()
-    if formats != known_input_formats[system]:
+    unexpected = set(formats) ^ set(known_input_formats[system])
+    unexpected -= build_dependent_formats
+    if unexpected:
         import pprint
 
         print(system)
         pprint.pprint(formats)
-    assert formats == known_input_formats[system]
+    assert unexpected == set()
 
 
 def test_copper_to_sdf(copper):

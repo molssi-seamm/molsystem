@@ -12,6 +12,9 @@ History
       boundary are bonded correctly, and any cell shape is handled.
     * The method is designed to grow: ``method="covalent radii"`` is the first;
       others such as a Voronoi tessellation can be added behind the same call.
+    * Internal: the test of Open Babel's format list now ignores formats that depend
+      on how Open Babel was built (the XML family, Chemical JSON, KET), which changed
+      in a recent conda-forge build.
 
 2026.6.29 -- Added geometric transforms and combining of configurations
     * Added rigid-body transforms for a (molecular) configuration: the center of mass
