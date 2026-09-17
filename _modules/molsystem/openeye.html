@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.openeye &#8212; MolSystem 2026.6.29 documentation</title>
+    <title>molsystem.openeye &#8212; MolSystem 2026.9.17 documentation</title>
   
   
   
@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -35,10 +35,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=afc2a114"></script>
+    <script src="../../_static/documentation_options.js?v=a493a295"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.29" />
+  <meta name="docsearch:version" content="2026.9.17" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -488,7 +488,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <h1>Source code for molsystem.openeye</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="sd">&quot;&quot;&quot;Interface to OpenEye OEChem.&quot;&quot;&quot;</span>
+<span class="sd">"""Interface to OpenEye OEChem."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
@@ -509,13 +509,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="k">def</span><span class="w"> </span><span class="nf">check_openeye_license</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">oechem_available</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;OpenEye OEChem is not installed! See &quot;</span>
-            <span class="s2">&quot;https://docs.eyesopen.com/toolkits/python/index.html for detail&quot;</span>
+            <span class="s2">"OpenEye OEChem is not installed! See "</span>
+            <span class="s2">"https://docs.eyesopen.com/toolkits/python/index.html for detail"</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">oechem_licensed</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot find a license for OpenEye OEChem! See &quot;</span>
-            <span class="s2">&quot;https://docs.eyesopen.com/toolkits/python/index.html for detail&quot;</span>
+            <span class="s2">"Cannot find a license for OpenEye OEChem! See "</span>
+            <span class="s2">"https://docs.eyesopen.com/toolkits/python/index.html for detail"</span>
         <span class="p">)</span></div>
 
 
@@ -523,7 +523,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="openeye_version">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openeye.openeye_version">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">openeye_version</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The version of the OpenEye OEChem toolkit.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The version of the OpenEye OEChem toolkit."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">oechem_available</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OEChemGetVersion</span><span class="p">()</span></div>
@@ -533,23 +533,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="OpenEyeMixin">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openeye.OpenEyeMixin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OpenEyeMixin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling OpenEye&#39;s software via its Python interface.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A mixin for handling OpenEye's software via its Python interface."""</span>
 
 <div class="viewcode-block" id="OpenEyeMixin.to_OEGraphMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openeye.OpenEyeMixin.to_OEGraphMol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_OEGraphMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an OEGraphMol object for the configuration, template, or subset.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return an OEGraphMol object for the configuration, template, or subset."""</span>
         <span class="n">check_openeye_license</span><span class="p">()</span>
         <span class="n">oe_mol</span> <span class="o">=</span> <span class="n">oechem</span><span class="o">.</span><span class="n">OEGraphMol</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;_Configuration&quot;</span><span class="p">:</span>
-            <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetIntData</span><span class="p">(</span><span class="s2">&quot;net charge&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span>
-            <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetIntData</span><span class="p">(</span><span class="s2">&quot;spin multiplicity&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"_Configuration"</span><span class="p">:</span>
+            <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetIntData</span><span class="p">(</span><span class="s2">"net charge"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span>
+            <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetIntData</span><span class="p">(</span><span class="s2">"spin multiplicity"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">)</span>
 
         <span class="c1"># Create the atoms</span>
         <span class="n">oe_atoms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="s2">&quot;charge&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
-            <span class="n">charges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">&quot;charge&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"charge"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">"charge"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">atno</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">charges</span>
             <span class="p">):</span>
@@ -567,39 +567,39 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">)}</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
             <span class="n">oe_mol</span><span class="o">.</span><span class="n">NewBond</span><span class="p">(</span>
-                <span class="n">oe_atoms</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]]],</span> <span class="n">oe_atoms</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]]],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]</span>
+                <span class="n">oe_atoms</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]]],</span> <span class="n">oe_atoms</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]]],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">]</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">properties</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">properties</span> <span class="o">==</span> <span class="s2">"all"</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"all"</span><span class="p">,</span> <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"int"</span><span class="p">:</span>
                     <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetIntData</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"float"</span><span class="p">:</span>
                     <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetDoubleData</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"str"</span><span class="p">:</span>
                     <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetStringData</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can&#39;t handle property of type &#39;</span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Can't handle property of type '</span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
                 <span class="c1"># Units, if any</span>
                 <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">units</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">units</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">units</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"#"</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetStringData</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;,units&quot;</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">units</span><span class="p">)</span>
+                        <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetStringData</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">",units"</span> <span class="o">+</span> <span class="s2">"#"</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">units</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetStringData</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;,units&quot;</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+                        <span class="n">oe_mol</span><span class="o">.</span><span class="n">SetStringData</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s2">",units"</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">oe_mol</span></div>
 
 
 <div class="viewcode-block" id="OpenEyeMixin.from_OEMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openeye.OpenEyeMixin.from_OEMol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_OEMol</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">oe_mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">oe_mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform an OpenEye molecule into the current object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Transform an OpenEye molecule into the current object."""</span>
         <span class="n">check_openeye_license</span><span class="p">()</span>
 
         <span class="n">atnos</span> <span class="o">=</span> <span class="p">[]</span>
@@ -629,7 +629,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">Is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
             <span class="n">BondOrders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bondorder</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bond </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">bondorder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bond </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">bondorder</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -643,16 +643,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">data</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="c1"># Check for property items for charge and multiplicity</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;_Configuration&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;net charge&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;net charge&quot;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="s2">&quot;spin multiplicity&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;spin multiplicity&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"_Configuration"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"net charge"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"net charge"</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s2">"spin multiplicity"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"spin multiplicity"</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">i</span> <span class="o">!=</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">]):</span>
-                <span class="k">if</span> <span class="s2">&quot;formal_charge&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">"formal_charge"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"charge"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"float"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="n">qs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">)</span>
@@ -669,19 +669,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">bondorder</span><span class="o">=</span><span class="n">BondOrders</span><span class="p">)</span>
 
         <span class="c1"># Record any properties in the database if desired</span>
-        <span class="k">if</span> <span class="n">properties</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">properties</span> <span class="o">==</span> <span class="s2">"all"</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="s2">&quot;,units&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
-                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;net charge&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;spin multiplicity&quot;</span><span class="p">,</span>
+                <span class="k">if</span> <span class="s2">",units"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                    <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"net charge"</span><span class="p">,</span>
+                    <span class="s2">"spin multiplicity"</span><span class="p">,</span>
                 <span class="p">]:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-                        <span class="n">tmp</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">tmp</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"#"</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                            <span class="n">units_key</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;,units&quot;</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">units_key</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">",units"</span> <span class="o">+</span> <span class="s2">"#"</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">units_key</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;,units&quot;</span>
+                            <span class="n">units_key</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">",units"</span>
                         <span class="n">_type</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
                         <span class="k">if</span> <span class="n">units_key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                             <span class="n">units</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">units_key</span><span class="p">]</span>
@@ -721,8 +721,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -734,7 +734,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

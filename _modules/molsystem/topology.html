@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.topology &#8212; MolSystem 2026.6.29 documentation</title>
+    <title>molsystem.topology &#8212; MolSystem 2026.9.17 documentation</title>
   
   
   
@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -35,10 +35,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=afc2a114"></script>
+    <script src="../../_static/documentation_options.js?v=a493a295"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.29" />
+  <meta name="docsearch:version" content="2026.9.17" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -488,33 +488,298 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <h1>Source code for molsystem.topology</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="sd">&quot;&quot;&quot;Topological methods for the system&quot;&quot;&quot;</span>
+<span class="sd">"""Topological methods for the system"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">floor</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>  <span class="c1"># noqa: F401</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openbabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">openbabel</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;     conda install -c conda-forge openbabel&quot;</span>
+        <span class="s2">"Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"     conda install -c conda-forge openbabel"</span>
     <span class="p">)</span>
     <span class="k">raise</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
+<span class="c1"># Elements that are never bonded by distance-based perception unless asked:</span>
+<span class="c1"># alkali and alkaline-earth metals, which are ions in molecular systems.</span>
+<span class="n">IONIC_ELEMENTS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Li"</span><span class="p">,</span> <span class="s2">"Na"</span><span class="p">,</span> <span class="s2">"K"</span><span class="p">,</span> <span class="s2">"Rb"</span><span class="p">,</span> <span class="s2">"Cs"</span><span class="p">,</span> <span class="s2">"Fr"</span><span class="p">,</span> <span class="s2">"Be"</span><span class="p">,</span> <span class="s2">"Mg"</span><span class="p">,</span> <span class="s2">"Ca"</span><span class="p">,</span> <span class="s2">"Sr"</span><span class="p">,</span> <span class="s2">"Ba"</span><span class="p">,</span> <span class="s2">"Ra"</span><span class="p">)</span>
+
+<span class="c1"># Default maximum number of bonds per element for perception; others unlimited.</span>
+<span class="n">MAX_BONDS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"H"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+
 <div class="viewcode-block" id="TopologyMixin">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TopologyMixin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling topology in a configuration.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A mixin for handling topology in a configuration."""</span>
+
+<div class="viewcode-block" id="TopologyMixin.perceive_bonds">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.perceive_bonds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perceive_bonds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">"covalent radii"</span><span class="p">,</span>
+        <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+        <span class="n">radii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="n">IONIC_ELEMENTS</span><span class="p">,</span>
+        <span class="n">min_distance</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Perceive the bonds from the geometry and add them to the configuration.</span>
+
+<span class="sd">        Bonds are single bonds; no attempt is made to assign bond orders. For a</span>
+<span class="sd">        periodic configuration every periodic image within reach is considered</span>
+<span class="sd">        and each bond is stored with the cell offset of its second atom (the</span>
+<span class="sd">        CIF-style ``symop2`` such as ``1_556``), so molecules that straddle the</span>
+<span class="sd">        cell boundary are bonded correctly and covalent crystals get all their</span>
+<span class="sd">        bonds -- including several bonds between the same two atoms through</span>
+<span class="sd">        different images (primitive diamond) and bonds from an atom to its own</span>
+<span class="sd">        image (a one-atom cell). Any cell shape is handled. Symmetry other than</span>
+<span class="sd">        P1 is not supported.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method : str = "covalent radii"</span>
+<span class="sd">            The perception method. Currently only "covalent radii": atoms i and j</span>
+<span class="sd">            are bonded if their distance is less than ``tolerance`` times the sum</span>
+<span class="sd">            of their covalent radii. Other methods (e.g. Voronoi) may be added.</span>
+<span class="sd">        replace : bool = False</span>
+<span class="sd">            Whether to delete any existing bonds first. If False and the</span>
+<span class="sd">            configuration already has bonds, an error is raised.</span>
+<span class="sd">        tolerance : float = 1.2</span>
+<span class="sd">            The factor multiplying the sum of the covalent radii.</span>
+<span class="sd">        radii : {str: float} = None</span>
+<span class="sd">            Covalent radii in Å, by element symbol, overriding the defaults</span>
+<span class="sd">            (Pyykkö radii from ``mendeleev``) for those elements.</span>
+<span class="sd">        max_bonds : {str: int} = None</span>
+<span class="sd">            The maximum number of bonds per atom, by element symbol, overriding</span>
+<span class="sd">            the defaults (H: 1). When an atom would exceed its limit the shortest</span>
+<span class="sd">            candidate bonds are kept.</span>
+<span class="sd">        exclude : iterable of str = IONIC_ELEMENTS</span>
+<span class="sd">            Elements that never form bonds -- by default the alkali and</span>
+<span class="sd">            alkaline-earth metals, which are ions in molecular systems. Pass an</span>
+<span class="sd">            empty tuple to bond them (e.g. for ionic crystals).</span>
+<span class="sd">        min_distance : float = 0.4</span>
+<span class="sd">            Pairs closer than this (Å) are ignored rather than bonded, guarding</span>
+<span class="sd">            against duplicate or overlapping atoms.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of bonds added.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">"covalent radii"</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown bond perception method '</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetry</span><span class="o">.</span><span class="n">n_symops</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">"Bond perception is only supported for configurations without "</span>
+                <span class="s2">"symmetry (P1 / C1)."</span>
+            <span class="p">)</span>
+        <span class="n">bonds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span>
+        <span class="k">if</span> <span class="n">bonds</span><span class="o">.</span><span class="n">n_bonds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">replace</span><span class="p">:</span>
+                <span class="n">bonds</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">"The configuration already has bonds. Use replace=True to "</span>
+                    <span class="s2">"perceive them afresh."</span>
+                <span class="p">)</span>
+
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">n_atoms</span>
+        <span class="k">if</span> <span class="n">n_atoms</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">n_atoms</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">symbols</span>
+        <span class="n">unique</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">symbols</span><span class="p">))</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covalent_radii</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">radii</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">radius</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">radii</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">limits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">MAX_BONDS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_bonds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">limits</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">max_bonds</span><span class="p">)</span>
+        <span class="n">excluded</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span> <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">r_atom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">radius</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">])</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">])</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">tolerance</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">r_atom</span><span class="p">[</span><span class="n">active</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="n">active</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="n">cutoff</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">pairs</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbor_pairs</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span>
+
+        <span class="c1"># Apply the criterion pair by pair.</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pairs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">active</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="o">&amp;</span> <span class="n">active</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="n">dist</span> <span class="o">&gt;</span> <span class="n">min_distance</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">tolerance</span> <span class="o">*</span> <span class="p">(</span><span class="n">r_atom</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">r_atom</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">j</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">dist</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">offsets</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+
+        <span class="c1"># Enforce the per-element bond limits, keeping the shortest bonds.</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">unlimited</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">limits</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">unlimited</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">])</span>
+        <span class="n">Is</span><span class="p">,</span> <span class="n">Js</span><span class="p">,</span> <span class="n">Os</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">:</span>
+                <span class="c1"># A bond from an atom to its own periodic image counts twice.</span>
+                <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">[</span><span class="n">a</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">count</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="ow">or</span> <span class="n">count</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">[</span><span class="n">b</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">count</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">count</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">Os</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offsets</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Cell offsets of the second atom, in the CIF-style '1_555' encoding</span>
+            <span class="c1"># (identity operator; each digit is 5 + the offset along that axis).</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Os</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">"A perceived bond spans more than 4 cell repeats; the cell is "</span>
+                    <span class="s2">"too small to encode the bond offsets."</span>
+                <span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"symop1"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"."</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"symop2"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">"."</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"1_"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">Os</span>
+            <span class="p">]</span>
+        <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">Is</span><span class="p">],</span>
+            <span class="n">j</span><span class="o">=</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">Js</span><span class="p">],</span>
+            <span class="n">bondorder</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_covalent_radii</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Pyykkö covalent radii (Å) for the given element symbols, via mendeleev."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">mendeleev</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">mendeleev</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">covalent_radius_pyykko</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">covalent_radius</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No covalent radius available for </span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="mf">100.0</span>  <span class="c1"># pm -&gt; Å</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_neighbor_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""All atom pairs within ``cutoff`` Å, each periodic image separately.</span>
+
+<span class="sd">        For a periodic configuration every image of atom j within the cutoff of</span>
+<span class="sd">        atom i is a distinct candidate bond, so a small cell (e.g. primitive</span>
+<span class="sd">        diamond) gets all its bonds, including bonds from an atom to its own</span>
+<span class="sd">        image. Each bond is reported once: pairs have i &lt;= j, and a self-image</span>
+<span class="sd">        bond is reported for one of the two opposite offsets only.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (pairs, distances, offsets)</span>
+<span class="sd">            pairs : ndarray (n, 2) of 0-based atom indices, i &lt;= j</span>
+<span class="sd">            distances : ndarray (n,) in Å</span>
+<span class="sd">            offsets : ndarray (n, 3) of int -- the cell offset of atom j</span>
+<span class="sd">                relative to the stored coordinates (all zero if not periodic)</span>
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">cKDTree</span>
+
+        <span class="n">empty</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="n">periodicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span>
+        <span class="k">if</span> <span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span><span class="o">.</span><span class="n">query_pairs</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="s2">"ndarray"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">empty</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="n">pairs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">pairs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">periodicity</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">"Bond perception is only implemented for 3-D periodic and "</span>
+                <span class="s2">"non-periodic configurations."</span>
+            <span class="p">)</span>
+
+        <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_cartesians_transform</span><span class="p">(</span><span class="n">as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># xyz = uvw @ T</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">wrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">uvw</span> <span class="o">=</span> <span class="n">stored</span> <span class="o">-</span> <span class="n">wrap</span>  <span class="c1"># in [0, 1)</span>
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">uvw</span><span class="p">)</span>
+
+        <span class="c1"># How many image shells are needed along each axis: the cutoff divided</span>
+        <span class="c1"># by the spacing between the lattice planes perpendicular to that axis.</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
+        <span class="n">spacing</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">volume</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">T</span><span class="p">[(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">],</span> <span class="n">T</span><span class="p">[(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">shells</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">spacing</span><span class="p">]</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">shells</span><span class="p">]</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+        <span class="n">central</span> <span class="o">=</span> <span class="n">uvw</span> <span class="o">@</span> <span class="n">T</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">@</span> <span class="n">T</span>
+        <span class="n">image_atom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+        <span class="n">image_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="n">hits</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query_ball_point</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+        <span class="n">Is</span><span class="p">,</span> <span class="n">Js</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">Offs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">neigh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hits</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">neigh</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_atom</span><span class="p">[</span><span class="n">h</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="k">continue</span>  <span class="c1"># reported from j's side with the opposite shift</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">image_shift</span><span class="p">[</span><span class="n">h</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">continue</span>  <span class="c1"># the atom itself</span>
+                    <span class="c1"># keep one of the two opposite offsets</span>
+                    <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">-</span> <span class="n">central</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">Is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">Js</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">D</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="c1"># offset of j relative to the *stored* coordinates of i and j</span>
+                <span class="n">Offs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">wrap</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">wrap</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">empty</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Is</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Js</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">D</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Offs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TopologyMixin.find_molecules">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.find_molecules">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_indices</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the separate molecules.</span>
+<span class="w">        </span><span class="sd">"""Find the separate molecules.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -525,7 +790,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        molecules : [[int]*n_molecules]</span>
 <span class="sd">            A list of lists of atom ids or indices for the molecules</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">molecules</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -536,7 +801,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">as_indices</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetry</span><span class="o">.</span><span class="n">n_symops</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot return atom ids for bonded_neighbors when there is symmetry&quot;</span>
+                <span class="s2">"Cannot return atom ids for bonded_neighbors when there is symmetry"</span>
             <span class="p">)</span>
         <span class="n">neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_neighbors</span><span class="p">(</span><span class="n">as_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">visited</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_atoms</span>
@@ -569,7 +834,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.bonded_neighbors">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.bonded_neighbors">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">bonded_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_indices</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">first_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The atoms bonded to each atom in the system.</span>
+<span class="w">        </span><span class="sd">"""The atoms bonded to each atom in the system.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -582,7 +847,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        neighbors : {int: [int]} or [[int]] for indices</span>
 <span class="sd">            list of atom ids for each atom id</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">neighbors</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">symmetry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetry</span>
@@ -600,7 +865,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="c1"># Symmetry involved...</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">as_indices</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot return atom ids for bonded_neighbors when there is symmetry&quot;</span>
+                    <span class="s2">"Cannot return atom ids for bonded_neighbors when there is symmetry"</span>
                 <span class="p">)</span>
             <span class="n">pairs</span> <span class="o">=</span> <span class="n">symmetry</span><span class="o">.</span><span class="n">bond_atoms</span>
             <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)]</span>
@@ -616,8 +881,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <span class="k">if</span> <span class="n">bonds</span><span class="o">.</span><span class="n">n_bonds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]</span>
-                    <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]</span>
                     <span class="n">neighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
                     <span class="n">neighbors</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
@@ -638,18 +903,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.create_molecule_subsets">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.create_molecule_subsets">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_molecule_subsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a subset for each molecule in a configuration.</span>
+<span class="w">        </span><span class="sd">"""Create a subset for each molecule in a configuration.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        [int]</span>
 <span class="sd">            The ids of the subsets, one per molecule.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Find the molecules and the create the subsets if they don&#39;t exist.</span>
+<span class="sd">        """</span>
+        <span class="c1"># Find the molecules and the create the subsets if they don't exist.</span>
         <span class="n">molecules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_molecules</span><span class="p">()</span>
 
         <span class="c1"># Remove any previous subsets for this configuration</span>
-        <span class="n">subsets</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;subset&quot;</span><span class="p">]</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"subset"</span><span class="p">]</span>
         <span class="n">tid</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">sids</span> <span class="o">=</span> <span class="n">subsets</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -667,7 +932,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.create_molecule_templates">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.create_molecule_templates">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_molecule_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_templates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">create_subsets</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a template for each unique molecule in a configuration.</span>
+<span class="w">        </span><span class="sd">"""Create a template for each unique molecule in a configuration.</span>
 
 <span class="sd">        By default also create subsets linking each template to the atoms</span>
 <span class="sd">        of the molecules in the system.</span>
@@ -686,7 +951,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            The ids of the templates, or if create_subsets is True</span>
 <span class="sd">            a two-element list containing the list of templates and</span>
 <span class="sd">            list of subsets.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="o">.</span><span class="n">templates</span>
 
         <span class="c1"># Find the molecules</span>
@@ -702,15 +967,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="c1"># The bonds in each molecule</span>
         <span class="n">bonds_per_molecule</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_molecules</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]</span>
-            <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]</span>
-            <span class="n">order</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">]</span>
             <span class="n">molecule</span> <span class="o">=</span> <span class="n">atom_to_molecule</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">bonds_per_molecule</span><span class="p">[</span><span class="n">molecule</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
 
         <span class="c1"># Get the canonical smiles for each molecule</span>
         <span class="n">to_can</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-        <span class="n">to_can</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;can&quot;</span><span class="p">)</span>
+        <span class="n">to_can</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">"can"</span><span class="p">)</span>
         <span class="n">ob_mol</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
         <span class="n">ob_template</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
         <span class="n">atnos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span>
@@ -740,11 +1005,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <span class="k">if</span> <span class="n">full_templates</span><span class="p">:</span>
                 <span class="c1"># See if a molecule template with the canonical smiles exists</span>
-                <span class="k">if</span> <span class="n">templates</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="s2">&quot;molecule&quot;</span><span class="p">):</span>
-                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;molecule&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">templates</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="s2">"molecule"</span><span class="p">):</span>
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">"molecule"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Create a new system &amp; configuration for the template</span>
-                    <span class="n">system_name</span> <span class="o">=</span> <span class="s2">&quot;template system &quot;</span> <span class="o">+</span> <span class="n">canonical</span>
+                    <span class="n">system_name</span> <span class="o">=</span> <span class="s2">"template system "</span> <span class="o">+</span> <span class="n">canonical</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="o">.</span><span class="n">system_exists</span><span class="p">(</span><span class="n">system_name</span><span class="p">):</span>
                         <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="o">.</span><span class="n">create_system</span><span class="p">(</span>
                             <span class="n">system_name</span><span class="p">,</span> <span class="n">make_current</span><span class="o">=</span><span class="kc">False</span>
@@ -755,29 +1020,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <span class="n">cid</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">id</span>
 
                         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;atno&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">molecule_atnos</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"atno"</span><span class="p">]</span> <span class="o">=</span> <span class="n">molecule_atnos</span>
                         <span class="n">molecule_xyzs</span> <span class="o">=</span> <span class="p">[</span><span class="n">xyzs</span><span class="p">[</span><span class="n">atom_index</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">z</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"z"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">z</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">molecule_xyzs</span><span class="p">]</span>
 
                         <span class="n">ids</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
                         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
-                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">]</span>
 
                         <span class="n">configuration</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
                         <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                            <span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;molecule&quot;</span><span class="p">,</span> <span class="n">configuration</span><span class="o">=</span><span class="n">cid</span>
+                            <span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">"molecule"</span><span class="p">,</span> <span class="n">configuration</span><span class="o">=</span><span class="n">cid</span>
                         <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">templates</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="s2">&quot;molecule&quot;</span><span class="p">):</span>
-                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;molecule&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">templates</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="s2">"molecule"</span><span class="p">):</span>
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">"molecule"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;molecule&quot;</span><span class="p">)</span>
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">"molecule"</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tids</span><span class="p">:</span>
                 <span class="n">tids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -795,9 +1060,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">tatom_ids</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span>
                     <span class="n">to_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tatom_ids</span><span class="p">)}</span>
                     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">template</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-                        <span class="n">i</span> <span class="o">=</span> <span class="n">to_index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]]</span>
-                        <span class="n">j</span> <span class="o">=</span> <span class="n">to_index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]]</span>
-                        <span class="n">order</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">to_index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]]</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">to_index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]]</span>
+                        <span class="n">order</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">]</span>
                         <span class="n">ob_template</span><span class="o">.</span><span class="n">AddBond</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
 
                     <span class="c1"># Get the mapping from template to molecule</span>
@@ -809,7 +1074,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reordered_atoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="s2">&quot;There are no atoms in the subset for this molecule!&quot;</span>
+                            <span class="s2">"There are no atoms in the subset for this molecule!"</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
@@ -834,13 +1099,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.get_molecule_smiles">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.get_molecule_smiles">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_molecule_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the a list of the canonical SMILES for each molecule..</span>
+<span class="w">        </span><span class="sd">"""Return the a list of the canonical SMILES for each molecule..</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        [str]</span>
 <span class="sd">            The canonical SMILES for each molecule, in order that they are found.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Find the molecules</span>
         <span class="n">molecules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_molecules</span><span class="p">()</span>
         <span class="n">n_molecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span>
@@ -854,15 +1119,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="c1"># The bonds in each molecule</span>
         <span class="n">bonds_per_molecule</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_molecules</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">]</span>
-            <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">]</span>
-            <span class="n">order</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">&quot;bondorder&quot;</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">bond</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">]</span>
             <span class="n">molecule</span> <span class="o">=</span> <span class="n">atom_to_molecule</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">bonds_per_molecule</span><span class="p">[</span><span class="n">molecule</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
 
         <span class="c1"># Get the canonical smiles for each molecule</span>
         <span class="n">to_can</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-        <span class="n">to_can</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;can&quot;</span><span class="p">)</span>
+        <span class="n">to_can</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">"can"</span><span class="p">)</span>
         <span class="n">ob_mol</span> <span class="o">=</span> <span class="n">openbabel</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
         <span class="n">atnos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span>
 
@@ -891,7 +1156,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.reimage_bonded_atoms">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.reimage_bonded_atoms">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reimage_bonded_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reimage_molecules</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure that the atoms in a molecule are &quot;near&quot; each other.</span>
+<span class="w">        </span><span class="sd">"""Ensure that the atoms in a molecule are "near" each other.</span>
 
 <span class="sd">        In a periodic system atoms can be translated by a unit cell without changing</span>
 <span class="sd">        anything. However the bonds in a molecule need to account for such translations</span>
@@ -912,20 +1177,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
 <span class="sd">            True if the coordinates were changed.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Nothing to do.</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Configuration </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Configuration </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="s2">&quot;+&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="s2">"+"</span><span class="p">)</span>
         <span class="c1"># The bonds from each atom</span>
         <span class="n">bonds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_neighbors</span><span class="p">(</span><span class="n">as_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Bonds:&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Bonds:"</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">bonds</span><span class="p">))</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
         <span class="c1"># And coordinates as fractionals</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -939,11 +1204,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="c1"># Work through the atoms, see if bonded atoms need to be moved</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atoms</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">atoms</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
             <span class="c1"># if len(atoms) &gt; 1:</span>
             <span class="c1">#     atom = sorted(atoms)[0]</span>
-            <span class="c1">#     logger.debug(f&quot; --&gt; {atom}&quot;)</span>
+            <span class="c1">#     logger.debug(f" --&gt; {atom}")</span>
             <span class="c1">#     if self._image_helper(bonds, xyz, atom):</span>
             <span class="c1">#         changed = True</span>
 
@@ -957,8 +1222,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">delta</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">vj</span> <span class="o">-</span> <span class="n">vi</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">delta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">iatom</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2"> delta = </span><span class="si">{</span><span class="n">vj</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">vi</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> = &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">"Warning: </span><span class="si">{</span><span class="n">iatom</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2"> delta = </span><span class="si">{</span><span class="n">vj</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">vi</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> = "</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">"</span>
                         <span class="p">)</span>
 
         <span class="c1"># Move the center of molecules into the primary cell, if requested.</span>
@@ -986,7 +1251,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_image_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">atom</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Translate all the bonded neighbors with larger index.</span>
+<span class="w">        </span><span class="sd">"""Translate all the bonded neighbors with larger index.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -994,12 +1259,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            The bonded neighbors for each atom.</span>
 <span class="sd">        xyz : [[float * 3]]</span>
 <span class="sd">            The fractional coordinates of the atoms.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;       helper </span><span class="si">{</span><span class="n">atom</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bonds</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"       helper </span><span class="si">{</span><span class="n">atom</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">bonds</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">xyzi</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">jatom</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">[</span><span class="n">atom</span><span class="p">]:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="si">{</span><span class="n">atom</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\t\t</span><span class="si">{</span><span class="n">atom</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">jatom</span> <span class="o">&lt;</span> <span class="n">atom</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">xyzj</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">jatom</span><span class="p">]</span>
@@ -1013,12 +1278,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">new_xyz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vj</span> <span class="o">-</span> <span class="n">delta</span><span class="p">)</span>
                     <span class="n">shift</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-                    <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">atom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">shift</span><span class="p">:</span>
                 <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">atom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">xyz</span><span class="p">[</span><span class="n">jatom</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_xyz</span>
 
@@ -1033,7 +1298,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="TopologyMixin.reimage_molecules">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.reimage_molecules">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reimage_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reimage molecules into the primary unit cell.</span>
+<span class="w">        </span><span class="sd">"""Reimage molecules into the primary unit cell.</span>
 
 <span class="sd">        The molecules are moved to bring their geometric center into the primary unit</span>
 <span class="sd">        cell, i.e. with fractional coordinates in the range [0..1).</span>
@@ -1042,7 +1307,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
 <span class="sd">            True if the coordinates were changed.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Nothing to do.</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -1081,7 +1346,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">visited</span><span class="p">[</span><span class="n">iatom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">xyzi</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">iatom</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">jatom</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">[</span><span class="n">iatom</span><span class="p">]:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="si">{</span><span class="n">iatom</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\t\t</span><span class="si">{</span><span class="n">iatom</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">jatom</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">visited</span><span class="p">[</span><span class="n">jatom</span><span class="p">]:</span>
                 <span class="k">continue</span>
             <span class="n">new_xyz</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1097,7 +1362,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">shift</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">shift</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">iatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">jatom</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">xyzi</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">xyzj</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">new_xyz</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="n">xyz</span><span class="p">[</span><span class="n">jatom</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_xyz</span>
             <span class="n">changed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_helper2</span><span class="p">(</span><span class="n">bonds</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">jatom</span><span class="p">,</span> <span class="n">changed</span><span class="p">)</span>
@@ -1132,8 +1397,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1145,7 +1410,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

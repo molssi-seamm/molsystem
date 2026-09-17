@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.properties &#8212; MolSystem 2026.6.29 documentation</title>
+    <title>molsystem.properties &#8212; MolSystem 2026.9.17 documentation</title>
   
   
   
@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -35,10 +35,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=afc2a114"></script>
+    <script src="../../_static/documentation_options.js?v=a493a295"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.29" />
+  <meta name="docsearch:version" content="2026.9.17" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -501,34 +501,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="add_properties_from_file">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.properties.add_properties_from_file">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">add_properties_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The standard properties recognized by SEAMM.</span>
+<span class="w">    </span><span class="sd">"""The standard properties recognized by SEAMM.</span>
 
 <span class="sd">    These are officially defined properties that can be used anywhere in SEAMM, as</span>
 <span class="sd">    long as the type and definition correspond to the standard.</span>
 
 <span class="sd">    Each property is defined by a string with up to three parts:</span>
 
-<span class="sd">        &lt;property name&gt;#&lt;code or &#39;experiment&#39;&gt;#&lt;technique or model chemistry&gt;</span>
+<span class="sd">        &lt;property name&gt;#&lt;code or 'experiment'&gt;#&lt;technique or model chemistry&gt;</span>
 
-<span class="sd">    The property name is required. In most cases this is followed by either &#39;experiment&#39;</span>
-<span class="sd">    or the name of the code, e.g. &#39;MOPAC&#39;, &#39;Gaussian&#39;, or &#39;VASP&#39;. The final part,</span>
+<span class="sd">    The property name is required. In most cases this is followed by either 'experiment'</span>
+<span class="sd">    or the name of the code, e.g. 'MOPAC', 'Gaussian', or 'VASP'. The final part,</span>
 <span class="sd">    if present, is either the experimental technique used to measure the property, or</span>
-<span class="sd">    the model chemistry, such as &#39;MP2/6-31G**&#39;, &#39;PM7&#39;, or a forcefield name such as</span>
-<span class="sd">    &#39;AMBER/ff19SB&#39;.</span>
+<span class="sd">    the model chemistry, such as 'MP2/6-31G**', 'PM7', or a forcefield name such as</span>
+<span class="sd">    'AMBER/ff19SB'.</span>
 
 <span class="sd">    You can create other properties on the fly, but they follow the above convention</span>
 <span class="sd">    and should have an appropriate code and, if necessary, model chemistry, so that</span>
 <span class="sd">    they full name is unique and does not conflict with any other defined name.</span>
 
-<span class="sd">    For example, the standard property &quot;enthalpy of formation&quot; refers to the</span>
+<span class="sd">    For example, the standard property "enthalpy of formation" refers to the</span>
 <span class="sd">    experimental heat of formation, or a calculated value comparable to experimental</span>
 <span class="sd">    values. If you are not sure what the heat of formation in e.g. MOPAC is, you could</span>
-<span class="sd">    create a new property &quot;enthalpy of formation#MOPAC#&lt;parameterization&gt;&quot;, which is</span>
-<span class="sd">    clearly similar to the standard &quot;enthalpy of formation&quot;. If the community decides</span>
+<span class="sd">    create a new property "enthalpy of formation#MOPAC#&lt;parameterization&gt;", which is</span>
+<span class="sd">    clearly similar to the standard "enthalpy of formation". If the community decides</span>
 <span class="sd">    that it is indeed the same, it can be replaced by the standard form, and also</span>
 <span class="sd">    aliased to it for backwards compatibility.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8-sig&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8-sig"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
         <span class="n">line</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
@@ -537,15 +537,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <span class="c1"># Headers</span>
                 <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">row</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">headers</span> <span class="o">!=</span> <span class="p">[</span>
-                    <span class="s2">&quot;Property&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;Type&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;Units&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;Description&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;URL&quot;</span><span class="p">,</span>
+                    <span class="s2">"Property"</span><span class="p">,</span>
+                    <span class="s2">"Type"</span><span class="p">,</span>
+                    <span class="s2">"Units"</span><span class="p">,</span>
+                    <span class="s2">"Description"</span><span class="p">,</span>
+                    <span class="s2">"URL"</span><span class="p">,</span>
                 <span class="p">]:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;Header of standard properties file not valid: &quot;</span>
-                        <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+                        <span class="s2">"Header of standard properties file not valid: "</span>
+                        <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">property</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -555,13 +555,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-<span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;molsystem&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span>
-<span class="n">csv_file</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;standard_properties.csv&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">"molsystem"</span><span class="p">))</span> <span class="o">/</span> <span class="s2">"data"</span>
+<span class="n">csv_file</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">"standard_properties.csv"</span>
 <span class="n">add_properties_from_file</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_Properties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for handling the properties in the star schema.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A class for handling the properties in the star schema."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_db</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_system_db</span> <span class="o">=</span> <span class="n">system_db</span>
@@ -581,19 +581,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">system_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the SystemDB object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return the SystemDB object."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_system_db</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">noerror</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a property to the database. By default, it is an error if it already</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_type</span><span class="o">=</span><span class="s2">"float"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">noerror</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Add a property to the database. By default, it is an error if it already</span>
 <span class="sd">        exists!</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
 <span class="sd">            The name of the property.</span>
-<span class="sd">        _type : str = &quot;float&quot;</span>
-<span class="sd">            The type of the property -- float, int, str. Default is &quot;float&quot;.</span>
+<span class="sd">        _type : str = "float"</span>
+<span class="sd">            The type of the property -- float, int, str. Default is "float".</span>
 <span class="sd">        units : str = None</span>
 <span class="sd">            The units of the property value, as a string that Pint can interpret.</span>
 <span class="sd">        description : str</span>
@@ -611,21 +611,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        If the property is registered in the list of standard properties, just</span>
 <span class="sd">        give the name and the rest will be filled in from the standard property</span>
 <span class="sd">        metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">noerror</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already exists.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' already exists."</span><span class="p">)</span>
 
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;property&quot;</span><span class="p">]</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"property"</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_properties</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Type&quot;</span><span class="p">],</span>
-                <span class="n">units</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Units&quot;</span><span class="p">],</span>
-                <span class="n">description</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">],</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"Type"</span><span class="p">],</span>
+                <span class="n">units</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"Units"</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"Description"</span><span class="p">],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -637,146 +637,146 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">create_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the needed tables to the database.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Add the needed tables to the database."""</span>
         <span class="c1"># The property dimension table</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;property&quot;</span><span class="p">]</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;unique&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"property"</span><span class="p">]</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">"unique"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"type"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">)</span>
 
         <span class="c1"># Floating point facts</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;float_data&quot;</span><span class="p">]</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;configuration&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;configuration&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;system&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;property&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"float_data"</span><span class="p">]</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"configuration"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"property"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"property"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"value"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"float"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_configuration_property_value&quot;</span>
-            <span class="s2">&quot;    ON float_data(configuration, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_configuration_property_value"</span>
+            <span class="s2">"    ON float_data(configuration, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_system_property_value&quot;</span>
-            <span class="s2">&quot;    ON float_data(system, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_system_property_value"</span>
+            <span class="s2">"    ON float_data(system, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_property_value&quot;</span>
-            <span class="s2">&quot;    ON float_data(property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_property_value"</span>
+            <span class="s2">"    ON float_data(property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_configuration_property&quot;</span>
-            <span class="s2">&quot;    ON float_data(configuration, property)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_configuration_property"</span>
+            <span class="s2">"    ON float_data(configuration, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_system_property&quot;</span>
-            <span class="s2">&quot;    ON float_data(system, property)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_system_property"</span>
+            <span class="s2">"    ON float_data(system, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX float_data_idx_configuration ON float_data(configuration)&quot;</span>
+            <span class="s2">"CREATE INDEX float_data_idx_configuration ON float_data(configuration)"</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE INDEX float_data_idx_system ON float_data(system)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"CREATE INDEX float_data_idx_system ON float_data(system)"</span><span class="p">)</span>
 
         <span class="c1"># Integer facts</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;int_data&quot;</span><span class="p">]</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;configuration&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;configuration&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;system&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;property&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"int_data"</span><span class="p">]</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"configuration"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"property"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"property"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"value"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_configuration_property_value&quot;</span>
-            <span class="s2">&quot;    ON int_data(configuration, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_configuration_property_value"</span>
+            <span class="s2">"    ON int_data(configuration, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_system_property_value&quot;</span>
-            <span class="s2">&quot;    ON int_data(system, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_system_property_value"</span>
+            <span class="s2">"    ON int_data(system, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_property_value&quot;</span>
-            <span class="s2">&quot;    ON int_data(property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_property_value"</span>
+            <span class="s2">"    ON int_data(property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_configuration_property&quot;</span>
-            <span class="s2">&quot;    ON int_data(configuration, property)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_configuration_property"</span>
+            <span class="s2">"    ON int_data(configuration, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_system_property ON int_data(system, property)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_system_property ON int_data(system, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX int_data_idx_configuration ON int_data(configuration)&quot;</span>
+            <span class="s2">"CREATE INDEX int_data_idx_configuration ON int_data(configuration)"</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE INDEX int_data_idx_system ON int_data(system)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"CREATE INDEX int_data_idx_system ON int_data(system)"</span><span class="p">)</span>
 
         <span class="c1"># String facts</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;str_data&quot;</span><span class="p">]</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;configuration&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;configuration&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;system&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;property&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"str_data"</span><span class="p">]</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"configuration"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"property"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"property"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"value"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_configuration_property_value&quot;</span>
-            <span class="s2">&quot;    ON str_data(configuration, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_configuration_property_value"</span>
+            <span class="s2">"    ON str_data(configuration, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_system_property_value&quot;</span>
-            <span class="s2">&quot;    ON str_data(system, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_system_property_value"</span>
+            <span class="s2">"    ON str_data(system, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_property_value&quot;</span>
-            <span class="s2">&quot;    ON str_data(property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_property_value"</span>
+            <span class="s2">"    ON str_data(property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_configuration_property&quot;</span>
-            <span class="s2">&quot;    ON str_data(configuration, property)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_configuration_property"</span>
+            <span class="s2">"    ON str_data(configuration, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_system_property  ON str_data(system, property)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_system_property  ON str_data(system, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX str_data_idx_configuration ON str_data(configuration)&quot;</span>
+            <span class="s2">"CREATE INDEX str_data_idx_configuration ON str_data(configuration)"</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE INDEX str_data_idx_system ON str_data(system)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"CREATE INDEX str_data_idx_system ON str_data(system)"</span><span class="p">)</span>
 
         <span class="c1"># Array facts</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">&quot;json_data&quot;</span><span class="p">]</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;configuration&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;configuration&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;system&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">&quot;property&quot;</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_db</span><span class="p">[</span><span class="s2">"json_data"</span><span class="p">]</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"configuration"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"property"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="s2">"property"</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"value"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"str"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_configuration_property_value&quot;</span>
-            <span class="s2">&quot;    ON json_data(configuration, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_configuration_property_value"</span>
+            <span class="s2">"    ON json_data(configuration, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_system_property_value&quot;</span>
-            <span class="s2">&quot;    ON json_data(system, property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_system_property_value"</span>
+            <span class="s2">"    ON json_data(system, property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_property_value&quot;</span>
-            <span class="s2">&quot;    ON json_data(property, value)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_property_value"</span>
+            <span class="s2">"    ON json_data(property, value)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_configuration_property&quot;</span>
-            <span class="s2">&quot;    ON json_data(configuration, property)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_configuration_property"</span>
+            <span class="s2">"    ON json_data(configuration, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_system_property ON json_data(system, property)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_system_property ON json_data(system, property)"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;CREATE INDEX json_data_idx_configuration ON json_data(configuration)&quot;</span>
+            <span class="s2">"CREATE INDEX json_data_idx_configuration ON json_data(configuration)"</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE INDEX json_data_idx_system ON json_data(system)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"CREATE INDEX json_data_idx_system ON json_data(system)"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_property</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The description of a property</span>
+<span class="w">        </span><span class="sd">"""The description of a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -787,11 +787,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The description of the property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">(</span><span class="n">_property</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the named property exists.</span>
+<span class="w">        </span><span class="sd">"""Whether the named property exists.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -802,21 +802,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
 <span class="sd">            True if the property is registered, False otherwise.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(*) FROM property WHERE name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT COUNT(*) FROM property WHERE name = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">_id</span><span class="p">,</span>
-        <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
-        <span class="n">match</span><span class="o">=</span><span class="s2">&quot;glob&quot;</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span>
+        <span class="n">match</span><span class="o">=</span><span class="s2">"glob"</span><span class="p">,</span>
         <span class="n">is_system</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">include_configuration_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">],</span>
+        <span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s2">"float"</span><span class="p">,</span> <span class="s2">"int"</span><span class="p">,</span> <span class="s2">"str"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">],</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the property value(s)</span>
+<span class="w">        </span><span class="sd">"""Get the property value(s)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -824,33 +824,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            The id of the configuration or system.</span>
 <span class="sd">        is_system : bool=False</span>
 <span class="sd">            Whether the ID is for a system, not a configuration.</span>
-<span class="sd">        pattern : str = &quot;*&quot;</span>
+<span class="sd">        pattern : str = "*"</span>
 <span class="sd">            The pattern of the property.</span>
-<span class="sd">        match : str=&quot;glob&quot;</span>
-<span class="sd">            Whether to use exact, glob, or &#39;like&#39; matching.</span>
+<span class="sd">        match : str="glob"</span>
+<span class="sd">            Whether to use exact, glob, or 'like' matching.</span>
 <span class="sd">        include_system_properties : bool=False</span>
 <span class="sd">            For a configuration, whether to include properties that are on the system.</span>
 <span class="sd">        include_configuration_properties : bool=False</span>
 <span class="sd">            For a system, whether to include properties that are on the configurations</span>
 <span class="sd">            of the system.</span>
-<span class="sd">        types : [str] = [&quot;float&quot;, &quot;int&quot;, &quot;str&quot;, &quot;json&quot;]</span>
+<span class="sd">        types : [str] = ["float", "int", "str", "json"]</span>
 <span class="sd">            The type of results to return.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        {str: {str: value}}</span>
 <span class="sd">            The matching property values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;glob&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;GLOB&quot;</span>
-        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;like&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;LIKE&quot;</span>
-        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;exact&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"glob"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"GLOB"</span>
+        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"like"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"LIKE"</span>
+        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"exact"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"="</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown match type &#39;</span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown match type '</span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
 
-        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">is_system</span><span class="p">:</span>
@@ -858,58 +858,58 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="k">if</span> <span class="n">include_configuration_properties</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                        <span class="s2">&quot;       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;        WHERE system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="s2">"       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"        WHERE system = ?</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                        <span class="s2">&quot;       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;        WHERE system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;          AND configuration is Null</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="s2">"       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"        WHERE system = ?</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"          AND configuration is Null</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                 <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                    <span class="s2">&quot;       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="s2">&quot;        WHERE configuration = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">"       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="s2">"        WHERE configuration = ?</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">include_system_properties</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                    <span class="s2">&quot;SELECT system FROM configuration WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,)</span>
+                    <span class="s2">"SELECT system FROM configuration WHERE id = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,)</span>
                 <span class="p">)</span>
                 <span class="n">system_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                        <span class="s2">&quot;       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;        WHERE system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;          AND configuration is Null</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="s2">"       SELECT name, type, value, system, configuration</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"         FROM property, </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"        WHERE system = ?</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"          AND configuration is Null</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data.property = property.id</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"          AND name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_id</span><span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
@@ -920,33 +920,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">:</span>
             <span class="n">name</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">cid</span> <span class="o">=</span> <span class="n">row</span>
             <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;sid&quot;</span><span class="p">:</span> <span class="n">sid</span><span class="p">,</span>
-                <span class="s2">&quot;cid&quot;</span><span class="p">:</span> <span class="n">cid</span><span class="p">,</span>
+                <span class="s2">"sid"</span><span class="p">:</span> <span class="n">sid</span><span class="p">,</span>
+                <span class="s2">"cid"</span><span class="p">:</span> <span class="n">cid</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"float"</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with value of property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with value of property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"int"</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with value of property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with value of property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with value of property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with value of property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The id for a property</span>
+<span class="w">        </span><span class="sd">"""The id for a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -957,31 +957,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
 <span class="sd">            The database id for the property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM property WHERE name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT id FROM property WHERE name = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,))</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not known.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not known."</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">known_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;List the known properties.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM property&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""List the known properties."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT name FROM property"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">_id</span><span class="p">,</span>
-        <span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
-        <span class="n">match</span><span class="o">=</span><span class="s2">&quot;glob&quot;</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span>
+        <span class="n">match</span><span class="o">=</span><span class="s2">"glob"</span><span class="p">,</span>
         <span class="n">is_system</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">include_configuration_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">as_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">],</span>
+        <span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s2">"float"</span><span class="p">,</span> <span class="s2">"int"</span><span class="p">,</span> <span class="s2">"str"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">],</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the list of matching properties for the configuration.</span>
+<span class="w">        </span><span class="sd">"""Get the list of matching properties for the configuration.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -989,10 +989,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            The id of the configuration.</span>
 <span class="sd">        is_system : bool=False</span>
 <span class="sd">            Whether the ID is for a system, not a configuration.</span>
-<span class="sd">        pattern : str = &quot;*&quot;</span>
+<span class="sd">        pattern : str = "*"</span>
 <span class="sd">            The pattern of the property.</span>
-<span class="sd">        match : str=&quot;glob&quot;</span>
-<span class="sd">            Whether to use exact, glob, or &#39;like&#39; matching.</span>
+<span class="sd">        match : str="glob"</span>
+<span class="sd">            Whether to use exact, glob, or 'like' matching.</span>
 <span class="sd">        include_system_properties : bool=False</span>
 <span class="sd">            For a configuration, whether to include properties that are on the system.</span>
 <span class="sd">        include_configuration_properties : bool=False</span>
@@ -1000,28 +1000,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            of the system.</span>
 <span class="sd">        as_ids : bool=False</span>
 <span class="sd">            Whether to return the ids rather than names</span>
-<span class="sd">        types : [str] = [&quot;float&quot;, &quot;int&quot;, &quot;str&quot;, &quot;json&quot;]</span>
+<span class="sd">        types : [str] = ["float", "int", "str", "json"]</span>
 <span class="sd">            The type of results to return.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        [str] or [int]</span>
 <span class="sd">            The matching properties.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;glob&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;GLOB&quot;</span>
-        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;like&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;LIKE&quot;</span>
-        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">&quot;exact&quot;</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"glob"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"GLOB"</span>
+        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"like"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"LIKE"</span>
+        <span class="k">elif</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"exact"</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">"="</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown match type &#39;</span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown match type '</span><span class="si">{</span><span class="n">match</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">as_ids</span><span class="p">:</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT id FROM property</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">"SELECT id FROM property</span><span class="se">\n</span><span class="s2">"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT name FROM property</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; WHERE name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="s2">&quot;    AND id IN (</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="s2">"SELECT name FROM property</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" WHERE name </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> ?</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"    AND id IN (</span><span class="se">\n</span><span class="s2">"</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">pattern</span><span class="p">]</span>
 
@@ -1030,48 +1030,48 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="k">if</span> <span class="n">include_configuration_properties</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;       SELECT property FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data WHERE system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"       SELECT property FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data WHERE system = ?</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                        <span class="s2">&quot;       SELECT property</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;         FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;        WHERE system = ? AND configuration is Null</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="s2">"       SELECT property</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"         FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"        WHERE system = ? AND configuration is Null</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  SELECT property FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data WHERE configuration = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"  SELECT property FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data WHERE configuration = ?</span><span class="se">\n</span><span class="s2">"</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">include_system_properties</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                    <span class="s2">&quot;SELECT system FROM configuration WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,)</span>
+                    <span class="s2">"SELECT system FROM configuration WHERE id = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,)</span>
                 <span class="p">)</span>
                 <span class="n">system_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;        UNION</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"        UNION</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="n">sql</span> <span class="o">+=</span> <span class="p">(</span>
-                        <span class="s2">&quot;       SELECT property</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;         FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;        WHERE configuration is Null AND system = ?</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="s2">"       SELECT property</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"         FROM </span><span class="si">{</span><span class="n">_type</span><span class="si">}</span><span class="s2">_data</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"        WHERE configuration is Null AND system = ?</span><span class="se">\n</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_id</span><span class="p">)</span>
 
-        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;    )&quot;</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">"    )"</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_property</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The metadata for a property</span>
+<span class="w">        </span><span class="sd">"""The metadata for a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1082,15 +1082,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str, str, str</span>
 <span class="sd">            The type, units, and description of the property</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_property</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                <span class="s2">&quot;SELECT type, units, description FROM property WHERE name = ?&quot;</span><span class="p">,</span>
+                <span class="s2">"SELECT type, units, description FROM property WHERE name = ?"</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">_property</span><span class="p">,),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                <span class="s2">&quot;SELECT type, units, description FROM property WHERE id = ?&quot;</span><span class="p">,</span>
+                <span class="s2">"SELECT type, units, description FROM property WHERE id = ?"</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">_property</span><span class="p">,),</span>
             <span class="p">)</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
@@ -1099,12 +1099,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <span class="k">if</span> <span class="n">_property</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_properties</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_properties</span><span class="p">[</span><span class="n">_property</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Type&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Units&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Type"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Units"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Description"</span><span class="p">]</span>
 
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">_property</span><span class="si">}</span><span class="s2">&#39; is not known.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Property '</span><span class="si">{</span><span class="n">_property</span><span class="si">}</span><span class="s2">' is not known."</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The name of a property</span>
+<span class="w">        </span><span class="sd">"""The name of a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1115,28 +1115,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The name of the property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM property WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">pid</span><span class="p">,))</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT name FROM property WHERE id = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">pid</span><span class="p">,))</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property id = &#39;</span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&#39; is not known.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Property id = '</span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">' is not known."</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">property_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="s2">&quot;Obsolete routine kept for compatibility&quot;</span>
+        <span class="s2">"Obsolete routine kept for compatibility"</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">property_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
-        <span class="s2">&quot;Obsolete routine kept for compatibility&quot;</span>
+        <span class="s2">"Obsolete routine kept for compatibility"</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">property_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_property</span><span class="p">):</span>
-        <span class="s2">&quot;Obsolete routine kept for compatibility&quot;</span>
+        <span class="s2">"Obsolete routine kept for compatibility"</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">_property</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">_property</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">is_system</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the given property value for the configuration or system</span>
+<span class="w">        </span><span class="sd">"""Store the given property value for the configuration or system</span>
 
 <span class="sd">        If the property value already exists, overwrite it in situ.</span>
 
@@ -1150,83 +1150,83 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">            The value to store.</span>
 <span class="sd">        is_system : bool=False</span>
 <span class="sd">            Whether the ID is for a system, not a configuration.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Get the property id and type</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_property</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">_property</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">_property</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_properties</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_property</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">_property</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Property '</span><span class="si">{</span><span class="n">_property</span><span class="si">}</span><span class="s2">' does not exist."</span><span class="p">)</span>
             <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">_property</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pid</span> <span class="o">=</span> <span class="n">_property</span>
         <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">is_system</span><span class="p">:</span>
             <span class="c1"># Check if a value already exists</span>
             <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;SELECT COUNT(*) FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND &quot;</span>
-                <span class="s2">&quot;configuration is Null AND property = ?&quot;</span>
+                <span class="sa">f</span><span class="s2">"SELECT COUNT(*) FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND "</span>
+                <span class="s2">"configuration is Null AND property = ?"</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Not there so add</span>
                 <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;INSERT INTO </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data (system, property, value)&quot;</span>
-                    <span class="s2">&quot;      VALUES(?, ?, ?)&quot;</span>
+                    <span class="sa">f</span><span class="s2">"INSERT INTO </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data (system, property, value)"</span>
+                    <span class="s2">"      VALUES(?, ?, ?)"</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># update in place</span>
                 <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;UPDATE </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data SET value = ? WHERE system = ? AND &quot;</span>
-                    <span class="s2">&quot;configuration is Null AND property = ?&quot;</span>
+                    <span class="sa">f</span><span class="s2">"UPDATE </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data SET value = ? WHERE system = ? AND "</span>
+                    <span class="s2">"configuration is Null AND property = ?"</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Get the system id</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT system FROM configuration WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT system FROM configuration WHERE id = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,))</span>
             <span class="n">sid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="c1"># Check if a value already exists</span>
             <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;SELECT COUNT(*) FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND &quot;</span>
-                <span class="s2">&quot;configuration = ? AND property = ?&quot;</span>
+                <span class="sa">f</span><span class="s2">"SELECT COUNT(*) FROM </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data WHERE system = ? AND "</span>
+                <span class="s2">"configuration = ? AND property = ?"</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Not there so add</span>
                 <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;INSERT INTO </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data (configuration, system, property, value)&quot;</span>
-                    <span class="s2">&quot;      VALUES(?, ?, ?, ?)&quot;</span>
+                    <span class="sa">f</span><span class="s2">"INSERT INTO </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data (configuration, system, property, value)"</span>
+                    <span class="s2">"      VALUES(?, ?, ?, ?)"</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># update in place</span>
                 <span class="n">sql</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;UPDATE </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data SET value = ? WHERE system = ? AND &quot;</span>
-                    <span class="s2">&quot;configuration = ? AND property = ?&quot;</span>
+                    <span class="sa">f</span><span class="s2">"UPDATE </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2">_data SET value = ? WHERE system = ? AND "</span>
+                    <span class="s2">"configuration = ? AND property = ?"</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">pid</span><span class="p">))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;configuration&quot;</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find configurations that match the query defined by the args.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="p">[</span><span class="s2">"configuration"</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">"""Find configurations that match the query defined by the args.</span>
 
 <span class="sd">        what : [str or int]]</span>
-<span class="sd">            What to return ... &quot;configuration&quot;, property names or ids.</span>
+<span class="sd">            What to return ... "configuration", property names or ids.</span>
 <span class="sd">        where : {}</span>
 
 <span class="sd">        Note</span>
 <span class="sd">        ----</span>
 <span class="sd">        args should be a multiple of 3 in length, with each triplet being</span>
 <span class="sd">        (property, operator, value). The property</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT&quot;</span>
-        <span class="n">where</span> <span class="o">=</span> <span class="s2">&quot;WHERE&quot;</span>
+<span class="sd">        """</span>
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">"SELECT"</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="s2">"WHERE"</span>
         <span class="n">criteria</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tables</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1234,53 +1234,53 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">n_tables</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">what</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">","</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;configuration&quot;</span><span class="p">:</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; t0.configuration&quot;</span>
-                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;configuration_id&quot;</span><span class="p">)</span>
-                    <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">[</span><span class="s2">&quot;configuration&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">"configuration"</span><span class="p">:</span>
+                    <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" t0.configuration"</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"configuration_id"</span><span class="p">)</span>
+                    <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">[</span><span class="s2">"configuration"</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                     <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-                    <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;_data&quot;</span>
+                    <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">"_data"</span>
                     <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
-                        <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                        <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                         <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">elif</span> <span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]:</span>
-                        <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span>
                         <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">alias</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span>
-                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value&quot;</span>
-                    <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value"</span>
+                    <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                     <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ptype</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">pid</span> <span class="o">=</span> <span class="n">item</span>
                 <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-                <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;_data&quot;</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">"_data"</span>
                 <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
-                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                     <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">elif</span> <span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]:</span>
-                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">alias</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value&quot;</span>
-                <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value"</span>
+                <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
                 <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ptype</span><span class="p">)</span>
 
         <span class="c1"># And the WHERE clause ...</span>
-        <span class="n">where</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">""</span><span class="p">}</span>
         <span class="n">items</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
         <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">"("</span><span class="p">:</span>
                 <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; (&quot;</span>
-            <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
-                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
+                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="s2">" ("</span>
+            <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">")"</span><span class="p">:</span>
+                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">")"</span>
                 <span class="n">where</span><span class="p">[</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
                 <span class="k">del</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
                 <span class="n">level</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -1291,75 +1291,75 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">pid</span> <span class="o">=</span> <span class="n">item</span>
                 <span class="n">ptype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-                <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">&quot;_data&quot;</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">ptype</span> <span class="o">+</span> <span class="s2">"_data"</span>
                 <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
-                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                     <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">elif</span> <span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">]:</span>
-                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"t</span><span class="si">{</span><span class="n">n_tables</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">n_tables</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">alias</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">pid</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;( &quot;</span><span class="p">:</span>
-                    <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; AND&quot;</span>
-                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">""</span> <span class="ow">and</span> <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"( "</span><span class="p">:</span>
+                    <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">" AND"</span>
+                <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.property == </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">"</span>
 
                 <span class="n">operator</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;between&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"between"</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"str"</span><span class="p">:</span>
                         <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value BETWEEN &quot;</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39; AND &quot;</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                            <span class="sa">f</span><span class="s1">' AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value BETWEEN "</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">"'</span>
+                            <span class="sa">f</span><span class="s1">' AND "</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">"'</span>
                         <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-                        <span class="n">value1</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
-                        <span class="n">value2</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+                        <span class="n">value1</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">))</span>
+                        <span class="n">value2</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">))</span>
                         <span class="n">where</span><span class="p">[</span>
                             <span class="n">level</span>
-                        <span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value BETWEEN &quot;</span><span class="si">{</span><span class="n">value1</span><span class="si">}</span><span class="s1">&quot; AND &quot;</span><span class="si">{</span><span class="n">value2</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                        <span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value BETWEEN "</span><span class="si">{</span><span class="n">value1</span><span class="si">}</span><span class="s1">" AND "</span><span class="si">{</span><span class="n">value2</span><span class="si">}</span><span class="s1">"'</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value BETWEEN </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; AND </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">" AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value BETWEEN </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">" AND </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
                         <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
-                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1"> &quot;</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
-                    <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-                        <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
-                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1"> &quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"str"</span><span class="p">:</span>
+                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1"> "</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s1">"'</span>
+                    <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">))</span>
+                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s1">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1"> "</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">"'</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">where</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" AND </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.value </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="c1"># Put it all together ... FROM clause plus needed criteria</span>
         <span class="c1"># if len(tables) == 0:</span>
         <span class="c1">#     # No tables ... so probably getting all configurations with properties</span>
-        <span class="c1">#     tables = [&quot;int_data&quot;, &quot;float_data&quot;, &quot;str_data&quot;]</span>
-        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; FROM &quot;</span>
+        <span class="c1">#     tables = ["int_data", "float_data", "str_data"]</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" FROM "</span>
 
         <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> AS </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> AS </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
 
         <span class="c1"># Now for the WHERE clause</span>
-        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE &quot;</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" WHERE "</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">alias</span> <span class="o">!=</span> <span class="s2">&quot;t0&quot;</span><span class="p">:</span>
-                    <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.configuration = t0.configuration&quot;</span><span class="p">)</span>
-        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; AND &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">alias</span> <span class="o">!=</span> <span class="s2">"t0"</span><span class="p">:</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2">.configuration = t0.configuration"</span><span class="p">)</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" AND "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">criteria</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; AND &quot;</span>
-            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; AND &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">criteria</span><span class="p">)</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" AND "</span>
+            <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" AND "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">criteria</span><span class="p">)</span>
 
         <span class="c1"># The user criteria, if any</span>
-        <span class="k">if</span> <span class="n">where</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">where</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; AND&quot;</span>
+                <span class="n">sql</span> <span class="o">+=</span> <span class="s2">" AND"</span>
             <span class="n">sql</span> <span class="o">+=</span> <span class="n">where</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
@@ -1368,22 +1368,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tmp</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">criteria</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">tmp</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">criteria</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">raise</span>
 
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
                     <span class="n">result</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">result</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_property</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The type of a property</span>
+<span class="w">        </span><span class="sd">"""The type of a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1394,11 +1394,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The type of the property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">(</span><span class="n">_property</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_property</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The unit string of a property</span>
+<span class="w">        </span><span class="sd">"""The unit string of a property</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1409,7 +1409,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The units string for the property.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">(</span><span class="n">_property</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 
@@ -1440,8 +1440,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1453,7 +1453,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

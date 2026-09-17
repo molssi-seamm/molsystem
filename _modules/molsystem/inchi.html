@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.inchi &#8212; MolSystem 2026.6.29 documentation</title>
+    <title>molsystem.inchi &#8212; MolSystem 2026.9.17 documentation</title>
   
   
   
@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -35,10 +35,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=afc2a114"></script>
+    <script src="../../_static/documentation_options.js?v=a493a295"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.6.29" />
+  <meta name="docsearch:version" content="2026.9.17" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -488,7 +488,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <h1>Source code for molsystem.inchi</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="sd">&quot;&quot;&quot;Functions for handling InChI&quot;&quot;&quot;</span>
+<span class="sd">"""Functions for handling InChI"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
@@ -497,15 +497,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <span class="kn">from</span><span class="w"> </span><span class="nn">openbabel</span><span class="w"> </span><span class="kn">import</span> <span class="n">openbabel</span> <span class="k">as</span> <span class="n">OB</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;     conda install -c conda-forge openbabel&quot;</span>
+        <span class="s2">"Please install openbabel using conda:</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"     conda install -c conda-forge openbabel"</span>
     <span class="p">)</span>
     <span class="k">raise</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">AllChem</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please install RDKit using conda:</span><span class="se">\n</span><span class="s2">     conda install -c conda-forge rdkit&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Please install RDKit using conda:</span><span class="se">\n</span><span class="s2">     conda install -c conda-forge rdkit"</span><span class="p">)</span>
     <span class="k">raise</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -514,22 +514,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="InChIMixin">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InChIMixin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A mixin for handling InChI.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A mixin for handling InChI."""</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the InChI string for this object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return the InChI string for this object."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_inchi</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the InChIKey string for this object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return the InChIKey string for this object."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_inchi</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="InChIMixin.to_inchi">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.to_inchi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">openbabel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the InChI string from the system.</span>
+<span class="w">        </span><span class="sd">"""Create the InChI string from the system.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -542,15 +542,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The InChI string, or (InChI, name) if the rname is requested</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;to_inchi&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"to_inchi"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">openbabel</span><span class="p">:</span>
             <span class="n">obConversion</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
-                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchikey&quot;</span><span class="p">)</span>
+                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">"inchikey"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">)</span>
+                <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">"inchi"</span><span class="p">)</span>
 
             <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">()</span>
 
@@ -562,7 +562,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">inchi</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">inchi</span><span class="o">.</span><span class="n">MolToInchi</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inchi = &#39;</span><span class="si">{</span><span class="n">inchi</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"inchi = '</span><span class="si">{</span><span class="n">inchi</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">inchi</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
@@ -570,7 +570,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="InChIMixin.from_inchi">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchi</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openbabel</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from a InChI string.</span>
+<span class="w">        </span><span class="sd">"""Create the system from a InChI string.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -586,13 +586,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">save</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
         <span class="k">if</span> <span class="n">openbabel</span><span class="p">:</span>
             <span class="n">obConversion</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBConversion</span><span class="p">()</span>
-            <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">&quot;inchi&quot;</span><span class="p">,</span> <span class="s2">&quot;mdl&quot;</span><span class="p">)</span>
+            <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInAndOutFormats</span><span class="p">(</span><span class="s2">"inchi"</span><span class="p">,</span> <span class="s2">"mdl"</span><span class="p">)</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">OB</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
             <span class="n">obConversion</span><span class="o">.</span><span class="n">ReadString</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">inchi</span><span class="p">)</span>
 
@@ -605,7 +605,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;RDKit from InChI doesn&#39;t seem to work!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"RDKit from InChI doesn't seem to work!"</span><span class="p">)</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromInchi</span><span class="p">(</span>
                 <span class="n">inchi</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">treatWarningAsError</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
@@ -628,7 +628,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="InChIMixin.from_inchikey">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.inchi.InChIMixin.from_inchikey">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_inchikey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the system from an InChIKey string.</span>
+<span class="w">        </span><span class="sd">"""Create the system from an InChIKey string.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -642,26 +642,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">inchi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_inchi</span><span class="p">(</span><span class="n">inchikey</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">from_inchi</span><span class="p">(</span><span class="n">inchi</span><span class="p">,</span> <span class="n">reorient</span><span class="o">=</span><span class="n">reorient</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_inchi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inchikey</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the InChI from PubChem given the InChIKey.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get the InChI from PubChem given the InChIKey."""</span>
         <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchikey/</span><span class="si">{</span><span class="n">inchikey</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;/property/InChI/JSON&quot;</span>
+            <span class="sa">f</span><span class="s2">"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchikey/</span><span class="si">{</span><span class="n">inchikey</span><span class="si">}</span><span class="s2">"</span>
+            <span class="s2">"/property/InChI/JSON"</span>
         <span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;Fault&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;InChIKey &#39;</span><span class="si">{</span><span class="n">inchikey</span><span class="si">}</span><span class="s2">&#39; not found in PubChem.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"Fault"</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"InChIKey '</span><span class="si">{</span><span class="n">inchikey</span><span class="si">}</span><span class="s2">' not found in PubChem."</span><span class="p">)</span>
 
         <span class="n">inchi</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;PropertyTable&quot;</span><span class="p">][</span><span class="s2">&quot;Properties&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="s2">&quot;InChI&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-                <span class="n">inchi</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;InChI&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s2">"PropertyTable"</span><span class="p">][</span><span class="s2">"Properties"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s2">"InChI"</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+                <span class="n">inchi</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s2">"InChI"</span><span class="p">])</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inchi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">inchi</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -696,8 +696,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -709,7 +709,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>
