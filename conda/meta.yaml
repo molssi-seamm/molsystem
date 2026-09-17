@@ -27,10 +27,12 @@ requirements:
   run:
     - python
     - openbabel
+    - mendeleev
     - numpy
     - pandas
     - pathvalidate
     - pycifrw
+    - scipy
 
 test:
   imports:
