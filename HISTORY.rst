@@ -1,6 +1,18 @@
 =======
 History
 =======
+2026.9.17 -- Added bond perception from the geometry
+    * Added ``perceive_bonds()`` to configurations, which finds the bonds from the
+      atomic positions and adds them, for structures read from formats that carry
+      no bonds such as extended XYZ trajectory frames. Atoms are bonded when closer
+      than a tolerance (default 1.2) times the sum of their covalent radii; hydrogen
+      is limited to one bond (the shortest); and alkali and alkaline-earth metals
+      are treated as ions and left unbonded unless requested. Periodic
+      configurations use the minimum image, so molecules straddling the cell
+      boundary are bonded correctly, and any cell shape is handled.
+    * The method is designed to grow: ``method="covalent radii"`` is the first;
+      others such as a Voronoi tessellation can be added behind the same call.
+
 2026.6.29 -- Added geometric transforms and combining of configurations
     * Added rigid-body transforms for a (molecular) configuration: the center of mass
       or geometric centroid, and in-place translate, rotate (about the center of mass,
