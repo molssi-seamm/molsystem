@@ -1,6 +1,23 @@
 =======
 History
 =======
+2026.9.17 -- Added bond perception from the geometry
+    * Added ``perceive_bonds()`` to configurations, which finds the bonds from the
+      atomic positions and adds them, for structures read from formats that carry
+      no bonds such as extended XYZ trajectory frames. Atoms are bonded when closer
+      than a tolerance (default 1.2) times the sum of their covalent radii; hydrogen
+      is limited to one bond (the shortest); and alkali and alkaline-earth metals
+      are treated as ions and left unbonded unless requested. In periodic
+      configurations every image within reach is considered and bonds carry their
+      cell offsets, so molecules straddling the cell boundary and covalent crystals
+      (e.g. diamond in any cell setting) are bonded correctly; any cell shape is
+      handled.
+    * The method is designed to grow: ``method="covalent radii"`` is the first;
+      others such as a Voronoi tessellation can be added behind the same call.
+    * Internal: the test of Open Babel's format list now ignores formats that depend
+      on how Open Babel was built (the XML family, Chemical JSON, KET), which changed
+      in a recent conda-forge build.
+
 2026.6.29 -- Added geometric transforms and combining of configurations
     * Added rigid-body transforms for a (molecular) configuration: the center of mass
       or geometric centroid, and in-place translate, rotate (about the center of mass,
