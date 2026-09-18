@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.9.17.1 documentation</title>
+    <title>History &#8212; MolSystem 2026.9.18 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=150cb533"></script>
+    <script src="_static/documentation_options.js?v=4c890157"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.17.1" />
+  <meta name="docsearch:version" content="2026.9.18" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.9.18 – Bugfix: pip metadata was missing several dependencies</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">molsystem</span></code> did not install <code class="docutils literal notranslate"><span class="pre">seekpath</span></code>, <code class="docutils literal notranslate"><span class="pre">spglib</span></code>, <code class="docutils literal notranslate"><span class="pre">requests</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seamm-util</span></code>, <code class="docutils literal notranslate"><span class="pre">pubchempy</span></code> or <code class="docutils literal notranslate"><span class="pre">rdkit</span></code>, all of which molsystem imports, so it
+failed to import outside a conda-forge environment (which supplied them through
+the conda recipe). The install requirements now mirror the conda recipe, except
+<code class="docutils literal notranslate"><span class="pre">openbabel</span></code>, which has no usable PyPI wheels and still needs conda-forge.</p></li>
+</ul>
+</dd>
 <dt>2026.9.17.1 – Bugfix: perceive_bonds failed with “No module named ‘mendeleev’”</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">perceive_bonds()</span></code> (added in 2026.9.17) uses <code class="docutils literal notranslate"><span class="pre">mendeleev</span></code> for the covalent
 radii and <code class="docutils literal notranslate"><span class="pre">scipy</span></code> for the neighbour search, but neither was declared as a
