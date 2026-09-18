@@ -1,7 +1,7 @@
 =======
 History
 =======
-2026.9.17.2 -- Bugfix: pip metadata was missing several dependencies
+2026.9.18 -- Bugfix: pip metadata was missing several dependencies
     * ``pip install molsystem`` did not install ``seekpath``, ``spglib``, ``requests``,
       ``seamm-util``, ``pubchempy`` or ``rdkit``, all of which molsystem imports, so it
       failed to import outside a conda-forge environment (which supplied them through
