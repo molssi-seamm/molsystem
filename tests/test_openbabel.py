@@ -851,5 +851,12 @@ def test_v3000_sdf_formal_charge_stays_on_its_own_atom(configuration):
     assert "V3000" in text
     assert "RAD" not in text
     charges = [line.strip() for line in text.splitlines() if "CHG=" in line]
-    # The oxygen of the 100th water, i.e. the 298th atom -- not the first.
-    assert charges == ["M  V30 298 O 495 0 0 0 CHG=-1"]
+    assert len(charges) == 1
+    # "M  V30 <index> <symbol> <x> <y> <z> <aamap> CHG=-1" -- the coordinates are
+    # formatted differently by different versions of Open Babel, so check the fields
+    # that matter: the charge is on the oxygen of the 100th water, the 298th atom,
+    # and not on the first.
+    fields = charges[0].split()
+    assert fields[2] == "298"
+    assert fields[3] == "O"
+    assert fields[-1] == "CHG=-1"
