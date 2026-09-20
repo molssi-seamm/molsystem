@@ -87,27 +87,30 @@ class OpenBabelMixin:
 
     def to_OBMol(self, properties=None):
         """Return an OBMol object for the configuration, template, or subset."""
-        if self.__class__.__name__ == "_Configuration":
-            charge = self.charge
-            spin = self.spin_multiplicity
+        atoms = self.atoms
+
+        # The atomic formal charges, if any. Note that these belong to the individual
+        # atoms: the molecular charge and spin multiplicity are set below, with
+        # SetTotalCharge() and SetTotalSpinMultiplicity(). Putting them on the first
+        # atom instead gives that atom a bogus formal charge and, since Open Babel's
+        # atomic spin convention is not the molecular one -- atomic 1 means a singlet
+        # carbene, not a closed shell -- a spurious radical flag, e.g. "RAD=1" in SDF.
+        if "formal_charge" in atoms:
+            formal_charges = atoms.get_column_data("formal_charge")
         else:
-            charge = None
-            spin = None
+            formal_charges = [0] * atoms.n_atoms
 
         ob_mol = ob.OBMol()
-        for atno, xyz in zip(
-            self.atoms.atomic_numbers,
-            self.atoms.get_coordinates(fractionals=False, in_cell="molecule"),
+        for atno, xyz, formal_charge in zip(
+            atoms.atomic_numbers,
+            atoms.get_coordinates(fractionals=False, in_cell="molecule"),
+            formal_charges,
         ):
             ob_atom = ob_mol.NewAtom()
             ob_atom.SetAtomicNum(atno)
             ob_atom.SetVector(*xyz)
-            if charge is not None:
-                ob_atom.SetFormalCharge(charge)
-                charge = None
-            if spin is not None:
-                ob_atom.SetSpinMultiplicity(spin)
-                spin = None
+            if formal_charge != 0:
+                ob_atom.SetFormalCharge(formal_charge)
 
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
@@ -321,7 +324,9 @@ class OpenBabelMixin:
             for key, value in data.items():
                 if key.startswith("SEAMM|"):
                     _, _property, _type, units = key.split("|", 4)
-                    units = None if units.strip() == "" else units
+                    # Keep dimensionless units as "", matching the property
+                    # definitions, rather than turning them into None (NULL).
+                    units = units.strip()
                     if not self.properties.exists(_property):
                         self.properties.add(_property, _type=_type, units=units)
                     if _type == "int":
