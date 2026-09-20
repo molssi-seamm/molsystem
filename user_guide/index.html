@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; MolSystem 2026.9.18 documentation</title>
+    <title>User Guide &#8212; MolSystem 2026.9.20 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=4c890157"></script>
+    <script src="../_static/documentation_options.js?v=c24a4294"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Getting Started" href="../getting_started/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.18" />
+  <meta name="docsearch:version" content="2026.9.20" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -544,6 +544,39 @@ single bonds; bond orders are not assigned.</p>
 <p>Only the <code class="docutils literal notranslate"><span class="pre">covalent</span> <span class="pre">radii</span></code> method is available at present; the <code class="docutils literal notranslate"><span class="pre">method</span></code> argument is
 there so that others, such as a Voronoi tessellation, can be added later.</p>
 </section>
+<section id="charges-and-spin-in-structure-files">
+<h2>Charges and spin in structure files<a class="headerlink" href="#charges-and-spin-in-structure-files" title="Link to this heading">#</a></h2>
+<p>A configuration carries its charge and spin multiplicity as properties of the structure
+as a whole:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">configuration</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>The atoms may <em>also</em> carry formal charges of their own, in the optional
+<code class="docutils literal notranslate"><span class="pre">formal_charge</span></code> attribute – the charge on the carboxylate oxygen of an acetate ion,
+for instance, rather than on the ion as a whole:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">"formal_charge"</span><span class="p">)</span>   <span class="c1"># e.g. [0, 0, 0, -1]</span>
+</pre></div>
+</div>
+<p>The two are distinct and are written to a structure file as such: the molecular charge
+and multiplicity as properties of the structure, and the formal charges on the
+individual atoms that carry them – the <code class="docutils literal notranslate"><span class="pre">M</span>&#160; <span class="pre">CHG</span></code> line of an SDF file, say. Both come
+back unchanged on reading the file, so the charges stay where they belong and a neutral,
+closed-shell structure is not mistaken for a radical.</p>
+</section>
+<section id="properties-and-their-units">
+<h2>Properties and their units<a class="headerlink" href="#properties-and-their-units" title="Link to this heading">#</a></h2>
+<p>Every property has units, held as a string that Pint can interpret, and a property that
+is genuinely dimensionless – a statistical inefficiency, a count, a ratio – has an
+<em>empty</em> unit string rather than no units at all:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">units</span><span class="p">(</span><span class="s2">"temperature, inefficiency#LAMMPS#oplsaa+"</span><span class="p">)</span>   <span class="c1"># ""</span>
+</pre></div>
+</div>
+<p>The distinction matters because the units are what a value is converted to when a
+property is stored or read, so a property whose units are undefined cannot be converted.
+Anything that creates properties – including reading them back from a structure file –
+records dimensionless units as <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
+</section>
 <section id="index">
 <h2>Index<a class="headerlink" href="#index" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -600,6 +633,8 @@ there so that others, such as a Voronoi tessellation, can be added later.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perceiving-bonds">Perceiving bonds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#charges-and-spin-in-structure-files">Charges and spin in structure files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-and-their-units">Properties and their units</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index">Index</a></li>
 </ul>
   </nav></div>

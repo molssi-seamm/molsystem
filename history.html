@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.9.18 documentation</title>
+    <title>History &#8212; MolSystem 2026.9.20 documentation</title>
   
   
   
@@ -49,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=4c890157"></script>
+    <script src="_static/documentation_options.js?v=c24a4294"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.18" />
+  <meta name="docsearch:version" content="2026.9.20" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.9.20 – Bugfix: spurious radicals and misplaced charges in structure files</dt><dd><ul class="simple">
+<li><p>Every SDF written from a closed-shell structure carried a spurious radical flag
+on its first atom – <code class="docutils literal notranslate"><span class="pre">RAD=1</span></code> in V3000 files, <code class="docutils literal notranslate"><span class="pre">M</span>&#160; <span class="pre">RAD</span></code> in V2000 – because the
+molecular spin multiplicity was being written as an atomic property of that atom,
+where Open Babel reads 1 as a singlet carbene rather than a closed shell. The
+molecular charge and multiplicity are now only written as molecular quantities,
+which is how they are read back.</p></li>
+<li><p>For the same reason, a charged structure had its entire net charge written as a
+formal charge on its first atom, wherever the charge actually belonged, which
+distorted the valence, the hydrogen count and the SMILES on reading the file
+back. The real per-atom formal charges are now written instead, so they survive
+a round trip through a structure file.</p></li>
+<li><p>A property with no units, such as a statistical inefficiency, lost its units on
+being read from a structure file: it came back with the units undefined rather
+than empty. A step storing a new value for such a property then tried to convert
+between the two and failed, warning that it could not save the property, or in
+the case of a vector property stopping the job altogether.</p></li>
+</ul>
+</dd>
 <dt>2026.9.18 – Bugfix: pip metadata was missing several dependencies</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">molsystem</span></code> did not install <code class="docutils literal notranslate"><span class="pre">seekpath</span></code>, <code class="docutils literal notranslate"><span class="pre">spglib</span></code>, <code class="docutils literal notranslate"><span class="pre">requests</span></code>,
 <code class="docutils literal notranslate"><span class="pre">seamm-util</span></code>, <code class="docutils literal notranslate"><span class="pre">pubchempy</span></code> or <code class="docutils literal notranslate"><span class="pre">rdkit</span></code>, all of which molsystem imports, so it
