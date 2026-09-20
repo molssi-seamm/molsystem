@@ -375,7 +375,9 @@ class RDKitMixin:
             for key, value in data.items():
                 if key.startswith("SEAMM|"):
                     _, _property, _type, units = key.split("|", 4)
-                    units = None if units.strip() == "" else units
+                    # Keep dimensionless units as "", matching the property
+                    # definitions, rather than turning them into None (NULL).
+                    units = units.strip()
                     if not self.properties.exists(_property):
                         self.properties.add(_property, _type=_type, units=units)
 

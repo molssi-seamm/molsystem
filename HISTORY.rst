@@ -1,6 +1,24 @@
 =======
 History
 =======
+2026.9.20 -- Bugfix: spurious radicals and misplaced charges in structure files
+    * Every SDF written from a closed-shell structure carried a spurious radical flag
+      on its first atom -- ``RAD=1`` in V3000 files, ``M  RAD`` in V2000 -- because the
+      molecular spin multiplicity was being written as an atomic property of that atom,
+      where Open Babel reads 1 as a singlet carbene rather than a closed shell. The
+      molecular charge and multiplicity are now only written as molecular quantities,
+      which is how they are read back.
+    * For the same reason, a charged structure had its entire net charge written as a
+      formal charge on its first atom, wherever the charge actually belonged, which
+      distorted the valence, the hydrogen count and the SMILES on reading the file
+      back. The real per-atom formal charges are now written instead, so they survive
+      a round trip through a structure file.
+    * A property with no units, such as a statistical inefficiency, lost its units on
+      being read from a structure file: it came back with the units undefined rather
+      than empty. A step storing a new value for such a property then tried to convert
+      between the two and failed, warning that it could not save the property, or in
+      the case of a vector property stopping the job altogether.
+
 2026.9.18 -- Bugfix: pip metadata was missing several dependencies
     * ``pip install molsystem`` did not install ``seekpath``, ``spglib``, ``requests``,
       ``seamm-util``, ``pubchempy`` or ``rdkit``, all of which molsystem imports, so it

@@ -9,7 +9,7 @@ import platform
 
 import pytest  # noqa: F401
 
-from molsystem import openbabel_version
+from molsystem import openbabel_version, SystemDB
 
 # H-Asp-Arg-Val-Tyr-Ile-His-Pro-Phe-OH
 SMILES = (
@@ -371,11 +371,10 @@ copper_sdf = """SEAMM=default/FCC Copper
  OpenBabel03252515063D
 
   4  0  0  0  0  0  0  0  0  0999 V2000
-    0.0000    0.0000    0.0000 Cu  0  0  0  0  0 15  0  0  0  0  0  0
+    0.0000    0.0000    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     1.8075    1.8075    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     1.8075    0.0000    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     0.0000    1.8075    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
-M  RAD  1   1   1
 M  END
 >  <SEAMM|net charge|int|>
 0
@@ -406,11 +405,10 @@ copper_sdf_2 = """SEAMM=default/FCC Copper
  OpenBabel03252519453D
 
   4  0  0  0  0  0  0  0  0  0999 V2000
-    0.0000    0.0000    0.0000 Cu  0  0  0  0  0 15  0  0  0  0  0  0
+    0.0000    0.0000    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     1.8075    1.8075    0.0000 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     1.8075    3.6149    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
     3.6149    1.8075    1.8075 Cu  0  0  0  0  0  0  0  0  0  0  0  0
-M  RAD  1   1   1
 M  END
 >  <SEAMM|net charge|int|>
 0
@@ -716,3 +714,149 @@ def test_copper_from_sdf(copper):
     if text != correct:
         print(saved)
     assert text == correct
+
+
+def test_sdf_roundtrip_keeps_dimensionless_units(AceticAcid):
+    """A property with no units must not come back with units of None.
+
+    Writing "" and reading it back as None (NULL) made the units of the property
+    disagree with its definition, which then broke the unit conversion when a
+    step stored a new value for it.
+    """
+    configuration = AceticAcid
+    configuration.properties.add(
+        "statistical inefficiency#LAMMPS#oplsaa+",
+        _type="float",
+        units="",
+        description="The statistical inefficiency.",
+    )
+    configuration.properties.put("statistical inefficiency#LAMMPS#oplsaa+", 3.5)
+    text = configuration.to_sdf_text()
+
+    db = SystemDB(filename="file:sdf_units_db?mode=memory&cache=shared")
+    try:
+        new = db.create_system(name="new").create_configuration(name="new")
+        new.from_sdf_text(text)
+
+        assert new.properties.units("statistical inefficiency#LAMMPS#oplsaa+") == ""
+        assert new.properties.get("statistical inefficiency#LAMMPS#oplsaa+")[
+            "statistical inefficiency#LAMMPS#oplsaa+"
+        ]["value"] == pytest.approx(3.5)
+    finally:
+        db.close()
+
+
+ACETATE_SDF = """\
+
+ test
+
+  4  3  0  0  0  0  0  0  0  0999 V2000
+    0.9834   -0.0510    0.0844 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.5034   -0.0510    0.0844 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.1388   -0.7604    0.9259 O   0  0  0  0  0  0  0  0  0  0  0  0
+    3.2134    0.7415   -0.8559 O   0  5  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  2  0  0  0  0
+  2  4  1  0  0  0  0
+M  CHG  1   4  -1
+M  END
+$$$$
+"""
+
+
+def test_sdf_closed_shell_has_no_radical_flag(AceticAcid):
+    """A closed-shell molecule must not pick up a radical flag.
+
+    The molecular spin multiplicity used to be put on the first atom, where
+    Open Babel reads 1 as a singlet carbene rather than a closed shell, so every
+    SDF came out with a spurious "RAD=1"/"M  RAD" on atom 1.
+    """
+    configuration = AceticAcid
+    assert configuration.spin_multiplicity == 1
+
+    text = configuration.to_sdf_text()
+
+    assert "RAD" not in text
+
+
+def test_sdf_formal_charge_stays_on_its_own_atom(configuration):
+    """The molecular charge must not be written as a formal charge on atom 1."""
+    configuration.from_sdf_text(ACETATE_SDF)
+
+    assert configuration.charge == -1
+    # The charge is on the 4th atom, one of the two oxygens.
+    assert configuration.atoms.get_column_data("formal_charge") == [0, 0, 0, -1]
+
+    text = configuration.to_sdf_text()
+
+    assert "RAD" not in text
+    charges = [line.strip() for line in text.splitlines() if "CHG" in line]
+    assert charges == ["M  CHG  1   4  -1"]
+
+
+def _water_box(configuration, n_mol=400, charged_molecule=None):
+    """Fill a configuration with enough water to force the V3000 SDF format.
+
+    Open Babel switches to V3000 above 999 atoms or bonds, so this is the format
+    the production 500-molecule cells are written in.
+    """
+    Xs, Ys, Zs, atnos, qs = [], [], [], [], []
+    geometry = ((8, (0.0, 0.0, 0.0)), (1, (0.96, 0.0, 0.0)), (1, (-0.24, 0.93, 0.0)))
+    for molecule in range(n_mol):
+        x0 = molecule * 5.0
+        for atno, (dx, dy, dz) in geometry:
+            atnos.append(atno)
+            Xs.append(x0 + dx)
+            Ys.append(dy)
+            Zs.append(dz)
+            qs.append(0)
+
+    if charged_molecule is not None:
+        # Make one molecule a hydroxide: the charge sits on its oxygen.
+        qs[3 * charged_molecule] = -1
+        configuration.atoms.add_attribute("formal_charge", coltype="int", default=0)
+        ids = configuration.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
+        configuration.charge = -1
+    else:
+        ids = configuration.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+
+    Is = [ids[3 * m] for m in range(n_mol)] * 2
+    Js = [ids[3 * m + 1] for m in range(n_mol)]
+    Js += [ids[3 * m + 2] for m in range(n_mol)]
+    configuration.bonds.append(i=Is, j=Js, bondorder=[1] * (2 * n_mol))
+
+
+def test_v3000_sdf_closed_shell_has_no_radical_flag(configuration):
+    """The V3000 writer showed the same atom-1 radical flag as V2000.
+
+    This is the form it was found in: "M  V30 1 O ... RAD=1" in the 500-molecule
+    liquid cells, which are large enough that Open Babel picks V3000.
+    """
+    _water_box(configuration)
+
+    text = configuration.to_sdf_text()
+
+    assert "V3000" in text
+    assert "RAD" not in text
+
+
+def test_v3000_sdf_formal_charge_stays_on_its_own_atom(configuration):
+    """In V3000 too, the molecular charge must not land on atom 1."""
+    _water_box(configuration, charged_molecule=99)
+
+    assert configuration.charge == -1
+
+    text = configuration.to_sdf_text()
+
+    assert "V3000" in text
+    assert "RAD" not in text
+    charges = [line.strip() for line in text.splitlines() if "CHG=" in line]
+    assert len(charges) == 1
+    # "M  V30 <index> <symbol> <x> <y> <z> <aamap> CHG=-1" -- the coordinates are
+    # formatted differently by different versions of Open Babel, so check the fields
+    # that matter: the charge is on the oxygen of the 100th water, the 298th atom,
+    # and not on the first.
+    fields = charges[0].split()
+    assert fields[2] == "298"
+    assert fields[3] == "O"
+    assert fields[-1] == "CHG=-1"
