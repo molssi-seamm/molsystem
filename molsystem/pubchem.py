@@ -25,6 +25,29 @@ except ModuleNotFoundError:
     )
 
 
+class PubChemUnavailableError(RuntimeError):
+    """PubChem could not serve the request: throttled, blocked or down.
+
+    Distinct from a genuine "not found" so callers (and the test-suite) can
+    tell a transient service problem from a wrong answer.
+    """
+
+
+def _check_available(response, what):
+    """Raise PubChemUnavailableError if the response says PubChem is unavailable.
+
+    403 (blocked), 429 (too many requests) and any 5xx (server busy or down)
+    mean PubChem did not consider the request, so there is no answer to
+    interpret. Anything else is left to the caller.
+    """
+    code = response.status_code
+    if code in (403, 429) or code >= 500:
+        raise PubChemUnavailableError(
+            f"PubChem returned HTTP {code} for {what}; the service is throttled, "
+            "blocked or unavailable."
+        )
+
+
 def PC_standardize(structures):
     """Use the PubChem standardization service with SMILES.
 
@@ -171,6 +194,7 @@ class PubChemMixin:
         if response.status_code == 200:
             self.from_sdf_text(response.text)
             return
+        _check_available(response, f"CID {cid}")
 
         # An error!
         if fallback is None:
@@ -237,6 +261,7 @@ class PubChemMixin:
             if response.status_code == 200:
                 self.from_sdf_text(response.text, properties=properties)
                 return
+            _check_available(response, f"{namespace} '{identifier}'")
 
         # An error!
         if fallback is None:

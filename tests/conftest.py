@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from molsystem.pubchem import PubChemUnavailableError
 from molsystem.system_db import SystemDB
 
 path = Path(__file__).resolve().parent
@@ -652,3 +653,24 @@ def benzene(configuration):
     configuration.from_cif_text(cif_text)
 
     return configuration
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """Report a test as skipped, not failed, when PubChem itself was unavailable.
+
+    The PubChem tests need the live service. When it throttles or refuses
+    the request (as it does when several CI jobs hit it at once) the test
+    has not shown anything wrong with molsystem, so it is skipped with the
+    reason. A genuine "not found" or wrong answer still fails.
+    """
+    outcome = yield
+    report = outcome.get_result()
+    if call.when == "call" and call.excinfo is not None:
+        if isinstance(call.excinfo.value, PubChemUnavailableError):
+            report.outcome = "skipped"
+            report.longrepr = (
+                str(item.fspath),
+                item.location[1],
+                f"Skipped: {call.excinfo.value}",
+            )

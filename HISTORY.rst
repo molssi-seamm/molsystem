@@ -1,6 +1,15 @@
 =======
 History
 =======
+2026.9.25 -- Bugfix: Open Babel is now a declared dependency
+    * ``pip install molsystem`` did not install Open Babel, so molsystem failed to
+      import outside a conda environment (whose recipe supplied it). Open Babel has
+      had official PyPI wheels for every current platform since 3.2.1, so it is now
+      an ordinary requirement.
+    * A request that PubChem refuses (throttled, blocked or down) now raises
+      ``PubChemUnavailableError`` rather than being reported as "not found", and
+      the test-suite skips, rather than fails, the PubChem tests in that case.
+
 2026.9.20 -- Bugfix: spurious radicals and misplaced charges in structure files
     * Every SDF written from a closed-shell structure carried a spurious radical flag
       on its first atom -- ``RAD=1`` in V3000 files, ``M  RAD`` in V2000 -- because the

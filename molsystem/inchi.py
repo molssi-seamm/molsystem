@@ -5,6 +5,8 @@
 import logging
 import requests
 
+from .pubchem import _check_available
+
 try:
     from openbabel import openbabel as OB
 except ModuleNotFoundError:
@@ -155,6 +157,7 @@ class InChIMixin:
             "/property/InChI/JSON"
         )
         r = requests.get(url)
+        _check_available(r, f"InChIKey {inchikey}")
         result = r.json()
         if "Fault" in result:
             raise RuntimeError(f"InChIKey '{inchikey}' not found in PubChem.")
