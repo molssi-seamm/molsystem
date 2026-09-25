@@ -20,13 +20,17 @@ The non-graphical installer is also straightforward::
 
 will ensure both that it is installed and up-to-date.
 
-MolSystem is not directly tied to SEAMM, so can be used outside SEAMM. The recommended
-way to install it is using Conda:
+MolSystem is not directly tied to SEAMM, so can be used outside SEAMM. Install it
+from PyPI with pip (or uv) into any Python 3.10 or later environment:
+
+  pip install molsystem
+
+Its compiled dependencies, RDKit and Open Babel, are installed automatically from
+their PyPI wheels on macOS, Linux and Windows. A conda-forge package also exists:
 
   conda install -c conda-forge molsystem
 
-It can also be installed from PyPi using pip; however, since MolSystem relies on
-complicated dependencies such as RDKit and OpenBabel we strongly recommend using Conda!
+but it lags the PyPI release, and you should not mix the two in one environment.
 
 .. _SEAMM Installer: https://molssi-seamm.github.io/installation/index.html
 

@@ -46,12 +46,11 @@ setup(
     # Allows `setup.py test` to work correctly with pytest
     setup_requires=[] + pytest_runner,
 
-    # Required packages, pulls from pip if needed; do not use for Conda
-    # deployment
-    # Mirrors the conda recipe (conda/meta.yaml) except openbabel, which has no
-    # usable PyPI wheels and must come from conda-forge.
+    # Required packages. Open Babel has had official PyPI wheels for every
+    # current platform since 3.2.1, so it is declared like everything else.
     install_requires=[
         "mendeleev",
+        "openbabel>=3.1.1",
         "numpy",
         "pandas",
         "pathvalidate",
