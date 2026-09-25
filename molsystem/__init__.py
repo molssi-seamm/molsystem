@@ -32,7 +32,7 @@ from .transform import (  # noqa: F401
     rotation_matrix_from_axis_angle,
     rotation_matrix_from_quaternion,
 )
-from .pubchem import PC_standardize  # noqa: F401
+from .pubchem import PC_standardize, PubChemUnavailableError  # noqa: F401
 
 try:
     from .openeye import openeye_version  # noqa: F401
