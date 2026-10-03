@@ -14,6 +14,7 @@ from .configuration import _Configuration
 from .properties import _Properties
 from .system import _System
 from .table import _Table
+from .user_tables import UserTables
 from .templates import _Templates
 
 logger = logging.getLogger(__name__)
@@ -159,6 +160,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._db = None
         self._cursor = None
         self._items = {}
+        self._user_tables = None
 
         if "filename" in kwargs:
             self.filename = kwargs.pop("filename")
@@ -350,6 +352,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 self._db = None
                 self._cursor = None
         self._filename = value
+        self._user_tables = None
         if self._filename is not None:
             if self._filename[0:5] == "file:":
                 self._db = sqlite3.connect(self._filename, uri=True, timeout=10.0)
@@ -423,6 +426,13 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
     def system_ids(self):
         """The list of system ids."""
         return [row[0] for row in self.db.execute("SELECT id FROM system")]
+
+    @property
+    def user_tables(self):
+        """The user tables (flowchart results tables) in this database."""
+        if self._user_tables is None:
+            self._user_tables = UserTables(self)
+        return self._user_tables
 
     @property
     def templates(self):
