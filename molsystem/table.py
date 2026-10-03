@@ -350,7 +350,8 @@ class _Table(collections.abc.MutableMapping):
         column_def = f'"{name}" {column_type}'
         if default is not None:
             if coltype == "str":
-                column_def += f" DEFAULT '{default}'"
+                escaped = str(default).replace("'", "''")
+                column_def += f" DEFAULT '{escaped}'"
             else:
                 column_def += f" DEFAULT {default}"
         if notnull:

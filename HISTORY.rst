@@ -1,6 +1,19 @@
 =======
 History
 =======
+2026.10.3 -- Tables in the database
+    * SEAMM's flowchart tables can now be stored in the job's database:
+      ``SystemDB.user_tables`` holds named tables with declared column types and
+      defaults, an optional index column and a current row. Values are stored exactly
+      as written and read back by the declared type; ``to_dataframe()`` gives a pandas
+      copy. See "User tables" in the user guide.
+    * A registry (``_tables``) and a change journal (``_table_changes``) are kept
+      beside the tables; row ids are never reused.
+    * A database opened read-only can be read, but creating or changing a table raises
+      ``PermissionError`` with a clear message.
+    * Bugfix: a string column default containing a quote (``'``) no longer breaks
+      ``add_attribute``.
+
 2026.9.25 -- Bugfix: Open Babel is now a declared dependency
     * ``pip install molsystem`` did not install Open Babel, so molsystem failed to
       import outside a conda environment (whose recipe supplied it). Open Babel has
