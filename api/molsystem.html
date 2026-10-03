@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.9.25 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.10.3 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=9a43dc2a"></script>
+    <script src="../_static/documentation_options.js?v=f64fa391"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="molsystem" href="modules.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.25" />
+  <meta name="docsearch:version" content="2026.10.3" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -2495,6 +2495,12 @@ structure.</p>
 <dd><p>The defined templates.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.user_tables">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">user_tables</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.user_tables" title="Link to this definition">#</a></dt>
+<dd><p>The user tables (flowchart results tables) in this database.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -2877,6 +2883,295 @@ is created. Pass a seeded generator for reproducible orientations.</p>
 </dd></dl>
 
 </section>
+<section id="module-molsystem.user_tables">
+<span id="molsystem-user-tables-module"></span><h2>molsystem.user_tables module<a class="headerlink" href="#module-molsystem.user_tables" title="Link to this heading">#</a></h2>
+<p>User tables: named, ordered tables of results stored in the database.</p>
+<p>These are the tables a flowchart builds (with the Table step, or with
+<code class="docutils literal notranslate"><span class="pre">store_results</span></code>), as opposed to the tables that hold the structures. They are
+kept in the same SQLite file, under SQL names <code class="docutils literal notranslate"><span class="pre">table_&lt;n&gt;</span></code>, with a registry
+<code class="docutils literal notranslate"><span class="pre">_tables</span></code> holding each table’s display name, declared column types and
+defaults, index column, current row and free-form metadata, and a journal
+<code class="docutils literal notranslate"><span class="pre">_table_changes</span></code> recording every change.</p>
+<p>The columns have no SQL type, so SQLite stores exactly what was written (the
+text “1.0960” stays text); the declared type in the registry decides how values
+are read back. Rows are identified by an internal row id, which is not meant to
+be shown to users: they see the index column or the position of the row.</p>
+<p>Writes are not committed here; the caller (the flowchart evaluator) commits
+after each step.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">UserTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#molsystem.user_tables.UserTables" title="molsystem.user_tables.UserTables"><span class="pre">UserTables</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Table</span></code></p>
+<p>One user table. Get it from <code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables[name]</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.add_column">
+<span class="sig-name descname"><span class="pre">add_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coltype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'string'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.add_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.add_column" title="Link to this definition">#</a></dt>
+<dd><p>Add a column, filling existing rows with its default.</p>
+<p>Returns False, changing nothing, if the column already exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.append_row">
+<span class="sig-name descname"><span class="pre">append_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.append_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.append_row" title="Link to this definition">#</a></dt>
+<dd><p>Append one row; returns its row id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.append_rows">
+<span class="sig-name descname"><span class="pre">append_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.append_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.append_rows" title="Link to this definition">#</a></dt>
+<dd><p>Append rows given as dicts; missing columns get their defaults.</p>
+<p>Returns the new row ids. By default the current row becomes the last one.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.column_definitions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">column_definitions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.column_definitions" title="Link to this definition">#</a></dt>
+<dd><p>name, type, default, sql.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The columns as an ordered list of dicts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.column_type">
+<span class="sig-name descname"><span class="pre">column_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.column_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.column_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.columns">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.columns" title="Link to this definition">#</a></dt>
+<dd><p>The column names, in order.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.current_row">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_row</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.current_row" title="Link to this definition">#</a></dt>
+<dd><p>The row id of the current row, or None for ‘the next row to append’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.default">
+<span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.default" title="Link to this definition">#</a></dt>
+<dd><p>The default value of a column, as it would be read back.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.defaults">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">defaults</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.defaults" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.find">
+<span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.find"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.find" title="Link to this definition">#</a></dt>
+<dd><p>The row ids whose column equals the value, in order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.get_cell">
+<span class="sig-name descname"><span class="pre">get_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.get_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.get_cell" title="Link to this definition">#</a></dt>
+<dd><p>Get one value, converted according to the column’s declared type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.get_row">
+<span class="sig-name descname"><span class="pre">get_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.get_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.get_row" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.has_row">
+<span class="sig-name descname"><span class="pre">has_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.has_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.has_row" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.index_column">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">index_column</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.index_column" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.iter_rows">
+<span class="sig-name descname"><span class="pre">iter_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.iter_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.iter_rows" title="Link to this definition">#</a></dt>
+<dd><p>Iterate over (row id, dict of values) in order.</p>
+<p><code class="docutils literal notranslate"><span class="pre">where</span></code> is a list of (column, op, value) with op one of the SQL
+comparisons =, !=, &lt;, &lt;=, &gt;, &gt;=, all of which must hold.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.metadata">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.metadata" title="Link to this definition">#</a></dt>
+<dd><p>A copy of the table’s metadata. Change it with set_metadata.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.name" title="Link to this definition">#</a></dt>
+<dd><p>The display name of the table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.next_rowid">
+<span class="sig-name descname"><span class="pre">next_rowid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.next_rowid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.next_rowid" title="Link to this definition">#</a></dt>
+<dd><p>The row id after the given one, or None at the end.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.position">
+<span class="sig-name descname"><span class="pre">position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.position" title="Link to this definition">#</a></dt>
+<dd><p>The 0-based position of a row.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.row_ids">
+<span class="sig-name descname"><span class="pre">row_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.row_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.row_ids" title="Link to this definition">#</a></dt>
+<dd><p>The row ids, in order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.rowid_at">
+<span class="sig-name descname"><span class="pre">rowid_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.rowid_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.rowid_at" title="Link to this definition">#</a></dt>
+<dd><p>The row id at a 0-based position, or None past the end.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.set_cell">
+<span class="sig-name descname"><span class="pre">set_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.set_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.set_cell" title="Link to this definition">#</a></dt>
+<dd><p>Set one value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.set_metadata">
+<span class="sig-name descname"><span class="pre">set_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.set_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.set_metadata" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.sql_name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sql_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#molsystem.user_tables.UserTable.sql_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTable.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTable.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTable.to_dataframe" title="Link to this definition">#</a></dt>
+<dd><p>A copy of the table as a DataFrame, typed by the declared types.</p>
+<p>The index is the index column if there is one, otherwise 0, 1, 2, …</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">UserTables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_db</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The user tables in a SystemDB, by display name.</p>
+<p>Access through <code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables</span></code>. The registry and journal are created
+when the first table is.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.check_writable">
+<span class="sig-name descname"><span class="pre">check_writable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables.check_writable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables.check_writable" title="Link to this definition">#</a></dt>
+<dd><p>Raise a clear error if tables cannot be written.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.create">
+<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#molsystem.user_tables.UserTable" title="molsystem.user_tables.UserTable"><span class="pre">UserTable</span></a></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables.create" title="Link to this definition">#</a></dt>
+<dd><p>Create a new, empty table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The display name of the table.</p></li>
+<li><p><strong>columns</strong> (<em>[</em><em>(</em><a class="reference internal" href="#molsystem.user_tables.UserTable.name" title="molsystem.user_tables.UserTable.name"><em>name</em></a><em>, </em><em>type</em><em>, </em><em>default</em><em>)</em><em>] or </em><em>[</em><em>dict</em><em>]</em>) – The columns, in order. The default may be None for the type’s default.</p></li>
+<li><p><strong>index_column</strong> (<em>str = None</em>) – The column whose values identify the rows, if any.</p></li>
+<li><p><strong>metadata</strong> (<em>dict = None</em>) – Free-form JSON-serializable information kept with the table.</p></li>
+<li><p><strong>replace</strong> (<em>bool = False</em>) – Replace an existing table of the same name rather than raising.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.cursor">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cursor</span></span><a class="headerlink" href="#molsystem.user_tables.UserTables.cursor" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.db">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">db</span></span><a class="headerlink" href="#molsystem.user_tables.UserTables.db" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables.delete" title="Link to this definition">#</a></dt>
+<dd><p>Remove a table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.from_dataframe">
+<span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">definitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#molsystem.user_tables.UserTable" title="molsystem.user_tables.UserTable"><span class="pre">UserTable</span></a></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables.from_dataframe" title="Link to this definition">#</a></dt>
+<dd><p>Create a table holding the contents of a DataFrame.</p>
+<p>A named index of the DataFrame becomes a column; <code class="docutils literal notranslate"><span class="pre">index_column</span></code> names the
+column that identifies rows. <code class="docutils literal notranslate"><span class="pre">definitions</span></code> (dicts with name, type and
+default) give the type and default of columns, overriding those inferred
+from the dtypes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.journal">
+<span class="sig-name descname"><span class="pre">journal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#UserTables.journal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.UserTables.journal" title="Link to this definition">#</a></dt>
+<dd><p>The journal entries as dicts, optionally for one table, in order.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></span><a class="headerlink" href="#molsystem.user_tables.UserTables.names" title="Link to this definition">#</a></dt>
+<dd><p>The names of the tables, in the order they were created.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.read_only">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">read_only</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#molsystem.user_tables.UserTables.read_only" title="Link to this definition">#</a></dt>
+<dd><p>Whether the database is read-only, so tables cannot be written.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.user_tables.UserTables.system_db">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">system_db</span></span><a class="headerlink" href="#molsystem.user_tables.UserTables.system_db" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.user_tables.column_types">
+<span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">column_types</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'boolean':</span> <span class="pre">False,</span> <span class="pre">'float':</span> <span class="pre">nan,</span> <span class="pre">'integer':</span> <span class="pre">0,</span> <span class="pre">'json':</span> <span class="pre">'',</span> <span class="pre">'string':</span> <span class="pre">''}</span></span><a class="headerlink" href="#molsystem.user_tables.column_types" title="Link to this definition">#</a></dt>
+<dd><p>The declared column types and the default for a column without one.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.user_tables.dtype_to_type">
+<span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">dtype_to_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#dtype_to_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.dtype_to_type" title="Link to this definition">#</a></dt>
+<dd><p>The declared column type for a pandas dtype.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.user_tables.from_sql">
+<span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">from_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coltype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#from_sql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.from_sql" title="Link to this definition">#</a></dt>
+<dd><p>Convert a stored value back according to the declared column type.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.user_tables.quote">
+<span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">quote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#quote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.quote" title="Link to this definition">#</a></dt>
+<dd><p>Quote an SQL identifier.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.user_tables.to_sql">
+<span class="sig-prename descclassname"><span class="pre">molsystem.user_tables.</span></span><span class="sig-name descname"><span class="pre">to_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coltype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/molsystem/user_tables.html#to_sql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.user_tables.to_sql" title="Link to this definition">#</a></dt>
+<dd><p>Convert a Python value into one that sqlite3 can store.</p>
+<p>Values for string and json columns are stored as text, so that e.g. the
+integer 3 written to a text column is found as “3”.</p>
+</dd></dl>
+
+</section>
 <section id="module-molsystem">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-molsystem" title="Link to this heading">#</a></h2>
 <p>molsystem
@@ -3164,6 +3459,7 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_ids</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.systems"><code class="docutils literal notranslate"><span class="pre">SystemDB.systems</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.templates"><code class="docutils literal notranslate"><span class="pre">SystemDB.templates</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.user_tables"><code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -3201,6 +3497,55 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.transform.random_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">random_rotation_matrix()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.transform.rotation_matrix_from_axis_angle"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_from_axis_angle()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.transform.rotation_matrix_from_quaternion"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_from_quaternion()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.user_tables">molsystem.user_tables module</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable"><code class="docutils literal notranslate"><span class="pre">UserTable</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.add_column"><code class="docutils literal notranslate"><span class="pre">UserTable.add_column()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.append_row"><code class="docutils literal notranslate"><span class="pre">UserTable.append_row()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.append_rows"><code class="docutils literal notranslate"><span class="pre">UserTable.append_rows()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.column_definitions"><code class="docutils literal notranslate"><span class="pre">UserTable.column_definitions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.column_type"><code class="docutils literal notranslate"><span class="pre">UserTable.column_type()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.columns"><code class="docutils literal notranslate"><span class="pre">UserTable.columns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.current_row"><code class="docutils literal notranslate"><span class="pre">UserTable.current_row</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.default"><code class="docutils literal notranslate"><span class="pre">UserTable.default()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.defaults"><code class="docutils literal notranslate"><span class="pre">UserTable.defaults</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.find"><code class="docutils literal notranslate"><span class="pre">UserTable.find()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.get_cell"><code class="docutils literal notranslate"><span class="pre">UserTable.get_cell()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.get_row"><code class="docutils literal notranslate"><span class="pre">UserTable.get_row()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.has_row"><code class="docutils literal notranslate"><span class="pre">UserTable.has_row()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.index_column"><code class="docutils literal notranslate"><span class="pre">UserTable.index_column</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.iter_rows"><code class="docutils literal notranslate"><span class="pre">UserTable.iter_rows()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.metadata"><code class="docutils literal notranslate"><span class="pre">UserTable.metadata</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.name"><code class="docutils literal notranslate"><span class="pre">UserTable.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.next_rowid"><code class="docutils literal notranslate"><span class="pre">UserTable.next_rowid()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.position"><code class="docutils literal notranslate"><span class="pre">UserTable.position()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.row_ids"><code class="docutils literal notranslate"><span class="pre">UserTable.row_ids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.rowid_at"><code class="docutils literal notranslate"><span class="pre">UserTable.rowid_at()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.set_cell"><code class="docutils literal notranslate"><span class="pre">UserTable.set_cell()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.set_metadata"><code class="docutils literal notranslate"><span class="pre">UserTable.set_metadata()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.sql_name"><code class="docutils literal notranslate"><span class="pre">UserTable.sql_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTable.to_dataframe"><code class="docutils literal notranslate"><span class="pre">UserTable.to_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables"><code class="docutils literal notranslate"><span class="pre">UserTables</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.check_writable"><code class="docutils literal notranslate"><span class="pre">UserTables.check_writable()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.create"><code class="docutils literal notranslate"><span class="pre">UserTables.create()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.cursor"><code class="docutils literal notranslate"><span class="pre">UserTables.cursor</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.db"><code class="docutils literal notranslate"><span class="pre">UserTables.db</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.delete"><code class="docutils literal notranslate"><span class="pre">UserTables.delete()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.from_dataframe"><code class="docutils literal notranslate"><span class="pre">UserTables.from_dataframe()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.journal"><code class="docutils literal notranslate"><span class="pre">UserTables.journal()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.names"><code class="docutils literal notranslate"><span class="pre">UserTables.names</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.read_only"><code class="docutils literal notranslate"><span class="pre">UserTables.read_only</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.UserTables.system_db"><code class="docutils literal notranslate"><span class="pre">UserTables.system_db</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.column_types"><code class="docutils literal notranslate"><span class="pre">column_types</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.dtype_to_type"><code class="docutils literal notranslate"><span class="pre">dtype_to_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.from_sql"><code class="docutils literal notranslate"><span class="pre">from_sql()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.quote"><code class="docutils literal notranslate"><span class="pre">quote()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.to_sql"><code class="docutils literal notranslate"><span class="pre">to_sql()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem">Module contents</a></li>

@@ -260,6 +260,14 @@ molsystem.transform module
    :show-inheritance:
    :undoc-members:
 
+molsystem.user\_tables module
+-----------------------------
+
+.. automodule:: molsystem.user_tables
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 

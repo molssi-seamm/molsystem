@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; MolSystem 2026.9.25 documentation</title>
+    <title>User Guide &#8212; MolSystem 2026.10.3 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=9a43dc2a"></script>
+    <script src="../_static/documentation_options.js?v=f64fa391"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Getting Started" href="../getting_started/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.25" />
+  <meta name="docsearch:version" content="2026.10.3" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -576,6 +576,39 @@ property is stored or read, so a property whose units are undefined cannot be co
 Anything that creates properties – including reading them back from a structure file –
 records dimensionless units as <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
 </section>
+<section id="user-tables">
+<h2>User tables<a class="headerlink" href="#user-tables" title="Link to this heading">#</a></h2>
+<p>Besides the structures, the database holds the tables a SEAMM flowchart builds – with
+the Table step, or by storing results into a table – so that a job’s tables are in its
+<code class="docutils literal notranslate"><span class="pre">seamm.db</span></code> with everything else. They are reached by name through
+<code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">user_tables</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="s2">"energies"</span><span class="p">,</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[(</span><span class="s2">"SMILES"</span><span class="p">,</span> <span class="s2">"string"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s2">"E (kJ/mol)"</span><span class="p">,</span> <span class="s2">"float"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)],</span>
+    <span class="n">index_column</span><span class="o">=</span><span class="s2">"SMILES"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">append_row</span><span class="p">(</span><span class="n">SMILES</span><span class="o">=</span><span class="s2">"CCO"</span><span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">"E (kJ/mol)"</span><span class="p">,</span> <span class="o">-</span><span class="mf">235.1</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>          <span class="c1"># a pandas copy, typed by the declared types</span>
+</pre></div>
+</div>
+<p>Each column has a declared type – <code class="docutils literal notranslate"><span class="pre">boolean</span></code>, <code class="docutils literal notranslate"><span class="pre">integer</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">string</span></code> or
+<code class="docutils literal notranslate"><span class="pre">json</span></code> – and a default, which fills the column in rows that do not give a value. The
+values are stored exactly as written (the text <code class="docutils literal notranslate"><span class="pre">&quot;1.0960&quot;</span></code> stays text) and read back
+according to the declared type; values written to text columns are stored as text. A
+table may have an <em>index column</em> whose values identify the rows; rows also have an
+internal id, which is not meant for users, and a <em>current row</em> that SEAMM’s steps write
+to (<code class="docutils literal notranslate"><span class="pre">None</span></code> means the next write appends a row).</p>
+<p>The tables are stored under internal names, <code class="docutils literal notranslate"><span class="pre">table_1</span></code>, <code class="docutils literal notranslate"><span class="pre">table_2</span></code>, …, with
+internal column names, so any display name is allowed, including names that differ only
+in case. A registry table, <code class="docutils literal notranslate"><span class="pre">_tables</span></code>, records each table’s name, columns, index column,
+current row and metadata, and a journal, <code class="docutils literal notranslate"><span class="pre">_table_changes</span></code>, records every change
+(creating and dropping tables, adding columns, appending rows and setting values). Row
+ids are never reused. Nothing is committed by these calls; the caller commits.</p>
+<p>A database opened read-only (<code class="docutils literal notranslate"><span class="pre">file:seamm.db?mode=ro</span></code>) can be read but not written:
+creating or changing a table raises <code class="docutils literal notranslate"><span class="pre">PermissionError</span></code>.</p>
+</section>
 <section id="index">
 <h2>Index<a class="headerlink" href="#index" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -634,6 +667,7 @@ records dimensionless units as <code class="docutils literal notranslate"><span 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perceiving-bonds">Perceiving bonds</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#charges-and-spin-in-structure-files">Charges and spin in structure files</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-and-their-units">Properties and their units</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#user-tables">User tables</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index">Index</a></li>
 </ul>
   </nav></div>

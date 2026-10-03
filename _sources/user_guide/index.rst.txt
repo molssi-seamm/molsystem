@@ -83,6 +83,42 @@ property is stored or read, so a property whose units are undefined cannot be co
 Anything that creates properties -- including reading them back from a structure file --
 records dimensionless units as ``""``.
 
+User tables
+===========
+Besides the structures, the database holds the tables a SEAMM flowchart builds -- with
+the Table step, or by storing results into a table -- so that a job's tables are in its
+``seamm.db`` with everything else. They are reached by name through
+``SystemDB.user_tables``::
+
+    tables = db.user_tables
+    table = tables.create(
+        "energies",
+        columns=[("SMILES", "string", None), ("E (kJ/mol)", "float", None)],
+        index_column="SMILES",
+    )
+    row = table.append_row(SMILES="CCO")
+    table.set_cell(row, "E (kJ/mol)", -235.1)
+    df = table.to_dataframe()          # a pandas copy, typed by the declared types
+
+Each column has a declared type -- ``boolean``, ``integer``, ``float``, ``string`` or
+``json`` -- and a default, which fills the column in rows that do not give a value. The
+values are stored exactly as written (the text ``"1.0960"`` stays text) and read back
+according to the declared type; values written to text columns are stored as text. A
+table may have an *index column* whose values identify the rows; rows also have an
+internal id, which is not meant for users, and a *current row* that SEAMM's steps write
+to (``None`` means the next write appends a row).
+
+The tables are stored under internal names, ``table_1``, ``table_2``, ..., with
+internal column names, so any display name is allowed, including names that differ only
+in case. A registry table, ``_tables``, records each table's name, columns, index column,
+current row and metadata, and a journal, ``_table_changes``, records every change
+(creating and dropping tables, adding columns, appending rows and setting values). Row
+ids are never reused. Nothing is committed by these calls; the caller commits.
+
+A database opened read-only (``file:seamm.db?mode=ro``) can be read but not written:
+creating or changing a table raises ``PermissionError``.
+
+
 Index
 =====
 

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.9.25 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.3 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=9a43dc2a"></script>
+    <script src="_static/documentation_options.js?v=f64fa391"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.9.25" />
+  <meta name="docsearch:version" content="2026.10.3" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -505,6 +505,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.3 – Tables in the database</dt><dd><ul class="simple">
+<li><p>SEAMM’s flowchart tables can now be stored in the job’s database:
+<code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables</span></code> holds named tables with declared column types and
+defaults, an optional index column and a current row. Values are stored exactly
+as written and read back by the declared type; <code class="docutils literal notranslate"><span class="pre">to_dataframe()</span></code> gives a pandas
+copy. See “User tables” in the user guide.</p></li>
+<li><p>A registry (<code class="docutils literal notranslate"><span class="pre">_tables</span></code>) and a change journal (<code class="docutils literal notranslate"><span class="pre">_table_changes</span></code>) are kept
+beside the tables; row ids are never reused.</p></li>
+<li><p>A database opened read-only can be read, but creating or changing a table raises
+<code class="docutils literal notranslate"><span class="pre">PermissionError</span></code> with a clear message.</p></li>
+<li><p>Bugfix: a string column default containing a quote (<code class="docutils literal notranslate"><span class="pre">'</span></code>) no longer breaks
+<code class="docutils literal notranslate"><span class="pre">add_attribute</span></code>.</p></li>
+</ul>
+</dd>
 <dt>2026.9.25 – Bugfix: Open Babel is now a declared dependency</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">molsystem</span></code> did not install Open Babel, so molsystem failed to
 import outside a conda environment (whose recipe supplied it). Open Babel has
