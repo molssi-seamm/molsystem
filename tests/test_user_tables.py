@@ -292,3 +292,72 @@ def test_read_only(tmp_path):
     with pytest.raises(PermissionError, match="read-only"):
         tables.create("U")
     db.close()
+
+
+def test_columns_differing_in_case(tables):
+    """Display names are case sensitive, as pandas columns were."""
+    table = tables.create("T", columns=[("E", "float", None)])
+    assert table.add_column("e", "float", None)
+    rowid = table.append_row(E=1.0, e=2.0)
+    assert table.get_cell(rowid, "E") == 1.0
+    assert table.get_cell(rowid, "e") == 2.0
+    assert list(table.to_dataframe().columns) == ["E", "e"]
+
+
+def test_text_columns_store_text(tables):
+    """An integer written to a text column is found by its text."""
+    table = tables.create(
+        "T",
+        columns=[("name", "string", None), ("x", "float", None)],
+        index_column="name",
+    )
+    rowid = table.append_row(name=3, x=1.0)
+    table.append_row(name=True)
+    assert table.find("name", "3") == [rowid]
+    assert table.find("name", 3) == [rowid]
+    assert table.to_dataframe().index.tolist() == ["3", "True"]
+
+
+def test_missing_text_is_nan(tables):
+    table = tables.create("T", columns=[("s", "string", None)])
+    rowid = table.append_row()
+    table.set_cell(rowid, "s", None)
+    assert table.get_cell(rowid, "s") is None
+    df = table.to_dataframe()
+    assert math.isnan(df["s"].iloc[0])
+    assert "NaN" in df.to_string()
+
+
+def test_bad_index_column_changes_nothing(tables):
+    """Validation happens before an existing table is replaced."""
+    tables.create("T", columns=[("a", "integer", None)]).append_row(a=1)
+    with pytest.raises(ValueError, match="index column"):
+        tables.create(
+            "T", columns=[("b", "integer", None)], index_column="c", replace=True
+        )
+    with pytest.raises(ValueError, match="Column type"):
+        tables.create("U", columns=[("b", "decimal", None)])
+    assert tables.names == ["T"]
+    assert tables["T"].to_dataframe()["a"].tolist() == [1]
+
+
+def test_row_ids_not_reused(tables):
+    table = tables.create("T", columns=[("a", "integer", None)])
+    first, second = table.append_rows([{"a": 1}, {"a": 2}])
+    table.db.execute(f"DELETE FROM {table.table} WHERE __rowid__ = ?", (second,))
+    assert table.append_row(a=3) == second + 1
+
+
+def test_list_default(tables):
+    table = tables.create("T", columns=[("j", "json", [1, 2])])
+    rowid = table.append_row()
+    assert table.get_cell(rowid, "j") == "[1,2]"
+
+
+def test_from_dataframe_definitions(tables):
+    df = pandas.DataFrame({"j": ["[1]", "[2]"], "n": [1, 2]})
+    table = tables.from_dataframe(
+        "T", df, definitions=[{"name": "j", "type": "json", "default": ""}]
+    )
+    assert table.column_type("j") == "json"
+    assert table.column_type("n") == "integer"

@@ -49,8 +49,20 @@ def quote(name: str) -> str:
     return '"' + str(name).replace('"', '""') + '"'
 
 
-def to_sql(value: Any) -> Any:
-    """Convert a Python value into one that sqlite3 can store."""
+def to_sql(value: Any, coltype: str = None) -> Any:
+    """Convert a Python value into one that sqlite3 can store.
+
+    Values for string and json columns are stored as text, so that e.g. the
+    integer 3 written to a text column is found as "3".
+    """
+    value = _to_sql(value)
+    if coltype in ("string", "json") and value is not None:
+        if not isinstance(value, (str, bytes)):
+            value = str(value)
+    return value
+
+
+def _to_sql(value: Any) -> Any:
     if value is None:
         return None
     if isinstance(value, np.generic):
@@ -101,6 +113,9 @@ def _cast_column(values: list, coltype: str) -> pandas.Series:
             return pandas.Series(values, dtype="bool")
     if len(values) == 0:
         return pandas.Series(values, dtype="object")
+    if coltype in ("string", "json"):
+        # Missing text shows as NaN, as it did in the in-memory tables.
+        values = [math.nan if v is None else v for v in values]
     # Let pandas infer, as it would have for the in-memory tables (e.g. str).
     return pandas.Series(values)
 
@@ -196,6 +211,16 @@ class UserTables:
             Replace an existing table of the same name rather than raising.
         """
         self.check_writable(name)
+        columns = [
+            (
+                (c["name"], c.get("type", "string"), c.get("default"))
+                if isinstance(c, dict)
+                else tuple(c)
+            )
+            for c in columns
+        ]
+        # Check everything before changing anything.
+        _check_columns(name, columns, index_column)
         self._ensure_registry()
         if name in self:
             if not replace:
@@ -211,7 +236,8 @@ class UserTables:
         sql_name = f"table_{n}"
 
         self.db.execute(
-            f"CREATE TABLE {quote(sql_name)} ({quote(ROWID)} INTEGER PRIMARY KEY)"
+            f"CREATE TABLE {quote(sql_name)}"
+            f" ({quote(ROWID)} INTEGER PRIMARY KEY AUTOINCREMENT)"
         )
         self.db.execute(
             f"INSERT INTO {REGISTRY} (name, sql_name, index_column, current_row,"
@@ -222,12 +248,7 @@ class UserTables:
         table = UserTable(self, name)
         self._items[name] = table
         for column in columns:
-            if isinstance(column, dict):
-                table.add_column(
-                    column["name"], column.get("type", "string"), column.get("default")
-                )
-            else:
-                table.add_column(*column)
+            table.add_column(*column)
         if index_column is not None:
             table.index_column = index_column
         return table
@@ -250,18 +271,27 @@ class UserTables:
         index_column: str = None,
         metadata: dict = None,
         replace: bool = False,
+        definitions: Iterable = (),
     ) -> "UserTable":
         """Create a table holding the contents of a DataFrame.
 
         A named index of the DataFrame becomes a column; ``index_column`` names the
-        column that identifies rows.
+        column that identifies rows. ``definitions`` (dicts with name, type and
+        default) give the type and default of columns, overriding those inferred
+        from the dtypes.
         """
         if df.index.name is not None:
             df = df.reset_index()
+        known = {d["name"]: d for d in definitions}
         columns = []
         for column, dtype in zip(df.columns, df.dtypes):
-            coltype = dtype_to_type(dtype)
-            columns.append((str(column), coltype, None))
+            column = str(column)
+            if column in known:
+                columns.append(
+                    (column, known[column]["type"], known[column]["default"])
+                )
+            else:
+                columns.append((column, dtype_to_type(dtype), None))
         table = self.create(
             name,
             columns=columns,
@@ -339,6 +369,23 @@ class UserTables:
         ]
 
 
+def _check_columns(name, columns, index_column):
+    """Check column definitions and the index column before creating a table."""
+    names = set()
+    for column in columns:
+        cname, coltype = str(column[0]), column[1]
+        if coltype not in column_types:
+            raise ValueError(
+                f"Column type '{coltype}' must be one of {', '.join(column_types)}."
+            )
+        names.add(cname)
+    if index_column is not None and index_column not in names:
+        raise ValueError(
+            f"The index column '{index_column}' is not in the table '{name}': "
+            f"columns = {', '.join(str(c[0]) for c in columns)}"
+        )
+
+
 def dtype_to_type(dtype) -> str:
     """The declared column type for a pandas dtype."""
     kind = getattr(dtype, "kind", "O")
@@ -387,7 +434,7 @@ class UserTable(_Table):
 
     @property
     def column_definitions(self) -> list:
-        """The columns as an ordered list of dicts: name, type, default."""
+        """The columns as an ordered list of dicts: name, type, default, sql."""
         return json.loads(self._registry("columns"))
 
     @property
@@ -399,11 +446,20 @@ class UserTable(_Table):
     def defaults(self) -> dict:
         return {c["name"]: c["default"] for c in self.column_definitions}
 
-    def column_type(self, column: str) -> str:
+    def _definition(self, column: str) -> dict:
         for c in self.column_definitions:
             if c["name"] == column:
-                return c["type"]
+                return c
         raise KeyError(f"The table '{self._name}' has no column '{column}'.")
+
+    def _sql(self, column: str) -> str:
+        """The quoted SQL name of a column (the columns' SQL names are internal)."""
+        if column == ROWID:
+            return quote(ROWID)
+        return quote(self._definition(column)["sql"])
+
+    def column_type(self, column: str) -> str:
+        return self._definition(column)["type"]
 
     @property
     def index_column(self):
@@ -457,31 +513,30 @@ class UserTable(_Table):
         definitions = self.column_definitions
         if any(c["name"] == name for c in definitions):
             return False
-        if name == ROWID:
-            raise ValueError(f"'{ROWID}' is reserved and cannot name a column.")
         self._tables.check_writable(self._name)
         if default is None:
             default = column_types[coltype]
-        if isinstance(default, float) and math.isnan(default):
-            stored_default = None
-        else:
-            stored_default = default
-        self.db.execute(f"ALTER TABLE {self.table} ADD COLUMN {quote(name)}")
+        stored_default = to_sql(default, coltype)
+        # Columns have internal SQL names, so the display names may be anything,
+        # including names differing only in case, which SQLite would not allow.
+        n = max([int(c["sql"][1:]) for c in definitions], default=0) + 1
+        sql = f"c{n}"
+        self.db.execute(f"ALTER TABLE {self.table} ADD COLUMN {quote(sql)}")
         if stored_default is not None:
             self.db.execute(
-                f"UPDATE {self.table} SET {quote(name)} = ?", (to_sql(stored_default),)
+                f"UPDATE {self.table} SET {quote(sql)} = ?", (stored_default,)
             )
-        definitions.append({"name": name, "type": coltype, "default": stored_default})
+        definitions.append(
+            {"name": name, "type": coltype, "default": stored_default, "sql": sql}
+        )
         self._set_registry("columns", json.dumps(definitions))
         self._tables._journal(self._name, "add_column", column=name)
         return True
 
     def default(self, column: str):
         """The default value of a column, as it would be read back."""
-        for c in self.column_definitions:
-            if c["name"] == column:
-                return from_sql(c["default"], c["type"])
-        raise KeyError(f"The table '{self._name}' has no column '{column}'.")
+        c = self._definition(column)
+        return from_sql(c["default"], c["type"])
 
     # Rows
     def row_ids(self) -> list:
@@ -523,13 +578,13 @@ class UserTable(_Table):
 
     def find(self, column: str, value) -> list:
         """The row ids whose column equals the value, in order."""
-        self.column_type(column)
+        coltype = self.column_type(column)
         return [
             row[0]
             for row in self.db.execute(
-                f"SELECT {quote(ROWID)} FROM {self.table} WHERE {quote(column)} = ?"
-                f" ORDER BY {quote(ROWID)}",
-                (to_sql(value),),
+                f"SELECT {quote(ROWID)} FROM {self.table}"
+                f" WHERE {self._sql(column)} = ? ORDER BY {quote(ROWID)}",
+                (to_sql(value, coltype),),
             )
         ]
 
@@ -549,6 +604,7 @@ class UserTable(_Table):
         self._tables.check_writable(self._name)
         definitions = self.column_definitions
         names = [c["name"] for c in definitions]
+        types = [c["type"] for c in definitions]
         defaults = [c["default"] for c in definitions]
         known = set(names)
         parameters = []
@@ -562,17 +618,21 @@ class UserTable(_Table):
                 )
             parameters.append(
                 [
-                    to_sql(row[name]) if name in row else default
-                    for name, default in zip(names, defaults)
+                    to_sql(row[name], coltype) if name in row else default
+                    for name, coltype, default in zip(names, types, defaults)
                 ]
             )
         if len(parameters) == 0:
             return []
+        # Row ids are never reused (AUTOINCREMENT keeps the high-water mark).
         last = self.db.execute(f"SELECT MAX({quote(ROWID)}) FROM {self.table}")
-        last = last.fetchone()[0]
-        first = 1 if last is None else last + 1
+        last = last.fetchone()[0] or 0
+        seq = self.db.execute(
+            "SELECT seq FROM sqlite_sequence WHERE name = ?", (self._table,)
+        ).fetchone()
+        first = max(last, 0 if seq is None else seq[0]) + 1
         rowids = [*range(first, first + len(parameters))]
-        columns = ", ".join(quote(c) for c in [ROWID, *names])
+        columns = ", ".join([quote(ROWID), *(quote(c["sql"]) for c in definitions)])
         places = ", ".join(["?"] * (len(names) + 1))
         self.db.executemany(
             f"INSERT INTO {self.table} ({columns}) VALUES ({places})",
@@ -594,10 +654,10 @@ class UserTable(_Table):
     def set_cell(self, rowid, column: str, value):
         """Set one value."""
         self._tables.check_writable(self._name)
-        self.column_type(column)
+        coltype = self.column_type(column)
         cursor = self.db.execute(
-            f"UPDATE {self.table} SET {quote(column)} = ? WHERE {quote(ROWID)} = ?",
-            (to_sql(value), rowid),
+            f"UPDATE {self.table} SET {self._sql(column)} = ? WHERE {quote(ROWID)} = ?",
+            (to_sql(value, coltype), rowid),
         )
         if cursor.rowcount != 1:
             raise KeyError(f"The table '{self._name}' has no row with id {rowid}.")
@@ -607,7 +667,7 @@ class UserTable(_Table):
         """Get one value, converted according to the column's declared type."""
         coltype = self.column_type(column)
         row = self.db.execute(
-            f"SELECT {quote(column)} FROM {self.table} WHERE {quote(ROWID)} = ?",
+            f"SELECT {self._sql(column)} FROM {self.table} WHERE {quote(ROWID)} = ?",
             (rowid,),
         ).fetchone()
         if row is None:
@@ -628,7 +688,8 @@ class UserTable(_Table):
         definitions = self.column_definitions
         names = [c["name"] for c in definitions]
         types = [c["type"] for c in definitions]
-        sql = f"SELECT {', '.join(quote(c) for c in [ROWID, *names])} FROM {self.table}"
+        selected = ", ".join([quote(ROWID), *(quote(c["sql"]) for c in definitions)])
+        sql = f"SELECT {selected} FROM {self.table}"
         clauses = []
         parameters = []
         for column, op, value in where:
@@ -636,8 +697,10 @@ class UserTable(_Table):
                 op = "="
             if op not in ("=", "!=", "<", "<=", ">", ">="):
                 raise ValueError(f"Unsupported comparison '{op}'.")
-            clauses.append(f"{quote(column)} {op} ?")
-            parameters.append(to_sql(value))
+            clauses.append(f"{self._sql(column)} {op} ?")
+            parameters.append(
+                to_sql(value, None if column == ROWID else self.column_type(column))
+            )
         if len(clauses) > 0:
             sql += " WHERE " + " AND ".join(clauses)
         sql += f" ORDER BY {quote(ROWID)}"
