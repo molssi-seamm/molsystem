@@ -249,3 +249,38 @@ def test_new_configuration_of_an_existing_system(tmp_path):
     assert (
         committed(tmp_path / "seamm.db", "SELECT COUNT(*) FROM atom")[0][0] == n_atoms
     )
+
+
+def test_attribute_added_by_an_iteration(tmp_path):
+    """A step adds a per-atom attribute (MOPAC's charges): a new column."""
+    job = make_job(tmp_path / "seamm.db")
+    child, path = iteration(tmp_path, job, "second", 1)
+    configuration = child.system.configuration
+    configuration.atoms.add_attribute(
+        "charge", coltype="float", configuration_dependent=True
+    )
+    configuration.atoms["charge"] = [-0.8, 0.4, 0.4]
+    child.db.commit()
+    child.close()
+    merge(job, path, tmp_path / "iter_1" / "baseline.db", {}, 1)
+    job.commit_transaction()
+    second = configuration_named(job, "second")
+    assert second.atoms.get_column_data("charge") == pytest.approx([-0.8, 0.4, 0.4])
+    first = configuration_named(job, "first")
+    assert first.atoms.get_column_data("charge") == [None, None, None]
+
+
+def test_row_appended_before_its_column_was_added(tmp_path):
+    """A row appended, then a step adds a column and fills it (MOPAC results)."""
+    job = make_job(tmp_path / "seamm.db")
+    child, path = iteration(tmp_path, job, "first", 1)
+    table = child.user_tables["results"]
+    row = table.append_row(name="new")
+    table.add_column("dipole", "float", None)
+    table.set_cell(row, "dipole", 1.5)
+    child.db.commit()
+    child.close()
+    merge(job, path, tmp_path / "iter_1" / "baseline.db", {}, 1)
+    job.commit_transaction()
+    results = job.user_tables["results"]
+    assert results.get_cell(results.rowid_at(3), "dipole") == 1.5

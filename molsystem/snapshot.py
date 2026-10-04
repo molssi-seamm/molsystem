@@ -15,6 +15,7 @@ database's (possibly deferring) connection for reading the other file.
 
 import logging
 from pathlib import Path
+import re
 import shutil
 import sqlite3
 
@@ -311,8 +312,54 @@ def _conflict(touched, key, iteration, later_wins, what):
 
 
 def _rows(db, table, columns):
-    selected = ", ".join(f'"{c}"' for c in columns)
+    """The rows of ``table``, NULL for any of ``columns`` it does not have (yet)."""
+    present = set(_columns(db, table))
+    selected = ", ".join(f'"{c}"' if c in present else "NULL" for c in columns)
     return db.execute(f'SELECT {selected} FROM "{table}"').fetchall()
+
+
+def _add_columns(db, child, table):
+    """Add to the job's ``table`` the columns the iteration added to it.
+
+    A step may add an attribute (``add_attribute``: atom charges, say), which is
+    a column of the structure tables; type, default, NOT NULL, a foreign key and
+    an index on it are as in the iteration's database.
+    """
+    present = set(_columns(db, table))
+    references = {
+        row[3]: row for row in child.execute(f'PRAGMA foreign_key_list("{table}")')
+    }
+    for _, name, ctype, notnull, default, pk in child.execute(
+        f'PRAGMA table_info("{table}")'
+    ):
+        if name in present:
+            continue
+        column_def = f'"{name}" {ctype}'
+        if default is not None:
+            column_def += f" DEFAULT {default}"
+        if notnull:
+            column_def += " NOT NULL"
+        if name in references:
+            _, _, ref_table, _, to, on_update, on_delete, _ = references[name]
+            column_def += f' REFERENCES "{ref_table}"'
+            if to is not None:
+                column_def += f' ("{to}")'
+            column_def += f" ON DELETE {on_delete} ON UPDATE {on_update}"
+        db.execute(f'ALTER TABLE "{table}" ADD {column_def}')
+        for (sql,) in child.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'index' AND tbl_name = ?"
+            " AND sql IS NOT NULL",
+            (table,),
+        ):
+            if f'"{name}"' in sql or f"'{name}'" in sql or f"({name})" in sql:
+                db.execute(
+                    re.sub(
+                        r"^CREATE\s+(UNIQUE\s+)?INDEX\s+",
+                        r"CREATE \1INDEX IF NOT EXISTS ",
+                        sql,
+                        flags=re.IGNORECASE,
+                    )
+                )
 
 
 def _merge_properties(db, child, base, maps):
@@ -348,6 +395,11 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
         if ref in maps and value in maps[ref]:
             return maps[ref][value]
         return None  # not mapped yet: filled in later
+
+    # Columns the iteration added (attributes)
+    for table in (*ID_TABLES, *ROW_TABLES):
+        if table in child_tables and table in target_tables:
+            _add_columns(db, child, table)
 
     # Tables keyed by id
     for table in ID_TABLES:
@@ -498,6 +550,33 @@ def _merge_tables(target, source, base, maps, touched, iteration, later_wins):
                     r[0] for r in base.execute(f'SELECT "__rowid__" FROM "{sql_name}"')
                 }
         rowmap = {}
+
+        def add_column(name, column):
+            if name not in ctables or column not in ctables[name].columns:
+                return
+            definition = ctables[name]._definition(column)
+            table = tables[name]
+            if column in table.columns:
+                mine = table._definition(column)
+                if (mine["type"], mine["default"]) != (
+                    definition["type"],
+                    definition["default"],
+                ):
+                    raise MergeConflict(
+                        f"Iteration {iteration} gave the column '{column}' of the "
+                        f"table '{name}' type {definition['type']} and default "
+                        f"{definition['default']!r}, but the job's table has "
+                        f"{mine['type']} and {mine['default']!r}."
+                    )
+            else:
+                table.add_column(column, definition["type"], definition["default"])
+
+        # The columns the iteration added to the job's tables first: the rows it
+        # appended before adding a column are read with their final values.
+        for entry in journal:
+            if entry["op"] == "add_column" and entry["table"] in tables:
+                add_column(entry["table"], entry["column"])
+
         for entry in journal:
             name, op = entry["table"], entry["op"]
             row, column = entry["row"], entry["column"]
@@ -517,22 +596,7 @@ def _merge_tables(target, source, base, maps, touched, iteration, later_wins):
                 if name in tables and name not in ctables:
                     tables.delete(name)
             elif op == "add_column":
-                definition = ctables[name]._definition(column)
-                table = tables[name]
-                if column in table.columns:
-                    mine = table._definition(column)
-                    if (mine["type"], mine["default"]) != (
-                        definition["type"],
-                        definition["default"],
-                    ):
-                        raise MergeConflict(
-                            f"Iteration {iteration} gave the column '{column}' of the "
-                            f"table '{name}' type {definition['type']} and default "
-                            f"{definition['default']!r}, but the job's table has "
-                            f"{mine['type']} and {mine['default']!r}."
-                        )
-                else:
-                    table.add_column(column, definition["type"], definition["default"])
+                add_column(name, column)
             elif op == "append":
                 if name not in ctables:
                     continue
