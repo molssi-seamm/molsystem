@@ -351,13 +351,13 @@ class _System(CIFMixin, MutableMapping):
 
         new = self.create_configuration(
             name=name,
-            periodicity=configuration.periodicity,
-            coordinate_system=configuration.coordinate_system,
+            periodicity=previous.periodicity,
+            coordinate_system=previous.coordinate_system,
             coordinates=coordinates,
-            symmetry=configuration.symmetry_id,
+            symmetry=previous.symmetry_id,
             cell_parameters=cell_parameters,
-            atomset=configuration.atomset,
-            bondset=configuration.bondset,
+            atomset=previous.atomset,
+            bondset=previous.bondset,
             make_current=make_current,
         )
 
