@@ -159,3 +159,39 @@ def test_delete_column_deferred(deferred):
     assert count(path, "SELECT COUNT(*) FROM atom") == 0
     db.commit_transaction()
     assert count(path, "SELECT COUNT(*) FROM atom") == 1
+
+
+def test_first_write_of_a_step_is_create_table(tmp_path):
+    """DDL right after a commit is still part of the step's transaction."""
+    path = tmp_path / "seamm.db"
+    script = textwrap.dedent(f"""
+        import os
+        from molsystem import SystemDB
+
+        db = SystemDB(filename="file:{path}", deferred_commit=True)
+        db.create_system(name="first step")
+        db.commit_transaction()
+
+        db.db.execute("CREATE TABLE made_by_the_second_step (x)")
+        db.user_tables.create("table of the second step", columns=[("x", "float")])
+        os._exit(1)
+        """)
+    subprocess.run([sys.executable, "-c", script], check=False)
+    other = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    names = [r[0] for r in other.execute("SELECT name FROM sqlite_master")]
+    other.close()
+    assert "made_by_the_second_step" not in names
+    assert not any(name.startswith("table_") for name in names)
+    assert count(path, "SELECT COUNT(*) FROM system") == 1
+
+
+def test_always_in_a_transaction_while_deferring(deferred):
+    db, path = deferred
+    assert db.db.in_transaction
+    db.commit_transaction()
+    assert db.db.in_transaction
+    db.rollback_transaction()
+    assert db.db.in_transaction
+    db.deferred_commit = False
+    db.commit_transaction()
+    assert not db.db.in_transaction

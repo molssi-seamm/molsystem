@@ -28,21 +28,45 @@ class JobConnection(sqlite3.Connection):
     those commits do nothing, and calls :meth:`commit_now` when the step has
     finished. A process killed part way through a step then loses exactly that
     step's writes. Not deferring, this behaves as a plain connection.
+
+    While deferring a transaction is always open: the sqlite3 module opens one
+    implicitly only before INSERT, UPDATE, DELETE and REPLACE, so without it a
+    step whose first write is CREATE TABLE would commit that at once.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.deferring = False
+        self._deferring = False
         self._savepoint_count = 0
+
+    @property
+    def deferring(self):
+        """Whether commits are deferred until commit_now."""
+        return self._deferring
+
+    @deferring.setter
+    def deferring(self, value):
+        self._deferring = bool(value)
+        self._begin()
+
+    def _begin(self):
+        if self._deferring and not self.in_transaction:
+            self.execute("BEGIN")
 
     def commit(self):
         """Commit, unless commits are being deferred."""
-        if not self.deferring:
+        if not self._deferring:
             super().commit()
 
     def commit_now(self):
         """Commit, even if commits are being deferred."""
         super().commit()
+        self._begin()
+
+    def rollback(self):
+        """Roll back, and while deferring start the next transaction."""
+        super().rollback()
+        self._begin()
 
     def savepoint_name(self):
         """A new, unique name for a savepoint."""
