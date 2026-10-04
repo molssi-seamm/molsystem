@@ -1,6 +1,21 @@
 =======
 History
 =======
+2026.10.4 -- A step as one transaction; the same structure from the same SMILES
+    * ``SystemDB(deferred_commit=True)`` defers the many commits molsystem makes until
+      ``commit_transaction()`` (``rollback_transaction()`` abandons them), so a
+      flowchart step's writes are saved together or not at all. SEAMM's flowchart
+      evaluator uses this to checkpoint flowcharts (seamm 2026.10.4). A transaction is
+      kept open while deferring, so even a step that starts by creating a table is
+      covered. The default is unchanged.
+    * ``with configuration:`` and the other backup-and-restore blocks restore
+      correctly inside such a transaction, and deleting a column no longer commits it.
+    * Building a structure from SMILES with RDKit (the default) gives the same
+      structure every time for the same SMILES. Before, each call in a process gave a
+      different conformer, depending on what had been built before, so a resumed job
+      or a parallel loop iteration built other structures than an uninterrupted run.
+      **The conformers built from SMILES differ from those of earlier releases.**
+
 2026.10.3 -- Tables in the database
     * SEAMM's flowchart tables can now be stored in the job's database:
       ``SystemDB.user_tables`` holds named tables with declared column types and
