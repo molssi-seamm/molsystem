@@ -18,6 +18,7 @@ from pathlib import Path
 import re
 import shutil
 import sqlite3
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,11 @@ ROW_TABLES = {
 
 PROPERTY_DATA = ("float_data", "int_data", "str_data", "json_data")
 
+# Columns an iteration changes as it sets up (the current configuration of a
+# system), merged without a conflict: the last iteration merged sets them, as the
+# last iteration of a serial loop does.
+SOFT_COLUMNS = {"system": ("default_configuration",)}
+
 
 def _tables(db, schema="main"):
     """The tables of a database: name -> CREATE statement."""
@@ -114,7 +120,7 @@ def snapshot(source, target, configurations=(), whole=False):
         Path(str(target) + suffix).unlink(missing_ok=True)
 
     if whole:
-        src = sqlite3.connect(f"file:{source}?mode=ro", uri=True)
+        src = sqlite3.connect(f"file:{quote(str(source))}?mode=ro", uri=True)
         dst = sqlite3.connect(str(target))
         try:
             src.backup(dst)
@@ -127,10 +133,10 @@ def snapshot(source, target, configurations=(), whole=False):
             dst.close()
         return
 
-    dst = sqlite3.connect(str(target), uri=True)
+    dst = sqlite3.connect(f"file:{quote(str(target))}", uri=True)
     try:
         dst.execute("PRAGMA foreign_keys = OFF")
-        dst.execute(f"ATTACH DATABASE 'file:{source}?mode=ro' AS src")
+        dst.execute("ATTACH DATABASE ? AS src", (f"file:{quote(str(source))}?mode=ro",))
         tables = _tables(dst, "src")
         # The same schema, including columns steps added to atom, coordinates, ...
         for name, sql in tables.items():
@@ -150,6 +156,14 @@ def snapshot(source, target, configurations=(), whole=False):
             dst.execute(
                 "INSERT OR IGNORE INTO sel_conf SELECT configuration FROM src.template"
                 " WHERE configuration IS NOT NULL"
+            )
+        # Each system's default configuration too, so the system is usable and a
+        # change of its default by the iteration can be seen
+        if "system" in tables:
+            dst.execute(
+                "INSERT OR IGNORE INTO sel_conf SELECT default_configuration"
+                " FROM src.system WHERE default_configuration IS NOT NULL AND id IN"
+                " (SELECT system FROM src.configuration WHERE id IN sel_conf)"
             )
         selections = {
             "configuration": "SELECT id FROM sel_conf",
@@ -281,8 +295,8 @@ def merge(target, source, baseline_path, state=None, iteration=None, later_wins=
     if state is None:
         state = {}
     touched = state.setdefault("touched", {})
-    child = sqlite3.connect(f"file:{source}?mode=ro", uri=True)
-    base = sqlite3.connect(f"file:{baseline_path}?mode=ro", uri=True)
+    child = sqlite3.connect(f"file:{quote(str(source))}?mode=ro", uri=True)
+    base = sqlite3.connect(f"file:{quote(str(baseline_path))}?mode=ro", uri=True)
     db = target.db
     try:
         maps = {}
@@ -337,7 +351,8 @@ def _add_columns(db, child, table):
         column_def = f'"{name}" {ctype}'
         if default is not None:
             column_def += f" DEFAULT {default}"
-        if notnull:
+        if notnull and default is not None:
+            # (SQLite cannot add a NOT NULL column without a default)
             column_def += " NOT NULL"
         if name in references:
             _, _, ref_table, _, to, on_update, on_delete, _ = references[name]
@@ -370,7 +385,15 @@ def _merge_properties(db, child, base, maps):
     for pid, name, ptype, units, description in child.execute(
         "SELECT id, name, type, units, description FROM property"
     ):
-        row = db.execute("SELECT id FROM property WHERE name = ?", (name,)).fetchone()
+        row = db.execute(
+            "SELECT id, type, units FROM property WHERE name = ?", (name,)
+        ).fetchone()
+        if row is not None and (row[1], row[2] or "") != (ptype, units or ""):
+            raise MergeConflict(
+                f"An iteration defined the property '{name}' with type {ptype} and "
+                f"units '{units}', but the job has it with type {row[1]} and units "
+                f"'{row[2]}'."
+            )
         if row is None:
             cursor = db.execute(
                 "INSERT INTO property (name, type, units, description)"
@@ -386,7 +409,19 @@ def _merge_properties(db, child, base, maps):
 def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
     child_tables = _tables(child)
     target_tables = _tables(db)
+    base_tables = _tables(base)
     deferred = []  # (table, job id, column, iteration id) for forward references
+
+    # The rows the iteration created, which get new ids in the job. Any other row
+    # it refers to is the job's own, with the same id -- also one that is not in
+    # the snapshot, such as a system's default configuration.
+    created = {}
+    for table in ID_TABLES:
+        if table in child_tables:
+            ids = {r[0] for r in child.execute(f'SELECT id FROM "{table}"')}
+            if table in base_tables:
+                ids -= {r[0] for r in base.execute(f'SELECT id FROM "{table}"')}
+            created[table] = ids
 
     def mapped(table, column, value, row_table):
         ref = FOREIGN_KEYS.get(row_table, {}).get(column)
@@ -394,7 +429,9 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
             return value
         if ref in maps and value in maps[ref]:
             return maps[ref][value]
-        return None  # not mapped yet: filled in later
+        if value in created.get(ref, ()):
+            return None  # created by the iteration, not mapped yet: filled in later
+        return value
 
     # Columns the iteration added (attributes)
     for table in (*ID_TABLES, *ROW_TABLES):
@@ -413,17 +450,20 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
         for _id, row in new_rows.items():
             if _id in old_rows:
                 mapping[_id] = _id
+        soft = SOFT_COLUMNS.get(table, ())
         for _id, row in new_rows.items():
+            old = old_rows.get(_id)
+            if old is not None and row == old:
+                continue
             values = [mapped(table, c, v, table) for c, v in zip(others, row[1:])]
             for c, v, value in zip(others, row[1:], values):
                 if value is None and v is not None:
                     deferred.append((table, _id, c, v))
-            if _id in old_rows:
-                if row == old_rows[_id]:
-                    continue
-                _conflict(
-                    touched, (table, _id), iteration, later_wins, f"{table} {_id}"
-                )
+            if old is not None:
+                if any(a != b for c, a, b in zip(columns, row, old) if c not in soft):
+                    _conflict(
+                        touched, (table, _id), iteration, later_wins, f"{table} {_id}"
+                    )
                 assignments = ", ".join(f'"{c}" = ?' for c in others)
                 db.execute(
                     f'UPDATE "{table}" SET {assignments} WHERE id = ?', (*values, _id)
@@ -473,11 +513,24 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
             tuple(row[i] for i in index): row for row in _rows(base, table, columns)
         }
         where = " AND ".join(f'"{k}" = ?' for k in key)
+        owner = FOREIGN_KEYS[table][key[0]]  # configuration, atomset, ...
+
+        def changed(job_owner):
+            _conflict(
+                touched,
+                (owner, job_owner),
+                iteration,
+                later_wins,
+                f"the {table} of {owner} {job_owner}",
+            )
+
         for k, row in new_rows.items():
             if old_rows.get(k) == row:
                 continue
             values = job_row(row)
             job_key = tuple(values[i] for i in index)
+            if k in old_rows:
+                changed(job_key[0])
             db.execute(f'DELETE FROM "{table}" WHERE {where}', job_key)
             names = ", ".join(f'"{c}"' for c in columns)
             places = ", ".join("?" * len(columns))
@@ -485,6 +538,7 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
         for k, row in old_rows.items():
             if k not in new_rows:
                 job_key = tuple(mapped(table, c, v, table) for c, v in zip(key, k))
+                changed(job_key[0])
                 db.execute(f'DELETE FROM "{table}" WHERE {where}', job_key)
 
     # Property values, keyed by (configuration, system, property)
@@ -532,7 +586,7 @@ def _merge_tables(target, source, base, maps, touched, iteration, later_wins):
     from .system_db import SystemDB  # noqa: F811
 
     result = {"current_rows": {}, "exported": []}
-    child = SystemDB(filename=f"file:{source}?mode=ro")
+    child = SystemDB(filename=f"file:{quote(str(source))}?mode=ro")
     try:
         if "_tables" not in _tables(child.db):
             return result
@@ -600,24 +654,10 @@ def _merge_tables(target, source, base, maps, touched, iteration, later_wins):
             elif op == "append":
                 if name not in ctables:
                     continue
+                # Appended as a serial loop appends: after the rows of the
+                # iterations before, even with an index value already there.
                 values = ctables[name].get_row(row)
                 table = tables[name]
-                index = table.index_column
-                if index is not None and index in values:
-                    existing = table.find(index, values[index])
-                    if len(existing) > 0:
-                        _conflict(
-                            touched,
-                            ("table", name, "index", values[index]),
-                            iteration,
-                            later_wins,
-                            f"the row '{values[index]}' of the table '{name}'",
-                        )
-                        for c, v in values.items():
-                            table.set_cell(existing[0], c, v)
-                        rowmap[(name, row)] = existing[0]
-                        continue
-                touched[("table", name, "index", values.get(index))] = iteration
                 (rowmap[(name, row)],) = table.append_rows([values], move_current=False)
             elif op == "set":
                 if name not in ctables or not ctables[name].has_row(row):

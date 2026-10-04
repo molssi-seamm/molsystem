@@ -184,6 +184,7 @@ def test_same_cell_from_two_iterations(tmp_path):
 
 
 def test_same_index_appended_by_two_iterations(tmp_path):
+    """Appended as a serial loop appends: two rows, in iteration order."""
     job = make_job(tmp_path / "seamm.db")
     state = {}
     paths = []
@@ -194,8 +195,11 @@ def test_same_index_appended_by_two_iterations(tmp_path):
         child.close()
         paths.append(path)
     merge(job, paths[0], tmp_path / "iter_1" / "baseline.db", state, 1)
-    with pytest.raises(MergeConflict, match="shared"):
-        merge(job, paths[1], tmp_path / "iter_2" / "baseline.db", state, 2)
+    merge(job, paths[1], tmp_path / "iter_2" / "baseline.db", state, 2)
+    job.commit_transaction()
+    results = job.user_tables["results"]
+    rows = [results.get_row(r) for r in results.row_ids()][-2:]
+    assert [(r["name"], r["E"]) for r in rows] == [("shared", 1.0), ("shared", 2.0)]
 
 
 def test_current_row_and_new_table(tmp_path):
@@ -284,3 +288,109 @@ def test_row_appended_before_its_column_was_added(tmp_path):
     job.commit_transaction()
     results = job.user_tables["results"]
     assert results.get_cell(results.rowid_at(3), "dipole") == 1.5
+
+
+def conformers(path):
+    """A job with one system of three configurations, the first its default."""
+    db = SystemDB(filename=f"file:{path}", deferred_commit=True)
+    system = db.create_system(name="mol")
+    first = system.create_configuration(name="c1")
+    first.atoms.append(**WATER)
+    for name in ("c2", "c3"):
+        system.copy_configuration(name=name)
+    system.configuration = first
+    db.commit_transaction()
+    return db
+
+
+def test_default_configuration_outside_the_snapshot(tmp_path):
+    """M1: an untouched system whose default is not in the snapshot keeps it."""
+    job = conformers(tmp_path / "seamm.db")
+    system = job.get_system("mol")
+    c1, c2 = (system.get_configuration(n).id for n in ("c1", "c2"))
+    path = tmp_path / "iter_1" / "seamm.db"
+    snapshot(tmp_path / "seamm.db", path, configurations=[c2])
+    baseline(path, tmp_path / "iter_1" / "baseline.db")
+    child = SystemDB(filename=f"file:{path}")
+    # The system's default comes with it, so the system is usable in the child
+    assert child.get_system("mol").configuration.id == c1
+    child.close()
+    merge(job, path, tmp_path / "iter_1" / "baseline.db", {}, 1)
+    job.commit_transaction()
+    assert committed(
+        tmp_path / "seamm.db", "SELECT id, default_configuration FROM system"
+    ) == [(system.id, c1)]
+
+
+def test_loop_over_conformers_of_one_system(tmp_path):
+    """M2: each iteration makes its conformer current: no conflict, the last
+    merged iteration's change is left. (An iteration choosing the configuration
+    that was current at loop entry changes nothing the merge can see; the Loop
+    makes the iteration's configuration current before merging it.)"""
+    job = conformers(tmp_path / "seamm.db")
+    system = job.get_system("mol")
+    ids = [system.get_configuration(n).id for n in ("c2", "c3")]
+    state = {}
+    paths = []
+    for k, cid in enumerate(ids, start=1):
+        path = tmp_path / f"iter_{k}" / "seamm.db"
+        snapshot(tmp_path / "seamm.db", path, configurations=[cid])
+        baseline(path, tmp_path / f"iter_{k}" / "baseline.db")
+        child = SystemDB(filename=f"file:{path}")
+        csystem = child.get_system("mol")
+        configuration = child.get_configuration(cid)
+        csystem.configuration = configuration
+        configuration.atoms.set_coordinates([[0, 0, k], [0, 0.8, 0], [0.8, 0, 0]])
+        child.db.commit()
+        child.close()
+        paths.append(path)
+    for k, path in enumerate(paths, start=1):
+        merge(job, path, tmp_path / f"iter_{k}" / "baseline.db", state, k)
+    job.commit_transaction()
+    system = job.get_system("mol")
+    assert system.configuration.id == ids[-1]
+    for k, cid in enumerate(ids, start=1):
+        xyz = job.get_configuration(cid).atoms.get_coordinates()
+        assert xyz[0] == pytest.approx([0, 0, k])
+
+
+def test_two_iterations_moving_the_same_atoms(tmp_path):
+    """M3: coordinates of one configuration changed by two iterations."""
+    for later_wins in (False, True):
+        directory = tmp_path / str(later_wins)
+        directory.mkdir()
+        job = make_job(directory / "seamm.db")
+        cid = configuration_named(job, "first").id
+        state = {}
+        paths = []
+        for k in (1, 2):
+            path = directory / f"iter_{k}" / "seamm.db"
+            snapshot(directory / "seamm.db", path, configurations=[cid])
+            baseline(path, directory / f"iter_{k}" / "baseline.db")
+            child = SystemDB(filename=f"file:{path}")
+            child.get_configuration(cid).atoms.set_coordinates(
+                [[float(k), 0, 0], [0, 0.76, 0], [0.76, 0, 0]]
+            )
+            child.db.commit()
+            child.close()
+            paths.append(path)
+        merge(job, paths[0], directory / "iter_1" / "baseline.db", state, 1)
+        if later_wins:
+            merge(job, paths[1], directory / "iter_2" / "baseline.db", state, 2, True)
+            xyz = job.get_configuration(cid).atoms.get_coordinates()
+            assert xyz[0] == pytest.approx([2.0, 0, 0])
+        else:
+            with pytest.raises(MergeConflict, match="coordinates of configuration"):
+                merge(job, paths[1], directory / "iter_2" / "baseline.db", state, 2)
+        job.rollback_transaction()
+
+
+def test_property_defined_differently(tmp_path):
+    """S2: a property of the same name with other units is a conflict."""
+    job = make_job(tmp_path / "seamm.db")
+    child, path = iteration(tmp_path, job, "first", 1)
+    child.db.execute("UPDATE property SET units = 'eV' WHERE name = 'energy'")
+    child.db.commit()
+    child.close()
+    with pytest.raises(MergeConflict, match="units"):
+        merge(job, path, tmp_path / "iter_1" / "baseline.db", {}, 1)
