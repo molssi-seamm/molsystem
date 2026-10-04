@@ -796,6 +796,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
             The other SystemDB object containing the database
         """
         if self.is_attached(other):
+            if self._db is not None and self._db.deferring:
+                # DETACH is refused inside the open transaction once the other
+                # database has been read ("database ... is locked"); it stays
+                # attached, read-only, and is reused if attached again.
+                return
             attached_name = self.attached_as(other)
             self.cursor.execute(f'DETACH DATABASE "{attached_name}"')
             del self._attached[other.filename]

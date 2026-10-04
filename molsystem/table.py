@@ -119,7 +119,26 @@ class _Table(collections.abc.MutableMapping):
         if self._deferring:
             # executescript would commit the deferred transaction, and the
             # foreign keys cannot be switched off inside it. SQLite 3.35 and
-            # later drop a column directly.
+            # later drop a column directly, once no index uses it.
+            if sqlite3.sqlite_version_info < (3, 35, 0):
+                raise RuntimeError(
+                    f"Deleting the column '{key}' inside a flowchart step needs "
+                    f"SQLite 3.35 or later; this is {sqlite3.sqlite_version}."
+                )
+            indices = self.db.execute(
+                f"SELECT name FROM {self.schema}.sqlite_master"
+                " WHERE type = 'index' AND tbl_name = ? AND sql IS NOT NULL",
+                (self._table,),
+            ).fetchall()
+            for (index,) in indices:
+                columns = [
+                    row[2]
+                    for row in self.db.execute(
+                        f'PRAGMA {self.schema}.index_info("{index}")'
+                    )
+                ]
+                if key in columns:
+                    self.db.execute(f'DROP INDEX {self.schema}."{index}"')
             self.db.execute(f'ALTER TABLE {self.table} DROP COLUMN "{key}"')
             return
 

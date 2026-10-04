@@ -195,3 +195,28 @@ def test_always_in_a_transaction_while_deferring(deferred):
     db.deferred_commit = False
     db.commit_transaction()
     assert not db.db.in_transaction
+
+
+def test_delete_indexed_column_deferred(deferred):
+    db, path = deferred
+    atoms = db.system.configuration.atoms
+    atoms.add_attribute("tag", coltype="int", default=0, index=True)
+    assert "tag" in db["atom"].attributes
+    del db["atom"]["tag"]
+    assert "tag" not in db["atom"].attributes
+    db.commit_transaction()
+
+
+def test_compare_with_another_database_while_deferring(deferred, tmp_path):
+    """Comparing attaches the other database; detaching it inside the open
+    transaction would fail, so it stays attached."""
+    db, path = deferred
+    other = SystemDB(filename=f"file:{tmp_path / 'other.db'}")
+    system = other.create_system(name="default")
+    system.create_configuration(name="default")
+    db.system.configuration.atoms.append(x=[0.0], y=[0.0], z=[0.0], symbol=["H"])
+    db.attach(other)
+    db.db.execute(f'SELECT COUNT(*) FROM "{db.attached_as(other)}".atom').fetchone()
+    db.detach(other)  # must not raise
+    assert db.is_attached(other)
+    db.commit_transaction()
