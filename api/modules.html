@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem &#8212; MolSystem 2026.10.3 documentation</title>
+    <title>molsystem &#8212; MolSystem 2026.10.4 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=f64fa391"></script>
+    <script src="../_static/documentation_options.js?v=3dc6335c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="API Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.3" />
+  <meta name="docsearch:version" content="2026.10.4" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -713,11 +713,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.symmetry">molsystem.symmetry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.system">molsystem.system module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="molsystem.html#module-molsystem.system_db">molsystem.system_db module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection"><code class="docutils literal notranslate"><span class="pre">JobConnection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection.commit"><code class="docutils literal notranslate"><span class="pre">JobConnection.commit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection.commit_now"><code class="docutils literal notranslate"><span class="pre">JobConnection.commit_now()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection.deferring"><code class="docutils literal notranslate"><span class="pre">JobConnection.deferring</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection.rollback"><code class="docutils literal notranslate"><span class="pre">JobConnection.rollback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.JobConnection.savepoint_name"><code class="docutils literal notranslate"><span class="pre">JobConnection.savepoint_name()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB"><code class="docutils literal notranslate"><span class="pre">SystemDB</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.attach"><code class="docutils literal notranslate"><span class="pre">SystemDB.attach()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.attached_as"><code class="docutils literal notranslate"><span class="pre">SystemDB.attached_as()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.attributes"><code class="docutils literal notranslate"><span class="pre">SystemDB.attributes()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.close"><code class="docutils literal notranslate"><span class="pre">SystemDB.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.commit_transaction"><code class="docutils literal notranslate"><span class="pre">SystemDB.commit_transaction()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.configuration_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.configuration_ids</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.configurations</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.create_combined_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_combined_system()</span></code></a></li>
@@ -726,6 +735,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.cursor"><code class="docutils literal notranslate"><span class="pre">SystemDB.cursor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.db"><code class="docutils literal notranslate"><span class="pre">SystemDB.db</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.db_version"><code class="docutils literal notranslate"><span class="pre">SystemDB.db_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.deferred_commit"><code class="docutils literal notranslate"><span class="pre">SystemDB.deferred_commit</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.delete_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.delete_system()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.detach"><code class="docutils literal notranslate"><span class="pre">SystemDB.detach()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.diff"><code class="docutils literal notranslate"><span class="pre">SystemDB.diff()</span></code></a></li>
@@ -745,6 +755,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.names"><code class="docutils literal notranslate"><span class="pre">SystemDB.names</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.parent"><code class="docutils literal notranslate"><span class="pre">SystemDB.parent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.properties"><code class="docutils literal notranslate"><span class="pre">SystemDB.properties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.rollback_transaction"><code class="docutils literal notranslate"><span class="pre">SystemDB.rollback_transaction()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.system"><code class="docutils literal notranslate"><span class="pre">SystemDB.system</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.system_exists"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_exists()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="molsystem.html#molsystem.system_db.SystemDB.system_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_ids</span></code></a></li>

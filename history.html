@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.3 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.4 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=f64fa391"></script>
+    <script src="_static/documentation_options.js?v=3dc6335c"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.3" />
+  <meta name="docsearch:version" content="2026.10.4" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -505,6 +505,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.4 – A step as one transaction; the same structure from the same SMILES</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SystemDB(deferred_commit=True)</span></code> defers the many commits molsystem makes until
+<code class="docutils literal notranslate"><span class="pre">commit_transaction()</span></code> (<code class="docutils literal notranslate"><span class="pre">rollback_transaction()</span></code> abandons them), so a
+flowchart step’s writes are saved together or not at all. SEAMM’s flowchart
+evaluator uses this to checkpoint flowcharts (seamm 2026.10.4). A transaction is
+kept open while deferring, so even a step that starts by creating a table is
+covered. The default is unchanged.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">configuration:</span></code> and the other backup-and-restore blocks restore
+correctly inside such a transaction, and deleting a column no longer commits it.</p></li>
+<li><p>Building a structure from SMILES with RDKit (the default) gives the same
+structure every time for the same SMILES. Before, each call in a process gave a
+different conformer, depending on what had been built before, so a resumed job
+or a parallel loop iteration built other structures than an uninterrupted run.
+<strong>The conformers built from SMILES differ from those of earlier releases.</strong></p></li>
+</ul>
+</dd>
 <dt>2026.10.3 – Tables in the database</dt><dd><ul class="simple">
 <li><p>SEAMM’s flowchart tables can now be stored in the job’s database:
 <code class="docutils literal notranslate"><span class="pre">SystemDB.user_tables</span></code> holds named tables with declared column types and

@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2026.10.3 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2026.10.4 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=f64fa391"></script>
+    <script src="../../_static/documentation_options.js?v=3dc6335c"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.3" />
+  <meta name="docsearch:version" content="2026.10.4" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -529,6 +529,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
+<span class="c1"># The random seed for RDKit's embedding of SMILES (see from_smiles)</span>
+<span class="n">EMBEDDING_SEED</span> <span class="o">=</span> <span class="mi">20261004</span>
+
 <span class="n">RDKit_Embedding_Error</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"INITIAL_COORDS"</span><span class="p">:</span> <span class="s2">"""</span>
 <span class="s2">generation of the initial coordinates from the random distance matrix (default)</span>
@@ -713,7 +716,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="k">if</span> <span class="n">mol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SMILES '</span><span class="si">{</span><span class="n">smiles</span><span class="si">}</span><span class="s2">' is not valid."</span><span class="p">)</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="n">conformer</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="c1"># A fixed seed: the same SMILES gives the same structure every time,</span>
+            <span class="c1"># whatever was built before it in the process (RDKit's default</span>
+            <span class="c1"># carries its random state from call to call), so a resumed job or a</span>
+            <span class="c1"># parallel loop iteration builds what an uninterrupted run would.</span>
+            <span class="n">conformer</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">randomSeed</span><span class="o">=</span><span class="n">EMBEDDING_SEED</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">conformer</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># Check if there are small rings</span>
                 <span class="k">for</span> <span class="n">ring</span> <span class="ow">in</span> <span class="n">rdmolops</span><span class="o">.</span><span class="n">GetSSSR</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
@@ -723,6 +730,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ps</span> <span class="o">=</span> <span class="n">rdDistGeom</span><span class="o">.</span><span class="n">ETKDGv3</span><span class="p">()</span>
                 <span class="n">ps</span><span class="o">.</span><span class="n">trackFailures</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ps</span><span class="o">.</span><span class="n">randomSeed</span> <span class="o">=</span> <span class="n">EMBEDDING_SEED</span>
                 <span class="n">conformer</span> <span class="o">=</span> <span class="n">rdDistGeom</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">ps</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">conformer</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="n">counts</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">GetFailureCounts</span><span class="p">()</span>

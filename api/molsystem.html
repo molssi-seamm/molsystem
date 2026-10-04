@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.10.3 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.10.4 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=f64fa391"></script>
+    <script src="../_static/documentation_options.js?v=3dc6335c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="molsystem" href="modules.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.3" />
+  <meta name="docsearch:version" content="2026.10.4" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -1959,6 +1959,51 @@ tell a transient service problem from a wrong answer.</p>
 <span id="molsystem-system-db-module"></span><h2>molsystem.system_db module<a class="headerlink" href="#module-molsystem.system_db" title="Link to this heading">#</a></h2>
 <p>A dictionary-like object for holding a system</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.system_db.</span></span><span class="sig-name descname"><span class="pre">JobConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#JobConnection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.JobConnection" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></p>
+<p>A SQLite connection whose commits can be deferred.</p>
+<p>molsystem commits after most operations. A flowchart evaluator that wants
+each step to be one transaction sets <code class="docutils literal notranslate"><span class="pre">deferring</span></code> while the step runs, so
+those commits do nothing, and calls <a class="reference internal" href="#molsystem.system_db.JobConnection.commit_now" title="molsystem.system_db.JobConnection.commit_now"><code class="xref py py-meth docutils literal notranslate"><span class="pre">commit_now()</span></code></a> when the step has
+finished. A process killed part way through a step then loses exactly that
+step’s writes. Not deferring, this behaves as a plain connection.</p>
+<p>While deferring a transaction is always open: the sqlite3 module opens one
+implicitly only before INSERT, UPDATE, DELETE and REPLACE, so without it a
+step whose first write is CREATE TABLE would commit that at once.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#JobConnection.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.JobConnection.commit" title="Link to this definition">#</a></dt>
+<dd><p>Commit, unless commits are being deferred.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection.commit_now">
+<span class="sig-name descname"><span class="pre">commit_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#JobConnection.commit_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.JobConnection.commit_now" title="Link to this definition">#</a></dt>
+<dd><p>Commit, even if commits are being deferred.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection.deferring">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deferring</span></span><a class="headerlink" href="#molsystem.system_db.JobConnection.deferring" title="Link to this definition">#</a></dt>
+<dd><p>Whether commits are deferred until commit_now.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection.rollback">
+<span class="sig-name descname"><span class="pre">rollback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#JobConnection.rollback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.JobConnection.rollback" title="Link to this definition">#</a></dt>
+<dd><p>Roll back, and while deferring start the next transaction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.JobConnection.savepoint_name">
+<span class="sig-name descname"><span class="pre">savepoint_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#JobConnection.savepoint_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.JobConnection.savepoint_name" title="Link to this definition">#</a></dt>
+<dd><p>A new, unique name for a savepoint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.system_db.</span></span><span class="sig-name descname"><span class="pre">SystemDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;Logger</span> <span class="pre">molsystem.system_db</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#molsystem.cif.CIFMixin" title="molsystem.cif.CIFMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">CIFMixin</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></p>
@@ -2123,6 +2168,12 @@ descriptors</p>
 <dd><p>Close the database.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.commit_transaction">
+<span class="sig-name descname"><span class="pre">commit_transaction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.commit_transaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.commit_transaction" title="Link to this definition">#</a></dt>
+<dd><p>Commit everything written so far, even when commits are deferred.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.configuration_ids">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">configuration_ids</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.configuration_ids" title="Link to this definition">#</a></dt>
@@ -2233,6 +2284,12 @@ structure.</p>
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.db_version">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">db_version</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.db_version" title="Link to this definition">#</a></dt>
 <dd><p>The version string for the database.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.deferred_commit">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deferred_commit</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.deferred_commit" title="Link to this definition">#</a></dt>
+<dd><p>Whether commits are deferred until <a class="reference internal" href="#molsystem.system_db.SystemDB.commit_transaction" title="molsystem.system_db.SystemDB.commit_transaction"><code class="xref py py-meth docutils literal notranslate"><span class="pre">commit_transaction()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2452,6 +2509,12 @@ structure.</p>
 <dt class="sig sig-object py" id="molsystem.system_db.SystemDB.properties">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#molsystem.system_db.SystemDB.properties" title="Link to this definition">#</a></dt>
 <dd><p>The class to handle the properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="molsystem.system_db.SystemDB.rollback_transaction">
+<span class="sig-name descname"><span class="pre">rollback_transaction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/system_db.html#SystemDB.rollback_transaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.system_db.SystemDB.rollback_transaction" title="Link to this definition">#</a></dt>
+<dd><p>Abandon everything written since the last real commit.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -3422,11 +3485,20 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.symmetry">molsystem.symmetry module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.system">molsystem.system module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.system_db">molsystem.system_db module</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection"><code class="docutils literal notranslate"><span class="pre">JobConnection</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection.commit"><code class="docutils literal notranslate"><span class="pre">JobConnection.commit()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection.commit_now"><code class="docutils literal notranslate"><span class="pre">JobConnection.commit_now()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection.deferring"><code class="docutils literal notranslate"><span class="pre">JobConnection.deferring</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection.rollback"><code class="docutils literal notranslate"><span class="pre">JobConnection.rollback()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.JobConnection.savepoint_name"><code class="docutils literal notranslate"><span class="pre">JobConnection.savepoint_name()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB"><code class="docutils literal notranslate"><span class="pre">SystemDB</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attach"><code class="docutils literal notranslate"><span class="pre">SystemDB.attach()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attached_as"><code class="docutils literal notranslate"><span class="pre">SystemDB.attached_as()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.attributes"><code class="docutils literal notranslate"><span class="pre">SystemDB.attributes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.close"><code class="docutils literal notranslate"><span class="pre">SystemDB.close()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.commit_transaction"><code class="docutils literal notranslate"><span class="pre">SystemDB.commit_transaction()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.configuration_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.configuration_ids</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.configurations"><code class="docutils literal notranslate"><span class="pre">SystemDB.configurations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.create_combined_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.create_combined_system()</span></code></a></li>
@@ -3435,6 +3507,7 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.cursor"><code class="docutils literal notranslate"><span class="pre">SystemDB.cursor</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.db"><code class="docutils literal notranslate"><span class="pre">SystemDB.db</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.db_version"><code class="docutils literal notranslate"><span class="pre">SystemDB.db_version</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.deferred_commit"><code class="docutils literal notranslate"><span class="pre">SystemDB.deferred_commit</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.delete_system"><code class="docutils literal notranslate"><span class="pre">SystemDB.delete_system()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.detach"><code class="docutils literal notranslate"><span class="pre">SystemDB.detach()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.diff"><code class="docutils literal notranslate"><span class="pre">SystemDB.diff()</span></code></a></li>
@@ -3454,6 +3527,7 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.names"><code class="docutils literal notranslate"><span class="pre">SystemDB.names</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.parent"><code class="docutils literal notranslate"><span class="pre">SystemDB.parent</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.properties"><code class="docutils literal notranslate"><span class="pre">SystemDB.properties</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.rollback_transaction"><code class="docutils literal notranslate"><span class="pre">SystemDB.rollback_transaction()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system"><code class="docutils literal notranslate"><span class="pre">SystemDB.system</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system_exists"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_exists()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.system_db.SystemDB.system_ids"><code class="docutils literal notranslate"><span class="pre">SystemDB.system_ids</span></code></a></li>
