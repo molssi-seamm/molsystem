@@ -20,6 +20,36 @@ from .templates import _Templates
 logger = logging.getLogger(__name__)
 
 
+class JobConnection(sqlite3.Connection):
+    """A SQLite connection whose commits can be deferred.
+
+    molsystem commits after most operations. A flowchart evaluator that wants
+    each step to be one transaction sets ``deferring`` while the step runs, so
+    those commits do nothing, and calls :meth:`commit_now` when the step has
+    finished. A process killed part way through a step then loses exactly that
+    step's writes. Not deferring, this behaves as a plain connection.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.deferring = False
+        self._savepoint_count = 0
+
+    def commit(self):
+        """Commit, unless commits are being deferred."""
+        if not self.deferring:
+            super().commit()
+
+    def commit_now(self):
+        """Commit, even if commits are being deferred."""
+        super().commit()
+
+    def savepoint_name(self):
+        """A new, unique name for a savepoint."""
+        self._savepoint_count += 1
+        return f"molsystem_{self._savepoint_count}"
+
+
 class SystemDB(CIFMixin, collections.abc.MutableMapping):
     """A database of systems for SEAMM.
 
@@ -161,6 +191,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._cursor = None
         self._items = {}
         self._user_tables = None
+        self._deferred_commit = kwargs.pop("deferred_commit", False)
 
         if "filename" in kwargs:
             self.filename = kwargs.pop("filename")
@@ -173,9 +204,11 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         # Delete any cached objects
         del self._items
 
-        # And close the database
+        # And close the database. A deferred transaction that nobody committed
+        # is abandoned, as if the process had died.
         if self._db is not None:
-            self.db.commit()
+            if not self._db.deferring:
+                self.db.commit()
             self.db.close()
 
     def __enter__(self):
@@ -332,6 +365,27 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         return self._db
 
     @property
+    def deferred_commit(self):
+        """Whether commits are deferred until :meth:`commit_transaction`."""
+        return self._deferred_commit
+
+    @deferred_commit.setter
+    def deferred_commit(self, value):
+        self._deferred_commit = bool(value)
+        if self._db is not None:
+            self._db.deferring = self._deferred_commit
+
+    def commit_transaction(self):
+        """Commit everything written so far, even when commits are deferred."""
+        if self._db is not None:
+            self._db.commit_now()
+
+    def rollback_transaction(self):
+        """Abandon everything written since the last real commit."""
+        if self._db is not None:
+            self._db.rollback()
+
+    @property
     def db_version(self):
         """The version string for the database."""
         self.cursor.execute("SELECT value FROM metadata WHERE key = 'version'")
@@ -347,7 +401,7 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         if value != self._filename:
             if self._db is not None:
                 self.cursor.close()
-                self._db.commit()
+                self._db.commit_now()
                 self._db.close()
                 self._db = None
                 self._cursor = None
@@ -355,9 +409,13 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
         self._user_tables = None
         if self._filename is not None:
             if self._filename[0:5] == "file:":
-                self._db = sqlite3.connect(self._filename, uri=True, timeout=10.0)
+                self._db = sqlite3.connect(
+                    self._filename, uri=True, timeout=10.0, factory=JobConnection
+                )
             else:
-                self._db = sqlite3.connect(self._filename, timeout=10.0)
+                self._db = sqlite3.connect(
+                    self._filename, timeout=10.0, factory=JobConnection
+                )
             self._db.row_factory = sqlite3.Row
             self._db.execute("PRAGMA foreign_keys = ON")
             self._db.execute("PRAGMA synchronous = normal")
@@ -367,6 +425,10 @@ class SystemDB(CIFMixin, collections.abc.MutableMapping):
                 self._db.execute("PRAGMA journal_mode = WAL")
             self._cursor = self._db.cursor()
             self._initialize()
+            # Defer only after the schema is in place, so a new database is
+            # complete on disk before the first step runs.
+            self._db.commit_now()
+            self._db.deferring = self._deferred_commit
 
     @property
     def names(self):

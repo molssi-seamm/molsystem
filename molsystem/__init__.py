@@ -21,7 +21,7 @@ except ImportError:
 # the molsystem package.
 
 import molsystem.elements  # noqa: F401
-from .system_db import SystemDB  # noqa: F401
+from .system_db import JobConnection, SystemDB  # noqa: F401
 from .configuration import spin_states  # noqa: F401
 from .cell import Cell  # noqa: F401
 from .properties import standard_properties, add_properties_from_file  # noqa: F401

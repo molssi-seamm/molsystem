@@ -3,6 +3,8 @@
 import collections.abc
 from itertools import zip_longest
 import logging
+import sqlite3
+
 import pandas
 
 from .column import _Column
@@ -43,6 +45,19 @@ class _Table(collections.abc.MutableMapping):
 
     def __enter__(self):
         """Copy the table to a backup for a 'with' statement."""
+        if self._deferring:
+            # Inside a deferred transaction the foreign keys cannot be switched
+            # off, so restoring by "delete all and copy back" would cascade into
+            # other tables. Use a savepoint instead.
+            # A savepoint outside a transaction would be a transaction of its
+            # own, committed for real by its RELEASE; so open one first.
+            if not self.db.in_transaction:
+                self.db.execute("BEGIN")
+            name = self.db.savepoint_name()
+            self.db.execute(f'SAVEPOINT "{name}"')
+            self._checkpoints.append(("savepoint", name))
+            return self
+
         n = len(self._checkpoints)
         checkpoint = f"temp.{self._table}_checkpoint_{n}"
         self.db.execute(f"CREATE TEMP TABLE {checkpoint} AS SELECT * FROM {self.table}")
@@ -53,6 +68,21 @@ class _Table(collections.abc.MutableMapping):
     def __exit__(self, etype, value, traceback) -> None:
         """Handle returning from a 'with' statement."""
         checkpoint = self._checkpoints.pop()
+
+        if isinstance(checkpoint, tuple):
+            # A savepoint. Configurations, atoms and bonds enter several tables
+            # and leave them in the same order, so the first to leave holds the
+            # outermost savepoint and releases (or rolls back) the inner ones
+            # with it; theirs are then already gone.
+            name = checkpoint[1]
+            try:
+                if etype is not None:
+                    self.db.execute(f'ROLLBACK TO "{name}"')
+                self.db.execute(f'RELEASE "{name}"')
+            except sqlite3.OperationalError as e:
+                if "no such savepoint" not in str(e):
+                    raise
+            return False
 
         if etype is None:
             self.db.commit()
@@ -86,6 +116,13 @@ class _Table(collections.abc.MutableMapping):
 
     def __delitem__(self, key) -> None:
         """Allow deletion of keys"""
+        if self._deferring:
+            # executescript would commit the deferred transaction, and the
+            # foreign keys cannot be switched off inside it. SQLite 3.35 and
+            # later drop a column directly.
+            self.db.execute(f'ALTER TABLE {self.table} DROP COLUMN "{key}"')
+            return
+
         # The easy way, which is not supported in SQLite :-(
         # self.cursor.execute(f'ALTER TABLE {self.table} DROP {key}')
 
@@ -116,6 +153,11 @@ class _Table(collections.abc.MutableMapping):
         """
         self.db.executescript(sql)
         self.db.commit()
+
+    @property
+    def _deferring(self):
+        """Whether the connection is deferring commits (see JobConnection)."""
+        return getattr(self.db, "deferring", False)
 
     def __iter__(self) -> iter:
         """Allow iteration over the object"""
