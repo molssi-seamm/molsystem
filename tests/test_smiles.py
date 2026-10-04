@@ -119,3 +119,33 @@ def test_from_smiles_openeye(configuration):
 
     assert result == correct
     assert configuration.name == "acetic acid"
+
+
+def test_rdkit_structure_independent_of_history(tmp_path):
+    """The same SMILES gives the same structure whatever was built before it,
+    in this process or another one."""
+    import subprocess
+    import sys
+    import textwrap
+
+    script = textwrap.dedent("""
+        from molsystem import SystemDB
+
+        db = SystemDB(filename="file:history?mode=memory&cache=shared")
+        xyz = []
+        for smiles in ("CCCCCCCC", "CCO", "c1ccccc1", "CCCCCCCC"):
+            c = db.create_system(name=smiles).create_configuration(name=smiles)
+            c.from_smiles(smiles, flavor="rdkit")
+            if smiles == "CCCCCCCC":
+                xyz.append(c.atoms.get_coordinates())
+        assert xyz[0] == xyz[1], "differs within a process"
+        print(xyz[0][0])
+        """)
+    first = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, check=True
+    ).stdout
+    other_order = script.replace('("CCCCCCCC", "CCO",', '("CCO", "CCCCCCCC",')
+    second = subprocess.run(
+        [sys.executable, "-c", other_order], capture_output=True, text=True, check=True
+    ).stdout
+    assert first == second

@@ -89,6 +89,9 @@ class _Configuration(
 
     def __enter__(self):
         """Copy the tables to a backup for a 'with' statement."""
+        # The cell row is made on first use; make it before the backups so that
+        # restoring them cannot leave the cached id pointing at nothing.
+        self.cell_id
         self.system_db["configuration"].__enter__()
         self.atoms.__enter__()
         self.bonds.__enter__()

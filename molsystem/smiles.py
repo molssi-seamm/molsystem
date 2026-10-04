@@ -42,6 +42,9 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+# The random seed for RDKit's embedding of SMILES (see from_smiles)
+EMBEDDING_SEED = 20261004
+
 RDKit_Embedding_Error = {
     "INITIAL_COORDS": """
 generation of the initial coordinates from the random distance matrix (default)
@@ -216,7 +219,11 @@ class SMILESMixin:
             if mol is None:
                 raise ValueError(f"SMILES '{smiles}' is not valid.")
             mol = Chem.AddHs(mol)
-            conformer = AllChem.EmbedMolecule(mol)
+            # A fixed seed: the same SMILES gives the same structure every time,
+            # whatever was built before it in the process (RDKit's default
+            # carries its random state from call to call), so a resumed job or a
+            # parallel loop iteration builds what an uninterrupted run would.
+            conformer = AllChem.EmbedMolecule(mol, randomSeed=EMBEDDING_SEED)
             if conformer == -1:
                 # Check if there are small rings
                 for ring in rdmolops.GetSSSR(mol):
@@ -226,6 +233,7 @@ class SMILESMixin:
                 else:
                     ps = rdDistGeom.ETKDGv3()
                 ps.trackFailures = True
+                ps.randomSeed = EMBEDDING_SEED
                 conformer = rdDistGeom.EmbedMolecule(mol, ps)
             if conformer == -1:
                 counts = ps.GetFailureCounts()
