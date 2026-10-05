@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.4 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.5 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=3dc6335c"></script>
+    <script src="_static/documentation_options.js?v=99beb745"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.4" />
+  <meta name="docsearch:version" content="2026.10.5" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -505,6 +505,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.5 – Snapshots and merges for parallel loops</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">molsystem.snapshot</span></code> supports loops that run their iterations in parallel
+(loop_step 2026.10.5): <code class="docutils literal notranslate"><span class="pre">snapshot</span></code> writes, from the committed state of a job’s
+database, the structures an iteration works on – with their ids and their
+systems’ default configurations – and all the tables, or a copy of the whole
+database; <code class="docutils literal notranslate"><span class="pre">merge</span></code> brings back what the iteration did, in iteration order: new
+structures (with new ids), changed structures and configurations, properties,
+appended table rows, changed cells, new tables and columns. Two iterations
+changing the same thing (a table cell, a structure or its atoms’ coordinates)
+raise <code class="docutils literal notranslate"><span class="pre">MergeConflict</span></code>, unless the later may win.</p></li>
+<li><p>Bugfix: <code class="docutils literal notranslate"><span class="pre">System.copy_configuration</span></code> copied the new configuration’s data rather
+than the previous configuration’s.</p></li>
+</ul>
+</dd>
 <dt>2026.10.4 – A step as one transaction; the same structure from the same SMILES</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">SystemDB(deferred_commit=True)</span></code> defers the many commits molsystem makes until
 <code class="docutils literal notranslate"><span class="pre">commit_transaction()</span></code> (<code class="docutils literal notranslate"><span class="pre">rollback_transaction()</span></code> abandons them), so a

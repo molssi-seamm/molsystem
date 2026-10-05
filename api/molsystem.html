@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.10.4 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.10.5 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=3dc6335c"></script>
+    <script src="../_static/documentation_options.js?v=99beb745"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="molsystem" href="modules.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.4" />
+  <meta name="docsearch:version" content="2026.10.5" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -1935,6 +1935,81 @@ tell a transient service problem from a wrong answer.</p>
 <dd></dd></dl>
 
 </section>
+<section id="module-molsystem.snapshot">
+<span id="molsystem-snapshot-module"></span><h2>molsystem.snapshot module<a class="headerlink" href="#module-molsystem.snapshot" title="Link to this heading">#</a></h2>
+<p>Snapshots of a job database for parallel loop iterations, and their merge.</p>
+<p>A parallel Loop runs each iteration in its own evaluator with its own database: a
+<em>snapshot</em> of the job’s database holding the configurations the iteration works on
+(with their own ids), all the user tables and the property definitions. When the
+iteration has finished, <a class="reference internal" href="#molsystem.snapshot.merge" title="molsystem.snapshot.merge"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge()</span></code></a> brings what it did back into the job’s
+database: new and changed structures (new ones get new ids), property values, and
+table rows replayed from the iteration’s change journal.</p>
+<p>Both work on committed state through their own connections, never through the job
+database’s (possibly deferring) connection for reading the other file.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="molsystem.snapshot.MergeConflict">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">molsystem.snapshot.</span></span><span class="sig-name descname"><span class="pre">MergeConflict</span></span><a class="reference internal" href="../_modules/molsystem/snapshot.html#MergeConflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.snapshot.MergeConflict" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></p>
+<p>Two iterations of a parallel loop changed the same thing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.snapshot.baseline">
+<span class="sig-prename descclassname"><span class="pre">molsystem.snapshot.</span></span><span class="sig-name descname"><span class="pre">baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/snapshot.html#baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.snapshot.baseline" title="Link to this definition">#</a></dt>
+<dd><p>Keep an untouched copy of a snapshot, read-only, to diff the merge against.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.snapshot.merge">
+<span class="sig-prename descclassname"><span class="pre">molsystem.snapshot.</span></span><span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">later_wins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/snapshot.html#merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.snapshot.merge" title="Link to this definition">#</a></dt>
+<dd><p>Bring what a parallel loop iteration did back into the job’s database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>molsystem.SystemDB</em>) – The job’s database. Writes go through its connection, inside its
+transaction; the caller commits (with the checkpoint).</p></li>
+<li><p><strong>source</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The iteration’s database, read through its own read-only connection.</p></li>
+<li><p><strong>baseline_path</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The untouched snapshot the iteration started from.</p></li>
+<li><p><strong>state</strong> (<em>dict</em>) – Carried from one iteration’s merge to the next in the same loop: what
+earlier iterations changed, to detect two changing the same thing.</p></li>
+<li><p><strong>iteration</strong> (<em>any</em>) – The iteration, for messages.</p></li>
+<li><p><strong>later_wins</strong> (<em>bool</em>) – If two iterations change the same table cell or structure, let the later
+one win (with a warning) instead of raising MergeConflict.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">maps</span></code> (table -&gt; {iteration id: job id}), <code class="docutils literal notranslate"><span class="pre">current_rows</span></code> (table name -&gt;
+the job’s row the iteration left current, for tables whose current row it
+moved), <code class="docutils literal notranslate"><span class="pre">exported</span></code> (tables whose export metadata it changed).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.snapshot.snapshot">
+<span class="sig-prename descclassname"><span class="pre">molsystem.snapshot.</span></span><span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whole</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/snapshot.html#snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.snapshot.snapshot" title="Link to this definition">#</a></dt>
+<dd><p>Write a snapshot of a job database for one parallel loop iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The job database. Only its committed state is read, through a separate
+read-only connection.</p></li>
+<li><p><strong>target</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The new database file (replaced if it exists).</p></li>
+<li><p><strong>configurations</strong> (<em>[</em><em>int</em><em>]</em>) – The ids of the configurations the iteration works on. Their systems,
+atoms, bonds, cells, symmetry, coordinates, velocities, gradients, subsets
+and property values are copied with their own ids; so are the
+configurations of the templates.</p></li>
+<li><p><strong>whole</strong> (<em>bool</em>) – Copy the whole database instead (the Loop’s “whole database” option).</p></li>
+<li><p><strong>empty.</strong> (<em>The change journal and the checkpoint tables are left</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-molsystem.subset">
 <span id="molsystem-subset-module"></span><h2>molsystem.subset module<a class="headerlink" href="#module-molsystem.subset" title="Link to this heading">#</a></h2>
 </section>
@@ -3475,6 +3550,13 @@ A general implementation for molecular and periodic systems.</p>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.smiles.check_openeye_license"><code class="docutils literal notranslate"><span class="pre">check_openeye_license()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.snapshot">molsystem.snapshot module</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.snapshot.MergeConflict"><code class="docutils literal notranslate"><span class="pre">MergeConflict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.snapshot.baseline"><code class="docutils literal notranslate"><span class="pre">baseline()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.snapshot.merge"><code class="docutils literal notranslate"><span class="pre">merge()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.snapshot.snapshot"><code class="docutils literal notranslate"><span class="pre">snapshot()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.subset">molsystem.subset module</a></li>

@@ -172,6 +172,14 @@ molsystem.smiles module
    :show-inheritance:
    :undoc-members:
 
+molsystem.snapshot module
+-------------------------
+
+.. automodule:: molsystem.snapshot
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 molsystem.subset module
 -----------------------
 

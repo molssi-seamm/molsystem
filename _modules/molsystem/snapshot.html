@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>molsystem.snapshot &#8212; MolSystem 2026.10.5 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c224919a" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
+<!-- End Google Tag Manager -->
+
+    <script src="../../_static/documentation_options.js?v=99beb745"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/molsystem/snapshot';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2026.10.5" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/SEAMM logo.png" class="logo__image only-light" alt=""/>
+    <img src="../../_static/SEAMM Inverted 288x181.png" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LAMMPS Step</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer_guide/index.html">
+    Developer Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../authors.html">
+    Credits
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../history.html">
+    History
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://molssi-seamm.github.io">
+    SEAMM Documentation
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://molssi.org">
+    MolSSI
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/molssi-seamm/molsystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/MolSSI_NSF" title="Twitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-twitter fa-lg" aria-hidden="true"></i><span class="visually-hidden">Twitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer_guide/index.html">
+    Developer Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../authors.html">
+    Credits
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../history.html">
+    History
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://molssi-seamm.github.io">
+    SEAMM Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://molssi.org">
+    MolSSI
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/molssi-seamm/molsystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/MolSSI_NSF" title="Twitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-twitter fa-lg" aria-hidden="true"></i><span class="visually-hidden">Twitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">molsystem.snapshot</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for molsystem.snapshot</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">"""Snapshots of a job database for parallel loop iterations, and their merge.</span>
+
+<span class="sd">A parallel Loop runs each iteration in its own evaluator with its own database: a</span>
+<span class="sd">*snapshot* of the job's database holding the configurations the iteration works on</span>
+<span class="sd">(with their own ids), all the user tables and the property definitions. When the</span>
+<span class="sd">iteration has finished, :func:`merge` brings what it did back into the job's</span>
+<span class="sd">database: new and changed structures (new ones get new ids), property values, and</span>
+<span class="sd">table rows replayed from the iteration's change journal.</span>
+
+<span class="sd">Both work on committed state through their own connections, never through the job</span>
+<span class="sd">database's (possibly deferring) connection for reading the other file.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">quote</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Tables a snapshot leaves empty: they belong to the run, not to the data.</span>
+<span class="n">RUN_TABLES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"_table_changes"</span><span class="p">,</span> <span class="s2">"_checkpoint"</span><span class="p">,</span> <span class="s2">"_checkpoint_variables"</span><span class="p">)</span>
+
+<span class="c1"># Structure tables keyed by id, in the order their foreign keys allow.</span>
+<span class="n">ID_TABLES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"symmetry"</span><span class="p">,</span>
+    <span class="s2">"cell"</span><span class="p">,</span>
+    <span class="s2">"atom"</span><span class="p">,</span>
+    <span class="s2">"atomset"</span><span class="p">,</span>
+    <span class="s2">"bond"</span><span class="p">,</span>
+    <span class="s2">"bondset"</span><span class="p">,</span>
+    <span class="s2">"system"</span><span class="p">,</span>
+    <span class="s2">"configuration"</span><span class="p">,</span>
+    <span class="s2">"template"</span><span class="p">,</span>
+    <span class="s2">"subset"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Foreign keys of the structure tables: column -&gt; referenced table.</span>
+<span class="n">FOREIGN_KEYS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"configuration"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"system"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span>
+        <span class="s2">"symmetry"</span><span class="p">:</span> <span class="s2">"symmetry"</span><span class="p">,</span>
+        <span class="s2">"cell"</span><span class="p">:</span> <span class="s2">"cell"</span><span class="p">,</span>
+        <span class="s2">"atomset"</span><span class="p">:</span> <span class="s2">"atomset"</span><span class="p">,</span>
+        <span class="s2">"bondset"</span><span class="p">:</span> <span class="s2">"bondset"</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"system"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"default_configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">},</span>
+    <span class="s2">"template"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">},</span>
+    <span class="s2">"bond"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"i"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">,</span> <span class="s2">"j"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+    <span class="s2">"atomset_atom"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"atomset"</span><span class="p">:</span> <span class="s2">"atomset"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+    <span class="s2">"bondset_bond"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"bondset"</span><span class="p">:</span> <span class="s2">"bondset"</span><span class="p">,</span> <span class="s2">"bond"</span><span class="p">:</span> <span class="s2">"bond"</span><span class="p">},</span>
+    <span class="s2">"coordinates"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+    <span class="s2">"velocities"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+    <span class="s2">"gradients"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+    <span class="s2">"subset"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"template"</span><span class="p">:</span> <span class="s2">"template"</span><span class="p">},</span>
+    <span class="s2">"subset_atom"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"subset"</span><span class="p">:</span> <span class="s2">"subset"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">,</span> <span class="s2">"templateatom"</span><span class="p">:</span> <span class="s2">"atom"</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># Tables of (configuration, atom) data, and link tables, keyed by these columns.</span>
+<span class="n">ROW_TABLES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"atomset_atom"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"atomset"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">),</span>
+    <span class="s2">"bondset_bond"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bondset"</span><span class="p">,</span> <span class="s2">"bond"</span><span class="p">),</span>
+    <span class="s2">"coordinates"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">),</span>
+    <span class="s2">"velocities"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">),</span>
+    <span class="s2">"gradients"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">),</span>
+    <span class="s2">"subset_atom"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"subset"</span><span class="p">,</span> <span class="s2">"atom"</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="n">PROPERTY_DATA</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"float_data"</span><span class="p">,</span> <span class="s2">"int_data"</span><span class="p">,</span> <span class="s2">"str_data"</span><span class="p">,</span> <span class="s2">"json_data"</span><span class="p">)</span>
+
+<span class="c1"># Columns an iteration changes as it sets up (the current configuration of a</span>
+<span class="c1"># system), merged without a conflict: the last iteration merged sets them, as the</span>
+<span class="c1"># last iteration of a serial loop does.</span>
+<span class="n">SOFT_COLUMNS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"system"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"default_configuration"</span><span class="p">,)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_tables</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">"main"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The tables of a database: name -&gt; CREATE statement."""</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">sql</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sql</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"SELECT name, sql FROM </span><span class="si">{</span><span class="n">schema</span><span class="si">}</span><span class="s2">.sqlite_master WHERE type = 'table'"</span>
+            <span class="s2">" AND name NOT LIKE 'sqlite_%'"</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_columns</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">"main"</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PRAGMA </span><span class="si">{</span><span class="n">schema</span><span class="si">}</span><span class="s1">.table_info("</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">")'</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="snapshot">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.snapshot.snapshot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">configurations</span><span class="o">=</span><span class="p">(),</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Write a snapshot of a job database for one parallel loop iteration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source : str or pathlib.Path</span>
+<span class="sd">        The job database. Only its committed state is read, through a separate</span>
+<span class="sd">        read-only connection.</span>
+<span class="sd">    target : str or pathlib.Path</span>
+<span class="sd">        The new database file (replaced if it exists).</span>
+<span class="sd">    configurations : [int]</span>
+<span class="sd">        The ids of the configurations the iteration works on. Their systems,</span>
+<span class="sd">        atoms, bonds, cells, symmetry, coordinates, velocities, gradients, subsets</span>
+<span class="sd">        and property values are copied with their own ids; so are the</span>
+<span class="sd">        configurations of the templates.</span>
+<span class="sd">    whole : bool</span>
+<span class="sd">        Copy the whole database instead (the Loop's "whole database" option).</span>
+
+<span class="sd">    The change journal and the checkpoint tables are left empty.</span>
+<span class="sd">    """</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"-wal"</span><span class="p">,</span> <span class="s2">"-shm"</span><span class="p">):</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">whole</span><span class="p">:</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="si">}</span><span class="s2">?mode=ro"</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">src</span><span class="o">.</span><span class="n">backup</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">RUN_TABLES</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">_tables</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
+                    <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span><span class="p">)</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"PRAGMA foreign_keys = OFF"</span><span class="p">)</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"ATTACH DATABASE ? AS src"</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="si">}</span><span class="s2">?mode=ro"</span><span class="p">,))</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">_tables</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="s2">"src"</span><span class="p">)</span>
+        <span class="c1"># The same schema, including columns steps added to atom, coordinates, ...</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sql</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">sql</span><span class="p">,)</span> <span class="ow">in</span> <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">"SELECT sql FROM src.sqlite_master WHERE type = 'index' AND sql IS NOT NULL"</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+
+        <span class="c1"># The ids to copy</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"CREATE TEMP TABLE sel_conf (id INTEGER PRIMARY KEY)"</span><span class="p">)</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
+            <span class="s2">"INSERT OR IGNORE INTO sel_conf VALUES (?)"</span><span class="p">,</span>
+            <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">configurations</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"template"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT OR IGNORE INTO sel_conf SELECT configuration FROM src.template"</span>
+                <span class="s2">" WHERE configuration IS NOT NULL"</span>
+            <span class="p">)</span>
+        <span class="c1"># Each system's default configuration too, so the system is usable and a</span>
+        <span class="c1"># change of its default by the iteration can be seen</span>
+        <span class="k">if</span> <span class="s2">"system"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT OR IGNORE INTO sel_conf SELECT default_configuration"</span>
+                <span class="s2">" FROM src.system WHERE default_configuration IS NOT NULL AND id IN"</span>
+                <span class="s2">" (SELECT system FROM src.configuration WHERE id IN sel_conf)"</span>
+            <span class="p">)</span>
+        <span class="n">selections</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"configuration"</span><span class="p">:</span> <span class="s2">"SELECT id FROM sel_conf"</span><span class="p">,</span>
+            <span class="s2">"system"</span><span class="p">:</span> <span class="s2">"SELECT system FROM src.configuration WHERE id IN sel_conf"</span><span class="p">,</span>
+            <span class="s2">"cell"</span><span class="p">:</span> <span class="s2">"SELECT cell FROM src.configuration WHERE id IN sel_conf"</span><span class="p">,</span>
+            <span class="s2">"symmetry"</span><span class="p">:</span> <span class="s2">"SELECT symmetry FROM src.configuration WHERE id IN sel_conf"</span><span class="p">,</span>
+            <span class="s2">"atomset"</span><span class="p">:</span> <span class="s2">"SELECT atomset FROM src.configuration WHERE id IN sel_conf"</span><span class="p">,</span>
+            <span class="s2">"bondset"</span><span class="p">:</span> <span class="s2">"SELECT bondset FROM src.configuration WHERE id IN sel_conf"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">select</span> <span class="ow">in</span> <span class="n">selections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'INSERT INTO main."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SELECT * FROM src."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span>
+                    <span class="sa">f</span><span class="s2">" WHERE id IN (</span><span class="si">{</span><span class="n">select</span><span class="si">}</span><span class="s2">)"</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"atomset_atom"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.atomset_atom SELECT * FROM src.atomset_atom"</span>
+                <span class="s2">" WHERE atomset IN (SELECT id FROM main.atomset)"</span>
+            <span class="p">)</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.atom SELECT * FROM src.atom"</span>
+                <span class="s2">" WHERE id IN (SELECT atom FROM main.atomset_atom)"</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"bondset_bond"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.bondset_bond SELECT * FROM src.bondset_bond"</span>
+                <span class="s2">" WHERE bondset IN (SELECT id FROM main.bondset)"</span>
+            <span class="p">)</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.bond SELECT * FROM src.bond"</span>
+                <span class="s2">" WHERE id IN (SELECT bond FROM main.bondset_bond)"</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"velocities"</span><span class="p">,</span> <span class="s2">"gradients"</span><span class="p">,</span> <span class="s2">"subset"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'INSERT INTO main."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SELECT * FROM src."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span>
+                    <span class="s2">" WHERE configuration IN sel_conf"</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"subset_atom"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.subset_atom SELECT * FROM src.subset_atom"</span>
+                <span class="s2">" WHERE subset IN (SELECT id FROM main.subset)"</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">PROPERTY_DATA</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'INSERT INTO main."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SELECT * FROM src."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span>
+                    <span class="s2">" WHERE configuration IN sel_conf OR (configuration IS NULL AND"</span>
+                    <span class="s2">" system IN (SELECT id FROM main.system))"</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Whole tables: shared definitions and the user tables</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">*</span><span class="n">selections</span><span class="p">,</span>
+            <span class="s2">"atom"</span><span class="p">,</span>
+            <span class="s2">"atomset_atom"</span><span class="p">,</span>
+            <span class="s2">"bond"</span><span class="p">,</span>
+            <span class="s2">"bondset_bond"</span><span class="p">,</span>
+            <span class="s2">"coordinates"</span><span class="p">,</span>
+            <span class="s2">"velocities"</span><span class="p">,</span>
+            <span class="s2">"gradients"</span><span class="p">,</span>
+            <span class="s2">"subset"</span><span class="p">,</span>
+            <span class="s2">"subset_atom"</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">PROPERTY_DATA</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">RUN_TABLES</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">done</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">table</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_collection_system"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">table</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                <span class="s2">"_collection_configuration"</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># links to structures that may not be here</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'INSERT INTO main."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SELECT * FROM src."</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">"SELECT 1 FROM src.sqlite_master WHERE name = 'sqlite_sequence'"</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">():</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"DELETE FROM main.sqlite_sequence"</span><span class="p">)</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO main.sqlite_sequence SELECT * FROM src.sqlite_sequence"</span>
+            <span class="p">)</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"DETACH DATABASE src"</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="baseline">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.snapshot.baseline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">baseline</span><span class="p">(</span><span class="n">snapshot_path</span><span class="p">,</span> <span class="n">baseline_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Keep an untouched copy of a snapshot, read-only, to diff the merge against."""</span>
+    <span class="n">baseline_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">baseline_path</span><span class="p">)</span>
+    <span class="n">baseline_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">snapshot_path</span><span class="p">,</span> <span class="n">baseline_path</span><span class="p">)</span>
+    <span class="n">baseline_path</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="mo">0o444</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MergeConflict">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.snapshot.MergeConflict">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MergeConflict</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Two iterations of a parallel loop changed the same thing."""</span></div>
+
+
+
+<div class="viewcode-block" id="merge">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.snapshot.merge">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">baseline_path</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">later_wins</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Bring what a parallel loop iteration did back into the job's database.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    target : molsystem.SystemDB</span>
+<span class="sd">        The job's database. Writes go through its connection, inside its</span>
+<span class="sd">        transaction; the caller commits (with the checkpoint).</span>
+<span class="sd">    source : str or pathlib.Path</span>
+<span class="sd">        The iteration's database, read through its own read-only connection.</span>
+<span class="sd">    baseline_path : str or pathlib.Path</span>
+<span class="sd">        The untouched snapshot the iteration started from.</span>
+<span class="sd">    state : dict</span>
+<span class="sd">        Carried from one iteration's merge to the next in the same loop: what</span>
+<span class="sd">        earlier iterations changed, to detect two changing the same thing.</span>
+<span class="sd">    iteration : any</span>
+<span class="sd">        The iteration, for messages.</span>
+<span class="sd">    later_wins : bool</span>
+<span class="sd">        If two iterations change the same table cell or structure, let the later</span>
+<span class="sd">        one win (with a warning) instead of raising MergeConflict.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        ``maps`` (table -&gt; {iteration id: job id}), ``current_rows`` (table name -&gt;</span>
+<span class="sd">        the job's row the iteration left current, for tables whose current row it</span>
+<span class="sd">        moved), ``exported`` (tables whose export metadata it changed).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">touched</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"touched"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">child</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="si">}</span><span class="s2">?mode=ro"</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">baseline_path</span><span class="p">))</span><span class="si">}</span><span class="s2">?mode=ro"</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">db</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">maps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">_merge_properties</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">)</span>
+        <span class="n">_merge_structures</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">,</span> <span class="n">touched</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_merge_tables</span><span class="p">(</span>
+            <span class="n">target</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">,</span> <span class="n">touched</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span>
+        <span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">result</span><span class="p">[</span><span class="s2">"maps"</span><span class="p">]</span> <span class="o">=</span> <span class="n">maps</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_conflict</span><span class="p">(</span><span class="n">touched</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">,</span> <span class="n">what</span><span class="p">):</span>
+    <span class="n">earlier</span> <span class="o">=</span> <span class="n">touched</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">earlier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">earlier</span> <span class="o">!=</span> <span class="n">iteration</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Iterations </span><span class="si">{</span><span class="n">earlier</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> of the parallel loop both changed "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">."</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">later_wins</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MergeConflict</span><span class="p">(</span><span class="n">message</span> <span class="o">+</span> <span class="s2">" (The Loop can let the later one win.)"</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span> <span class="o">+</span> <span class="s2">" The later one wins."</span><span class="p">)</span>
+    <span class="n">touched</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rows</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The rows of ``table``, NULL for any of ``columns`` it does not have (yet)."""</span>
+    <span class="n">present</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_columns</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">table</span><span class="p">))</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">"'</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">present</span> <span class="k">else</span> <span class="s2">"NULL"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'SELECT </span><span class="si">{</span><span class="n">selected</span><span class="si">}</span><span class="s1"> FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_columns</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Add to the job's ``table`` the columns the iteration added to it.</span>
+
+<span class="sd">    A step may add an attribute (``add_attribute``: atom charges, say), which is</span>
+<span class="sd">    a column of the structure tables; type, default, NOT NULL, a foreign key and</span>
+<span class="sd">    an index on it are as in the iteration's database.</span>
+<span class="sd">    """</span>
+    <span class="n">present</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_columns</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">table</span><span class="p">))</span>
+    <span class="n">references</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PRAGMA foreign_key_list("</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">")'</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">notnull</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'PRAGMA table_info("</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">")'</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">present</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">column_def</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">" </span><span class="si">{</span><span class="n">ctype</span><span class="si">}</span><span class="s1">'</span>
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">column_def</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" DEFAULT </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">notnull</span> <span class="ow">and</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># (SQLite cannot add a NOT NULL column without a default)</span>
+            <span class="n">column_def</span> <span class="o">+=</span> <span class="s2">" NOT NULL"</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">references</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ref_table</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">on_update</span><span class="p">,</span> <span class="n">on_delete</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">references</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">column_def</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' REFERENCES "</span><span class="si">{</span><span class="n">ref_table</span><span class="si">}</span><span class="s1">"'</span>
+            <span class="k">if</span> <span class="n">to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">column_def</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' ("</span><span class="si">{</span><span class="n">to</span><span class="si">}</span><span class="s1">")'</span>
+            <span class="n">column_def</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" ON DELETE </span><span class="si">{</span><span class="n">on_delete</span><span class="si">}</span><span class="s2"> ON UPDATE </span><span class="si">{</span><span class="n">on_update</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ALTER TABLE "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" ADD </span><span class="si">{</span><span class="n">column_def</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">sql</span><span class="p">,)</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">"SELECT sql FROM sqlite_master WHERE type = 'index' AND tbl_name = ?"</span>
+            <span class="s2">" AND sql IS NOT NULL"</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">table</span><span class="p">,),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">"'</span> <span class="ow">in</span> <span class="n">sql</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span> <span class="ow">in</span> <span class="n">sql</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span> <span class="ow">in</span> <span class="n">sql</span><span class="p">:</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                        <span class="sa">r</span><span class="s2">"^CREATE\s+(UNIQUE\s+)?INDEX\s+"</span><span class="p">,</span>
+                        <span class="sa">r</span><span class="s2">"CREATE \1INDEX IF NOT EXISTS "</span><span class="p">,</span>
+                        <span class="n">sql</span><span class="p">,</span>
+                        <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_merge_properties</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Property definitions by name; new ones created in the job's database."""</span>
+    <span class="k">if</span> <span class="s2">"property"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_tables</span><span class="p">(</span><span class="n">child</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">"SELECT id, name, type, units, description FROM property"</span>
+    <span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">"SELECT id, type, units FROM property WHERE name = ?"</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">ptype</span><span class="p">,</span> <span class="n">units</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MergeConflict</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"An iteration defined the property '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' with type </span><span class="si">{</span><span class="n">ptype</span><span class="si">}</span><span class="s2"> and "</span>
+                <span class="sa">f</span><span class="s2">"units '</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">', but the job has it with type </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> and units "</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">'."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"INSERT INTO property (name, type, units, description)"</span>
+                <span class="s2">" VALUES (?, ?, ?, ?)"</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">description</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">mapping</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">lastrowid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapping</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">maps</span><span class="p">[</span><span class="s2">"property"</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_merge_structures</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">,</span> <span class="n">touched</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">):</span>
+    <span class="n">child_tables</span> <span class="o">=</span> <span class="n">_tables</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    <span class="n">target_tables</span> <span class="o">=</span> <span class="n">_tables</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+    <span class="n">base_tables</span> <span class="o">=</span> <span class="n">_tables</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="n">deferred</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># (table, job id, column, iteration id) for forward references</span>
+
+    <span class="c1"># The rows the iteration created, which get new ids in the job. Any other row</span>
+    <span class="c1"># it refers to is the job's own, with the same id -- also one that is not in</span>
+    <span class="c1"># the snapshot, such as a system's default configuration.</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">ID_TABLES</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">child_tables</span><span class="p">:</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'SELECT id FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">base_tables</span><span class="p">:</span>
+                <span class="n">ids</span> <span class="o">-=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'SELECT id FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">"'</span><span class="p">)}</span>
+            <span class="n">created</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapped</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">row_table</span><span class="p">):</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="n">FOREIGN_KEYS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row_table</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">maps</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">[</span><span class="n">ref</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">maps</span><span class="p">[</span><span class="n">ref</span><span class="p">][</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">created</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="p">()):</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># created by the iteration, not mapped yet: filled in later</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="c1"># Columns the iteration added (attributes)</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">ID_TABLES</span><span class="p">,</span> <span class="o">*</span><span class="n">ROW_TABLES</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">child_tables</span> <span class="ow">and</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">target_tables</span><span class="p">:</span>
+            <span class="n">_add_columns</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+
+    <span class="c1"># Tables keyed by id</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">ID_TABLES</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">child_tables</span> <span class="ow">or</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_tables</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">_columns</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+        <span class="n">new_rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)}</span>
+        <span class="n">old_rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)}</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="n">maps</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">others</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">for</span> <span class="n">_id</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">old_rows</span><span class="p">:</span>
+                <span class="n">mapping</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_id</span>
+        <span class="n">soft</span> <span class="o">=</span> <span class="n">SOFT_COLUMNS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="p">())</span>
+        <span class="k">for</span> <span class="n">_id</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">old</span> <span class="o">=</span> <span class="n">old_rows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">row</span> <span class="o">==</span> <span class="n">old</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">mapped</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">others</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+            <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">others</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">values</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">deferred</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">table</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span> <span class="o">!=</span> <span class="n">b</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">soft</span><span class="p">):</span>
+                    <span class="n">_conflict</span><span class="p">(</span>
+                        <span class="n">touched</span><span class="p">,</span> <span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">_id</span><span class="p">),</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">_id</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
+                <span class="n">assignments</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">" = ?'</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">others</span><span class="p">)</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'UPDATE "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SET </span><span class="si">{</span><span class="n">assignments</span><span class="si">}</span><span class="s1"> WHERE id = ?'</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">others</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># e.g. atomset, bondset: only an id</span>
+                    <span class="n">cursor</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'INSERT INTO "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" DEFAULT VALUES'</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">"'</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">others</span><span class="p">)</span>
+                    <span class="n">places</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"?"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">others</span><span class="p">))</span>
+                    <span class="n">cursor</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">'INSERT INTO "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" (</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">) VALUES (</span><span class="si">{</span><span class="n">places</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span> <span class="n">values</span>
+                    <span class="p">)</span>
+                <span class="n">mapping</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">lastrowid</span>
+        <span class="c1"># Structures the iteration deleted</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="s2">"configuration"</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">old_rows</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="p">:</span>
+                    <span class="n">_conflict</span><span class="p">(</span>
+                        <span class="n">touched</span><span class="p">,</span> <span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">_id</span><span class="p">),</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">_id</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
+                    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" WHERE id = ?'</span><span class="p">,</span> <span class="p">(</span><span class="n">_id</span><span class="p">,))</span>
+
+    <span class="c1"># References to rows inserted after the row that refers to them</span>
+    <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">deferred</span><span class="p">:</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="n">FOREIGN_KEYS</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">column</span><span class="p">]</span>
+        <span class="n">job_id</span> <span class="o">=</span> <span class="n">maps</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">_id</span><span class="p">]</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'UPDATE "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" SET "</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1">" = ? WHERE id = ?'</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">maps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">job_id</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Link and per-atom tables, keyed by columns</span>
+    <span class="k">for</span> <span class="n">table</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ROW_TABLES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">child_tables</span> <span class="ow">or</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_tables</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">_columns</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">job_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mapped</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+
+        <span class="n">new_rows</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">):</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">old_rows</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">):</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="s2">" AND "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">" = ?'</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">)</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="n">FOREIGN_KEYS</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># configuration, atomset, ...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">changed</span><span class="p">(</span><span class="n">job_owner</span><span class="p">):</span>
+            <span class="n">_conflict</span><span class="p">(</span>
+                <span class="n">touched</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="n">job_owner</span><span class="p">),</span>
+                <span class="n">iteration</span><span class="p">,</span>
+                <span class="n">later_wins</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">job_owner</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">old_rows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">row</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">job_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">job_key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">old_rows</span><span class="p">:</span>
+                <span class="n">changed</span><span class="p">(</span><span class="n">job_key</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" WHERE </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">job_key</span><span class="p">)</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">"'</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">)</span>
+            <span class="n">places</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"?"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'INSERT INTO "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" (</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1">) VALUES (</span><span class="si">{</span><span class="n">places</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">old_rows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="p">:</span>
+                <span class="n">job_key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mapped</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">changed</span><span class="p">(</span><span class="n">job_key</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" WHERE </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">job_key</span><span class="p">)</span>
+
+    <span class="c1"># Property values, keyed by (configuration, system, property)</span>
+    <span class="n">pmap</span> <span class="o">=</span> <span class="n">maps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"property"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">PROPERTY_DATA</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">child_tables</span> <span class="ow">or</span> <span class="n">table</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_tables</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">_columns</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>  <span class="c1"># id, configuration, system, property, value</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">key_of</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"configuration"</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s2">"system"</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s2">"property"</span><span class="p">])</span>
+
+        <span class="n">new_rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">key_of</span><span class="p">(</span><span class="n">r</span><span class="p">):</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)}</span>
+        <span class="n">old_rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">key_of</span><span class="p">(</span><span class="n">r</span><span class="p">):</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">new_rows</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">old</span> <span class="o">=</span> <span class="n">old_rows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">old</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">continue</span>
+            <span class="n">configuration</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">prop</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">job_conf</span> <span class="o">=</span> <span class="n">maps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"configuration"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span>
+            <span class="n">job_sys</span> <span class="o">=</span> <span class="n">maps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"system"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">system</span><span class="p">)</span>
+            <span class="n">job_prop</span> <span class="o">=</span> <span class="n">pmap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">row</span><span class="p">))[</span><span class="s2">"value"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">job_conf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" WHERE configuration IS NULL AND system = ?'</span>
+                    <span class="s2">" AND property = ?"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">job_sys</span><span class="p">,</span> <span class="n">job_prop</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'DELETE FROM "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" WHERE configuration = ? AND property = ?'</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">job_conf</span><span class="p">,</span> <span class="n">job_prop</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'INSERT INTO "</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s1">" (configuration, system, property, value)'</span>
+                <span class="s2">" VALUES (?, ?, ?, ?)"</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">job_conf</span><span class="p">,</span> <span class="n">job_sys</span><span class="p">,</span> <span class="n">job_prop</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
+            <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_merge_tables</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">maps</span><span class="p">,</span> <span class="n">touched</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">later_wins</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Replay the iteration's table journal into the job's tables."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.system_db</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemDB</span>  <span class="c1"># noqa: F811</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"current_rows"</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">"exported"</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">child</span> <span class="o">=</span> <span class="n">SystemDB</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s2">"file:</span><span class="si">{</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="si">}</span><span class="s2">?mode=ro"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"_tables"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_tables</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">db</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">user_tables</span>
+        <span class="n">ctables</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">user_tables</span>
+        <span class="n">journal</span> <span class="o">=</span> <span class="n">ctables</span><span class="o">.</span><span class="n">journal</span><span class="p">()</span>
+        <span class="n">base_rows</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">base_registry</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">"_tables"</span> <span class="ow">in</span> <span class="n">_tables</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sql_name</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">metadata</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"SELECT name, sql_name, current_row, metadata FROM _tables"</span>
+            <span class="p">):</span>
+                <span class="n">base_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+                <span class="n">base_rows</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s1">'SELECT "__rowid__" FROM "</span><span class="si">{</span><span class="n">sql_name</span><span class="si">}</span><span class="s1">"'</span><span class="p">)</span>
+                <span class="p">}</span>
+        <span class="n">rowmap</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">add_column</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctables</span> <span class="ow">or</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">definition</span> <span class="o">=</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">_definition</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">mine</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">_definition</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">mine</span><span class="p">[</span><span class="s2">"type"</span><span class="p">],</span> <span class="n">mine</span><span class="p">[</span><span class="s2">"default"</span><span class="p">])</span> <span class="o">!=</span> <span class="p">(</span>
+                    <span class="n">definition</span><span class="p">[</span><span class="s2">"type"</span><span class="p">],</span>
+                    <span class="n">definition</span><span class="p">[</span><span class="s2">"default"</span><span class="p">],</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">MergeConflict</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"Iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2"> gave the column '</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">' of the "</span>
+                        <span class="sa">f</span><span class="s2">"table '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' type </span><span class="si">{</span><span class="n">definition</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> and default "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">definition</span><span class="p">[</span><span class="s1">'default'</span><span class="p">]</span><span class="si">!r}</span><span class="s2">, but the job's table has "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">mine</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">mine</span><span class="p">[</span><span class="s1">'default'</span><span class="p">]</span><span class="si">!r}</span><span class="s2">."</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">definition</span><span class="p">[</span><span class="s2">"type"</span><span class="p">],</span> <span class="n">definition</span><span class="p">[</span><span class="s2">"default"</span><span class="p">])</span>
+
+        <span class="c1"># The columns the iteration added to the job's tables first: the rows it</span>
+        <span class="c1"># appended before adding a column are read with their final values.</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">journal</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"op"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"add_column"</span> <span class="ow">and</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"table"</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+                <span class="n">add_column</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"table"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"column"</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">journal</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">op</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"table"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"op"</span><span class="p">]</span>
+            <span class="n">row</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"row"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"column"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"create"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+                    <span class="n">source_table</span> <span class="o">=</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                    <span class="n">tables</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                        <span class="n">name</span><span class="p">,</span>
+                        <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+                            <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="s2">"type"</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="s2">"default"</span><span class="p">])</span>
+                            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">source_table</span><span class="o">.</span><span class="n">column_definitions</span>
+                        <span class="p">],</span>
+                        <span class="n">index_column</span><span class="o">=</span><span class="n">source_table</span><span class="o">.</span><span class="n">index_column</span><span class="p">,</span>
+                        <span class="n">metadata</span><span class="o">=</span><span class="n">source_table</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"drop"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tables</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctables</span><span class="p">:</span>
+                    <span class="n">tables</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"add_column"</span><span class="p">:</span>
+                <span class="n">add_column</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"append"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctables</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Appended as a serial loop appends: after the rows of the</span>
+                <span class="c1"># iterations before, even with an index value already there.</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="p">(</span><span class="n">rowmap</span><span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="p">)],)</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">append_rows</span><span class="p">([</span><span class="n">values</span><span class="p">],</span> <span class="n">move_current</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"set"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctables</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">has_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rowmap</span><span class="p">:</span>
+                    <span class="n">job_row</span> <span class="o">=</span> <span class="n">rowmap</span><span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="p">)]</span>
+                <span class="k">elif</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">base_rows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">()):</span>
+                    <span class="n">job_row</span> <span class="o">=</span> <span class="n">row</span>
+                    <span class="n">_conflict</span><span class="p">(</span>
+                        <span class="n">touched</span><span class="p">,</span>
+                        <span class="p">(</span><span class="s2">"cell"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">),</span>
+                        <span class="n">iteration</span><span class="p">,</span>
+                        <span class="n">later_wins</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"the cell '</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">' of row </span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2"> of the table '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">tables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span>
+                    <span class="n">job_row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="c1"># Current rows the iteration moved, and exports it made</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ctables</span><span class="p">:</span>
+            <span class="n">ctable</span> <span class="o">=</span> <span class="n">ctables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">ctable</span><span class="o">.</span><span class="n">current_row</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">base_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">before</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">"current_rows"</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rowmap</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">current</span><span class="p">),</span> <span class="n">current</span><span class="p">)</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">ctable</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"filename"</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">before</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">metadata</span> <span class="o">!=</span> <span class="n">_loads</span><span class="p">(</span><span class="n">before</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">"exported"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_loads</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
