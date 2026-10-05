@@ -1,6 +1,18 @@
 =======
 History
 =======
+2026.10.5 -- Snapshots and merges for parallel loops
+    * ``molsystem.snapshot`` supports loops that run their iterations in parallel
+      (loop_step 2026.10.5): ``snapshot`` writes, from the committed state of a job's
+      database, the structures an iteration works on -- with their ids and their
+      systems' default configurations -- and all the tables, or a copy of the whole
+      database; ``merge`` brings back what the iteration did, in iteration order: new
+      structures (with new ids), changed structures and configurations, properties,
+      appended table rows, changed cells, new tables and columns. Two iterations
+      changing the same thing (a table cell, a structure or its atoms' coordinates)
+      raise ``MergeConflict``, unless the later may win.
+    * Bugfix: ``System.copy_configuration`` copied the new configuration's data rather
+      than the previous configuration's.
 2026.10.4 -- A step as one transaction; the same structure from the same SMILES
     * ``SystemDB(deferred_commit=True)`` defers the many commits molsystem makes until
       ``commit_transaction()`` (``rollback_transaction()`` abandons them), so a
