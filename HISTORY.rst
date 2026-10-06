@@ -1,6 +1,16 @@
 =======
 History
 =======
+2026.10.5.1 -- Bugfix: lowering the symmetry of structures with bonds
+    * ``Configuration.lower_symmetry()`` failed for any structure with bonds: the bonds
+      name atoms by id, but they were looked up by position. The P1 bonds now come from
+      the symmetry's expansion, each with its asymmetric bond's order, so bonds across a
+      symmetry operation are kept too.
+    * ``lower_symmetry(other=...)``, which fills a configuration from another one, put
+      the new atoms' coordinates on the other configuration, leaving the new one's
+      atoms without coordinates, and in a Cartesian configuration took the fractional
+      coordinates as Cartesian.
+
 2026.10.5 -- Snapshots and merges for parallel loops
     * ``molsystem.snapshot`` supports loops that run their iterations in parallel
       (loop_step 2026.10.5): ``snapshot`` writes, from the committed state of a job's

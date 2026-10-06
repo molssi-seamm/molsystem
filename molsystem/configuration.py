@@ -789,17 +789,38 @@ class _Configuration(
         if periodicity != 0:
             cell_parameters = other.cell.parameters
 
-        # Get the atom and bond information for low symmetry
+        # The atoms in low symmetry: get_as_dict() expands them. Its "id" holds
+        # row positions, and "configuration" the source's id, which would put
+        # the new atoms' coordinates on the source configuration.
         atom_data = other.atoms.get_as_dict()
         del atom_data["id"]
-        bond_data = other.bonds.get_as_dict()
-        del bond_data["id"]
+        atom_data.pop("configuration", None)
 
         # It is not clear that it makes sense to handle velocities, so drop
         if "vx" in atom_data:
             del atom_data["vx"]
             del atom_data["vy"]
             del atom_data["vz"]
+
+        # The coordinates, set explicitly below: for a periodic system
+        # get_as_dict() gives fractional coordinates, which append() would take
+        # as Cartesian in a Cartesian configuration.
+        if periodicity != 0:
+            coordinates = other.atoms.get_coordinates(fractionals=True)
+        else:
+            coordinates = other.atoms.get_coordinates()
+
+        # The bonds in low symmetry, as pairs of positions in the expanded atoms,
+        # each with the order of the asymmetric bond it comes from. The bonds
+        # name atoms by id, not by position.
+        pairs = []
+        orders = []
+        if other.bonds.n_asymmetric_bonds > 0:
+            pairs = list(other.symmetry.bond_atoms)
+            asymmetric_orders = other.bonds.get_column_data("bondorder")
+            orders = [
+                asymmetric_orders[k] for k in other.symmetry.bond_to_asymmetric_bond
+            ]
 
         self.clear()
         self.new_atomset()
@@ -811,13 +832,17 @@ class _Configuration(
         self.periodicity = periodicity
 
         ids = self.atoms.append(**atom_data)
+        if periodicity != 0:
+            self.atoms.set_coordinates(coordinates, fractionals=True)
+        else:
+            self.atoms.set_coordinates(coordinates)
 
-        iatoms = bond_data["i"]
-        jatoms = bond_data["j"]
-        bond_data["i"] = [ids[i] for i in iatoms]
-        bond_data["j"] = [ids[j] for j in jatoms]
-
-        self.bonds.append(**bond_data)
+        if len(pairs) > 0:
+            self.bonds.append(
+                i=[ids[i] for i, j in pairs],
+                j=[ids[j] for i, j in pairs],
+                bondorder=orders,
+            )
 
         # Finally, copy over the charge multiplicity, etc.
         if self is not other:
