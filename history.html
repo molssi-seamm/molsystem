@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.5 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.6 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=99beb745"></script>
+    <script src="_static/documentation_options.js?v=ae463d2f"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -62,7 +62,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="prev" title="Credits" href="authors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.5" />
+  <meta name="docsearch:version" content="2026.10.6" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -505,6 +505,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.6 – Bugfix: lowering the symmetry of structures with bonds</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Configuration.lower_symmetry()</span></code> failed for any structure with bonds: the bonds
+name atoms by id, but they were looked up by position. The P1 bonds now come from
+the symmetry’s expansion, each with its asymmetric bond’s order, so bonds across a
+symmetry operation are kept too.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lower_symmetry(other=...)</span></code>, which fills a configuration from another one, put
+the new atoms’ coordinates on the other configuration, leaving the new one’s
+atoms without coordinates, and in a Cartesian configuration took the fractional
+coordinates as Cartesian.</p></li>
+</ul>
+</dd>
 <dt>2026.10.5 – Snapshots and merges for parallel loops</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">molsystem.snapshot</span></code> supports loops that run their iterations in parallel
 (loop_step 2026.10.5): <code class="docutils literal notranslate"><span class="pre">snapshot</span></code> writes, from the committed state of a job’s
