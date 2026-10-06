@@ -268,6 +268,9 @@ class Cell(object):
             UVW = uvw
         else:
             UVW = numpy.array(uvw)
+        if UVW.size == 0:
+            # No atoms: an empty (0, 3) array converts to an empty one (#121)
+            UVW = UVW.reshape(0, 3)
 
         T = self.to_cartesians_transform(as_array=True)
         XYZ = UVW @ T
@@ -339,6 +342,9 @@ class Cell(object):
             XYZ = xyz
         else:
             XYZ = numpy.array(xyz)
+        if XYZ.size == 0:
+            # No atoms: an empty (0, 3) array converts to an empty one (#121)
+            XYZ = XYZ.reshape(0, 3)
 
         T = self.to_fractionals_transform(as_array=True)
         UVW = XYZ @ T
