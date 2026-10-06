@@ -1,6 +1,11 @@
 =======
 History
 =======
+2026.10.6.1 -- Bugfix: an empty periodic configuration can be made non-periodic
+    * Setting ``periodicity = 0`` on a periodic configuration with no atoms failed in the
+      coordinate conversion; the cell's ``to_fractionals`` and ``to_cartesians`` now
+      convert an empty list of coordinates to an empty one (#121).
+
 2026.10.6 -- Bugfix: lowering the symmetry of structures with bonds
     * ``Configuration.lower_symmetry()`` failed for any structure with bonds: the bonds
       name atoms by id, but they were looked up by position. The P1 bonds now come from
