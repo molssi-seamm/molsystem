@@ -1,7 +1,7 @@
 =======
 History
 =======
-2026.10.5.1 -- Bugfix: lowering the symmetry of structures with bonds
+2026.10.6 -- Bugfix: lowering the symmetry of structures with bonds
     * ``Configuration.lower_symmetry()`` failed for any structure with bonds: the bonds
       name atoms by id, but they were looked up by position. The P1 bonds now come from
       the symmetry's expansion, each with its asymmetric bond's order, so bonds across a
