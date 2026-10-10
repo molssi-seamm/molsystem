@@ -633,3 +633,19 @@ def test_periodic_gradients_cartesians(vanadium):
 
     gxyz = configuration.atoms.get_gradients(fractionals=False)
     assert np.allclose(gxyz, gxyz0)
+
+
+def test_clear_only_this_configuration(db):
+    """Clearing one configuration's atoms leaves another system's alone."""
+    configurations = []
+    for name in ("first", "second"):
+        system = db.create_system(name=name)
+        configuration = system.create_configuration(name="initial")
+        configuration.atoms.append(
+            x=[0.0, 1.0], y=[0.0, 0.0], z=[0.0, 0.0], symbol=["H", "H"]
+        )
+        configurations.append(configuration)
+    first, second = configurations
+    first.atoms.clear()
+    assert first.atoms.n_atoms == 0
+    assert second.atoms.n_atoms == 2

@@ -63,6 +63,7 @@ setup(
         "seekpath",
         "spglib",
     ],
+    python_requires='>=3.12',
     test_suite='tests',
 
     # Valid platforms your code works on, adjust to your flavor
@@ -83,7 +84,6 @@ setup(
         'Topic :: Scientific/Engineering :: Physics',
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.12',
     ]
 )

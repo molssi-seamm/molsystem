@@ -1683,6 +1683,14 @@ class _Atoms(_Table):
             except TypeError:
                 return 0
 
+    def clear(self):
+        """Delete all the atoms of this configuration.
+
+        The atom table is shared by every configuration in the database, so the
+        generic :meth:`_Table.clear` would delete the atoms of all of them.
+        """
+        self.delete("all")
+
     def delete(self, atoms) -> int:
         """Delete the atoms listed
 

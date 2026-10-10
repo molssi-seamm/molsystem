@@ -1,6 +1,13 @@
 =======
 History
 =======
+2026.10.10 -- Bugfix: clearing the atoms or bonds of one configuration cleared all
+    * ``configuration.atoms.clear()`` and ``configuration.bonds.clear()`` deleted the
+      atoms or bonds of every configuration in the database, not just this one's.
+      They now delete only those of the configuration. Clearing a subset's bonds
+      raises NotImplementedError, as adding them does.
+    * Requires Python 3.12 or later.
+
 2026.10.6.1 -- Bugfix: an empty periodic configuration can be made non-periodic
     * Setting ``periodicity = 0`` on a periodic configuration with no atoms failed in the
       coordinate conversion; the cell's ``to_fractionals`` and ``to_cartesians`` now
