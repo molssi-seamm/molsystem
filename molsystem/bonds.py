@@ -371,6 +371,14 @@ class _Bonds(_Table):
             )
             self.db.execute(sql, (self.bondset,))
 
+    def clear(self):
+        """Delete all the bonds of this configuration.
+
+        The bond table is shared by every configuration in the database, so the
+        generic :meth:`_Table.clear` would delete the bonds of all of them.
+        """
+        self.delete()
+
     def diff(self, other):
         """Difference between these bonds and another
 
@@ -964,6 +972,12 @@ class _SubsetBonds(_Bonds):
 
         Not currently allowed in subsets."""
         raise NotImplementedError("Can't add bonds in a subset yet.")
+
+    def clear(self):
+        """Delete the bonds of the subset.
+
+        Not currently allowed in subsets."""
+        raise NotImplementedError("Can't delete bonds from a subset yet.")
 
     def bonds(self, *args):
         """Returns an iterator over the bonds.

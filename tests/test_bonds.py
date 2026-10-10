@@ -225,3 +225,27 @@ def test_bonds_across_cell(h_chain):
     correct = 1.0
     R = h_chain.bonds.get_lengths(as_array=True, asymmetric=False)
     assert np.all(R == correct)
+
+
+def _two_bonded_systems(db):
+    """Two systems in one database, each a bonded triatomic."""
+    configurations = []
+    for name in ("first", "second"):
+        system = db.create_system(name=name)
+        configuration = system.create_configuration(name="initial")
+        ids = configuration.atoms.append(
+            x=[0.0, 1.0, -1.0], y=[0.0, 0.0, 0.0], z=[0.0, 0.0, 0.0],
+            symbol=["C", "O", "O"],
+        )  # fmt: skip
+        configuration.bonds.append(i=[ids[0], ids[0]], j=[ids[1], ids[2]])
+        configurations.append(configuration)
+    return configurations
+
+
+def test_clear_only_this_configuration(db):
+    """Clearing one configuration's bonds leaves another system's alone."""
+    first, second = _two_bonded_systems(db)
+    first.bonds.clear()
+    assert first.bonds.n_bonds == 0
+    assert second.bonds.n_bonds == 2
+    assert second.atoms.n_atoms == 3
