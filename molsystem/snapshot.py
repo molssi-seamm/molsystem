@@ -460,7 +460,19 @@ def _merge_structures(db, child, base, maps, touched, iteration, later_wins):
                 if value is None and v is not None:
                     deferred.append((table, _id, c, v))
             if old is not None:
-                if any(a != b for c, a, b in zip(columns, row, old) if c not in soft):
+                # The same change made by an earlier iteration is no conflict: the
+                # job already has it (e.g. a default written when it was first read)
+                current = db.execute(
+                    f'SELECT {", ".join(f"{chr(34)}{c}{chr(34)}" for c in others)} '
+                    f'FROM "{table}" WHERE id = ?',
+                    (_id,),
+                ).fetchone()
+                same = current is not None and all(
+                    a == b for c, a, b in zip(others, values, current) if c not in soft
+                )
+                if not same and any(
+                    a != b for c, a, b in zip(columns, row, old) if c not in soft
+                ):
                     _conflict(
                         touched, (table, _id), iteration, later_wins, f"{table} {_id}"
                     )
