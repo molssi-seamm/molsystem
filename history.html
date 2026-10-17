@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.10 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.17 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=355f04a4"></script>
+    <script src="_static/documentation_options.js?v=fed69469"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.10" />
+  <meta name="docsearch:version" content="2026.10.17" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.17 – Bugfix: parallel loops over one structure failed on identical changes</dt><dd><ul class="simple">
+<li><p>Iterations of a parallel loop that changed a structure in the same way – for
+example by reading its spin multiplicity before it was set, which stores the
+default – were reported as two iterations changing the same configuration,
+stopping the job after all the iterations had run. A change the job already has
+from an earlier iteration is no longer a conflict; different changes still are.</p></li>
+</ul>
+</dd>
 <dt>2026.10.10 – Bugfix: clearing the atoms or bonds of one configuration cleared all</dt><dd><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">configuration.atoms.clear()</span></code> and <code class="docutils literal notranslate"><span class="pre">configuration.bonds.clear()</span></code> deleted the
 atoms or bonds of every configuration in the database, not just this one’s.
