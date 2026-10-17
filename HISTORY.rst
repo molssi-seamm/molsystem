@@ -1,6 +1,13 @@
 =======
 History
 =======
+2026.10.17 -- Bugfix: parallel loops over one structure failed on identical changes
+    * Iterations of a parallel loop that changed a structure in the same way -- for
+      example by reading its spin multiplicity before it was set, which stores the
+      default -- were reported as two iterations changing the same configuration,
+      stopping the job after all the iterations had run. A change the job already has
+      from an earlier iteration is no longer a conflict; different changes still are.
+
 2026.10.10 -- Bugfix: clearing the atoms or bonds of one configuration cleared all
     * ``configuration.atoms.clear()`` and ``configuration.bonds.clear()`` deleted the
       atoms or bonds of every configuration in the database, not just this one's.

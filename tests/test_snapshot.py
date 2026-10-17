@@ -385,6 +385,40 @@ def test_two_iterations_moving_the_same_atoms(tmp_path):
         job.rollback_transaction()
 
 
+def test_two_iterations_making_the_same_change(tmp_path):
+    """Reading an unset spin multiplicity writes its default: every iteration
+    "changes" the configuration in the same way, which is no conflict. Different
+    changes still are."""
+    for values in ((1, 1), (1, 3)):
+        directory = tmp_path / "-".join(str(v) for v in values)
+        directory.mkdir()
+        job = make_job(directory / "seamm.db")
+        cid = configuration_named(job, "first").id
+        state = {}
+        paths = []
+        for k, value in enumerate(values, start=1):
+            path = directory / f"iter_{k}" / "seamm.db"
+            snapshot(directory / "seamm.db", path, configurations=[cid])
+            baseline(path, directory / f"iter_{k}" / "baseline.db")
+            child = SystemDB(filename=f"file:{path}")
+            configuration = child.get_configuration(cid)
+            if value == 1:
+                assert configuration.spin_multiplicity == 1  # written when read
+            else:
+                configuration.spin_multiplicity = value
+            child.db.commit()
+            child.close()
+            paths.append(path)
+        merge(job, paths[0], directory / "iter_1" / "baseline.db", state, 1)
+        if values[0] == values[1]:
+            merge(job, paths[1], directory / "iter_2" / "baseline.db", state, 2)
+            assert job.get_configuration(cid).spin_multiplicity == 1
+        else:
+            with pytest.raises(MergeConflict, match="configuration"):
+                merge(job, paths[1], directory / "iter_2" / "baseline.db", state, 2)
+        job.rollback_transaction()
+
+
 def test_property_defined_differently(tmp_path):
     """S2: a property of the same name with other units is a conflict."""
     job = make_job(tmp_path / "seamm.db")
