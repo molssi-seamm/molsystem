@@ -59,7 +59,7 @@ setup(
         "rdkit",
         "requests",
         "scipy",
-        "seamm-util",
+        "seamm-util>=2026.10.18",
         "seekpath",
         "spglib",
     ],
