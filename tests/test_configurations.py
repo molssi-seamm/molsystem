@@ -25,7 +25,8 @@ def test_formula_periodic(vanadium):
 def test_density(vanadium):
     """Test the density, and implicitly the mass and volume."""
 
-    assert abs(vanadium.density - 6.0817308915133) < 1.0e-06
+    # V 50.9415 (mendeleev's standard atomic weight; 50.942 before 2026.10.18)
+    assert abs(vanadium.density - 6.0817308915133 * 50.9415 / 50.942) < 1.0e-06
 
 
 def test_copy(H2O):
