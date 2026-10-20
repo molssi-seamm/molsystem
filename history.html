@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.18 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.20 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=16cc37ab"></script>
+    <script src="_static/documentation_options.js?v=980f7468"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.18" />
+  <meta name="docsearch:version" content="2026.10.20" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.20 – Bugfix: SDF files with results from LAMMPS could not be read back</dt><dd><ul class="simple">
+<li><p>A structure written to an SDF file stores each property as
+‘SEAMM|&lt;name&gt;|&lt;type&gt;|&lt;units&gt;’. A property whose name holds ‘|’ from its model
+chemistry, such as ‘density#LAMMPS#LAMMPS:<a class="reference external" href="mailto:MD|FF&#37;&#52;&#48;oplsaa+">MD|FF<span>&#64;</span>oplsaa+</a>’, could not be read
+back (“too many values to unpack”), so the structure of any system simulated
+with LAMMPS failed to load. The type and units are now taken from the end.</p></li>
+</ul>
+</dd>
 <dt>2026.10.18 – Bugfix: atomic weights from mendeleev, in one table</dt><dd><ul class="simple">
 <li><p>For the elements whose weight varies in nature, the atomic weights were the
 midpoints of CIAAW’s intervals rather than the conventional values: Li 6.9675
