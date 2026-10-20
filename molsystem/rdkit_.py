@@ -374,7 +374,10 @@ class RDKitMixin:
         if properties == "all":
             for key, value in data.items():
                 if key.startswith("SEAMM|"):
-                    _, _property, _type, units = key.split("|", 4)
+                    # SEAMM|<property>|<type>|<units>. A property's name may hold
+                    # '|' (density#LAMMPS#LAMMPS:MD|FF@oplsaa+), so split the
+                    # type and units off the end.
+                    _property, _type, units = key[len("SEAMM|") :].rsplit("|", 2)
                     # Keep dimensionless units as "", matching the property
                     # definitions, rather than turning them into None (NULL).
                     units = units.strip()

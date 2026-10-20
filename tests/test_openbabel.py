@@ -746,6 +746,30 @@ def test_sdf_roundtrip_keeps_dimensionless_units(AceticAcid):
         db.close()
 
 
+def test_sdf_roundtrip_property_name_with_a_bar(AceticAcid):
+    """A property whose name holds '|', from its model chemistry, is read back.
+
+    A LAMMPS run stores e.g. 'density#LAMMPS#LAMMPS:MD|FF@oplsaa+', and the SDF key
+    'SEAMM|<name>|<type>|<units>' then has more '|' than expected: the system could
+    not be read back (science, 2026-10-20).
+    """
+    name = "density#LAMMPS#LAMMPS:MD|FF@oplsaa+"
+    configuration = AceticAcid
+    configuration.properties.add(name, _type="float", units="g/mL")
+    configuration.properties.put(name, 1.25)
+    text = configuration.to_sdf_text()
+    assert f"SEAMM|{name}|float|g/mL" in text
+
+    db = SystemDB(filename="file:sdf_bar_db?mode=memory&cache=shared")
+    try:
+        new = db.create_system(name="new").create_configuration(name="new")
+        new.from_sdf_text(text)
+        assert new.properties.units(name) == "g/mL"
+        assert new.properties.get(name)[name]["value"] == pytest.approx(1.25)
+    finally:
+        db.close()
+
+
 ACETATE_SDF = """\
 
  test

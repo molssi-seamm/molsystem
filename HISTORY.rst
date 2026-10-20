@@ -1,6 +1,13 @@
 =======
 History
 =======
+2026.10.20 -- Bugfix: SDF files with results from LAMMPS could not be read back
+    * A structure written to an SDF file stores each property as
+      'SEAMM|<name>|<type>|<units>'. A property whose name holds '|' from its model
+      chemistry, such as 'density#LAMMPS#LAMMPS:MD|FF@oplsaa+', could not be read
+      back ("too many values to unpack"), so the structure of any system simulated
+      with LAMMPS failed to load. The type and units are now taken from the end.
+
 2026.10.18 -- Bugfix: atomic weights from mendeleev, in one table
     * For the elements whose weight varies in nature, the atomic weights were the
       midpoints of CIAAW's intervals rather than the conventional values: Li 6.9675
