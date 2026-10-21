@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.rdkit_ &#8212; MolSystem 2026.10.20 documentation</title>
+    <title>molsystem.rdkit_ &#8212; MolSystem 2026.10.21 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=980f7468"></script>
+    <script src="../../_static/documentation_options.js?v=3c77f071"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.20" />
+  <meta name="docsearch:version" content="2026.10.21" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -789,8 +789,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="p">)</span>
 
         <span class="n">atnos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">rdk_atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
             <span class="n">atnos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">())</span>
+            <span class="n">qs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rdk_atom</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"atom </span><span class="si">{</span><span class="n">atnos</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">Xs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -823,7 +825,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">if</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">)</span>
+                <span class="c1"># The formal charges, as from_OBMol keeps them: analyses of an MD</span>
+                <span class="c1"># without fixed charges (an MLFF) find the ions from them</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">q</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s2">"formal_charge"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+                            <span class="s2">"formal_charge"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
+                        <span class="p">)</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">,</span> <span class="n">formal_charge</span><span class="o">=</span><span class="n">qs</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Ys</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Zs</span><span class="p">,</span> <span class="n">atno</span><span class="o">=</span><span class="n">atnos</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">"Xs="</span><span class="p">)</span>
                 <span class="n">pprint</span><span class="o">.</span><span class="n">pp</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
