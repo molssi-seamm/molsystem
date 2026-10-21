@@ -67,3 +67,20 @@ def test_from_RDKMol(configuration):
 
     assert configuration.n_atoms == 7
     assert configuration.bonds.bondorders == [1, 2, 1, 1, 1, 1]
+
+
+def test_formal_charges_from_rdkit(configuration):
+    """Atoms keep their formal charges from RDKit, as from Open Babel; analyses of
+    an MD without fixed charges (an MLFF) find the ions from them (2026-10-21)."""
+    configuration.from_smiles("F[B-](F)(F)F", flavor="rdkit")
+    assert configuration.charge == -1
+    q = dict(
+        zip(
+            configuration.atoms.symbols,
+            configuration.atoms.get_column_data("formal_charge"),
+        )
+    )
+    assert q == {"F": 0, "B": -1}
+
+    configuration.from_smiles("[Li+]", flavor="rdkit")
+    assert configuration.atoms.get_column_data("formal_charge") == [1]

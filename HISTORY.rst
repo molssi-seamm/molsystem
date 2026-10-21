@@ -1,6 +1,11 @@
 =======
 History
 =======
+2026.10.21 -- Bugfix: formal charges from RDKit are kept
+    * A structure made from SMILES with RDKit (the default) kept its total charge but
+      not the formal charges of its atoms, as one made with Open Babel does. They are
+      now kept in the atoms' "formal_charge" attribute.
+
 2026.10.20 -- Bugfix: SDF files with results from LAMMPS could not be read back
     * A structure written to an SDF file stores each property as
       'SEAMM|<name>|<type>|<units>'. A property whose name holds '|' from its model

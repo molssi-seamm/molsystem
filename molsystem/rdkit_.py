@@ -282,8 +282,10 @@ class RDKitMixin:
             )
 
         atnos = []
+        qs = []
         for rdk_atom in mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
+            qs.append(rdk_atom.GetFormalCharge())
             logger.debug(f"atom {atnos}")
 
         Xs = []
@@ -316,7 +318,18 @@ class RDKitMixin:
         if atoms:
             self.clear()
             try:
-                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+                # The formal charges, as from_OBMol keeps them: analyses of an MD
+                # without fixed charges (an MLFF) find the ions from them
+                if any(q != 0 for q in qs):
+                    if "formal_charge" not in self.atoms:
+                        self.atoms.add_attribute(
+                            "formal_charge", coltype="int", default=0
+                        )
+                    ids = self.atoms.append(
+                        x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs
+                    )
+                else:
+                    ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
             except Exception:
                 print("Xs=")
                 pprint.pp(Xs)
