@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.21.1 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.22 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=aa7b2be7"></script>
+    <script src="_static/documentation_options.js?v=0b8f7a1b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.21.1" />
+  <meta name="docsearch:version" content="2026.10.22" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.22 – Bugfix: sensible geometries for hypervalent and metal centres from SMILES</dt><dd><ul class="simple">
+<li><p>RDKit and Open Babel embedded centres with five or more electron pairs badly:
+PF6- from ‘F[P-](F)(F)(F)(F)F’ had fluorines 0.3-1.2 Å apart, which stopped an MD
+run at its first step. The ligands of such centres – main-group atoms with a
+steric number of 5-7 (PF6-, SF6, SiF6 2-, AsF6-, SF4, XeF4, …) and transition
+metals – are now placed on the VSEPR polyhedron, with the lone pairs where VSEPR
+puts them, at standard bond lengths, and larger ligands are turned to keep clear
+of each other. Centres with four pairs (BF4-, ClO4-) are left as they were. The
+structure is checked afterwards, and an error raised rather than a broken
+structure returned.</p></li>
+<li><p>When RDKit refuses the valences of a SMILES (AsF6-) or cannot embed it (some
+metal complexes), Open Babel now builds the structure, with a warning, instead
+of the step failing.</p></li>
+</ul>
+</dd>
 <dt>2026.10.21.1 – Bugfix: the fragments of a SMILES no longer overlap</dt><dd><ul class="simple">
 <li><p>A structure made from a SMILES of several fragments, such as ‘[Na+].O’ or ‘O.O’,
 had them on top of each other: RDKit and Open Babel place each fragment at the

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.10.21.1 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.10.22 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=aa7b2be7"></script>
+    <script src="../_static/documentation_options.js?v=0b8f7a1b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.21.1" />
+  <meta name="docsearch:version" content="2026.10.22" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -3317,6 +3317,104 @@ integer 3 written to a text column is found as “3”.</p>
 </dd></dl>
 
 </section>
+<section id="module-molsystem.vsepr">
+<span id="molsystem-vsepr-module"></span><h2>molsystem.vsepr module<a class="headerlink" href="#module-molsystem.vsepr" title="Link to this heading">#</a></h2>
+<p>Sensible geometries for hypervalent and coordination centres built from SMILES.</p>
+<p>RDKit and Open Babel embed centres with five or more electron pairs badly: PF6- from
+<code class="docutils literal notranslate"><span class="pre">F[P-](F)(F)(F)(F)F</span></code> had two fluorines 0.32-1.19 Å apart (2026-10-22: it killed an
+MD run at its first step). This places the ligands of such centres on the ideal VSEPR
+polyhedron, with the lone pairs where VSEPR puts them, at standard bond lengths, and
+moves each ligand’s other atoms with it.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.vsepr.BOND_LENGTHS">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">BOND_LENGTHS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{('Al',</span> <span class="pre">'F'):</span> <span class="pre">1.81,</span> <span class="pre">('As',</span> <span class="pre">'F'):</span> <span class="pre">1.72,</span> <span class="pre">('B',</span> <span class="pre">'F'):</span> <span class="pre">1.4,</span> <span class="pre">('Cl',</span> <span class="pre">'O'):</span> <span class="pre">1.45,</span> <span class="pre">('F',</span> <span class="pre">'P'):</span> <span class="pre">1.606,</span> <span class="pre">('F',</span> <span class="pre">'S'):</span> <span class="pre">1.56,</span> <span class="pre">('F',</span> <span class="pre">'Sb'):</span> <span class="pre">1.88,</span> <span class="pre">('F',</span> <span class="pre">'Si'):</span> <span class="pre">1.68}</span></span><a class="headerlink" href="#molsystem.vsepr.BOND_LENGTHS" title="Link to this definition">#</a></dt>
+<dd><p>Bond lengths, Å, where the sum of covalent radii is poor</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.vsepr.HYPERVALENT">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">HYPERVALENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'As',</span> <span class="pre">'Br',</span> <span class="pre">'Cl',</span> <span class="pre">'I',</span> <span class="pre">'Kr',</span> <span class="pre">'P',</span> <span class="pre">'S',</span> <span class="pre">'Sb',</span> <span class="pre">'Se',</span> <span class="pre">'Te',</span> <span class="pre">'Xe'}</span></span><a class="headerlink" href="#molsystem.vsepr.HYPERVALENT" title="Link to this definition">#</a></dt>
+<dd><p>Main-group atoms that can have five or more electron pairs with fewer than five
+ligands, thanks to lone pairs (SF4, ClF3, XeF4, I3-, …)</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.vsepr.MIN_HEAVY">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">MIN_HEAVY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.8</span></span><a class="headerlink" href="#molsystem.vsepr.MIN_HEAVY" title="Link to this definition">#</a></dt>
+<dd><p>heavy atoms,
+and any pair with a hydrogen; and between fluorines however far apart</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The least distances, Å, between atoms more than two bonds apart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.vsepr.SQUARE_PLANAR">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">SQUARE_PLANAR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{('Au',</span> <span class="pre">3),</span> <span class="pre">('Ir',</span> <span class="pre">1),</span> <span class="pre">('Ni',</span> <span class="pre">2),</span> <span class="pre">('Pd',</span> <span class="pre">2),</span> <span class="pre">('Pt',</span> <span class="pre">2),</span> <span class="pre">('Rh',</span> <span class="pre">1)}</span></span><a class="headerlink" href="#molsystem.vsepr.SQUARE_PLANAR" title="Link to this definition">#</a></dt>
+<dd><p>Transition-metal ions with four ligands that are square planar (d8)</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="molsystem.vsepr.TRANSITION_METALS">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">TRANSITION_METALS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'Ag',</span> <span class="pre">'Au',</span> <span class="pre">'Cd',</span> <span class="pre">'Co',</span> <span class="pre">'Cr',</span> <span class="pre">'Cu',</span> <span class="pre">'Fe',</span> <span class="pre">'Hf',</span> <span class="pre">'Hg',</span> <span class="pre">'Ir',</span> <span class="pre">'Mn',</span> <span class="pre">'Mo',</span> <span class="pre">'Nb',</span> <span class="pre">'Ni',</span> <span class="pre">'Os',</span> <span class="pre">'Pd',</span> <span class="pre">'Pt',</span> <span class="pre">'Re',</span> <span class="pre">'Rh',</span> <span class="pre">'Ru',</span> <span class="pre">'Sc',</span> <span class="pre">'Ta',</span> <span class="pre">'Tc',</span> <span class="pre">'Ti',</span> <span class="pre">'V',</span> <span class="pre">'W',</span> <span class="pre">'Y',</span> <span class="pre">'Zn',</span> <span class="pre">'Zr'}</span></span><a class="headerlink" href="#molsystem.vsepr.TRANSITION_METALS" title="Link to this definition">#</a></dt>
+<dd><p>Transition metals, whose ligands are placed by their number alone</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.vsepr.check_contacts">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">check_contacts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/vsepr.html#check_contacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.vsepr.check_contacts" title="Link to this definition">#</a></dt>
+<dd><p>Raise RuntimeError if atoms more than two bonds apart are too close, or any
+two fluorines are; only pairs involving <code class="docutils literal notranslate"><span class="pre">atoms</span></code> when given.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.vsepr.ligand_directions">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">ligand_directions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_ligands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_lone_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_planar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/vsepr.html#ligand_directions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.vsepr.ligand_directions" title="Link to this definition">#</a></dt>
+<dd><p>Unit vectors for the ligands of a centre, from VSEPR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_ligands</strong> (<em>int</em>) – The number of atoms bonded to the centre.</p></li>
+<li><p><strong>n_lone_pairs</strong> (<em>int</em>) – Its lone pairs.</p></li>
+<li><p><strong>square_planar</strong> (<em>bool</em>) – For a d8 metal with four ligands: an octahedron less a trans pair.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray(n_ligands, 3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="molsystem.vsepr.regularize">
+<span class="sig-prename descclassname"><span class="pre">molsystem.vsepr.</span></span><span class="sig-name descname"><span class="pre">regularize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/vsepr.html#regularize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.vsepr.regularize" title="Link to this definition">#</a></dt>
+<dd><p>Place the ligands of hypervalent and coordination centres by VSEPR.</p>
+<p>A centre is reshaped when it has five or more electron pairs (a main-group atom
+with a steric number of 5 to 7: PF6-, SF6, SF4, ClF3, XeF4, IF7, …) or is a
+transition metal with two or more ligands. Centres with four pairs or fewer
+(BF4-, ClO4-, …) are left as the embedder made them. Chelating ligands are not
+handled: such centres are left alone, with a warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symbols</strong> (<em>[</em><em>str</em><em>]</em>) – The element of each atom.</p></li>
+<li><p><strong>xyz</strong> (<em>numpy.ndarray</em><em>(</em><em>n</em><em>, </em><em>3</em><em>)</em>) – The coordinates, Å.</p></li>
+<li><p><strong>bonds</strong> (<em>[</em><em>(</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>)</em><em>]</em>) – The bonds as (i, j, bond order), 0-based.</p></li>
+<li><p><strong>charges</strong> (<em>[</em><em>int</em><em>]</em>) – The formal charge of each atom, or None for none.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The coordinates, and the atoms whose ligands were placed (empty if none).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(numpy.ndarray(n, 3), [int])</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-molsystem">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-molsystem" title="Link to this heading">#</a></h2>
 <p>molsystem
@@ -3710,6 +3808,17 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.from_sql"><code class="docutils literal notranslate"><span class="pre">from_sql()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.quote"><code class="docutils literal notranslate"><span class="pre">quote()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.user_tables.to_sql"><code class="docutils literal notranslate"><span class="pre">to_sql()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.vsepr">molsystem.vsepr module</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.BOND_LENGTHS"><code class="docutils literal notranslate"><span class="pre">BOND_LENGTHS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.HYPERVALENT"><code class="docutils literal notranslate"><span class="pre">HYPERVALENT</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.MIN_HEAVY"><code class="docutils literal notranslate"><span class="pre">MIN_HEAVY</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.SQUARE_PLANAR"><code class="docutils literal notranslate"><span class="pre">SQUARE_PLANAR</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.TRANSITION_METALS"><code class="docutils literal notranslate"><span class="pre">TRANSITION_METALS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.check_contacts"><code class="docutils literal notranslate"><span class="pre">check_contacts()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.ligand_directions"><code class="docutils literal notranslate"><span class="pre">ligand_directions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.vsepr.regularize"><code class="docutils literal notranslate"><span class="pre">regularize()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem">Module contents</a></li>

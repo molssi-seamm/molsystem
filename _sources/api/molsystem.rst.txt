@@ -276,6 +276,14 @@ molsystem.user\_tables module
    :show-inheritance:
    :undoc-members:
 
+molsystem.vsepr module
+----------------------
+
+.. automodule:: molsystem.vsepr
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
