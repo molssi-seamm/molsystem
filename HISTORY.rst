@@ -1,6 +1,12 @@
 =======
 History
 =======
+2026.10.21.1 -- Bugfix: the fragments of a SMILES no longer overlap
+    * A structure made from a SMILES of several fragments, such as '[Na+].O' or 'O.O',
+      had them on top of each other: RDKit and Open Babel place each fragment at the
+      origin (Na 0.38 Å from O). The fragments are now placed side by side, at least
+      3 Å apart, as a start for an optimization.
+
 2026.10.21 -- Bugfix: formal charges from RDKit are kept
     * A structure made from SMILES with RDKit (the default) kept its total charge but
       not the formal charges of its atoms, as one made with Open Babel does. They are

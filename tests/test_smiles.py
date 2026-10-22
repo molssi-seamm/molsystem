@@ -149,3 +149,31 @@ def test_rdkit_structure_independent_of_history(tmp_path):
         [sys.executable, "-c", other_order], capture_output=True, text=True, check=True
     ).stdout
     assert first == second
+
+
+@pytest.mark.parametrize("flavor", ["rdkit", "openbabel"])
+@pytest.mark.parametrize("smiles", ["[Na+].O", "O.O.O", "[Li+].F[B-](F)(F)F"])
+def test_fragments_do_not_overlap(configuration, flavor, smiles):
+    """The fragments of a SMILES are placed apart: both toolkits embedded each at the
+    origin, so they overlapped (2026-10-21: Na 0.38 Å from O in '[Na+].O')."""
+    import numpy as np
+    from molsystem.smiles import FRAGMENT_GAP
+
+    configuration.from_smiles(smiles, flavor=flavor)
+    xyz = np.array(configuration.atoms.coordinates)
+    molecules = configuration.find_molecules(as_indices=True)
+    assert len(molecules) == smiles.count(".") + 1
+    for i, a in enumerate(molecules):
+        for b in molecules[i + 1 :]:
+            d = np.linalg.norm(xyz[a][:, None] - xyz[b][None], axis=2)
+            assert d.min() >= FRAGMENT_GAP - 1.0e-6
+
+
+def test_one_fragment_is_unchanged(configuration):
+    """A single molecule is left where it was built."""
+    import numpy as np
+
+    configuration.from_smiles("CCO", reorient=False)
+    before = np.array(configuration.atoms.coordinates)
+    configuration._separate_fragments()
+    np.testing.assert_allclose(configuration.atoms.coordinates, before)

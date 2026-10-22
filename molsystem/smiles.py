@@ -4,6 +4,8 @@
 
 import logging
 
+import numpy as np
+
 try:
     from openeye import oechem
 except ImportError:
@@ -44,6 +46,8 @@ logger = logging.getLogger(__name__)
 
 # The random seed for RDKit's embedding of SMILES (see from_smiles)
 EMBEDDING_SEED = 20261004
+#: The least distance between fragments of a SMILES placed side by side, Å
+FRAGMENT_GAP = 3.0
 
 RDKit_Embedding_Error = {
     "INITIAL_COORDS": """
@@ -275,6 +279,10 @@ class SMILESMixin:
 
             self.from_OEMol(mol, properties=None)
 
+        # A SMILES of several fragments ('[Na+].O') is embedded with them on top of
+        # each other, so place them side by side.
+        self._separate_fragments()
+
         # Rotate to standard orientation
         if reorient:
             rdkMol = self.to_RDKMol()
@@ -286,6 +294,31 @@ class SMILESMixin:
             self.name = name
         else:
             self.name = save
+
+    def _separate_fragments(self, gap=FRAGMENT_GAP):
+        """Place the fragments of the structure side by side along x.
+
+        RDKit and Open Babel embed the fragments of a SMILES such as '[Na+].O' or
+        'O.O' each at the origin, so their atoms overlap (2026-10-21: Na 0.38 Å from
+        O). Each fragment after the first is moved so that its atoms are at least
+        ``gap`` Å beyond those already placed along x, centred on them in y and z: a
+        start for an optimization, not an equilibrium structure.
+        """
+        if self.n_atoms < 2:
+            return
+        fragments = self.find_molecules(as_indices=True)
+        if len(fragments) < 2:
+            return
+        xyz = np.array(self.atoms.get_coordinates(fractionals=False), dtype=float)
+        placed = list(fragments[0])
+        for fragment in fragments[1:]:
+            fragment = list(fragment)
+            shift = np.zeros(3)
+            shift[0] = xyz[placed, 0].max() + gap - xyz[fragment, 0].min()
+            shift[1:] = xyz[placed, 1:].mean(axis=0) - xyz[fragment, 1:].mean(axis=0)
+            xyz[fragment] += shift
+            placed.extend(fragment)
+        self.atoms.set_coordinates(xyz.tolist(), fractionals=False)
 
     def to_smarts(self):
         """Generate a SMARTS string for this object.
