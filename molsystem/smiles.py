@@ -221,7 +221,15 @@ class SMILESMixin:
         if flavor == "rdkit":
             mol = Chem.rdmolfiles.MolFromSmiles(smiles)
             if mol is None:
-                raise ValueError(f"SMILES '{smiles}' is not valid.")
+                if Chem.rdmolfiles.MolFromSmiles(smiles, sanitize=False) is None:
+                    raise ValueError(f"SMILES '{smiles}' is not valid.")
+                # Valid, but RDKit refuses the valences, e.g. AsF6-
+                logger.warning(
+                    f"RDKit cannot handle the valences in '{smiles}', so Open Babel "
+                    "builds the structure."
+                )
+                flavor = "openbabel"
+        if flavor == "rdkit":
             mol = Chem.AddHs(mol)
             # A fixed seed: the same SMILES gives the same structure every time,
             # whatever was built before it in the process (RDKit's default
@@ -247,9 +255,15 @@ class SMILESMixin:
                             f" {counts[i]:5} {k} errors in embedding"
                             f"{RDKit_Embedding_Error[k]}"
                         )
-                raise RuntimeError(f"RDKit unable to embed SMILES structure {smiles}")
-            self.from_RDKMol(mol, properties=None)
-        elif flavor == "openbabel":
+                # e.g. a metal complex such as [Co(NH3)6]3+
+                logger.warning(
+                    f"RDKit could not embed '{smiles}', so Open Babel builds the "
+                    "structure."
+                )
+                flavor = "openbabel"
+            else:
+                self.from_RDKMol(mol, properties=None)
+        if flavor == "openbabel":
             obConversion = openbabel.OBConversion()
             obConversion.SetInAndOutFormats("smi", "mdl")
             obConversion.AddOption("3")
@@ -279,21 +293,66 @@ class SMILESMixin:
 
             self.from_OEMol(mol, properties=None)
 
-        # A SMILES of several fragments ('[Na+].O') is embedded with them on top of
-        # each other, so place them side by side.
+        # Hypervalent and coordination centres (PF6-, SF6, metal complexes) are
+        # embedded badly, so place their ligands by VSEPR; then a SMILES of several
+        # fragments ('[Na+].O'), embedded on top of each other, side by side.
+        self._regularize_centres()
         self._separate_fragments()
 
         # Rotate to standard orientation
         if reorient:
-            rdkMol = self.to_RDKMol()
-            rdkConf = rdkMol.GetConformers()[0]
-            Chem.rdMolTransforms.CanonicalizeConformer(rdkConf, ignoreHs=False)
-            self.coordinates_from_RDKMol(rdkMol)
+            try:
+                rdkMol = self.to_RDKMol()
+                rdkConf = rdkMol.GetConformers()[0]
+                Chem.rdMolTransforms.CanonicalizeConformer(rdkConf, ignoreHs=False)
+                self.coordinates_from_RDKMol(rdkMol)
+            except Exception:
+                # RDKit refuses some valences (AsF6-): the principal axes instead
+                self._principal_axes_orientation()
 
         if name is not None:
             self.name = name
         else:
             self.name = save
+
+    def _regularize_centres(self):
+        """Place the ligands of hypervalent and coordination centres by VSEPR, and
+        check that no atoms are left too close (see :mod:`molsystem.vsepr`)."""
+        from . import vsepr
+
+        n = self.n_atoms
+        if n < 3:
+            return
+        symbols = self.atoms.symbols
+        index = {atom_id: k for k, atom_id in enumerate(self.atoms.ids)}
+        bonds = [
+            (index[i], index[j], order)
+            for i, j, order in zip(
+                self.bonds.get_column_data("i"),
+                self.bonds.get_column_data("j"),
+                self.bonds.get_column_data("bondorder"),
+            )
+        ]
+        charges = None
+        if "formal_charge" in self.atoms:
+            charges = self.atoms.get_column_data("formal_charge")
+        xyz = self.atoms.get_coordinates(fractionals=False)
+        xyz, changed = vsepr.regularize(symbols, xyz, bonds, charges)
+        if not changed:
+            return
+        self.atoms.set_coordinates(xyz.tolist(), fractionals=False)
+        # Fail loudly rather than return a broken structure
+        molecules = self.find_molecules(as_indices=True)
+        atoms = [a for m in molecules if set(m) & set(changed) for a in m]
+        vsepr.check_contacts(symbols, xyz, bonds, atoms=atoms)
+
+    def _principal_axes_orientation(self):
+        """Centre the structure and align its principal axes with x, y and z."""
+        xyz = np.array(self.atoms.get_coordinates(fractionals=False), dtype=float)
+        xyz -= xyz.mean(axis=0)
+        _, vectors = np.linalg.eigh(xyz.T @ xyz)
+        xyz = xyz @ vectors[:, ::-1]
+        self.atoms.set_coordinates(xyz.tolist(), fractionals=False)
 
     def _separate_fragments(self, gap=FRAGMENT_GAP):
         """Place the fragments of the structure side by side along x.

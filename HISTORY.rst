@@ -1,6 +1,20 @@
 =======
 History
 =======
+2026.10.22 -- Bugfix: sensible geometries for hypervalent and metal centres from SMILES
+    * RDKit and Open Babel embedded centres with five or more electron pairs badly:
+      PF6- from 'F[P-](F)(F)(F)(F)F' had fluorines 0.3-1.2 Å apart, which stopped an MD
+      run at its first step. The ligands of such centres -- main-group atoms with a
+      steric number of 5-7 (PF6-, SF6, SiF6 2-, AsF6-, SF4, XeF4, ...) and transition
+      metals -- are now placed on the VSEPR polyhedron, with the lone pairs where VSEPR
+      puts them, at standard bond lengths, and larger ligands are turned to keep clear
+      of each other. Centres with four pairs (BF4-, ClO4-) are left as they were. The
+      structure is checked afterwards, and an error raised rather than a broken
+      structure returned.
+    * When RDKit refuses the valences of a SMILES (AsF6-) or cannot embed it (some
+      metal complexes), Open Babel now builds the structure, with a warning, instead
+      of the step failing.
+
 2026.10.21.1 -- Bugfix: the fragments of a SMILES no longer overlap
     * A structure made from a SMILES of several fragments, such as '[Na+].O' or 'O.O',
       had them on top of each other: RDKit and Open Babel place each fragment at the
