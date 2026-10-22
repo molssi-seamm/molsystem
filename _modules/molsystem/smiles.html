@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2026.10.21 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2026.10.21.1 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=3c77f071"></script>
+    <script src="../../_static/documentation_options.js?v=aa7b2be7"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.21" />
+  <meta name="docsearch:version" content="2026.10.21.1" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -492,6 +492,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">openeye</span><span class="w"> </span><span class="kn">import</span> <span class="n">oechem</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -532,6 +534,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="c1"># The random seed for RDKit's embedding of SMILES (see from_smiles)</span>
 <span class="n">EMBEDDING_SEED</span> <span class="o">=</span> <span class="mi">20261004</span>
+<span class="c1">#: The least distance between fragments of a SMILES placed side by side, Å</span>
+<span class="n">FRAGMENT_GAP</span> <span class="o">=</span> <span class="mf">3.0</span>
 
 <span class="n">RDKit_Embedding_Error</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"INITIAL_COORDS"</span><span class="p">:</span> <span class="s2">"""</span>
@@ -773,6 +777,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <span class="bp">self</span><span class="o">.</span><span class="n">from_OEMol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
+        <span class="c1"># A SMILES of several fragments ('[Na+].O') is embedded with them on top of</span>
+        <span class="c1"># each other, so place them side by side.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_separate_fragments</span><span class="p">()</span>
+
         <span class="c1"># Rotate to standard orientation</span>
         <span class="k">if</span> <span class="n">reorient</span><span class="p">:</span>
             <span class="n">rdkMol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
@@ -785,6 +793,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">save</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_separate_fragments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="n">FRAGMENT_GAP</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Place the fragments of the structure side by side along x.</span>
+
+<span class="sd">        RDKit and Open Babel embed the fragments of a SMILES such as '[Na+].O' or</span>
+<span class="sd">        'O.O' each at the origin, so their atoms overlap (2026-10-21: Na 0.38 Å from</span>
+<span class="sd">        O). Each fragment after the first is moved so that its atoms are at least</span>
+<span class="sd">        ``gap`` Å beyond those already placed along x, centred on them in y and z: a</span>
+<span class="sd">        start for an optimization, not an equilibrium structure.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_molecules</span><span class="p">(</span><span class="n">as_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fragments</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">placed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fragments</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">fragment</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">placed</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">gap</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">fragment</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">shift</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">placed</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">fragment</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">xyz</span><span class="p">[</span><span class="n">fragment</span><span class="p">]</span> <span class="o">+=</span> <span class="n">shift</span>
+            <span class="n">placed</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">set_coordinates</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SMILESMixin.to_smarts">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.smiles.SMILESMixin.to_smarts">[docs]</a>

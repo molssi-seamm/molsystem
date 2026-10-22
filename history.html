@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.21 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.21.1 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=3c77f071"></script>
+    <script src="_static/documentation_options.js?v=aa7b2be7"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.21" />
+  <meta name="docsearch:version" content="2026.10.21.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.21.1 – Bugfix: the fragments of a SMILES no longer overlap</dt><dd><ul class="simple">
+<li><p>A structure made from a SMILES of several fragments, such as ‘[Na+].O’ or ‘O.O’,
+had them on top of each other: RDKit and Open Babel place each fragment at the
+origin (Na 0.38 Å from O). The fragments are now placed side by side, at least
+3 Å apart, as a start for an optimization.</p></li>
+</ul>
+</dd>
 <dt>2026.10.21 – Bugfix: formal charges from RDKit are kept</dt><dd><ul class="simple">
 <li><p>A structure made from SMILES with RDKit (the default) kept its total charge but
 not the formal charges of its atoms, as one made with Open Babel does. They are
