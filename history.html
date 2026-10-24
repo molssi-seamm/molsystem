@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.22 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.24 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=0b8f7a1b"></script>
+    <script src="_static/documentation_options.js?v=647e6ecf"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.22" />
+  <meta name="docsearch:version" content="2026.10.24" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.24 – Bugfix: parallel loops are slow to start on slow disks</dt><dd><ul class="simple">
+<li><p>Setting up each iteration of a parallel Loop took about 6 seconds on a job
+directory where writes to disk are slow (ChemAI’s /D3), so a 161-iteration loop
+spent 16 minutes before starting any calculation. The iteration’s copy of the
+database was written in about 70 separate commits; it is now one, taking 0.1-0.2
+seconds.</p></li>
+<li><p>The baseline copy each iteration is compared against when its results are merged
+is now forced to disk before the iteration is used, so that a crash or reboot
+cannot leave a damaged baseline that a restarted job would trust.</p></li>
+</ul>
+</dd>
 <dt>2026.10.22 – Bugfix: sensible geometries for hypervalent and metal centres from SMILES</dt><dd><ul class="simple">
 <li><p>RDKit and Open Babel embedded centres with five or more electron pairs badly:
 PF6- from ‘F[P-](F)(F)(F)(F)F’ had fluorines 0.3-1.2 Å apart, which stopped an MD
