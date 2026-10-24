@@ -14,6 +14,7 @@ database's (possibly deferring) connection for reading the other file.
 """
 
 import logging
+import os
 from pathlib import Path
 import re
 import shutil
@@ -133,10 +134,14 @@ def snapshot(source, target, configurations=(), whole=False):
             dst.close()
         return
 
-    dst = sqlite3.connect(f"file:{quote(str(target))}", uri=True)
+    # One explicit transaction: Python's sqlite3 commits each CREATE on its own,
+    # and ~70 commits, each with its fsyncs, took ~6 s per snapshot on a slow
+    # (ZFS) job directory.
+    dst = sqlite3.connect(f"file:{quote(str(target))}", uri=True, isolation_level=None)
     try:
         dst.execute("PRAGMA foreign_keys = OFF")
         dst.execute("ATTACH DATABASE ? AS src", (f"file:{quote(str(source))}?mode=ro",))
+        dst.execute("BEGIN")
         tables = _tables(dst, "src")
         # The same schema, including columns steps added to atom, coordinates, ...
         for name, sql in tables.items():
@@ -246,7 +251,7 @@ def snapshot(source, target, configurations=(), whole=False):
             dst.execute(
                 "INSERT INTO main.sqlite_sequence SELECT * FROM src.sqlite_sequence"
             )
-        dst.commit()
+        dst.execute("COMMIT")
         dst.execute("DETACH DATABASE src")
     finally:
         dst.close()
@@ -258,6 +263,18 @@ def baseline(snapshot_path, baseline_path):
     baseline_path.unlink(missing_ok=True)
     shutil.copyfile(snapshot_path, baseline_path)
     baseline_path.chmod(0o444)
+    # On disk, with its directory entry, before the caller renames the snapshot
+    # into place: after a crash a restart trusts any baseline beside a snapshot.
+    fd = os.open(baseline_path, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    fd = os.open(baseline_path.parent, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 class MergeConflict(RuntimeError):
