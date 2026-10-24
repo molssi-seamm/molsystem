@@ -218,6 +218,59 @@ def test_current_row_and_new_table(tmp_path):
     assert [made.get_cell(r, "x") for r in made.row_ids()] == [1.5]
 
 
+def test_snapshot_is_one_transaction(tmp_path, monkeypatch):
+    """Every write of a snapshot is in one transaction: each commit costs fsyncs."""
+    job = make_job(tmp_path / "seamm.db")
+    cid = configuration_named(job, "second").id
+    outside = []
+    connect = sqlite3.connect
+
+    def traced(*args, **kwargs):
+        db = connect(*args, **kwargs)
+
+        def trace(sql):
+            word = sql.lstrip().split(None, 1)[0].upper()
+            if not db.in_transaction and word in ("CREATE", "INSERT", "DELETE"):
+                outside.append(sql)
+
+        db.set_trace_callback(trace)
+        return db
+
+    monkeypatch.setattr(sqlite3, "connect", traced)
+    snapshot(tmp_path / "seamm.db", tmp_path / "c.db", configurations=[cid])
+    assert outside == []
+    assert committed(tmp_path / "c.db", "SELECT name FROM system") == [("second",)]
+
+
+def test_baseline_is_on_disk(tmp_path, monkeypatch):
+    """The baseline and its directory entry are synced before the snapshot is used."""
+    import os
+
+    job = make_job(tmp_path / "seamm.db")
+    cid = configuration_named(job, "first").id
+    snapshot(tmp_path / "seamm.db", tmp_path / "iter" / "c.db", configurations=[cid])
+    opened = {}
+    synced = []
+    open_, fsync = os.open, os.fsync
+
+    def traced_open(path, *args, **kwargs):
+        fd = open_(path, *args, **kwargs)
+        opened[fd] = str(path)
+        return fd
+
+    def traced_fsync(fd):
+        synced.append(opened.get(fd))
+        fsync(fd)
+
+    monkeypatch.setattr(os, "open", traced_open)
+    monkeypatch.setattr(os, "fsync", traced_fsync)
+    baseline(tmp_path / "iter" / "c.db", tmp_path / "iter" / "baseline.db")
+    assert synced == [str(tmp_path / "iter" / "baseline.db"), str(tmp_path / "iter")]
+    assert committed(tmp_path / "iter" / "baseline.db", "SELECT name FROM system") == [
+        ("first",)
+    ]
+
+
 def test_merge_is_one_transaction(tmp_path):
     """A merge rolled back leaves the job's database as it was."""
     job = make_job(tmp_path / "seamm.db")

@@ -1,6 +1,16 @@
 =======
 History
 =======
+2026.10.24 -- Bugfix: parallel loops are slow to start on slow disks
+    * Setting up each iteration of a parallel Loop took about 6 seconds on a job
+      directory where writes to disk are slow (ChemAI's /D3), so a 161-iteration loop
+      spent 16 minutes before starting any calculation. The iteration's copy of the
+      database was written in about 70 separate commits; it is now one, taking 0.1-0.2
+      seconds.
+    * The baseline copy each iteration is compared against when its results are merged
+      is now forced to disk before the iteration is used, so that a crash or reboot
+      cannot leave a damaged baseline that a restarted job would trust.
+
 2026.10.22 -- Bugfix: sensible geometries for hypervalent and metal centres from SMILES
     * RDKit and Open Babel embedded centres with five or more electron pairs badly:
       PF6- from 'F[P-](F)(F)(F)(F)F' had fluorines 0.3-1.2 Å apart, which stopped an MD
