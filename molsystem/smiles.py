@@ -111,6 +111,25 @@ def check_openeye_license():
         )
 
 
+def _clear_symmetric_nontetrahedral_stereo(mol):
+    """Remove the octahedral, square-planar or trigonal-bipyramidal stereo that
+    RDKit assigns from 3-D coordinates to a centre whose ligands are all alike, so
+    that PF6- is F[P-](F)(F)(F)(F)F rather than F[P@OH26-](F)(F)(F)(F)F."""
+    tetrahedral = (
+        Chem.ChiralType.CHI_UNSPECIFIED,
+        Chem.ChiralType.CHI_TETRAHEDRAL_CW,
+        Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
+    )
+    centres = [a for a in mol.GetAtoms() if a.GetChiralTag() not in tetrahedral]
+    if len(centres) == 0:
+        return
+    ranks = list(Chem.CanonicalRankAtoms(mol, breakTies=False))
+    for atom in centres:
+        if len({ranks[n.GetIdx()] for n in atom.GetNeighbors()}) == 1:
+            atom.SetChiralTag(Chem.ChiralType.CHI_UNSPECIFIED)
+            atom.ClearProp("_chiralPermutation")
+
+
 class SMILESMixin:
     """A mixin for handling SMILES."""
 
@@ -163,10 +182,11 @@ class SMILESMixin:
             mol = self.to_RDKMol()
             if isomeric:
                 rdmolops.AssignStereochemistryFrom3D(mol)
+                _clear_symmetric_nontetrahedral_stereo(mol)
             if hydrogens:
                 mol2 = mol
             else:
-                mol2 = AllChem.RemoveHs(mol)
+                mol2 = AllChem.RemoveHs(mol, sanitize=False)
             if canonical:
                 smiles = Chem.MolToSmiles(mol2, isomericSmiles=isomeric)
             else:
