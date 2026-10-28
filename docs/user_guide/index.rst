@@ -70,6 +70,25 @@ individual atoms that carry them -- the ``M  CHG`` line of an SDF file, say. Bot
 back unchanged on reading the file, so the charges stay where they belong and a neutral,
 closed-shell structure is not mistaken for a radical.
 
+Radicals and ions in SMILES and RDKit
+-------------------------------------
+``to_smiles()`` and ``to_RDKMol()`` carry the charges and unpaired electrons into RDKit,
+so that radicals and ions give the right SMILES::
+
+    configuration.from_smiles("[CH2]C")        # charge 0, multiplicity 2
+    configuration.to_smiles(canonical=True)    # '[CH2]C', the ethyl radical
+
+``from_smiles()`` sets the charge and spin multiplicity from the SMILES, and the formal
+charges of the atoms. Since the hydrogens are all explicit, an atom short of its valence
+is a radical, an anion or a cation: the formal charges are used when they add up to the
+configuration's charge, and otherwise, as for a structure read from a file without them,
+charges and radical electrons are chosen that match the charge and multiplicity, with
+the fewest charges, negative charges on electronegative atoms, positive ones on metals
+and electropositive atoms, and charge-separated groups such as the nitro group
+C[N+](=O)[O-] kept neutral. Hypervalent atoms need no charge of their own: sulfuric acid
+is O=S(=O)(O)O. The same atoms and bonds are the radical [CH2]C, the cation [CH2+]C or the
+anion [CH2-]C, depending on the configuration's charge and multiplicity.
+
 Properties and their units
 ==========================
 Every property has units, held as a string that Pint can interpret, and a property that

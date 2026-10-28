@@ -1,6 +1,23 @@
 =======
 History
 =======
+2026.10.28 -- Bugfix: SMILES of radicals and ions
+    * The SMILES and RDKit molecules of radicals came out as anions -- the ethyl radical
+      as [CH2-]C, the methoxy radical as C[O-] -- and of some cations as anions too
+      ([CH3+] as [CH3-]). Hypervalent atoms got charges they do not have: sulfuric acid
+      became O=[S+4](=O)(O)O and DMSO C[S+2](C)=O, and pyridinium lost its aromaticity.
+      The charges and unpaired electrons of the configuration are now carried into
+      RDKit: the atoms' formal charges when they add up to the configuration's charge,
+      and otherwise charges and radical electrons that match the charge and spin
+      multiplicity, so that [CH2]C, [CH2+]C and [CH2-]C all come back as written, as do
+      nitro groups, zwitterions, aromatic ions and radicals, and PF6-.
+    * RDKit no longer adds hydrogens to atoms short of their valence, since SEAMM's
+      hydrogens are all explicit.
+    * PF6-, SF6 and other centres with identical ligands no longer get an octahedral
+      stereo label in isomeric SMILES (F[P@OH26-](F)(F)(F)(F)F).
+    * A structure that RDKit cannot represent, such as CH4+, still gives a SMILES rather
+      than an error, and the spin multiplicity stored in an RDKit molecule is read back.
+
 2026.10.24 -- Bugfix: parallel loops are slow to start on slow disks
     * Setting up each iteration of a parallel Loop took about 6 seconds on a job
       directory where writes to disk are slow (ChemAI's /D3), so a 161-iteration loop

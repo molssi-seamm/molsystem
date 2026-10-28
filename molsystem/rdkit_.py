@@ -21,53 +21,242 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
 
-def _explicit_valence(atom):
-    """The atom's explicit valence, across RDKit's API changes.
-
-    RDKit's valence API has moved in two steps, and different installed
-    versions are at different points:
-
-    1. oldest -- ``GetExplicitValence()`` (no ``ValenceType``);
-    2. newer  -- ``GetValence(Chem.ValenceType.EXPLICIT)`` positional;
-    3. newest -- the positional form is deprecated too; it wants the keyword
-       ``GetValence(which=Chem.ValenceType.EXPLICIT)``.
-
-    Prefer the keyword form (warning-free on current RDKit), fall back to the
-    positional form, then to the old method -- so this stays quiet on every
-    version.
-    """
-    valence_type = getattr(Chem, "ValenceType", None)
-    if valence_type is None:
-        return atom.GetExplicitValence()
-    try:
-        return atom.GetValence(which=valence_type.EXPLICIT)
-    except TypeError:
-        # An RDKit binding with ValenceType but without the `which` keyword.
-        return atom.GetValence(valence_type.EXPLICIT)
-
-
-# Valence
-valence = {
-    1: 1,
-    2: 0,
-    3: 1,
-    4: 2,
-    5: 3,
-    6: 4,
-    7: 3,
-    8: 2,
-    9: 1,
-    10: 0,
-    11: 1,
-    12: 2,
-    13: 3,
-    14: 4,
-    15: 3,
-    16: 2,
-    17: 1,
-    18: 0,
-    92: 2,
+# Pauling electronegativities, to place the charges that the net charge needs:
+# negative charges on the more, positive ones on the less electronegative atoms.
+_electronegativity = {
+    1: 2.20,
+    5: 2.04,
+    6: 2.55,
+    7: 3.04,
+    8: 3.44,
+    9: 3.98,
+    14: 1.90,
+    15: 2.19,
+    16: 2.58,
+    17: 3.16,
+    33: 2.18,
+    34: 2.55,
+    35: 2.96,
+    53: 2.66,
 }
+
+# Give up on the search for charges and radicals beyond this many partial
+# assignments, e.g. a large system whose bonds were perceived without orders.
+_max_states = 20000
+
+
+def _charge_cost(atno, q, metal=False):
+    """The cost of putting the formal charge ``q`` on an atom.
+
+    Charges are costly, negative ones less so on electronegative atoms and
+    positive ones on electropositive atoms, and charges on carbon more, since
+    carbocations and carbanions are rarer than ions of heteroatoms. A metal is
+    better as a cation than neutral, e.g. Li+ in an electrolyte.
+    """
+    if metal:
+        if q > 0:
+            return 0.1 * q
+        return 1.0 + 2.0 * abs(q)
+    if q == 0:
+        return 0.0
+    en = _electronegativity.get(atno, 2.5)
+    if q < 0:
+        cost = abs(q) * (1.0 + 0.1 * (4.0 - en))
+    else:
+        cost = q * (1.0 + 0.1 * en)
+    if atno == 6:
+        cost += abs(q)
+    return cost
+
+
+def _candidates(atno, v_sigma, aromatic, charge=None):
+    """The (formal charge, radical electrons, pi) an atom can have.
+
+    The valence an atom with formal charge q may have is that of the
+    isoelectronic element, as RDKit has it: N+ like C, O- like F, B- like C,
+    P- like S. An atom short of its lowest valence has the difference as
+    radical electrons. Atoms in aromatic rings may take part in a ring double
+    bond (pi = 1), like the carbons of benzene, or not (pi = 0), like the N of
+    pyrrole or a carbanion in a ring.
+
+    Parameters
+    ----------
+    atno : int
+        The atomic number.
+    v_sigma : int
+        The valence from the bonds, counting each aromatic bond as single.
+    aromatic : bool
+        Whether the atom has aromatic bonds.
+    charge : int = None
+        The formal charge, if known; otherwise charges from -2 to +2 are tried.
+
+    Returns
+    -------
+    [(int, int, int)]
+        The possible (charge, radicals, pi).
+    """
+    table = Chem.GetPeriodicTable()
+    result = []
+    for q in (0, -1, 1, -2, 2) if charge is None else (charge,):
+        z = atno - q
+        if z < 1 or z > 118:
+            continue
+        valences = list(table.GetValenceList(z))
+        if -1 in valences:
+            # Metals have any valence and no radicals in RDKit
+            if q == 0:
+                result.append((0, 0, 0))
+            continue
+        for pi in (0, 1) if aromatic else (0,):
+            v = v_sigma + pi
+            allowed = [x for x in valences if x >= v]
+            if len(allowed) == 0:
+                continue
+            radicals = allowed[0] - v
+            if radicals <= 4:
+                result.append((q, radicals, pi))
+    return result
+
+
+def _charges_and_radicals(
+    atnos, bonds, charge=None, n_unpaired=None, fixed=None, prune=True
+):
+    """The formal charges and radical electrons of the atoms of a structure.
+
+    All the hydrogens are explicit, so an atom short of its valence is a radical,
+    an anion or a cation, depending on the net charge and the number of unpaired
+    electrons. The choice is the one that matches the net charge and the number of
+    unpaired electrons, with the fewest charges, negative charges on electronegative
+    atoms and positive ones on electropositive atoms; e.g. the ethyl radical
+    [CH2]C, the ethyl cation [CH2+]C, nitromethane C[N+](=O)[O-], sulfuric acid
+    O=S(=O)(O)O and PF6- with the charge on P. The ring double bonds of an aromatic
+    system pair its atoms, so an even number of them must take part.
+
+    Parameters
+    ----------
+    atnos : [int]
+        The atomic numbers.
+    bonds : [(int, int, int)]
+        The bonds as (i, j, bond order), with indices into atnos and 5 for an
+        aromatic bond.
+    charge : int = None
+        The net charge, or None if not known.
+    n_unpaired : int = None
+        The number of unpaired electrons, or None if not known.
+    fixed : [int] = None
+        Known formal charges of the atoms.
+    prune : bool = True
+        Keep neutral, closed-shell atoms outside aromatic rings so, which keeps the
+        search small for large systems but misses e.g. radical cations like C[NH2+].
+
+    Returns
+    -------
+    ([int], [int])
+        The formal charges and the numbers of radical electrons, or (None, None)
+        if there are too many possibilities to search.
+    """
+    n = len(atnos)
+    v_sigma = [0] * n
+    aromatic_neighbors = [[] for _ in range(n)]
+    for i, j, order in bonds:
+        if order == 5:
+            v_sigma[i] += 1
+            v_sigma[j] += 1
+            aromatic_neighbors[i].append(j)
+            aromatic_neighbors[j].append(i)
+        else:
+            v_sigma[i] += order
+            v_sigma[j] += order
+
+    # The aromatic systems, each a set of atoms joined by aromatic bonds
+    system = [None] * n
+    n_systems = 0
+    for start in range(n):
+        if system[start] is None and len(aromatic_neighbors[start]) > 0:
+            stack = [start]
+            system[start] = n_systems
+            while stack:
+                i = stack.pop()
+                for j in aromatic_neighbors[i]:
+                    if system[j] is None:
+                        system[j] = n_systems
+                        stack.append(j)
+            n_systems += 1
+
+    # Metals, which RDKit allows any valence, may be ions, e.g. Li+
+    table = Chem.GetPeriodicTable()
+    metals = {z for z in set(atnos) if -1 in list(table.GetValenceList(z))}
+
+    candidates = []
+    for i, atno in enumerate(atnos):
+        tmp = _candidates(
+            atno,
+            v_sigma[i],
+            system[i] is not None,
+            charge=None if fixed is None else fixed[i],
+        )
+        if len(tmp) == 0:
+            # A valence nothing fits: leave the atom as it is, for RDKit to judge
+            tmp = [(0 if fixed is None else fixed[i], 0, 0)]
+        elif prune and system[i] is None and (0, 0, 0) in tmp and atno not in metals:
+            # A neutral, closed-shell atom outside aromatic rings stays so, which
+            # keeps the search small for large systems, e.g. a box of water
+            tmp = [(0, 0, 0)]
+        candidates.append(tmp)
+
+    radical_cost = 0.0 if n_unpaired is not None else 1.5
+
+    # Dynamic programming over the atoms, the aromatic systems last and each
+    # together, so that the parity of its ring double bonds can be checked at its
+    # end. A state is (sum of charges, sum of radicals, parity) -> (cost, choices),
+    # with the choices as a linked list.
+    order = sorted(range(n), key=lambda i: -1 if system[i] is None else system[i])
+    states = {(0, 0, 0): (0.0, None)}
+    for k, i in enumerate(order):
+        new_states = {}
+        for (sq, sr, parity), (cost, choices) in states.items():
+            for q, r, pi in candidates[i]:
+                key = (sq + q, sr + r, parity ^ pi)
+                value = (
+                    cost
+                    + _charge_cost(atnos[i], q, metal=atnos[i] in metals)
+                    + radical_cost * r
+                )
+                if key not in new_states or value < new_states[key][0]:
+                    new_states[key] = (value, ((i, q, r), choices))
+        states = new_states
+        last = k + 1 == n or system[order[k + 1]] != system[i]
+        if system[i] is not None and last:
+            # The end of an aromatic system: its ring double bonds must pair up
+            states = {
+                (sq, sr, 0): value
+                for (sq, sr, parity), value in states.items()
+                if parity == 0
+            }
+            if len(states) == 0:
+                # No way to pair them; carry on without the check
+                states = new_states
+                states = {(sq, sr, 0): value for (sq, sr, _), value in states.items()}
+        if len(states) > _max_states:
+            return None, None
+
+    def badness(item):
+        (sq, sr, _), (cost, _) = item
+        return (
+            0 if charge is None else abs(sq - charge),
+            0 if n_unpaired is None else abs(sr - n_unpaired),
+            cost,
+        )
+
+    _, (_, choices) = min(states.items(), key=badness)
+    charges = [0] * n
+    radicals = [0] * n
+    while choices is not None:
+        (i, q, r), choices = choices
+        charges[i] = q
+        radicals[i] = r
+    return charges, radicals
+
 
 references = [
     """\
@@ -167,23 +356,65 @@ class RDKitMixin:
                     index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
                 )
 
-        # Check for NH4+ type groups and set their charge
-        rdk_mol.UpdatePropertyCache(strict=False)
-        for at in rdk_mol.GetAtoms():
-            atno = at.GetAtomicNum()
-            if atno in valence:
-                if atno == 5:
-                    # Boron is a special case! Both BH4- and BH2- have a - charge.
-                    if _explicit_valence(at) == 4:
-                        charge = -1
-                    elif _explicit_valence(at) == 2:
-                        charge = -1
-                    else:
-                        charge = 0
-                else:
-                    charge = _explicit_valence(at) - valence[atno]
-                if charge != 0 and at.GetFormalCharge() == 0:
-                    at.SetFormalCharge(charge)
+        # The formal charges and radicals. The hydrogens are all explicit, so RDKit
+        # must not add any: an atom short of its valence is a radical or an ion.
+        atnos = self.atoms.atomic_numbers
+        bonds = [
+            (index[row["i"]], index[row["j"]], row["bondorder"])
+            for row in self.bonds.bonds()
+            if row["bondorder"] in bond_types
+        ]
+        if self.__class__.__name__ == "_Configuration":
+            charge = self.charge
+            n_unpaired = self.spin_multiplicity - 1
+        else:
+            charge = None
+            n_unpaired = None
+        fixed = None
+        if "formal_charge" in self.atoms:
+            fixed = self.atoms.get_column_data("formal_charge")
+            if charge is not None and sum(fixed) != charge:
+                fixed = None
+        # The formal charges stored with the atoms are kept unless others fit the
+        # net charge and spin better, e.g. after the bonds have changed.
+        best = None
+        tries = [(None, True), (None, False)]
+        if fixed is not None:
+            tries.insert(0, (fixed, True))
+        for known, prune in tries:
+            charges, radicals = _charges_and_radicals(
+                atnos,
+                bonds,
+                charge=charge,
+                n_unpaired=n_unpaired,
+                fixed=known,
+                prune=prune,
+            )
+            if charges is None:
+                continue
+            miss = (
+                0 if charge is None else abs(sum(charges) - charge),
+                0 if n_unpaired is None else abs(sum(radicals) - n_unpaired),
+            )
+            if best is None or miss < best[0]:
+                best = (miss, charges, radicals)
+            if miss == (0, 0):
+                break
+        if best is not None:
+            _, charges, radicals = best
+        else:
+            charges, radicals = fixed, None
+        for idx, at in enumerate(rdk_mol.GetAtoms()):
+            at.SetNoImplicit(True)
+            if charges is not None:
+                at.SetFormalCharge(charges[idx])
+            if radicals is not None:
+                at.SetNumRadicalElectrons(radicals[idx])
+        for bond in rdk_mol.GetBonds():
+            if bond.GetBondType() == Chem.BondType.AROMATIC:
+                bond.SetIsAromatic(True)
+                bond.GetBeginAtom().SetIsAromatic(True)
+                bond.GetEndAtom().SetIsAromatic(True)
 
         natom = self.atoms.n_atoms
         conf = Chem.Conformer(natom)
@@ -197,6 +428,13 @@ class RDKitMixin:
             logger.warning(f"Kekulization failed: {e}")
             flags = (
                 Chem.SanitizeFlags.SANITIZE_ALL ^ Chem.SanitizeFlags.SANITIZE_KEKULIZE
+            )
+            Chem.rdmolops.SanitizeMol(rdk_mol, sanitizeOps=flags)
+        except Chem.AtomValenceException as e:
+            # e.g. CH4+, which RDKit cannot write
+            logger.warning(f"RDKit does not accept the valences: {e}")
+            flags = (
+                Chem.SanitizeFlags.SANITIZE_ALL ^ Chem.SanitizeFlags.SANITIZE_PROPERTIES
             )
             Chem.rdmolops.SanitizeMol(rdk_mol, sanitizeOps=flags)
 
@@ -367,7 +605,7 @@ class RDKitMixin:
             if "SEAMM|net charge|int|" in data:
                 self.charge = int(data["SEAMM|net charge|int|"])
                 del data["SEAMM|net charge|int|"]
-            if "SEAMM|spin multiplicity" in data:
+            if "SEAMM|spin multiplicity|int|" in data:
                 self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
                 del data["SEAMM|spin multiplicity|int|"]
 
