@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; MolSystem 2026.10.24 documentation</title>
+    <title>User Guide &#8212; MolSystem 2026.10.28 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=647e6ecf"></script>
+    <script src="../_static/documentation_options.js?v=bb9c4767"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.24" />
+  <meta name="docsearch:version" content="2026.10.28" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -563,6 +563,25 @@ and multiplicity as properties of the structure, and the formal charges on the
 individual atoms that carry them – the <code class="docutils literal notranslate"><span class="pre">M</span>&#160; <span class="pre">CHG</span></code> line of an SDF file, say. Both come
 back unchanged on reading the file, so the charges stay where they belong and a neutral,
 closed-shell structure is not mistaken for a radical.</p>
+<section id="radicals-and-ions-in-smiles-and-rdkit">
+<h3>Radicals and ions in SMILES and RDKit<a class="headerlink" href="#radicals-and-ions-in-smiles-and-rdkit" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">to_smiles()</span></code> and <code class="docutils literal notranslate"><span class="pre">to_RDKMol()</span></code> carry the charges and unpaired electrons into RDKit,
+so that radicals and ions give the right SMILES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span><span class="s2">"[CH2]C"</span><span class="p">)</span>        <span class="c1"># charge 0, multiplicity 2</span>
+<span class="n">configuration</span><span class="o">.</span><span class="n">to_smiles</span><span class="p">(</span><span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># '[CH2]C', the ethyl radical</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">from_smiles()</span></code> sets the charge and spin multiplicity from the SMILES, and the formal
+charges of the atoms. Since the hydrogens are all explicit, an atom short of its valence
+is a radical, an anion or a cation: the formal charges are used when they add up to the
+configuration’s charge, and otherwise, as for a structure read from a file without them,
+charges and radical electrons are chosen that match the charge and multiplicity, with
+the fewest charges, negative charges on electronegative atoms, positive ones on metals
+and electropositive atoms, and charge-separated groups such as the nitro group
+C[N+](=O)[O-] kept neutral. Hypervalent atoms need no charge of their own: sulfuric acid
+is O=S(=O)(O)O. The same atoms and bonds are the radical [CH2]C, the cation [CH2+]C or the
+anion [CH2-]C, depending on the configuration’s charge and multiplicity.</p>
+</section>
 </section>
 <section id="properties-and-their-units">
 <h2>Properties and their units<a class="headerlink" href="#properties-and-their-units" title="Link to this heading">#</a></h2>
@@ -666,7 +685,10 @@ creating or changing a table raises <code class="docutils literal notranslate"><
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perceiving-bonds">Perceiving bonds</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#charges-and-spin-in-structure-files">Charges and spin in structure files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#charges-and-spin-in-structure-files">Charges and spin in structure files</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#radicals-and-ions-in-smiles-and-rdkit">Radicals and ions in SMILES and RDKit</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-and-their-units">Properties and their units</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#user-tables">User tables</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index">Index</a></li>

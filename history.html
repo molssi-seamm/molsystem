@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.24 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.28 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=647e6ecf"></script>
+    <script src="_static/documentation_options.js?v=bb9c4767"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.24" />
+  <meta name="docsearch:version" content="2026.10.28" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.28 – Bugfix: SMILES of radicals and ions</dt><dd><ul class="simple">
+<li><p>The SMILES and RDKit molecules of radicals came out as anions – the ethyl radical
+as [CH2-]C, the methoxy radical as C[O-] – and of some cations as anions too
+([CH3+] as [CH3-]). Hypervalent atoms got charges they do not have: sulfuric acid
+became O=[S+4](=O)(O)O and DMSO C[S+2](C)=O, and pyridinium lost its aromaticity.
+The charges and unpaired electrons of the configuration are now carried into
+RDKit: the atoms’ formal charges when they add up to the configuration’s charge,
+and otherwise charges and radical electrons that match the charge and spin
+multiplicity, so that [CH2]C, [CH2+]C and [CH2-]C all come back as written, as do
+nitro groups, zwitterions, aromatic ions and radicals, and PF6-.</p></li>
+<li><p>RDKit no longer adds hydrogens to atoms short of their valence, since SEAMM’s
+hydrogens are all explicit.</p></li>
+<li><p>PF6-, SF6 and other centres with identical ligands no longer get an octahedral
+stereo label in isomeric SMILES (F[<a class="reference external" href="mailto:P&#37;&#52;&#48;OH26">P<span>&#64;</span>OH26</a>-](F)(F)(F)(F)F).</p></li>
+<li><p>A structure that RDKit cannot represent, such as CH4+, still gives a SMILES rather
+than an error, and the spin multiplicity stored in an RDKit molecule is read back.</p></li>
+</ul>
+</dd>
 <dt>2026.10.24 – Bugfix: parallel loops are slow to start on slow disks</dt><dd><ul class="simple">
 <li><p>Setting up each iteration of a parallel Loop took about 6 seconds on a job
 directory where writes to disk are slow (ChemAI’s /D3), so a 161-iteration loop

@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.smiles &#8212; MolSystem 2026.10.24 documentation</title>
+    <title>molsystem.smiles &#8212; MolSystem 2026.10.28 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=647e6ecf"></script>
+    <script src="../../_static/documentation_options.js?v=bb9c4767"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.24" />
+  <meta name="docsearch:version" content="2026.10.28" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -602,6 +602,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_clear_symmetric_nontetrahedral_stereo</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Remove the octahedral, square-planar or trigonal-bipyramidal stereo that</span>
+<span class="sd">    RDKit assigns from 3-D coordinates to a centre whose ligands are all alike, so</span>
+<span class="sd">    that PF6- is F[P-](F)(F)(F)(F)F rather than F[P@OH26-](F)(F)(F)(F)F."""</span>
+    <span class="n">tetrahedral</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">ChiralType</span><span class="o">.</span><span class="n">CHI_UNSPECIFIED</span><span class="p">,</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">ChiralType</span><span class="o">.</span><span class="n">CHI_TETRAHEDRAL_CW</span><span class="p">,</span>
+        <span class="n">Chem</span><span class="o">.</span><span class="n">ChiralType</span><span class="o">.</span><span class="n">CHI_TETRAHEDRAL_CCW</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">centres</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">GetChiralTag</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tetrahedral</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">centres</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">CanonicalRankAtoms</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">breakTies</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">centres</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">ranks</span><span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">GetIdx</span><span class="p">()]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">GetNeighbors</span><span class="p">()})</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">atom</span><span class="o">.</span><span class="n">SetChiralTag</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">ChiralType</span><span class="o">.</span><span class="n">CHI_UNSPECIFIED</span><span class="p">)</span>
+            <span class="n">atom</span><span class="o">.</span><span class="n">ClearProp</span><span class="p">(</span><span class="s2">"_chiralPermutation"</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="SMILESMixin">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.smiles.SMILESMixin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SMILESMixin</span><span class="p">:</span>
@@ -658,10 +677,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RDKMol</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">isomeric</span><span class="p">:</span>
                 <span class="n">rdmolops</span><span class="o">.</span><span class="n">AssignStereochemistryFrom3D</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                <span class="n">_clear_symmetric_nontetrahedral_stereo</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">hydrogens</span><span class="p">:</span>
                 <span class="n">mol2</span> <span class="o">=</span> <span class="n">mol</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">mol2</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+                <span class="n">mol2</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">canonical</span><span class="p">:</span>
                 <span class="n">smiles</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">mol2</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="o">=</span><span class="n">isomeric</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
