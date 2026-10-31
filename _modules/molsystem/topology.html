@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.topology &#8212; MolSystem 2026.10.28 documentation</title>
+    <title>molsystem.topology &#8212; MolSystem 2026.10.31 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=bb9c4767"></script>
+    <script src="../../_static/documentation_options.js?v=58b82035"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.28" />
+  <meta name="docsearch:version" content="2026.10.31" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -507,6 +507,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="c1">#: The charges of isolated atoms that are ions: alkali and alkaline-earth metals and</span>
+<span class="c1">#: halogens, by atomic number</span>
+<span class="n">_ION_CHARGES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">**</span><span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">55</span><span class="p">)},</span>
+    <span class="o">**</span><span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">56</span><span class="p">)},</span>
+    <span class="o">**</span><span class="p">{</span><span class="n">z</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">53</span><span class="p">)},</span>
+<span class="p">}</span>
+
 
 <span class="c1"># Elements that are never bonded by distance-based perception unless asked:</span>
 <span class="c1"># alkali and alkaline-earth metals, which are ions in molecular systems.</span>
@@ -672,6 +680,140 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">Is</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TopologyMixin.assign_bond_orders">
+<a class="viewcode-back" href="../../api/molsystem.html#molsystem.topology.TopologyMixin.assign_bond_orders">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">assign_bond_orders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Assign bond orders to the perceived (single) bonds, molecule by molecule.</span>
+
+<span class="sd">        :meth:`perceive_bonds` gives connectivity only, so ethylene would be read</span>
+<span class="sd">        as [CH2+][CH2-] by anything that derives a SMILES or a Lewis structure.</span>
+<span class="sd">        Each molecule (connected fragment) gets the bond orders and formal charges</span>
+<span class="sd">        of RDKit's ``DetermineBondOrders``, trying the charges 0, -1, +1, -2 and +2</span>
+<span class="sd">        in turn and keeping the first that gives a valid structure; single atoms of</span>
+<span class="sd">        the alkali and alkaline-earth metals and of the halogens are given their</span>
+<span class="sd">        usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent</span>
+<span class="sd">        PF6-, whose single bonds are already its Lewis structure) keeps its bonds.</span>
+
+<span class="sd">        Only closed-shell, non-periodic configurations are handled: RDKit's method</span>
+<span class="sd">        assumes paired electrons, and a periodic cell's bonds cross the cell.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        charge : int = None</span>
+<span class="sd">            The net charge, if known, to check the molecules' charges against.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (int, int)</span>
+<span class="sd">            The number of molecules assigned and the number that could not be. If</span>
+<span class="sd">            the molecules' charges do not add up to `charge`, a warning is logged.</span>
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span><span class="p">,</span> <span class="n">RDLogger</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">rdDetermineBonds</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodicity</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">n_bonds</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">_id</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ids</span><span class="p">)}</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">()]</span>
+        <span class="n">atnos</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">]</span>
+        <span class="n">xyzs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">fractionals</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">whole</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">atno</span> <span class="ow">in</span> <span class="n">atnos</span><span class="p">:</span>
+            <span class="n">whole</span><span class="o">.</span><span class="n">AddAtom</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="n">atno</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">whole</span><span class="o">.</span><span class="n">AddBond</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">)</span>
+        <span class="n">fragments</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">GetMolFrags</span><span class="p">(</span><span class="n">whole</span><span class="o">.</span><span class="n">GetMol</span><span class="p">(),</span> <span class="n">sanitizeFrags</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">to_order</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">TRIPLE</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">AROMATIC</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">{</span><span class="n">pair</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">}</span>
+        <span class="n">formal</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atnos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"formal_charge"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">formal</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">(</span><span class="s2">"formal_charge"</span><span class="p">)]</span>
+        <span class="n">n_ok</span> <span class="o">=</span> <span class="n">n_failed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">RDLogger</span><span class="o">.</span><span class="n">DisableLog</span><span class="p">(</span><span class="s2">"rdApp.*"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="n">fragment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ion</span> <span class="o">=</span> <span class="n">_ION_CHARGES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atnos</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">ion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ion</span>
+                        <span class="n">total</span> <span class="o">+=</span> <span class="n">ion</span>
+                        <span class="n">n_ok</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">total</span> <span class="o">+=</span> <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="k">continue</span>
+                <span class="n">local</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fragment</span><span class="p">)}</span>
+                <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">local</span><span class="p">]</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                    <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                        <span class="n">mol</span><span class="o">.</span><span class="n">AddAtom</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">(</span><span class="n">atnos</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+                        <span class="n">mol</span><span class="o">.</span><span class="n">AddBond</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">local</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">Chem</span><span class="o">.</span><span class="n">BondType</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">)</span>
+                    <span class="n">conformer</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Conformer</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fragment</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                        <span class="n">conformer</span><span class="o">.</span><span class="n">SetAtomPosition</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">xyzs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="n">mol</span><span class="o">.</span><span class="n">AddConformer</span><span class="p">(</span><span class="n">conformer</span><span class="p">,</span> <span class="n">assignId</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">mol</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetMol</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">rdDetermineBonds</span><span class="o">.</span><span class="n">DetermineBondOrders</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">orders</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+                        <span class="n">bond</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetBondBetweenAtoms</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">local</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                        <span class="n">orders</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">to_order</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bond</span><span class="o">.</span><span class="n">GetBondType</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">orders</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="k">continue</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">orders</span><span class="p">,</span> <span class="n">mol</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">n_failed</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">total</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">q</span><span class="p">,</span> <span class="n">orders</span><span class="p">,</span> <span class="n">mol</span> <span class="o">=</span> <span class="n">result</span>
+                <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                    <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtomWithIdx</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">()</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="n">q</span>
+                <span class="n">n_ok</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">RDLogger</span><span class="o">.</span><span class="n">EnableLog</span><span class="p">(</span><span class="s2">"rdApp.*"</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_ok</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
+                <span class="n">j</span><span class="o">=</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
+                <span class="n">bondorder</span><span class="o">=</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="s2">"formal_charge"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="s2">"formal_charge"</span><span class="p">,</span> <span class="n">coltype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="s2">"formal_charge"</span><span class="p">][</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">formal</span>
+        <span class="k">if</span> <span class="n">charge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">total</span> <span class="o">!=</span> <span class="n">charge</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"The molecules' charges add up to </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">, not the net charge "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s2">: check the bond orders."</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">n_ok</span><span class="p">,</span> <span class="n">n_failed</span></div>
 
 
     <span class="nd">@staticmethod</span>

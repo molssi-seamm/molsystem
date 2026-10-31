@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.10.28 documentation</title>
+    <title>History &#8212; MolSystem 2026.10.31 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=bb9c4767"></script>
+    <script src="_static/documentation_options.js?v=58b82035"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.28" />
+  <meta name="docsearch:version" content="2026.10.31" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,6 +506,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
+<dt>2026.10.31 – Bond orders for perceived bonds</dt><dd><ul class="simple">
+<li><p>New <code class="docutils literal notranslate"><span class="pre">assign_bond_orders()</span></code> gives the bonds that <code class="docutils literal notranslate"><span class="pre">perceive_bonds()</span></code> finds
+their bond orders, and the atoms their formal charges, molecule by molecule with
+RDKit’s DetermineBondOrders. Perceived bonds are single bonds, so a SMILES of a
+structure read from an extended XYZ file read ethylene as <code class="docutils literal notranslate"><span class="pre">[CH2+][CH2-]</span></code> and
+acetone as <code class="docutils literal notranslate"><span class="pre">C[C+](C)[O-]</span></code>, and the Thermochemistry step built the wrong CBH
+fragments from them. Ions such as Li+ are recognized; hypervalent molecules such
+as PF6-, which RDKit cannot handle, keep their single bonds. Radicals and periodic
+configurations are left alone.</p></li>
+</ul>
+</dd>
 <dt>2026.10.28 – Bugfix: SMILES of radicals and ions</dt><dd><ul class="simple">
 <li><p>The SMILES and RDKit molecules of radicals came out as anions – the ethyl radical
 as [CH2-]C, the methoxy radical as C[O-] – and of some cations as anions too

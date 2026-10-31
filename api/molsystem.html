@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.10.28 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.10.31 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=bb9c4767"></script>
+    <script src="../_static/documentation_options.js?v=58b82035"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.28" />
+  <meta name="docsearch:version" content="2026.10.31" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -2678,6 +2678,34 @@ structure.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for handling topology in a configuration.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.assign_bond_orders">
+<span class="sig-name descname"><span class="pre">assign_bond_orders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.assign_bond_orders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.assign_bond_orders" title="Link to this definition">#</a></dt>
+<dd><p>Assign bond orders to the perceived (single) bonds, molecule by molecule.</p>
+<p><a class="reference internal" href="#molsystem.topology.TopologyMixin.perceive_bonds" title="molsystem.topology.TopologyMixin.perceive_bonds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">perceive_bonds()</span></code></a> gives connectivity only, so ethylene would be read
+as [CH2+][CH2-] by anything that derives a SMILES or a Lewis structure.
+Each molecule (connected fragment) gets the bond orders and formal charges
+of RDKit’s <code class="docutils literal notranslate"><span class="pre">DetermineBondOrders</span></code>, trying the charges 0, -1, +1, -2 and +2
+in turn and keeping the first that gives a valid structure; single atoms of
+the alkali and alkaline-earth metals and of the halogens are given their
+usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent
+PF6-, whose single bonds are already its Lewis structure) keeps its bonds.</p>
+<p>Only closed-shell, non-periodic configurations are handled: RDKit’s method
+assumes paired electrons, and a periodic cell’s bonds cross the cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>charge</strong> (<em>int = None</em>) – The net charge, if known, to check the molecules’ charges against.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of molecules assigned and the number that could not be. If
+the molecules’ charges do not add up to <cite>charge</cite>, a warning is logged.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(int, int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="molsystem.topology.TopologyMixin.bonded_neighbors">
 <span class="sig-name descname"><span class="pre">bonded_neighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/topology.html#TopologyMixin.bonded_neighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.topology.TopologyMixin.bonded_neighbors" title="Link to this definition">#</a></dt>
 <dd><p>The atoms bonded to each atom in the system.</p>
@@ -3735,6 +3763,7 @@ A general implementation for molecular and periodic systems.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.templates">molsystem.templates module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-molsystem.topology">molsystem.topology module</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin"><code class="docutils literal notranslate"><span class="pre">TopologyMixin</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.assign_bond_orders"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.assign_bond_orders()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.bonded_neighbors"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.bonded_neighbors()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.create_molecule_subsets"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.create_molecule_subsets()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#molsystem.topology.TopologyMixin.create_molecule_templates"><code class="docutils literal notranslate"><span class="pre">TopologyMixin.create_molecule_templates()</span></code></a></li>

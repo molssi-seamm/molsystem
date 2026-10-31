@@ -35,7 +35,21 @@ periodic configuration every periodic image within reach is considered and each 
 records the cell offset of its partner, so molecules straddling the cell boundary are
 bonded correctly and covalent crystals get all their bonds -- primitive diamond, for
 example, has four bonds between its two atoms through different images. All bonds are
-single bonds; bond orders are not assigned.
+single bonds: anything that derives a SMILES or Lewis structure from them would read
+ethylene as ``[CH2+][CH2-]``. For a molecule, ``assign_bond_orders()`` then gives the
+bonds their orders and the atoms their formal charges::
+
+    n_assigned, n_failed = configuration.assign_bond_orders(charge=0)
+
+Each molecule (connected fragment) gets the bond orders of RDKit's
+``DetermineBondOrders``, trying the charges 0, -1, +1, -2 and +2 in turn and keeping the
+first that gives a valid structure; single alkali, alkaline-earth and halogen atoms get
+their ionic charges. A molecule RDKit cannot handle, such as hypervalent PF6-, keeps its
+single bonds, which are already its Lewis structure. Given the net charge, the molecules'
+charges are checked against it and a mismatch is logged. Open-shell (a radical is
+indistinguishable from an ion by geometry alone, so set the multiplicity first) and
+periodic configurations are left alone. Read Structure does this for extended XYZ files
+when it perceives the bonds.
 
 The defaults can be adjusted per call::
 

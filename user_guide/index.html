@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; MolSystem 2026.10.28 documentation</title>
+    <title>User Guide &#8212; MolSystem 2026.10.31 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=bb9c4767"></script>
+    <script src="../_static/documentation_options.js?v=58b82035"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.28" />
+  <meta name="docsearch:version" content="2026.10.31" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -530,7 +530,21 @@ periodic configuration every periodic image within reach is considered and each 
 records the cell offset of its partner, so molecules straddling the cell boundary are
 bonded correctly and covalent crystals get all their bonds – primitive diamond, for
 example, has four bonds between its two atoms through different images. All bonds are
-single bonds; bond orders are not assigned.</p>
+single bonds: anything that derives a SMILES or Lewis structure from them would read
+ethylene as <code class="docutils literal notranslate"><span class="pre">[CH2+][CH2-]</span></code>. For a molecule, <code class="docutils literal notranslate"><span class="pre">assign_bond_orders()</span></code> then gives the
+bonds their orders and the atoms their formal charges:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">n_assigned</span><span class="p">,</span> <span class="n">n_failed</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">assign_bond_orders</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each molecule (connected fragment) gets the bond orders of RDKit’s
+<code class="docutils literal notranslate"><span class="pre">DetermineBondOrders</span></code>, trying the charges 0, -1, +1, -2 and +2 in turn and keeping the
+first that gives a valid structure; single alkali, alkaline-earth and halogen atoms get
+their ionic charges. A molecule RDKit cannot handle, such as hypervalent PF6-, keeps its
+single bonds, which are already its Lewis structure. Given the net charge, the molecules’
+charges are checked against it and a mismatch is logged. Open-shell (a radical is
+indistinguishable from an ion by geometry alone, so set the multiplicity first) and
+periodic configurations are left alone. Read Structure does this for extended XYZ files
+when it perceives the bonds.</p>
 <p>The defaults can be adjusted per call:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">perceive_bonds</span><span class="p">(</span>
     <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>            <span class="c1"># discard existing bonds first</span>
