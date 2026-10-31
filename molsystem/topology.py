@@ -19,6 +19,14 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
+#: The charges of isolated atoms that are ions: alkali and alkaline-earth metals and
+#: halogens, by atomic number
+_ION_CHARGES = {
+    **{z: 1 for z in (3, 11, 19, 37, 55)},
+    **{z: 2 for z in (4, 12, 20, 38, 56)},
+    **{z: -1 for z in (9, 17, 35, 53)},
+}
+
 
 # Elements that are never bonded by distance-based perception unless asked:
 # alkali and alkaline-earth metals, which are ions in molecular systems.
@@ -180,6 +188,137 @@ class TopologyMixin:
             **kwargs,
         )
         return len(Is)
+
+    def assign_bond_orders(self, charge=None):
+        """Assign bond orders to the perceived (single) bonds, molecule by molecule.
+
+        :meth:`perceive_bonds` gives connectivity only, so ethylene would be read
+        as [CH2+][CH2-] by anything that derives a SMILES or a Lewis structure.
+        Each molecule (connected fragment) gets the bond orders and formal charges
+        of RDKit's ``DetermineBondOrders``, trying the charges 0, -1, +1, -2 and +2
+        in turn and keeping the first that gives a valid structure; single atoms of
+        the alkali and alkaline-earth metals and of the halogens are given their
+        usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent
+        PF6-, whose single bonds are already its Lewis structure) keeps its bonds.
+
+        Only closed-shell, non-periodic configurations are handled: RDKit's method
+        assumes paired electrons, and a periodic cell's bonds cross the cell.
+
+        Parameters
+        ----------
+        charge : int = None
+            The net charge, if known, to check the molecules' charges against.
+
+        Returns
+        -------
+        (int, int)
+            The number of molecules assigned and the number that could not be. If
+            the molecules' charges do not add up to `charge`, a warning is logged.
+        """
+        from rdkit import Chem, RDLogger
+        from rdkit.Chem import rdDetermineBonds
+
+        if self.periodicity != 0 or self.bonds.n_bonds == 0:
+            return 0, 0
+        if self.spin_multiplicity not in (None, 1):
+            return 0, 0
+
+        ids = list(self.atoms.ids)
+        index = {_id: k for k, _id in enumerate(ids)}
+        rows = [(index[row["i"]], index[row["j"]]) for row in self.bonds.bonds()]
+        atnos = [int(a) for a in self.atoms.atomic_numbers]
+        xyzs = [
+            [float(x) for x in xyz]
+            for xyz in self.atoms.get_coordinates(fractionals=False)
+        ]
+
+        whole = Chem.RWMol()
+        for atno in atnos:
+            whole.AddAtom(Chem.Atom(atno))
+        for i, j in rows:
+            whole.AddBond(i, j, Chem.BondType.SINGLE)
+        fragments = Chem.GetMolFrags(whole.GetMol(), sanitizeFrags=False)
+
+        to_order = {
+            Chem.BondType.SINGLE: 1,
+            Chem.BondType.DOUBLE: 2,
+            Chem.BondType.TRIPLE: 3,
+            Chem.BondType.AROMATIC: 5,
+        }
+        order = {pair: 1 for pair in rows}
+        formal = [0] * len(atnos)
+        if "formal_charge" in self.atoms:
+            formal = [int(q or 0) for q in self.atoms.get_column_data("formal_charge")]
+        n_ok = n_failed = 0
+        total = 0
+        RDLogger.DisableLog("rdApp.*")
+        try:
+            for fragment in fragments:
+                if len(fragment) == 1:
+                    k = fragment[0]
+                    ion = _ION_CHARGES.get(atnos[k])
+                    if ion is not None:
+                        formal[k] = ion
+                        total += ion
+                        n_ok += 1
+                    else:
+                        total += formal[k]
+                    continue
+                local = {k: n for n, k in enumerate(fragment)}
+                pairs = [(i, j) for i, j in rows if i in local]
+                result = None
+                for q in (0, -1, 1, -2, 2):
+                    mol = Chem.RWMol()
+                    for k in fragment:
+                        mol.AddAtom(Chem.Atom(atnos[k]))
+                    for i, j in pairs:
+                        mol.AddBond(local[i], local[j], Chem.BondType.SINGLE)
+                    conformer = Chem.Conformer(len(fragment))
+                    for k in fragment:
+                        conformer.SetAtomPosition(local[k], xyzs[k])
+                    mol.AddConformer(conformer, assignId=True)
+                    mol = mol.GetMol()
+                    try:
+                        rdDetermineBonds.DetermineBondOrders(mol, charge=q)
+                    except Exception:
+                        continue
+                    orders = {}
+                    for i, j in pairs:
+                        bond = mol.GetBondBetweenAtoms(local[i], local[j])
+                        orders[(i, j)] = to_order.get(bond.GetBondType())
+                    if None in orders.values():
+                        continue
+                    result = (q, orders, mol)
+                    break
+                if result is None:
+                    n_failed += 1
+                    total += sum(formal[k] for k in fragment)
+                    continue
+                q, orders, mol = result
+                order.update(orders)
+                for k in fragment:
+                    formal[k] = mol.GetAtomWithIdx(local[k]).GetFormalCharge()
+                total += q
+                n_ok += 1
+        finally:
+            RDLogger.EnableLog("rdApp.*")
+
+        if n_ok > 0:
+            self.bonds.delete()
+            self.bonds.append(
+                i=[ids[i] for i, _ in rows],
+                j=[ids[j] for _, j in rows],
+                bondorder=[order[pair] for pair in rows],
+            )
+            if "formal_charge" not in self.atoms:
+                self.atoms.add_attribute("formal_charge", coltype="int", default=0)
+            self.atoms["formal_charge"][0:] = formal
+        if charge is not None and total != charge:
+            logger.warning(
+                f"The molecules' charges add up to {total}, not the net charge "
+                f"{charge}: check the bond orders."
+            )
+        return n_ok, n_failed
 
     @staticmethod
     def _covalent_radii(symbols):

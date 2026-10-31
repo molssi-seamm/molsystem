@@ -1,6 +1,16 @@
 =======
 History
 =======
+2026.10.31 -- Bond orders for perceived bonds
+    * New ``assign_bond_orders()`` gives the bonds that ``perceive_bonds()`` finds
+      their bond orders, and the atoms their formal charges, molecule by molecule with
+      RDKit's DetermineBondOrders. Perceived bonds are single bonds, so a SMILES of a
+      structure read from an extended XYZ file read ethylene as ``[CH2+][CH2-]`` and
+      acetone as ``C[C+](C)[O-]``, and the Thermochemistry step built the wrong CBH
+      fragments from them. Ions such as Li+ are recognized; hypervalent molecules such
+      as PF6-, which RDKit cannot handle, keep their single bonds. Radicals and periodic
+      configurations are left alone.
+
 2026.10.28 -- Bugfix: SMILES of radicals and ions
     * The SMILES and RDKit molecules of radicals came out as anions -- the ethyl radical
       as [CH2-]C, the methoxy radical as C[O-] -- and of some cations as anions too
