@@ -35,6 +35,201 @@ IONIC_ELEMENTS = ("Li", "Na", "K", "Rb", "Cs", "Fr", "Be", "Mg", "Ca", "Sr", "Ba
 # Default maximum number of bonds per element for perception; others unlimited.
 MAX_BONDS = {"H": 1}
 
+#: The metals for bond orders (assign_bond_orders): the alkali and alkaline-earth
+#: metals, the transition metals, lanthanides and actinides, and the heavier
+#: post-transition metals. B, Si, Ge, As, Sb, Se and Te are bonded covalently.
+METALS = frozenset(
+    (
+        "Li Na K Rb Cs Fr Be Mg Ca Sr Ba Ra Al Ga In Tl Sn Pb Bi Po "
+        "Sc Ti V Cr Mn Fe Co Ni Cu Zn Y Zr Nb Mo Tc Ru Rh Pd Ag Cd "
+        "La Hf Ta W Re Os Ir Pt Au Hg Rf Db Sg Bh Hs Mt Ds Rg Cn "
+        "Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu "
+        "Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr"
+    ).split()
+)
+
+#: The charges tried for a ligand, in order of preference among equals
+_LIGAND_CHARGES = (0, -1, -2, 1, -3, 2)
+
+
+def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
+    """The Lewis structure of a ligand: a fragment of a metal complex without its
+    metals, as RDKit's DetermineBondOrders gives it.
+
+    Of the charges that give a structure without radicals, the one with the least
+    charge separation (the smallest sum of |formal charges|) is taken, then the
+    smallest |charge|, then a negative one: CO is neutral ([C-]#[O+]), Cp, Cl and
+    OAc are -1, O is -2, H is -1. RDKit puts no lone pair on, e.g., the
+    two-coordinate N of NMe2-, so a saturated ligand that has no structure
+    otherwise gets its missing valence as negative charge on its donor atoms.
+
+    Parameters
+    ----------
+    atnos, xyzs : [int], [[float]]
+        The atomic numbers and Cartesian coordinates of all the atoms.
+    atoms : [int]
+        The ligand's atoms (indices into atnos).
+    pairs : [(int, int)]
+        The ligand's bonds (indices into atnos).
+    donors : set(int)
+        Its atoms bonded to a metal.
+
+    Returns
+    -------
+    ({(int, int): int}, {int: int}, int) or None
+        The bond orders by pair, the formal charges by atom and the ligand's
+        charge; or None if it has no closed-shell structure.
+    """
+    from rdkit import Chem
+    from rdkit.Chem import rdDetermineBonds
+
+    to_order = {
+        Chem.BondType.SINGLE: 1,
+        Chem.BondType.DOUBLE: 2,
+        Chem.BondType.TRIPLE: 3,
+        Chem.BondType.AROMATIC: 5,
+    }
+    local = {k: n for n, k in enumerate(atoms)}
+
+    def molecule():
+        mol = Chem.RWMol()
+        for k in atoms:
+            mol.AddAtom(Chem.Atom(atnos[k]))
+        for i, j in pairs:
+            mol.AddBond(local[i], local[j], Chem.BondType.SINGLE)
+        conformer = Chem.Conformer(len(atoms))
+        for k in atoms:
+            conformer.SetAtomPosition(local[k], xyzs[k])
+        mol.AddConformer(conformer, assignId=True)
+        return mol.GetMol()
+
+    def result(mol, q):
+        orders = {}
+        for i, j in pairs:
+            bond = mol.GetBondBetweenAtoms(local[i], local[j])
+            orders[(i, j)] = to_order.get(bond.GetBondType())
+        if None in orders.values():
+            return None
+        charges = {k: mol.GetAtomWithIdx(local[k]).GetFormalCharge() for k in atoms}
+        return orders, charges, q
+
+    best = None
+    for q in _LIGAND_CHARGES:
+        mol = molecule()
+        try:
+            rdDetermineBonds.DetermineBondOrders(
+                mol, charge=q, allowChargedFragments=True, embedChiral=False
+            )
+        except Exception:
+            continue
+        if any(a.GetNumRadicalElectrons() for a in mol.GetAtoms()):
+            continue
+        score = (sum(abs(a.GetFormalCharge()) for a in mol.GetAtoms()), abs(q), q > 0)
+        if best is None or score < best[0]:
+            got = result(mol, q)
+            if got is not None:
+                best = (score, got)
+    if best is not None:
+        return best[1]
+
+    # A saturated ligand whose donors lack valence: anions on the donors (NMe2-)
+    table = Chem.GetPeriodicTable()
+    mol = Chem.RWMol(molecule())
+    q = 0
+    for atom in mol.GetAtoms():
+        missing = table.GetDefaultValence(atom.GetAtomicNum()) - atom.GetDegree()
+        if missing > 0:
+            if atoms[atom.GetIdx()] not in donors or missing > 2:
+                return None
+            atom.SetFormalCharge(-missing)
+            q -= missing
+        atom.SetNoImplicit(True)
+    try:
+        Chem.SanitizeMol(mol)
+    except Exception:
+        return None
+    if any(a.GetNumRadicalElectrons() for a in mol.GetAtoms()):
+        return None
+    return result(mol, q)
+
+
+#: A metal's bond to the central atom of a four-membered chelate ring is dropped
+#: when it is this much (Å) longer than its bonds to both chelating atoms
+CHELATE_CENTER_MARGIN = 0.3
+
+
+def _drop_chelate_centers(metal, Is, Js, Os, Ls):
+    """Drop a metal's perceived bond to the central atom of a four-membered chelate
+    ring: the C of a kappa-2 carboxylate, the N of a kappa-2 nitrate. The wider
+    tolerance for metals (needed for pi ligands) reaches it, about 0.4 Å further
+    than the two O, but it is no donor. A bond is dropped when the atom has two
+    other neighbors bonded to the same metal, both by bonds at least
+    CHELATE_CENTER_MARGIN shorter; a pi ligand's atoms are all at about the same
+    distance from the metal (within 0.15 Å), so its bonds are kept.
+
+    Parameters
+    ----------
+    metal : numpy.ndarray of bool
+        Whether each atom is a metal.
+    Is, Js, Os, Ls : [int], [int], [array], [float]
+        The bonds' atoms, cell offsets and lengths (Å).
+
+    Returns
+    -------
+    ([int], [int], [array])
+        Is, Js and Os without the dropped bonds.
+    """
+    length = {}
+    neighbors = {}
+    for a, b, d in zip(Is, Js, Ls):
+        length[(a, b)] = length[(b, a)] = d
+        neighbors.setdefault(a, set()).add(b)
+        neighbors.setdefault(b, set()).add(a)
+    drop = set()
+    for k, (a, b, d) in enumerate(zip(Is, Js, Ls)):
+        if metal[a] == metal[b]:
+            continue
+        m, x = (a, b) if metal[a] else (b, a)
+        shorter = [
+            y
+            for y in neighbors[x]
+            if y != m
+            and not metal[y]
+            and (m, y) in length
+            and d >= length[(m, y)] + CHELATE_CENTER_MARGIN
+        ]
+        if len(shorter) >= 2:
+            drop.add(k)
+    if not drop:
+        return Is, Js, Os
+    keep = [k for k in range(len(Is)) if k not in drop]
+    return [Is[k] for k in keep], [Js[k] for k in keep], [Os[k] for k in keep]
+
+
+def _components(atoms, pairs):
+    """The connected components of the graph of `atoms` joined by `pairs`."""
+    neighbors = {k: [] for k in atoms}
+    for i, j in pairs:
+        neighbors[i].append(j)
+        neighbors[j].append(i)
+    seen = set()
+    result = []
+    for start in atoms:
+        if start in seen:
+            continue
+        seen.add(start)
+        component = [start]
+        stack = [start]
+        while stack:
+            k = stack.pop()
+            for n in neighbors[k]:
+                if n not in seen:
+                    seen.add(n)
+                    component.append(n)
+                    stack.append(n)
+        result.append(sorted(component))
+    return result
+
 
 class TopologyMixin:
     """A mixin for handling topology in a configuration."""
@@ -44,6 +239,7 @@ class TopologyMixin:
         method="covalent radii",
         replace=False,
         tolerance=1.2,
+        metal_tolerance=1.3,
         radii=None,
         max_bonds=None,
         exclude=IONIC_ELEMENTS,
@@ -72,6 +268,11 @@ class TopologyMixin:
             configuration already has bonds, an error is raised.
         tolerance : float = 1.2
             The factor multiplying the sum of the covalent radii.
+        metal_tolerance : float = 1.3
+            The factor for pairs with a metal (:data:`METALS`), whose bonds to
+            pi ligands (Cp, arenes, dienes) are longer than covalent radii suggest:
+            at 1.2 the Cr-C bonds of (C6H3Me3)Cr(CO)3 are missed. None uses
+            ``tolerance``.
         radii : {str: float} = None
             Covalent radii in Å, by element symbol, overriding the defaults
             (Pyykkö radii from ``mendeleev``) for those elements.
@@ -125,7 +326,11 @@ class TopologyMixin:
 
         r_atom = np.array([radius[s] for s in symbols])
         active = np.array([s not in excluded for s in symbols])
-        cutoff = tolerance * 2.0 * r_atom[active].max() if active.any() else 0.0
+        metal = np.array([s in METALS for s in symbols])
+        if metal_tolerance is None:
+            metal_tolerance = tolerance
+        widest = max(tolerance, metal_tolerance) if metal.any() else tolerance
+        cutoff = widest * 2.0 * r_atom[active].max() if active.any() else 0.0
         if cutoff <= 0.0:
             return 0
 
@@ -137,7 +342,11 @@ class TopologyMixin:
             active[i]
             & active[j]
             & (dist > min_distance)
-            & (dist < tolerance * (r_atom[i] + r_atom[j]))
+            & (
+                dist
+                < np.where(metal[i] | metal[j], metal_tolerance, tolerance)
+                * (r_atom[i] + r_atom[j])
+            )
         )
         i, j, dist, offsets = i[keep], j[keep], dist[keep], offsets[keep]
 
@@ -146,7 +355,7 @@ class TopologyMixin:
         count = np.zeros(n_atoms, dtype=int)
         unlimited = 10**9
         limit = np.array([limits.get(s, unlimited) for s in symbols])
-        Is, Js, Os = [], [], []
+        Is, Js, Os, Ls = [], [], [], []
         for k in order:
             a, b = int(i[k]), int(j[k])
             if a == b:
@@ -162,6 +371,10 @@ class TopologyMixin:
             Is.append(a)
             Js.append(b)
             Os.append(offsets[k])
+            Ls.append(float(dist[k]))
+
+        if self.periodicity == 0 and metal.any():
+            Is, Js, Os = _drop_chelate_centers(metal, Is, Js, Os, Ls)
 
         if len(Is) == 0:
             return 0
@@ -201,13 +414,29 @@ class TopologyMixin:
         usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent
         PF6-, whose single bonds are already its Lewis structure) keeps its bonds.
 
-        Only closed-shell, non-periodic configurations are handled: RDKit's method
-        assumes paired electrons, and a periodic cell's bonds cross the cell.
+        Metal complexes (molecules with an atom in :data:`METALS`) are ionic +
+        dative: each ligand, a fragment of the molecule without its metals, gets
+        its closed-shell Lewis structure with the least charge separation (CO 0,
+        Cp-, Cl-, OAc-, NMe2-, O2-; see :func:`_ligand_lewis`); every
+        metal-ligand bond is a dative bond from the ligand's donor atom to the
+        metal (:data:`molsystem.bonds.DATIVE`); metal-metal bonds are single
+        bonds; and the metals carry the rest of the net charge, shared as evenly
+        as integers allow. The unpaired electrons of an open-shell complex are
+        the metals', so complexes are assigned whatever their spin multiplicity.
+        The metals' formal charges are bookkeeping, not oxidation states. Long
+        metal-ligand contacts, agostic hydrogens, bridging hydrides and clusters
+        depend on which bonds were perceived and are not checked.
+
+        Only closed-shell, non-periodic configurations are handled otherwise:
+        RDKit's method assumes paired electrons, and a periodic cell's bonds cross
+        the cell.
 
         Parameters
         ----------
         charge : int = None
-            The net charge, if known, to check the molecules' charges against.
+            The net charge, if known, to check the molecules' charges against. The
+            metals of complexes take what is left of it (of the configuration's
+            charge if not given).
 
         Returns
         -------
@@ -218,15 +447,17 @@ class TopologyMixin:
         from rdkit import Chem, RDLogger
         from rdkit.Chem import rdDetermineBonds
 
+        from .bonds import DATIVE
+
         if self.periodicity != 0 or self.bonds.n_bonds == 0:
-            return 0, 0
-        if self.spin_multiplicity not in (None, 1):
             return 0, 0
 
         ids = list(self.atoms.ids)
         index = {_id: k for k, _id in enumerate(ids)}
         rows = [(index[row["i"]], index[row["j"]]) for row in self.bonds.bonds()]
         atnos = [int(a) for a in self.atoms.atomic_numbers]
+        symbols = list(self.atoms.symbols)
+        is_metal = [symbol in METALS for symbol in symbols]
         xyzs = [
             [float(x) for x in xyz]
             for xyz in self.atoms.get_coordinates(fractionals=False)
@@ -238,6 +469,9 @@ class TopologyMixin:
         for i, j in rows:
             whole.AddBond(i, j, Chem.BondType.SINGLE)
         fragments = Chem.GetMolFrags(whole.GetMol(), sanitizeFrags=False)
+        complexes = [f for f in fragments if len(f) > 1 and any(is_metal[k] for k in f)]
+        if self.spin_multiplicity not in (None, 1) and not complexes:
+            return 0, 0
 
         to_order = {
             Chem.BondType.SINGLE: 1,
@@ -251,6 +485,7 @@ class TopologyMixin:
             formal = [int(q or 0) for q in self.atoms.get_column_data("formal_charge")]
         n_ok = n_failed = 0
         total = 0
+        closed_shell = self.spin_multiplicity in (None, 1)
         RDLogger.DisableLog("rdApp.*")
         try:
             for fragment in fragments:
@@ -263,6 +498,11 @@ class TopologyMixin:
                         n_ok += 1
                     else:
                         total += formal[k]
+                    continue
+                if fragment in complexes:
+                    continue  # after the other molecules, for the metals' charges
+                if not closed_shell:
+                    total += sum(formal[k] for k in fragment)
                     continue
                 local = {k: n for n, k in enumerate(fragment)}
                 pairs = [(i, j) for i, j in rows if i in local]
@@ -300,16 +540,71 @@ class TopologyMixin:
                     formal[k] = mol.GetAtomWithIdx(local[k]).GetFormalCharge()
                 total += q
                 n_ok += 1
+
+            # The metal complexes: ligands, dative bonds, and the metals' charges
+            metals = []
+            for fragment in complexes:
+                in_fragment = set(fragment)
+                metals.extend(k for k in fragment if is_metal[k])
+                ligand_pairs = [
+                    (i, j)
+                    for i, j in rows
+                    if i in in_fragment and not is_metal[i] and not is_metal[j]
+                ]
+                donors = set()
+                for i, j in rows:
+                    if i in in_fragment and is_metal[i] != is_metal[j]:
+                        donors.add(j if is_metal[i] else i)
+                        order[(i, j)] = DATIVE if is_metal[j] else -DATIVE
+                    elif i in in_fragment and is_metal[i] and is_metal[j]:
+                        order[(i, j)] = 1
+                failed = False
+                for ligand in _components(
+                    [k for k in fragment if not is_metal[k]], ligand_pairs
+                ):
+                    pairs = [(i, j) for i, j in ligand_pairs if i in ligand]
+                    got = _ligand_lewis(atnos, xyzs, ligand, pairs, donors)
+                    if got is None:
+                        failed = True
+                        total += sum(formal[k] for k in ligand)
+                        continue
+                    orders, charges, q = got
+                    order.update(orders)
+                    for k, value in charges.items():
+                        formal[k] = value
+                    total += q
+                if failed:
+                    n_failed += 1
+                    logger.warning(
+                        "A ligand of a metal complex has no closed-shell Lewis "
+                        "structure; its bonds are left single."
+                    )
+                else:
+                    n_ok += 1
+            if metals:
+                if charge is None:
+                    charge = getattr(self, "charge", None) or 0
+                rest = charge - total
+                share = [rest // len(metals)] * len(metals)
+                for k in range(rest - sum(share)):
+                    share[k] += 1
+                for k, q in zip(metals, share):
+                    formal[k] = q
+                total += rest
         finally:
             RDLogger.EnableLog("rdApp.*")
 
         if n_ok > 0:
+            Is, Js, Os = [], [], []
+            for i, j in rows:
+                bondorder = order[(i, j)]
+                if bondorder == -DATIVE:  # the donor is j
+                    i, j, bondorder = j, i, DATIVE
+                Is.append(ids[i])
+                Js.append(ids[j])
+                Os.append(bondorder)
             self.bonds.delete()
-            self.bonds.append(
-                i=[ids[i] for i, _ in rows],
-                j=[ids[j] for _, j in rows],
-                bondorder=[order[pair] for pair in rows],
-            )
+            self.bonds.append(i=Is, j=Js, bondorder=Os)
             if "formal_charge" not in self.atoms:
                 self.atoms.add_attribute("formal_charge", coltype="int", default=0)
             self.atoms["formal_charge"][0:] = formal

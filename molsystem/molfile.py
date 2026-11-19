@@ -6,6 +6,7 @@ import logging
 import time
 
 from molsystem import elements
+from .bonds import dative_donor_acceptor, DATIVE
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,14 @@ class MolFileMixin:
         count = 0
         for row in bonds.bonds():
             count += 1
-            lines.append(f"M  V30 {count} {row['bondorder']} " f"{row['i']} {row['j']}")
+            dative = dative_donor_acceptor(row["i"], row["j"], row["bondorder"])
+            if dative is not None:
+                # MDL type 9 runs from the donor to the acceptor
+                lines.append(f"M  V30 {count} {DATIVE} {dative[0]} {dative[1]}")
+            else:
+                lines.append(
+                    f"M  V30 {count} {row['bondorder']} " f"{row['i']} {row['j']}"
+                )
         lines.append("M  V30 END BOND")
         lines.append("M  V30 END CTAB")
         lines.append("M  END")

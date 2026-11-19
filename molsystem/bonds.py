@@ -19,6 +19,23 @@ from .frozencolumn import _FrozenColumn
 
 logger = logging.getLogger(__name__)
 
+#: Bond order of a dative (coordinate) bond from atom i, the donor, to atom j, the
+#: acceptor, as MDL's bond type 9. Bonds are stored with i < j, so a dative bond
+#: whose donor is the second atom is stored as DATIVE_REVERSED: 9 and 10 together
+#: keep the direction, donor -> acceptor (e.g. [C-]#[O+] -> Fe).
+DATIVE = 9
+DATIVE_REVERSED = 10
+DATIVE_ORDERS = (DATIVE, DATIVE_REVERSED)
+
+
+def dative_donor_acceptor(i, j, bondorder):
+    """(donor, acceptor) of a stored dative bond (i, j, bondorder), else None."""
+    if bondorder == DATIVE:
+        return i, j
+    if bondorder == DATIVE_REVERSED:
+        return j, i
+    return None
+
 
 def grouped(iterable, n):
     "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,...s3n-1), ..."
@@ -244,7 +261,18 @@ class _Bonds(_Table):
         if isinstance(op2s, int):
             op2s = [op2s]
 
-        for i_, j_, op1, op2 in zip(i, j, op1s, op2s):
+        # A dative bond keeps its direction (donor -> acceptor) through the swap
+        # to i < j: DATIVE becomes DATIVE_REVERSED and vice versa.
+        orders = kwargs.get("bondorder")
+        if orders is not None:
+            if isinstance(orders, (int, np.integer)):
+                orders = [int(orders)] * len(i)
+            else:
+                orders = list(orders)
+                if len(orders) == 1 and len(i) > 1:
+                    orders = orders * len(i)
+
+        for k, (i_, j_, op1, op2) in enumerate(zip(i, j, op1s, op2s)):
             if not isinstance(i_, int) or not isinstance(j_, int):
                 raise TypeError("'i' and 'j', the atom indices, must be integers")
             if i_ < j_:
@@ -257,6 +285,10 @@ class _Bonds(_Table):
                 j2.append(i_)
                 symop1.append(op2)
                 symop2.append(op1)
+                if orders is not None and orders[k] in DATIVE_ORDERS:
+                    orders[k] = DATIVE_REVERSED if orders[k] == DATIVE else DATIVE
+        if orders is not None:
+            kwargs["bondorder"] = orders
 
         ids = super().append(i=i2, j=j2, **kwargs)
 
