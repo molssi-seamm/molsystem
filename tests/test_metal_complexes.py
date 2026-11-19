@@ -208,3 +208,35 @@ def test_the_center_of_a_chelate_ring_is_no_donor(configuration):
     assert ("C", "La") not in pairs and ("La", "O") in pairs
     charges = configuration.atoms.get_column_data("formal_charge")
     assert charges[0] == 3 and sum(charges) == 2
+
+
+def test_lone_atom_ligands_are_anions(configuration, system):
+    """A lone H, C, N on a metal is H-, C4-, N3- (PM-8: FeH, ZrC, ZrN), not a
+    covalent hydride or a bare atom."""
+    _build(configuration, ["Fe", "H"], [[0, 0, 0], [1.6, 0, 0]], multiplicity=4)
+    assert _smiles(configuration) == "[H-]->[Fe+]"
+    carbide = system.create_configuration(name="ZrC")
+    _build(carbide, ["Zr", "C"], [[0, 0, 0], [1.8, 0, 0]], multiplicity=3)
+    assert carbide.atoms.get_column_data("formal_charge") == [4, -4]
+    nitride = system.create_configuration(name="ZrN")
+    _build(nitride, ["Zr", "N"], [[0, 0, 0], [1.7, 0, 0]], multiplicity=2)
+    assert nitride.atoms.get_column_data("formal_charge") == [3, -3]
+
+
+def test_alkali_metals_take_their_charge_first(configuration):
+    """Na bonded in NaZrF5 (when the alkali metals are not left out of the
+    perception) is Na+, and Zr takes the rest: Zr4+, not Na2+/Zr3+."""
+    d = 1.95
+    symbols = ["Zr", "F", "F", "F", "F", "F", "Na"]
+    xyz = [[0, 0, 0], [d, 0, 0], [-d, 0, 0], [0, d, 0], [0, -d, 0], [0, 0, d]]
+    xyz.append([0, 0, d + 2.2])
+    xyz = np.asarray(xyz, dtype=float)
+    configuration.atoms.append(
+        x=xyz[:, 0].tolist(), y=xyz[:, 1].tolist(), z=xyz[:, 2].tolist(), symbol=symbols
+    )
+    configuration.charge = 0
+    configuration.spin_multiplicity = 1
+    configuration.perceive_bonds(exclude=())
+    configuration.assign_bond_orders(charge=0)
+    charges = configuration.atoms.get_column_data("formal_charge")
+    assert charges[0] == 4 and charges[-1] == 1 and sum(charges) == 0
