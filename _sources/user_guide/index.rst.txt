@@ -41,15 +41,27 @@ bonds their orders and the atoms their formal charges::
 
     n_assigned, n_failed = configuration.assign_bond_orders(charge=0)
 
-Each molecule (connected fragment) gets the bond orders of RDKit's
-``DetermineBondOrders``, trying the charges 0, -1, +1, -2 and +2 in turn and keeping the
-first that gives a valid structure; single alkali, alkaline-earth and halogen atoms get
-their ionic charges. A molecule RDKit cannot handle, such as hypervalent PF6-, keeps its
-single bonds, which are already its Lewis structure. Given the net charge, the molecules'
-charges are checked against it and a mismatch is logged. Open-shell (a radical is
-indistinguishable from an ion by geometry alone, so set the multiplicity first) and
-periodic configurations are left alone. Read Structure does this for extended XYZ and
-MOPAC files when it perceives the bonds.
+Each molecule (connected fragment) without metals gets the bond orders of RDKit's
+``DetermineBondOrders``. The first closed-shell structure is taken, trying the molecule's
+own charge when it is the only molecule, and otherwise the charges 0, -1, +1, -2 and +2
+in turn; a structure without formal charges is tried before one with them (N#As, not
+[N+]#[As-]). Failing that, a structure with as many radical electrons as the spin
+multiplicity says is taken (the ethyl radical; the vinyl radical, from the closed-shell
+anion). A molecule with neither keeps its single bonds, with radical electrons where its
+atoms lack valence: Ge2 is [Ge][Ge] and GeC [C][Ge], not charge-separated. A molecule
+RDKit cannot handle at all, such as hypervalent PF6-, keeps its single bonds, which are
+already its Lewis structure. Single alkali, alkaline-earth and halogen atoms get their
+ionic charges. Given the net charge, the molecules' charges are checked against it and
+a mismatch is logged. The Lewis structure does not depend on the spin multiplicity:
+triplet AsN is N#[As]. Periodic configurations are left alone. Read Structure does this
+for extended XYZ and MOPAC files when it perceives the bonds.
+
+The radical electrons are stored with the atoms, in the optional ``radical_electrons``
+attribute (as the formal charges are in ``formal_charge``), and SMILES and RDKit
+molecules use them as they are rather than fitting the charges and radicals to the spin
+multiplicity. SDF files hold them as ``M  RAD`` for one or two radical electrons on an
+atom and, since MDL files cannot hold more (three on each Ge of [Ge][Ge]), also as the
+data item ``SEAMM|radical electrons|json|``.
 
 Metal complexes
 ---------------
@@ -61,11 +73,13 @@ one convention, ionic + dative:
   bond order 9 (MDL's bond type 9, RDKit's ``DATIVE``);
 * each ligand -- a fragment of the complex without its metals -- has its closed-shell
   Lewis structure with the least charge separation: CO neutral (``[C-]#[O+]``), Cp-,
-  Cl-, acetate, NMe2-, O2-, H-; a pi ligand (Cp, arene, diene) has a dative bond from
-  each of its bonded atoms;
+  Cl-, acetate, NMe2-; a lone atom is the anion of its default valence: H-, O2-, N3-,
+  C4-, Si4-; a pi ligand (Cp, arene, diene) has a dative bond from each of its bonded
+  atoms;
 * metal-metal bonds are single bonds;
-* the metals carry the rest of the net charge, shared as evenly as integers allow:
-  Fe(CO)5 is Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+.
+* the metals carry the rest of the net charge: the alkali metals +1 and alkaline-earth
+  metals +2, the others sharing what is left as evenly as integers allow. Fe(CO)5 is
+  Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+, ZrC Zr4+ and C4-, NaZrF5 Na+ and Zr4+.
 
 The metals' formal charges are bookkeeping, not always oxidation states. The unpaired
 electrons of an open-shell complex are the metal's, so complexes are assigned whatever

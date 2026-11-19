@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.11.19 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.11.19.1 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=a0728fa8"></script>
+    <script src="../_static/documentation_options.js?v=3a3ba519"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.19" />
+  <meta name="docsearch:version" content="2026.11.19.1" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -2718,27 +2718,30 @@ post-transition metals. B, Si, Ge, As, Sb, Se and Te are bonded covalently.</p>
 <dd><p>Assign bond orders to the perceived (single) bonds, molecule by molecule.</p>
 <p><a class="reference internal" href="#molsystem.topology.TopologyMixin.perceive_bonds" title="molsystem.topology.TopologyMixin.perceive_bonds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">perceive_bonds()</span></code></a> gives connectivity only, so ethylene would be read
 as [CH2+][CH2-] by anything that derives a SMILES or a Lewis structure.
-Each molecule (connected fragment) gets the bond orders and formal charges
-of RDKit’s <code class="docutils literal notranslate"><span class="pre">DetermineBondOrders</span></code>, trying the charges 0, -1, +1, -2 and +2
-in turn and keeping the first that gives a valid structure; single atoms of
-the alkali and alkaline-earth metals and of the halogens are given their
-usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent
-PF6-, whose single bonds are already its Lewis structure) keeps its bonds.</p>
+Each molecule (connected fragment) without metals gets the bond orders,
+formal charges and radical electrons of RDKit’s <code class="docutils literal notranslate"><span class="pre">DetermineBondOrders</span></code>:
+the first closed-shell structure of the charges tried (the molecule’s own
+charge when it is the only one, else 0, -1, +1, -2, +2), or failing that
+one with as many radical electrons as the spin multiplicity says (the
+ethyl or vinyl radical). A molecule with neither keeps its single bonds and
+gets radical electrons where its atoms lack valence (Ge2 as [Ge][Ge], GeC
+as [C][Ge], not charge-separated), when that keeps the net charge;
+otherwise (hypervalent PF6-, whose single bonds are already its Lewis
+structure) it keeps its bonds as they are. Single atoms of the alkali and
+alkaline-earth metals and of the halogens get their usual ionic charges.</p>
 <p>Metal complexes (molecules with an atom in <a class="reference internal" href="#molsystem.topology.METALS" title="molsystem.topology.METALS"><code class="xref py py-data docutils literal notranslate"><span class="pre">METALS</span></code></a>) are ionic +
 dative: each ligand, a fragment of the molecule without its metals, gets
 its closed-shell Lewis structure with the least charge separation (CO 0,
-Cp-, Cl-, OAc-, NMe2-, O2-; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ligand_lewis()</span></code>); every
+Cp-, Cl-, OAc-, NMe2-, O2-, H-, C4-; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ligand_lewis()</span></code>); every
 metal-ligand bond is a dative bond from the ligand’s donor atom to the
 metal (<a class="reference internal" href="#molsystem.bonds.DATIVE" title="molsystem.bonds.DATIVE"><code class="xref py py-data docutils literal notranslate"><span class="pre">molsystem.bonds.DATIVE</span></code></a>); metal-metal bonds are single
-bonds; and the metals carry the rest of the net charge, shared as evenly
+bonds; and the metals carry the rest of the net charge: alkali metals +1
+and alkaline-earth metals +2, the others sharing what is left as evenly
 as integers allow. The unpaired electrons of an open-shell complex are
-the metals’, so complexes are assigned whatever their spin multiplicity.
-The metals’ formal charges are bookkeeping, not oxidation states. Long
-metal-ligand contacts, agostic hydrogens, bridging hydrides and clusters
-depend on which bonds were perceived and are not checked.</p>
-<p>Only closed-shell, non-periodic configurations are handled otherwise:
-RDKit’s method assumes paired electrons, and a periodic cell’s bonds cross
-the cell.</p>
+the metals’. The metals’ formal charges are bookkeeping, not oxidation
+states. Long metal-ligand contacts, agostic hydrogens, bridging hydrides
+and clusters depend on which bonds were perceived and are not checked.</p>
+<p>Periodic configurations are left alone: a cell’s bonds cross the cell.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>charge</strong> (<em>int = None</em>) – The net charge, if known, to check the molecules’ charges against. The
