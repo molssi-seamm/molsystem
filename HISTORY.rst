@@ -1,6 +1,25 @@
 =======
 History
 =======
+2026.11.19 -- Metal complexes: dative bonds that keep their direction, ionic + dative bond orders
+    * Dative bonds (bond order 9, MDL's bond type 9) lost their direction: bonds are
+      stored with the lower atom index first, so a CO's C -> Fe bond was written back
+      as Fe -> C, which RDKit rejects, and converting to RDKit failed outright. A dative
+      bond whose donor is the second atom is now stored as bond order 10, and SDF and
+      MDL files, Open Babel and RDKit all get the donor first;
+      ``molsystem.dative_donor_acceptor()`` gives the donor and acceptor.
+    * ``assign_bond_orders()`` now handles metal complexes, ionic + dative: every
+      metal-ligand bond is a dative bond from the donor to the metal, each ligand has
+      its closed-shell Lewis structure with the least charge separation (CO neutral,
+      Cp-, Cl-, acetate, NMe2-), metal-metal bonds are single bonds, and the metals
+      carry the rest of the net charge. Open-shell complexes are handled too, with the
+      unpaired electrons on the metals; RDKit keeps the stored formal charges of a
+      complex rather than putting radicals on its ligands.
+    * ``perceive_bonds()`` has a wider tolerance for bonds to metals
+      (``metal_tolerance``, 1.3), so the bonds to Cp, arene and diene ligands are found,
+      and it does not bond a metal to the central atom of a four-membered chelate ring,
+      e.g. the C of a kappa-2 acetate.
+
 2026.10.31 -- Bond orders for perceived bonds
     * New ``assign_bond_orders()`` gives the bonds that ``perceive_bonds()`` finds
       their bond orders, and the atoms their formal charges, molecule by molecule with

@@ -19,6 +19,8 @@ except ModuleNotFoundError:
 
 from seamm_util import CompactJSONEncoder
 
+from .bonds import dative_donor_acceptor, DATIVE
+
 logger = logging.getLogger(__name__)
 
 references = [
@@ -115,7 +117,12 @@ class OpenBabelMixin:
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
         for row in self.bonds.bonds():
-            ob_mol.AddBond(index[row["i"]], index[row["j"]], row["bondorder"])
+            dative = dative_donor_acceptor(row["i"], row["j"], row["bondorder"])
+            if dative is not None:
+                # MDL bond type 9 runs from the donor, the bond's begin atom
+                ob_mol.AddBond(index[dative[0]], index[dative[1]], DATIVE)
+            else:
+                ob_mol.AddBond(index[row["i"]], index[row["j"]], row["bondorder"])
 
         if self.__class__.__name__ == "_Configuration":
             ob_mol.SetTotalCharge(self.charge)

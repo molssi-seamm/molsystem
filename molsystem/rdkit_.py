@@ -17,6 +17,8 @@ except ModuleNotFoundError:
 
 from seamm_util import CompactJSONEncoder
 
+from .bonds import dative_donor_acceptor, DATIVE, DATIVE_ORDERS
+
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
@@ -351,13 +353,21 @@ class RDKitMixin:
             5: Chem.BondType.AROMATIC,
         }
         for row in self.bonds.bonds():
-            if row["bondorder"] > 0:
+            dative = dative_donor_acceptor(row["i"], row["j"], row["bondorder"])
+            if dative is not None:
+                # Donor -> acceptor: RDKit's dative bonds run from the begin atom
+                rdk_mol.AddBond(
+                    index[dative[0]], index[dative[1]], Chem.BondType.DATIVE
+                )
+            elif row["bondorder"] in bond_types:
                 rdk_mol.AddBond(
                     index[row["i"]], index[row["j"]], bond_types[row["bondorder"]]
                 )
 
         # The formal charges and radicals. The hydrogens are all explicit, so RDKit
         # must not add any: an atom short of its valence is a radical or an ion.
+        # Dative bonds are left out: they add nothing to the donor's valence, and
+        # their acceptors, metals, take any valence.
         atnos = self.atoms.atomic_numbers
         bonds = [
             (index[row["i"]], index[row["j"]], row["bondorder"])
@@ -375,12 +385,21 @@ class RDKitMixin:
             fixed = self.atoms.get_column_data("formal_charge")
             if charge is not None and sum(fixed) != charge:
                 fixed = None
-        # The formal charges stored with the atoms are kept unless others fit the
-        # net charge and spin better, e.g. after the bonds have changed.
+        # A structure with dative bonds (a metal complex, ionic + dative: closed-shell
+        # ligands, the metals carrying the rest of the charge) keeps its stored
+        # formal charges. Its unpaired electrons are the metals' d or f electrons,
+        # not radicals on the ligands; RDKit keeps no radical electrons on metals,
+        # so they are only in the spin multiplicity, a property of the molecule.
+        has_dative = any(
+            row["bondorder"] in DATIVE_ORDERS for row in self.bonds.bonds()
+        )
         best = None
         tries = [(None, True), (None, False)]
         if fixed is not None:
             tries.insert(0, (fixed, True))
+        if has_dative and fixed is not None:
+            best = ((0, 0), list(fixed), [0] * len(atnos))
+            tries = []
         for known, prune in tries:
             charges, radicals = _charges_and_radicals(
                 atnos,
@@ -547,7 +566,10 @@ class RDKitMixin:
         for rdk_bond in mol.GetBonds():
             i = rdk_bond.GetBeginAtom().GetIdx()
             j = rdk_bond.GetEndAtom().GetIdx()
-            bondorder = bond_types[rdk_bond.GetBondType()]
+            if rdk_bond.GetBondType() == Chem.BondType.DATIVE:
+                bondorder = DATIVE  # begin (donor) -> end; kept through i < j
+            else:
+                bondorder = bond_types[rdk_bond.GetBondType()]
             Is.append(i)
             Js.append(j)
             BondOrders.append(bondorder)
