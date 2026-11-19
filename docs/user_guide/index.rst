@@ -79,7 +79,11 @@ one convention, ionic + dative:
 * metal-metal bonds are single bonds;
 * the metals carry the rest of the net charge: the alkali metals +1 and alkaline-earth
   metals +2, the others sharing what is left as evenly as integers allow. Fe(CO)5 is
-  Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+, ZrC Zr4+ and C4-, NaZrF5 Na+ and Zr4+.
+  Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+, ZrC Zr4+ and C4-, NaZrF5 Na+ and Zr4+. When
+  only alkali and alkaline-earth metals are present, the ligands take the charges that
+  balance them if they can (Cs2O2: the peroxide O2 2-, not O=O); otherwise these metals
+  give way (SrOH: Sr+). The same holds for their ions and the molecules beside them,
+  since perception leaves these metals unbonded.
 
 The metals' formal charges are bookkeeping, not always oxidation states. The unpaired
 electrons of an open-shell complex are the metal's, so complexes are assigned whatever
