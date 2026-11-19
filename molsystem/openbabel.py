@@ -124,13 +124,20 @@ class OpenBabelMixin:
 
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
+        has_dative = False
         for row in self.bonds.bonds():
             dative = dative_donor_acceptor(row["i"], row["j"], row["bondorder"])
             if dative is not None:
                 # MDL bond type 9 runs from the donor, the bond's begin atom
                 ob_mol.AddBond(index[dative[0]], index[dative[1]], DATIVE)
+                has_dative = True
             else:
                 ob_mol.AddBond(index[row["i"]], index[row["j"]], row["bondorder"])
+        if has_dative:
+            # Open Babel would perceive stereocentres (the Sn of SnPh4) and write a
+            # wedge from one, turning a dative bond around (Sn -> C). The 3D
+            # coordinates hold the stereochemistry.
+            ob_mol.SetChiralityPerceived(True)
 
         if self.__class__.__name__ == "_Configuration":
             ob_mol.SetTotalCharge(self.charge)

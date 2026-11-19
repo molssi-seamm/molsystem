@@ -60,7 +60,7 @@ METALS = frozenset(
 _LIGAND_CHARGES = (0, -1, -2, 1, -3, 2)
 
 
-def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
+def _ligand_lewis(atnos, xyzs, atoms, pairs, donors, all_options=False):
     """The Lewis structure of a ligand: a fragment of a metal complex without its
     metals, as RDKit's DetermineBondOrders gives it.
 
@@ -71,6 +71,8 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
     two-coordinate N of NMe2-, so a saturated ligand that has no structure
     otherwise gets its missing valence as negative charge on its donor atoms. A
     lone atom is the anion of its default valence: H-, Cl-, O2-, N3-, C4-.
+    With `all_options`, all the structures found, as [(score, (orders, charges,
+    charge))], best first.
 
     Parameters
     ----------
@@ -103,7 +105,8 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         # A lone atom: the closed-shell anion of its default valence, e.g. H-,
         # Cl-, O2-, N3-, C4-, Si4-
         valence = max(0, table.GetDefaultValence(atnos[atoms[0]]))
-        return {}, {atoms[0]: -valence}, -valence
+        got = ({}, {atoms[0]: -valence}, -valence)
+        return [((valence, valence, False), got)] if all_options else got
     local = {k: n for n, k in enumerate(atoms)}
 
     def molecule():
@@ -128,7 +131,7 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         charges = {k: mol.GetAtomWithIdx(local[k]).GetFormalCharge() for k in atoms}
         return orders, charges, q
 
-    best = None
+    options = []
     for q in _LIGAND_CHARGES:
         mol = molecule()
         try:
@@ -140,12 +143,12 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         if any(a.GetNumRadicalElectrons() for a in mol.GetAtoms()):
             continue
         score = (sum(abs(a.GetFormalCharge()) for a in mol.GetAtoms()), abs(q), q > 0)
-        if best is None or score < best[0]:
-            got = result(mol, q)
-            if got is not None:
-                best = (score, got)
-    if best is not None:
-        return best[1]
+        got = result(mol, q)
+        if got is not None:
+            options.append((score, got))
+    if options:
+        options.sort(key=lambda option: option[0])
+        return options if all_options else options[0][1]
 
     # A saturated ligand whose donors lack valence: anions on the donors (NMe2-)
     mol = Chem.RWMol(molecule())
@@ -164,7 +167,40 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         return None
     if any(a.GetNumRadicalElectrons() for a in mol.GetAtoms()):
         return None
-    return result(mol, q)
+    got = result(mol, q)
+    if all_options:
+        return [((-q, abs(q), False), got)] if got is not None else []
+    return got
+
+
+def _balance_ligands(ligands, target, max_options=4, max_combinations=20000):
+    """The ligands' structures, one each, whose charges add up to `target`, with
+    the least charge separation in all; or None if there are none (or too many
+    combinations to try).
+
+    Parameters
+    ----------
+    ligands : [[(score, (orders, charges, q))]]
+        Each ligand's structures, best first, as _ligand_lewis gives them.
+    target : int
+        The total charge of the ligands.
+    """
+    import itertools
+
+    choices = [options[:max_options] for options in ligands]
+    n = 1
+    for options in choices:
+        n *= len(options)
+    if n > max_combinations:
+        return None
+    best = None
+    for combination in itertools.product(*choices):
+        if sum(got[2] for _, got in combination) != target:
+            continue
+        cost = tuple(sum(c) for c in zip(*(score for score, _ in combination)))
+        if best is None or cost < best[0]:
+            best = (cost, [got for _, got in combination])
+    return None if best is None else best[1]
 
 
 #: A metal's bond to the central atom of a four-membered chelate ring is dropped
@@ -698,6 +734,7 @@ class TopologyMixin:
         n_ok = n_failed = 0
         total = 0
         failed = []  # molecules with no Lewis structure, for radicals afterwards
+        assigned = []  # molecules without metals given a structure
         RDLogger.DisableLog("rdApp.*")
         try:
             for fragment in fragments:
@@ -735,9 +772,30 @@ class TopologyMixin:
                     radicals[k] = radicals_[k]
                 total += q
                 n_ok += 1
+                assigned.append((fragment, pairs, q))
+
+            # Ions and molecules whose charges do not add up (Cs2O2: Cs+ x 2 and
+            # O=O): other closed-shell charges of the molecules that balance them
+            # (peroxide); failing that, the metal ions give way (SrOH: Sr+, OH-)
+            # Only when every molecule has a structure: an unassigned one (PF6-)
+            # carries the difference
+            if not complexes and not failed and charge is not None and total != charge:
+                total = self._balance_ions(
+                    fragments,
+                    assigned,
+                    atnos,
+                    xyzs,
+                    is_metal,
+                    charge,
+                    total,
+                    order,
+                    formal,
+                    radicals,
+                )
 
             # The metal complexes: ligands, dative bonds, and the metals' charges
             metals = []
+            ligands = []  # each ligand's closed-shell structures, best first
             for fragment in complexes:
                 in_fragment = set(fragment)
                 metals.extend(k for k in fragment if is_metal[k])
@@ -758,17 +816,14 @@ class TopologyMixin:
                     [k for k in fragment if not is_metal[k]], ligand_pairs
                 ):
                     pairs = [(i, j) for i, j in ligand_pairs if i in ligand]
-                    got = _ligand_lewis(atnos, xyzs, ligand, pairs, donors)
-                    if got is None:
+                    options = _ligand_lewis(
+                        atnos, xyzs, ligand, pairs, donors, all_options=True
+                    )
+                    if not options:
                         ligand_failed = True
                         total += sum(formal[k] for k in ligand)
                         continue
-                    orders, charges_, q = got
-                    order.update(orders)
-                    for k, value in charges_.items():
-                        formal[k] = value
-                        radicals[k] = 0
-                    total += q
+                    ligands.append(options)
                 if ligand_failed:
                     n_failed += 1
                     logger.warning(
@@ -796,22 +851,47 @@ class TopologyMixin:
                     n_ok += 1
 
             if metals:
-                rest = (charge or 0) - total
                 fixed = {k: _METAL_ION_CHARGES.get(atnos[k]) for k in metals}
                 others = [k for k in metals if fixed[k] is None]
-                for k, q in fixed.items():
-                    if q is not None:
-                        formal[k] = q
-                        rest -= q
-                if not others:  # only alkali and alkaline-earth metals
-                    total += sum(q for q in fixed.values())
+                # Each ligand's best structure; with only alkali and
+                # alkaline-earth metals, whose charges are fixed, the ones that
+                # balance the net charge if there are (Cs2O2: peroxide, not O2)
+                chosen = [options[0][1] for options in ligands]
+                if not others and charge is not None and ligands:
+                    target = charge - total - sum(fixed.values())
+                    if sum(got[2] for got in chosen) != target:
+                        balanced = _balance_ligands(ligands, target)
+                        if balanced is not None:
+                            chosen = balanced
+                for orders, charges_, q in chosen:
+                    order.update(orders)
+                    for k, value in charges_.items():
+                        formal[k] = value
+                        radicals[k] = 0
+                    total += q
+                rest = (charge or 0) - total
+                if others:
+                    for k, q in fixed.items():
+                        if q is not None:
+                            formal[k] = q
+                            rest -= q
+                    takers = others
+                elif charge is not None and rest != sum(fixed.values()):
+                    # The fixed charges give way when the ligands cannot balance
+                    # them (SrOH: Sr+)
+                    takers = metals
                 else:
-                    share = [rest // len(others)] * len(others)
+                    takers = []
+                    for k, q in fixed.items():
+                        formal[k] = q
+                    rest = 0
+                if takers:
+                    share = [rest // len(takers)] * len(takers)
                     for k in range(rest - sum(share)):
                         share[k] += 1
-                    for k, q in zip(others, share):
+                    for k, q in zip(takers, share):
                         formal[k] = q
-                    total = charge or 0
+                total = sum(formal[k] for k in range(len(atnos)))
                 for k in metals:
                     radicals[k] = 0
         finally:
@@ -842,6 +922,67 @@ class TopologyMixin:
                 f"{charge}: check the bond orders."
             )
         return n_ok, n_failed
+
+    @staticmethod
+    def _balance_ions(
+        fragments,
+        assigned,
+        atnos,
+        xyzs,
+        is_metal,
+        charge,
+        total,
+        order,
+        formal,
+        radicals,
+    ):
+        """Make the charges of ions and molecules add up to the net charge: other
+        closed-shell charges of the molecules, with the least charge separation,
+        if there are some that balance (Cs2O2: O2 2-); otherwise the single metal
+        ions take what is left (SrOH: Sr+). Updates order, formal and radicals in
+        place and returns the new total."""
+        ions = [f[0] for f in fragments if len(f) == 1 and is_metal[f[0]]]
+        if assigned:
+            others = total - sum(q for _, _, q in assigned)
+            options = []
+            for fragment, pairs, _ in assigned:
+                found = []
+                for rank, q in enumerate((0, -1, 1, -2, 2)):
+                    got = _molecule_lewis(atnos, xyzs, fragment, pairs, (q,), 0)
+                    if got is not None:
+                        found.append(((rank,), got))
+                options.append(found)
+            if all(options):
+                chosen = _balance_ligands(
+                    [
+                        [
+                            (score, (got[0], got[1], got[3], got[2]))
+                            for score, got in found
+                        ]
+                        for found in options
+                    ],
+                    charge - others,
+                )
+                if chosen is not None:
+                    for (fragment, _, _), (orders, charges_, q, radicals_) in zip(
+                        assigned, chosen
+                    ):
+                        order.update(orders)
+                        for k in fragment:
+                            formal[k] = charges_[k]
+                            radicals[k] = radicals_[k]
+                    total = sum(formal)
+                    if total == charge:
+                        return total
+        if ions:
+            rest = charge - (total - sum(formal[k] for k in ions))
+            share = [rest // len(ions)] * len(ions)
+            for k in range(rest - sum(share)):
+                share[k] += 1
+            for k, q in zip(ions, share):
+                formal[k] = q
+            total = sum(formal)
+        return total
 
     @staticmethod
     def _covalent_radii(symbols):

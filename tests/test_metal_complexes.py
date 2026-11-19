@@ -240,3 +240,45 @@ def test_alkali_metals_take_their_charge_first(configuration):
     configuration.assign_bond_orders(charge=0)
     charges = configuration.atoms.get_column_data("formal_charge")
     assert charges[0] == 4 and charges[-1] == 1 and sum(charges) == 0
+
+
+def test_sdf_dative_bonds_run_from_the_donor_at_a_stereocentre(configuration):
+    """Open Babel perceives a stereocentre at a metal with four different ligands
+    and would write a wedge from it, turning a dative bond around (Sn -> C in
+    SnPh4, which RDKit rejects). Every type-9 bond is written donor first."""
+    d = 2.2 / math.sqrt(3)
+    _build(
+        configuration,
+        ["Ti", "F", "Cl", "Br", "I"],
+        [[0, 0, 0], [d, d, d], [d, -d, -d], [-d, d, -d], [-d, -d, d]],
+    )
+    lines = configuration.to_sdf_text().splitlines()
+    n_atoms, n_bonds = (int(x) for x in lines[3].split()[:2])
+    datives = [
+        line.split()
+        for line in lines[4 + n_atoms : 4 + n_atoms + n_bonds]
+        if line.split()[2] == "9"
+    ]
+    assert len(datives) == 4
+    assert all(int(fields[1]) == 1 for fields in datives)  # into Ti, atom 1
+    mol = Chem.MolFromMolBlock("\n".join(lines), removeHs=False)
+    assert mol is not None
+
+
+def test_ions_balance_the_net_charge(configuration, system):
+    """Cs2O2: the alkali metals are ions, so O2 is the peroxide, not O=O; SrOH (a
+    doublet): OH- and Sr+, the metal giving way."""
+    _build(
+        configuration,
+        ["Cs", "O", "O", "Cs"],
+        [[0, 2.6, 0], [-0.75, 0, 0], [0.75, 0, 0], [0, -2.6, 0]],
+    )
+    assert _smiles(configuration) == "[Cs+].[Cs+].[O-][O-]"
+    hydroxide = system.create_configuration(name="SrOH")
+    _build(
+        hydroxide,
+        ["Sr", "O", "H"],
+        [[0, 0, 0], [2.11, 0, 0], [3.07, 0, 0]],
+        multiplicity=2,
+    )
+    assert hydroxide.atoms.get_column_data("formal_charge") == [1, -1, 0]

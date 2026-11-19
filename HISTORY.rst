@@ -1,6 +1,18 @@
 =======
 History
 =======
+2026.11.19.2 -- Bugfix: dative bonds turned around in SDF files, and unbalanced ionic charges
+    * Open Babel perceived a stereocentre at a metal with four different-looking ligands
+      (the Sn of SnPh4, the Pb of Ph3PbBr) and wrote a wedge from it, which turned that
+      dative bond around in the SDF file (Sn -> C), so RDKit rejected the file. Open
+      Babel's stereo perception is now off for structures with dative bonds; their 3D
+      coordinates hold the stereochemistry.
+    * With only alkali and alkaline-earth metals, the fixed +1 and +2 left the charges
+      unbalanced when a ligand or molecule beside them took its preferred charge: Cs2O2
+      kept a neutral O=O. The ligands and molecules now take the closed-shell charges
+      that balance the net charge (the peroxide O2 2-), and failing that the metals give
+      way (SrOH: Sr+ and OH-).
+
 2026.11.19.1 -- Bond orders: radicals, lone-atom ligands, and Open Babel's own data
     * A molecule with no closed-shell Lewis structure, such as Ge2, GeC or Ge3, was
       given charge-separated forms ([Ge+][Ge-], [C+2][Ge-2]); it now keeps its single
