@@ -1,6 +1,23 @@
 =======
 History
 =======
+2026.11.19.1 -- Bond orders: radicals, lone-atom ligands, and Open Babel's own data
+    * A molecule with no closed-shell Lewis structure, such as Ge2, GeC or Ge3, was
+      given charge-separated forms ([Ge+][Ge-], [C+2][Ge-2]); it now keeps its single
+      bonds with radical electrons where its atoms lack valence ([Ge][Ge]). Radicals
+      such as the ethyl and vinyl radicals get their structures too (they were left
+      alone), and a structure is the same whatever the spin multiplicity: triplet AsN
+      is N#[As], not [N+]#[As-]. The radical electrons are stored with the atoms
+      (``radical_electrons``) and kept in SMILES, RDKit molecules and SDF files.
+    * The Lewis structure of a molecule that is the only one in a configuration keeps
+      the configuration's charge: acetate declared neutral is the acetoxyl radical.
+    * In metal complexes a lone atom bonded to a metal is the anion of its default
+      valence (H-, N3-, C4-, Si4-); hydrides were H+ before, and carbides and nitrides
+      uncharged. Alkali and alkaline-earth metals bonded in a complex take +1 and +2
+      before the other metals share the rest of the charge (NaZrF5 is Na+ and Zr4+).
+    * Reading a structure no longer stores Open Babel's own data (SSSR, LSSR,
+      StereoData, "MOL Chiral Flag", "OpenBabel Symmetry Classes") as properties.
+
 2026.11.19 -- Metal complexes: dative bonds that keep their direction, ionic + dative bond orders
     * Dative bonds (bond order 9, MDL's bond type 9) lost their direction: bonds are
       stored with the lower atom index first, so a CO's C -> Fe bond was written back

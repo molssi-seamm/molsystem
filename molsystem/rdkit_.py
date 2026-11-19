@@ -400,6 +400,20 @@ class RDKitMixin:
         if has_dative and fixed is not None:
             best = ((0, 0), list(fixed), [0] * len(atnos))
             tries = []
+        # A structure whose radical electrons are stored with the atoms (as
+        # assign_bond_orders stores them, e.g. Ge2 as [Ge][Ge] rather than
+        # charge-separated, or triplet AsN as N#[As]) keeps them and its formal
+        # charges, rather than having them fitted to the spin multiplicity.
+        if "radical_electrons" in self.atoms and not has_dative:
+            stored = [
+                int(r or 0) for r in self.atoms.get_column_data("radical_electrons")
+            ]
+            if fixed is not None:
+                best = ((0, 0), list(fixed), stored)
+                tries = []
+            elif "formal_charge" not in self.atoms and not charge:
+                best = ((0, 0), [0] * len(atnos), stored)
+                tries = []
         for known, prune in tries:
             charges, radicals = _charges_and_radicals(
                 atnos,
@@ -540,9 +554,11 @@ class RDKitMixin:
 
         atnos = []
         qs = []
+        rs = []
         for rdk_atom in mol.GetAtoms():
             atnos.append(rdk_atom.GetAtomicNum())
             qs.append(rdk_atom.GetFormalCharge())
+            rs.append(rdk_atom.GetNumRadicalElectrons())
             logger.debug(f"atom {atnos}")
 
         Xs = []
@@ -580,16 +596,20 @@ class RDKitMixin:
             try:
                 # The formal charges, as from_OBMol keeps them: analyses of an MD
                 # without fixed charges (an MLFF) find the ions from them
+                extra = {}
                 if any(q != 0 for q in qs):
                     if "formal_charge" not in self.atoms:
                         self.atoms.add_attribute(
                             "formal_charge", coltype="int", default=0
                         )
-                    ids = self.atoms.append(
-                        x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs
-                    )
-                else:
-                    ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+                    extra["formal_charge"] = qs
+                if any(r != 0 for r in rs):
+                    if "radical_electrons" not in self.atoms:
+                        self.atoms.add_attribute(
+                            "radical_electrons", coltype="int", default=0
+                        )
+                    extra["radical_electrons"] = rs
+                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, **extra)
             except Exception:
                 print("Xs=")
                 pprint.pp(Xs)

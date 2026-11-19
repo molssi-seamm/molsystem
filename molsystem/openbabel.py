@@ -101,6 +101,10 @@ class OpenBabelMixin:
             formal_charges = atoms.get_column_data("formal_charge")
         else:
             formal_charges = [0] * atoms.n_atoms
+        if "radical_electrons" in atoms:
+            radicals = [int(r or 0) for r in atoms.get_column_data("radical_electrons")]
+        else:
+            radicals = [0] * atoms.n_atoms
 
         ob_mol = ob.OBMol()
         for atno, xyz, formal_charge in zip(
@@ -113,6 +117,10 @@ class OpenBabelMixin:
             ob_atom.SetVector(*xyz)
             if formal_charge != 0:
                 ob_atom.SetFormalCharge(formal_charge)
+            if radicals[ob_atom.GetIdx() - 1] > 0:
+                # Open Babel's spin multiplicity of an atom: 2 for one radical
+                # electron, 3 for two ...
+                ob_atom.SetSpinMultiplicity(radicals[ob_atom.GetIdx() - 1] + 1)
 
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
@@ -160,6 +168,13 @@ class OpenBabelMixin:
                 )
             )
             ob_mol.CloneData(pair)
+
+            # Radical electrons: MDL files hold only one or two per atom (M  RAD),
+            # not e.g. the three of each Ge in [Ge][Ge]
+            if any(radicals):
+                pair.SetAttribute("SEAMM|radical electrons|json|")
+                pair.SetValue(json.dumps(radicals))
+                ob_mol.CloneData(pair)
 
             # If periodic, add cell
             if self.periodicity != 0:
@@ -232,6 +247,7 @@ class OpenBabelMixin:
         Ys = []
         Zs = []
         qs = []
+        rs = []
         for ob_atom in ob.OBMolAtomIter(ob_mol):
             atno = ob_atom.GetAtomicNum()
             atnos.append(atno)
@@ -240,6 +256,7 @@ class OpenBabelMixin:
             Zs.append(ob_atom.z())
             logger.debug(f"atom {atno} {ob_atom.x()} {ob_atom.z()} {ob_atom.z()}")
             qs.append(ob_atom.GetFormalCharge())
+            rs.append(max(0, ob_atom.GetSpinMultiplicity() - 1))
 
         Is = []
         Js = []
@@ -261,8 +278,15 @@ class OpenBabelMixin:
         # Get the property data, cast to correct type
         data = {}
         for item in ob_mol.GetData():
-            value = item.GetValue()
             key = item.GetAttribute()
+            if not key.startswith("SEAMM|") and (
+                item.GetDataType() != ob.PairData
+                or item.GetOrigin() in (ob.perceived, ob.local)
+            ):
+                # Open Babel's own data (SSSR, LSSR, StereoData, "MOL Chiral
+                # Flag", "OpenBabel Symmetry Classes"), not the file's
+                continue
+            value = item.GetValue()
             if key.startswith("SEAMM|"):
                 data[key] = value
             else:
@@ -285,6 +309,11 @@ class OpenBabelMixin:
             if "SEAMM|spin multiplicity|int|" in data:
                 self.spin_multiplicity = int(data["SEAMM|spin multiplicity|int|"])
                 del data["SEAMM|spin multiplicity|int|"]
+            if "SEAMM|radical electrons|json|" in data:
+                stored = json.loads(data["SEAMM|radical electrons|json|"])
+                if len(stored) == len(rs):
+                    rs = [int(r) for r in stored]
+                del data["SEAMM|radical electrons|json|"]
             if "SEAMM|XYZ|json|" in data:
                 XYZ = json.loads(data["SEAMM|XYZ|json|"])
                 Xs = [x for x, y, z in XYZ]
@@ -305,12 +334,18 @@ class OpenBabelMixin:
                 del data["SEAMM|configuration name|str|"]
 
         if atoms:
+            extra = {}
             if any([i != 0.0 for i in qs]):
                 if "formal_charge" not in self.atoms:
                     self.atoms.add_attribute("formal_charge", coltype="int", default=0)
-                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, formal_charge=qs)
-            else:
-                ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos)
+                extra["formal_charge"] = qs
+            if any(r != 0 for r in rs):
+                if "radical_electrons" not in self.atoms:
+                    self.atoms.add_attribute(
+                        "radical_electrons", coltype="int", default=0
+                    )
+                extra["radical_electrons"] = rs
+            ids = self.atoms.append(x=Xs, y=Ys, z=Zs, atno=atnos, **extra)
             if self.periodicity != 0:
                 xyz = [[x, y, z] for x, y, z in zip(Xs, Ys, Zs)]
                 self.atoms.set_coordinates(xyz, fractionals=False)

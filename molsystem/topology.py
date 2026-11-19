@@ -28,6 +28,14 @@ _ION_CHARGES = {
 }
 
 
+#: The charges of the alkali and alkaline-earth metals in complexes, by atomic
+#: number; the other metals share the rest of the charge
+_METAL_ION_CHARGES = {
+    **{z: 1 for z in (3, 11, 19, 37, 55, 87)},
+    **{z: 2 for z in (4, 12, 20, 38, 56, 88)},
+}
+
+
 # Elements that are never bonded by distance-based perception unless asked:
 # alkali and alkaline-earth metals, which are ions in molecular systems.
 IONIC_ELEMENTS = ("Li", "Na", "K", "Rb", "Cs", "Fr", "Be", "Mg", "Ca", "Sr", "Ba", "Ra")
@@ -61,7 +69,8 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
     smallest |charge|, then a negative one: CO is neutral ([C-]#[O+]), Cp, Cl and
     OAc are -1, O is -2, H is -1. RDKit puts no lone pair on, e.g., the
     two-coordinate N of NMe2-, so a saturated ligand that has no structure
-    otherwise gets its missing valence as negative charge on its donor atoms.
+    otherwise gets its missing valence as negative charge on its donor atoms. A
+    lone atom is the anion of its default valence: H-, Cl-, O2-, N3-, C4-.
 
     Parameters
     ----------
@@ -89,6 +98,12 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         Chem.BondType.TRIPLE: 3,
         Chem.BondType.AROMATIC: 5,
     }
+    table = Chem.GetPeriodicTable()
+    if len(atoms) == 1:
+        # A lone atom: the closed-shell anion of its default valence, e.g. H-,
+        # Cl-, O2-, N3-, C4-, Si4-
+        valence = max(0, table.GetDefaultValence(atnos[atoms[0]]))
+        return {}, {atoms[0]: -valence}, -valence
     local = {k: n for n, k in enumerate(atoms)}
 
     def molecule():
@@ -133,7 +148,6 @@ def _ligand_lewis(atnos, xyzs, atoms, pairs, donors):
         return best[1]
 
     # A saturated ligand whose donors lack valence: anions on the donors (NMe2-)
-    table = Chem.GetPeriodicTable()
     mol = Chem.RWMol(molecule())
     q = 0
     for atom in mol.GetAtoms():
@@ -204,6 +218,203 @@ def _drop_chelate_centers(metal, Is, Js, Os, Ls):
         return Is, Js, Os
     keep = [k for k in range(len(Is)) if k not in drop]
     return [Is[k] for k in keep], [Js[k] for k in keep], [Os[k] for k in keep]
+
+
+def _molecule_lewis(atnos, xyzs, fragment, pairs, charges, n_unpaired, _depth=0):
+    """The Lewis structure of a molecule without metals from RDKit's
+    DetermineBondOrders.
+
+    For each of `charges`, a structure without formal charges is tried first and
+    then one with them (N#As, not [N+]#[As-]). All hydrogens are explicit, so an
+    atom short of its valence has radical electrons (RDKit would otherwise count
+    the missing valence as implicit hydrogens). The first closed-shell structure
+    is taken; failing that, the first whose radical electrons number
+    `n_unpaired` (any number if None, none if 0). A doublet RDKit cannot build
+    directly, such as the vinyl radical, is made from the closed-shell anion (or
+    cation), its extra charge becoming the radical centre: C=[CH], not a
+    triradical.
+
+    Returns
+    -------
+    ({(int, int): int}, {int: int}, {int: int}, int) or None
+        The bond orders by pair, the formal charges and radical electrons by atom,
+        and the molecule's charge; or None.
+    """
+    from rdkit import Chem
+    from rdkit.Chem import rdDetermineBonds
+
+    to_order = {
+        Chem.BondType.SINGLE: 1,
+        Chem.BondType.DOUBLE: 2,
+        Chem.BondType.TRIPLE: 3,
+        Chem.BondType.AROMATIC: 5,
+    }
+    local = {k: n for n, k in enumerate(fragment)}
+
+    def molecule():
+        mol = Chem.RWMol()
+        for k in fragment:
+            mol.AddAtom(Chem.Atom(atnos[k]))
+        for i, j in pairs:
+            mol.AddBond(local[i], local[j], Chem.BondType.SINGLE)
+        conformer = Chem.Conformer(len(fragment))
+        for k in fragment:
+            conformer.SetAtomPosition(local[k], xyzs[k])
+        mol.AddConformer(conformer, assignId=True)
+        return mol.GetMol()
+
+    second = None
+    for q in charges:
+        for charged in (False, True):
+            mol = molecule()
+            try:
+                rdDetermineBonds.DetermineBondOrders(
+                    mol, charge=q, allowChargedFragments=charged
+                )
+            except Exception:
+                continue
+            if Chem.GetFormalCharge(mol) != q:
+                continue
+            orders = {}
+            for i, j in pairs:
+                bond = mol.GetBondBetweenAtoms(local[i], local[j])
+                orders[(i, j)] = to_order.get(bond.GetBondType())
+            if None in orders.values():
+                continue
+            # The radicals with every hydrogen explicit
+            for atom in mol.GetAtoms():
+                atom.SetNoImplicit(True)
+                atom.SetNumRadicalElectrons(0)
+            try:
+                Chem.SanitizeMol(mol)
+            except Exception:
+                continue
+            charges_ = {
+                k: mol.GetAtomWithIdx(local[k]).GetFormalCharge() for k in fragment
+            }
+            radicals = {
+                k: mol.GetAtomWithIdx(local[k]).GetNumRadicalElectrons()
+                for k in fragment
+            }
+            n_radicals = sum(radicals.values())
+            if n_radicals == 0:
+                return orders, charges_, radicals, q
+            if second is None and n_unpaired != 0:
+                if n_unpaired is None or n_radicals == n_unpaired:
+                    second = (orders, charges_, radicals, q)
+    if second is not None or n_unpaired != 1 or _depth > 0:
+        return second
+
+    # A doublet RDKit cannot build directly (the vinyl radical): the closed-shell
+    # anion (or cation), with its extra charge made the radical centre
+    for shift, pick in ((-1, min), (1, max)):
+        ion = _molecule_lewis(
+            atnos,
+            xyzs,
+            fragment,
+            pairs,
+            [q + shift for q in charges],
+            0,
+            _depth=1,
+        )
+        if ion is None:
+            continue
+        orders, charges_, radicals, q = ion
+        centers = [k for k in fragment if charges_[k] * shift > 0]
+        # The least electronegative anionic (most electronegative cationic) atom
+        # first, if it can hold the radical: a neutral B with four bonds cannot
+        centers.sort(key=lambda k: _ELECTRONEGATIVITY.get(atnos[k], 2.5))
+        if pick is max:
+            centers.reverse()
+        for k in centers:
+            trial_charges = dict(charges_)
+            trial_radicals = dict(radicals)
+            trial_charges[k] -= shift
+            trial_radicals[k] += 1
+            if _valid(atnos, fragment, orders, trial_charges, trial_radicals):
+                return orders, trial_charges, trial_radicals, q - shift
+    return None
+
+
+def _valid(atnos, fragment, orders, charges, radicals):
+    """Whether RDKit accepts the structure, with every hydrogen explicit."""
+    from rdkit import Chem
+
+    to_type = {
+        1: Chem.BondType.SINGLE,
+        2: Chem.BondType.DOUBLE,
+        3: Chem.BondType.TRIPLE,
+        5: Chem.BondType.AROMATIC,
+    }
+    local = {k: n for n, k in enumerate(fragment)}
+    mol = Chem.RWMol()
+    for k in fragment:
+        atom = Chem.Atom(atnos[k])
+        atom.SetFormalCharge(charges[k])
+        atom.SetNumRadicalElectrons(radicals[k])
+        atom.SetNoImplicit(True)
+        mol.AddAtom(atom)
+    for (i, j), order in orders.items():
+        mol.AddBond(local[i], local[j], to_type[order])
+        if order == 5:
+            bond = mol.GetBondBetweenAtoms(local[i], local[j])
+            bond.SetIsAromatic(True)
+    mol = mol.GetMol()
+    try:
+        mol.UpdatePropertyCache(strict=True)
+    except Exception:
+        return False
+    # The radicals RDKit would assign must be the ones given
+    for k in fragment:
+        atom = mol.GetAtomWithIdx(local[k])
+        if atom.GetNumRadicalElectrons() != radicals[k]:
+            return False
+    return True
+
+
+#: Pauling electronegativities, by atomic number, to choose the radical centre
+_ELECTRONEGATIVITY = {
+    1: 2.20,
+    5: 2.04,
+    6: 2.55,
+    7: 3.04,
+    8: 3.44,
+    9: 3.98,
+    14: 1.90,
+    15: 2.19,
+    16: 2.58,
+    17: 3.16,
+    32: 2.01,
+    33: 2.18,
+    34: 2.55,
+    35: 2.96,
+    50: 1.96,
+    51: 2.05,
+    52: 2.10,
+    53: 2.66,
+}
+
+
+def _radicals_of_single_bonds(atnos, fragment, pairs):
+    """The radical electrons of a neutral molecule with only single bonds, as RDKit
+    assigns them (each atom's lowest allowed valence), or None if RDKit does not
+    accept it (e.g. hypervalent PF6)."""
+    from rdkit import Chem
+
+    local = {k: n for n, k in enumerate(fragment)}
+    mol = Chem.RWMol()
+    for k in fragment:
+        atom = Chem.Atom(atnos[k])
+        atom.SetNoImplicit(True)
+        mol.AddAtom(atom)
+    for i, j in pairs:
+        mol.AddBond(local[i], local[j], Chem.BondType.SINGLE)
+    mol = mol.GetMol()
+    try:
+        Chem.SanitizeMol(mol)
+    except Exception:
+        return None
+    return {k: mol.GetAtomWithIdx(local[k]).GetNumRadicalElectrons() for k in fragment}
 
 
 def _components(atoms, pairs):
@@ -407,29 +618,32 @@ class TopologyMixin:
 
         :meth:`perceive_bonds` gives connectivity only, so ethylene would be read
         as [CH2+][CH2-] by anything that derives a SMILES or a Lewis structure.
-        Each molecule (connected fragment) gets the bond orders and formal charges
-        of RDKit's ``DetermineBondOrders``, trying the charges 0, -1, +1, -2 and +2
-        in turn and keeping the first that gives a valid structure; single atoms of
-        the alkali and alkaline-earth metals and of the halogens are given their
-        usual ionic charges. A molecule that cannot be assigned (e.g. hypervalent
-        PF6-, whose single bonds are already its Lewis structure) keeps its bonds.
+        Each molecule (connected fragment) without metals gets the bond orders,
+        formal charges and radical electrons of RDKit's ``DetermineBondOrders``:
+        the first closed-shell structure of the charges tried (the molecule's own
+        charge when it is the only one, else 0, -1, +1, -2, +2), or failing that
+        one with as many radical electrons as the spin multiplicity says (the
+        ethyl or vinyl radical). A molecule with neither keeps its single bonds and
+        gets radical electrons where its atoms lack valence (Ge2 as [Ge][Ge], GeC
+        as [C][Ge], not charge-separated), when that keeps the net charge;
+        otherwise (hypervalent PF6-, whose single bonds are already its Lewis
+        structure) it keeps its bonds as they are. Single atoms of the alkali and
+        alkaline-earth metals and of the halogens get their usual ionic charges.
 
         Metal complexes (molecules with an atom in :data:`METALS`) are ionic +
         dative: each ligand, a fragment of the molecule without its metals, gets
         its closed-shell Lewis structure with the least charge separation (CO 0,
-        Cp-, Cl-, OAc-, NMe2-, O2-; see :func:`_ligand_lewis`); every
+        Cp-, Cl-, OAc-, NMe2-, O2-, H-, C4-; see :func:`_ligand_lewis`); every
         metal-ligand bond is a dative bond from the ligand's donor atom to the
         metal (:data:`molsystem.bonds.DATIVE`); metal-metal bonds are single
-        bonds; and the metals carry the rest of the net charge, shared as evenly
+        bonds; and the metals carry the rest of the net charge: alkali metals +1
+        and alkaline-earth metals +2, the others sharing what is left as evenly
         as integers allow. The unpaired electrons of an open-shell complex are
-        the metals', so complexes are assigned whatever their spin multiplicity.
-        The metals' formal charges are bookkeeping, not oxidation states. Long
-        metal-ligand contacts, agostic hydrogens, bridging hydrides and clusters
-        depend on which bonds were perceived and are not checked.
+        the metals'. The metals' formal charges are bookkeeping, not oxidation
+        states. Long metal-ligand contacts, agostic hydrogens, bridging hydrides
+        and clusters depend on which bonds were perceived and are not checked.
 
-        Only closed-shell, non-periodic configurations are handled otherwise:
-        RDKit's method assumes paired electrons, and a periodic cell's bonds cross
-        the cell.
+        Periodic configurations are left alone: a cell's bonds cross the cell.
 
         Parameters
         ----------
@@ -445,7 +659,6 @@ class TopologyMixin:
             the molecules' charges do not add up to `charge`, a warning is logged.
         """
         from rdkit import Chem, RDLogger
-        from rdkit.Chem import rdDetermineBonds
 
         from .bonds import DATIVE
 
@@ -470,22 +683,21 @@ class TopologyMixin:
             whole.AddBond(i, j, Chem.BondType.SINGLE)
         fragments = Chem.GetMolFrags(whole.GetMol(), sanitizeFrags=False)
         complexes = [f for f in fragments if len(f) > 1 and any(is_metal[k] for k in f)]
-        if self.spin_multiplicity not in (None, 1) and not complexes:
-            return 0, 0
 
-        to_order = {
-            Chem.BondType.SINGLE: 1,
-            Chem.BondType.DOUBLE: 2,
-            Chem.BondType.TRIPLE: 3,
-            Chem.BondType.AROMATIC: 5,
-        }
+        if charge is None:
+            charge = getattr(self, "charge", None)
+        multiplicity = getattr(self, "spin_multiplicity", None)
+        n_unpaired = None if multiplicity is None else multiplicity - 1
+        only_one = len(fragments) == 1
+
         order = {pair: 1 for pair in rows}
         formal = [0] * len(atnos)
         if "formal_charge" in self.atoms:
             formal = [int(q or 0) for q in self.atoms.get_column_data("formal_charge")]
+        radicals = [0] * len(atnos)
         n_ok = n_failed = 0
         total = 0
-        closed_shell = self.spin_multiplicity in (None, 1)
+        failed = []  # molecules with no Lewis structure, for radicals afterwards
         RDLogger.DisableLog("rdApp.*")
         try:
             for fragment in fragments:
@@ -501,43 +713,26 @@ class TopologyMixin:
                     continue
                 if fragment in complexes:
                     continue  # after the other molecules, for the metals' charges
-                if not closed_shell:
-                    total += sum(formal[k] for k in fragment)
-                    continue
-                local = {k: n for n, k in enumerate(fragment)}
-                pairs = [(i, j) for i, j in rows if i in local]
-                result = None
-                for q in (0, -1, 1, -2, 2):
-                    mol = Chem.RWMol()
-                    for k in fragment:
-                        mol.AddAtom(Chem.Atom(atnos[k]))
-                    for i, j in pairs:
-                        mol.AddBond(local[i], local[j], Chem.BondType.SINGLE)
-                    conformer = Chem.Conformer(len(fragment))
-                    for k in fragment:
-                        conformer.SetAtomPosition(local[k], xyzs[k])
-                    mol.AddConformer(conformer, assignId=True)
-                    mol = mol.GetMol()
-                    try:
-                        rdDetermineBonds.DetermineBondOrders(mol, charge=q)
-                    except Exception:
-                        continue
-                    orders = {}
-                    for i, j in pairs:
-                        bond = mol.GetBondBetweenAtoms(local[i], local[j])
-                        orders[(i, j)] = to_order.get(bond.GetBondType())
-                    if None in orders.values():
-                        continue
-                    result = (q, orders, mol)
-                    break
+                pairs = [(i, j) for i, j in rows if i in set(fragment)]
+                if only_one and charge is not None:
+                    charges = (charge,)
+                else:
+                    charges = (0, -1, 1, -2, 2)
+                if only_one:
+                    expected = n_unpaired
+                else:
+                    expected = 0 if n_unpaired == 0 else None
+                result = _molecule_lewis(
+                    atnos, xyzs, fragment, pairs, charges, expected
+                )
                 if result is None:
-                    n_failed += 1
-                    total += sum(formal[k] for k in fragment)
+                    failed.append((fragment, pairs))
                     continue
-                q, orders, mol = result
+                orders, charges_, radicals_, q = result
                 order.update(orders)
                 for k in fragment:
-                    formal[k] = mol.GetAtomWithIdx(local[k]).GetFormalCharge()
+                    formal[k] = charges_[k]
+                    radicals[k] = radicals_[k]
                 total += q
                 n_ok += 1
 
@@ -558,22 +753,23 @@ class TopologyMixin:
                         order[(i, j)] = DATIVE if is_metal[j] else -DATIVE
                     elif i in in_fragment and is_metal[i] and is_metal[j]:
                         order[(i, j)] = 1
-                failed = False
+                ligand_failed = False
                 for ligand in _components(
                     [k for k in fragment if not is_metal[k]], ligand_pairs
                 ):
                     pairs = [(i, j) for i, j in ligand_pairs if i in ligand]
                     got = _ligand_lewis(atnos, xyzs, ligand, pairs, donors)
                     if got is None:
-                        failed = True
+                        ligand_failed = True
                         total += sum(formal[k] for k in ligand)
                         continue
-                    orders, charges, q = got
+                    orders, charges_, q = got
                     order.update(orders)
-                    for k, value in charges.items():
+                    for k, value in charges_.items():
                         formal[k] = value
+                        radicals[k] = 0
                     total += q
-                if failed:
+                if ligand_failed:
                     n_failed += 1
                     logger.warning(
                         "A ligand of a metal complex has no closed-shell Lewis "
@@ -581,16 +777,43 @@ class TopologyMixin:
                     )
                 else:
                     n_ok += 1
+
+            # Molecules with no Lewis structure: single bonds and radicals, if
+            # that keeps the net charge (it does not for PF6-)
+            if failed:
+                rest = None if charge is None or metals else charge - total
+                for fragment, pairs in failed:
+                    found = None
+                    if rest == 0 or (rest is None and charge is None):
+                        found = _radicals_of_single_bonds(atnos, fragment, pairs)
+                    if found is None:
+                        n_failed += 1
+                        total += sum(formal[k] for k in fragment)
+                        continue
+                    for k in fragment:
+                        formal[k] = 0
+                        radicals[k] = found[k]
+                    n_ok += 1
+
             if metals:
-                if charge is None:
-                    charge = getattr(self, "charge", None) or 0
-                rest = charge - total
-                share = [rest // len(metals)] * len(metals)
-                for k in range(rest - sum(share)):
-                    share[k] += 1
-                for k, q in zip(metals, share):
-                    formal[k] = q
-                total += rest
+                rest = (charge or 0) - total
+                fixed = {k: _METAL_ION_CHARGES.get(atnos[k]) for k in metals}
+                others = [k for k in metals if fixed[k] is None]
+                for k, q in fixed.items():
+                    if q is not None:
+                        formal[k] = q
+                        rest -= q
+                if not others:  # only alkali and alkaline-earth metals
+                    total += sum(q for q in fixed.values())
+                else:
+                    share = [rest // len(others)] * len(others)
+                    for k in range(rest - sum(share)):
+                        share[k] += 1
+                    for k, q in zip(others, share):
+                        formal[k] = q
+                    total = charge or 0
+                for k in metals:
+                    radicals[k] = 0
         finally:
             RDLogger.EnableLog("rdApp.*")
 
@@ -608,6 +831,11 @@ class TopologyMixin:
             if "formal_charge" not in self.atoms:
                 self.atoms.add_attribute("formal_charge", coltype="int", default=0)
             self.atoms["formal_charge"][0:] = formal
+            # Recorded even when all zero: the structure assigned here is the one
+            # to keep (to_RDKMol uses it rather than fitting the multiplicity)
+            if "radical_electrons" not in self.atoms:
+                self.atoms.add_attribute("radical_electrons", coltype="int", default=0)
+            self.atoms["radical_electrons"][0:] = radicals
         if charge is not None and total != charge:
             logger.warning(
                 f"The molecules' charges add up to {total}, not the net charge "
