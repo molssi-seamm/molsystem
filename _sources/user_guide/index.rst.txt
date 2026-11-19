@@ -48,14 +48,49 @@ their ionic charges. A molecule RDKit cannot handle, such as hypervalent PF6-, k
 single bonds, which are already its Lewis structure. Given the net charge, the molecules'
 charges are checked against it and a mismatch is logged. Open-shell (a radical is
 indistinguishable from an ion by geometry alone, so set the multiplicity first) and
-periodic configurations are left alone. Read Structure does this for extended XYZ files
-when it perceives the bonds.
+periodic configurations are left alone. Read Structure does this for extended XYZ and
+MOPAC files when it perceives the bonds.
+
+Metal complexes
+---------------
+Bonds to metals (``molsystem.topology.METALS``: the alkali, alkaline-earth and
+transition metals, lanthanides, actinides and the heavier post-transition metals) follow
+one convention, ionic + dative:
+
+* every metal-ligand bond is a dative bond from the ligand's donor atom to the metal,
+  bond order 9 (MDL's bond type 9, RDKit's ``DATIVE``);
+* each ligand -- a fragment of the complex without its metals -- has its closed-shell
+  Lewis structure with the least charge separation: CO neutral (``[C-]#[O+]``), Cp-,
+  Cl-, acetate, NMe2-, O2-, H-; a pi ligand (Cp, arene, diene) has a dative bond from
+  each of its bonded atoms;
+* metal-metal bonds are single bonds;
+* the metals carry the rest of the net charge, shared as evenly as integers allow:
+  Fe(CO)5 is Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+.
+
+The metals' formal charges are bookkeeping, not always oxidation states. The unpaired
+electrons of an open-shell complex are the metal's, so complexes are assigned whatever
+their spin multiplicity, and their ligands carry no radicals.
+
+``perceive_bonds()`` uses a wider tolerance for pairs with a metal (``metal_tolerance``,
+default 1.3), since bonds to pi ligands are longer than the covalent radii suggest. It
+drops a metal's bond to the central atom of a four-membered chelate ring -- the C of a
+kappa-2 carboxylate, the N of a nitrate -- which that tolerance reaches, when it is at
+least 0.3 Å longer than the bonds to both chelating atoms. Distance-based perception
+can still be wrong for long metal-ligand contacts, agostic hydrogens, bridging hydrides,
+ion pairs and clusters: check such structures.
+
+Dative bonds keep their direction. Bonds are stored with the first atom's index the
+lower, so a dative bond whose donor is the second atom has bond order 10
+(``molsystem.DATIVE_REVERSED``); ``molsystem.dative_donor_acceptor(i, j, bondorder)``
+gives (donor, acceptor). SDF and MDL files, Open Babel and RDKit all get the donor
+first.
 
 The defaults can be adjusted per call::
 
     configuration.perceive_bonds(
         replace=True,            # discard existing bonds first
         tolerance=1.25,          # looser criterion, e.g. hot MD frames
+        metal_tolerance=1.3,     # for pairs with a metal
         radii={"H": 0.35},       # override a covalent radius (Å)
         max_bonds={"H": 1, "O": 2},  # per-element valence limits
         exclude=(),              # bond the metals too, e.g. an ionic crystal

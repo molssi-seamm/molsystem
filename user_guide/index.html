@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; MolSystem 2026.10.31 documentation</title>
+    <title>User Guide &#8212; MolSystem 2026.11.19 documentation</title>
   
   
   
@@ -26,19 +26,19 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c224919a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,12 +48,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=58b82035"></script>
+    <script src="../_static/documentation_options.js?v=a0728fa8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/index';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
 
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.10.31" />
+  <meta name="docsearch:version" content="2026.11.19" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -112,7 +112,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -242,14 +242,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
       
@@ -295,7 +295,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   
 
   
-    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -309,7 +309,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
@@ -394,14 +394,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
   <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
-    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
   </ul>
 </div></div>
         
@@ -484,7 +484,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
-        <i class="fa-solid fa-home"></i>
+        <i class="fa-solid fa-house"></i>
       </a>
     </li>
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">User Guide</span></li>
@@ -543,12 +543,44 @@ their ionic charges. A molecule RDKit cannot handle, such as hypervalent PF6-, k
 single bonds, which are already its Lewis structure. Given the net charge, the molecules’
 charges are checked against it and a mismatch is logged. Open-shell (a radical is
 indistinguishable from an ion by geometry alone, so set the multiplicity first) and
-periodic configurations are left alone. Read Structure does this for extended XYZ files
-when it perceives the bonds.</p>
+periodic configurations are left alone. Read Structure does this for extended XYZ and
+MOPAC files when it perceives the bonds.</p>
+<section id="metal-complexes">
+<h3>Metal complexes<a class="headerlink" href="#metal-complexes" title="Link to this heading">#</a></h3>
+<p>Bonds to metals (<code class="docutils literal notranslate"><span class="pre">molsystem.topology.METALS</span></code>: the alkali, alkaline-earth and
+transition metals, lanthanides, actinides and the heavier post-transition metals) follow
+one convention, ionic + dative:</p>
+<ul class="simple">
+<li><p>every metal-ligand bond is a dative bond from the ligand’s donor atom to the metal,
+bond order 9 (MDL’s bond type 9, RDKit’s <code class="docutils literal notranslate"><span class="pre">DATIVE</span></code>);</p></li>
+<li><p>each ligand – a fragment of the complex without its metals – has its closed-shell
+Lewis structure with the least charge separation: CO neutral (<code class="docutils literal notranslate"><span class="pre">[C-]#[O+]</span></code>), Cp-,
+Cl-, acetate, NMe2-, O2-, H-; a pi ligand (Cp, arene, diene) has a dative bond from
+each of its bonded atoms;</p></li>
+<li><p>metal-metal bonds are single bonds;</p></li>
+<li><p>the metals carry the rest of the net charge, shared as evenly as integers allow:
+Fe(CO)5 is Fe(0), ferrocene Fe2+, Cp2TiCl2 Ti4+.</p></li>
+</ul>
+<p>The metals’ formal charges are bookkeeping, not always oxidation states. The unpaired
+electrons of an open-shell complex are the metal’s, so complexes are assigned whatever
+their spin multiplicity, and their ligands carry no radicals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">perceive_bonds()</span></code> uses a wider tolerance for pairs with a metal (<code class="docutils literal notranslate"><span class="pre">metal_tolerance</span></code>,
+default 1.3), since bonds to pi ligands are longer than the covalent radii suggest. It
+drops a metal’s bond to the central atom of a four-membered chelate ring – the C of a
+kappa-2 carboxylate, the N of a nitrate – which that tolerance reaches, when it is at
+least 0.3 Å longer than the bonds to both chelating atoms. Distance-based perception
+can still be wrong for long metal-ligand contacts, agostic hydrogens, bridging hydrides,
+ion pairs and clusters: check such structures.</p>
+<p>Dative bonds keep their direction. Bonds are stored with the first atom’s index the
+lower, so a dative bond whose donor is the second atom has bond order 10
+(<code class="docutils literal notranslate"><span class="pre">molsystem.DATIVE_REVERSED</span></code>); <code class="docutils literal notranslate"><span class="pre">molsystem.dative_donor_acceptor(i,</span> <span class="pre">j,</span> <span class="pre">bondorder)</span></code>
+gives (donor, acceptor). SDF and MDL files, Open Babel and RDKit all get the donor
+first.</p>
 <p>The defaults can be adjusted per call:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span><span class="o">.</span><span class="n">perceive_bonds</span><span class="p">(</span>
     <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>            <span class="c1"># discard existing bonds first</span>
     <span class="n">tolerance</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span>          <span class="c1"># looser criterion, e.g. hot MD frames</span>
+    <span class="n">metal_tolerance</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span>     <span class="c1"># for pairs with a metal</span>
     <span class="n">radii</span><span class="o">=</span><span class="p">{</span><span class="s2">"H"</span><span class="p">:</span> <span class="mf">0.35</span><span class="p">},</span>       <span class="c1"># override a covalent radius (Å)</span>
     <span class="n">max_bonds</span><span class="o">=</span><span class="p">{</span><span class="s2">"H"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"O"</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>  <span class="c1"># per-element valence limits</span>
     <span class="n">exclude</span><span class="o">=</span><span class="p">(),</span>              <span class="c1"># bond the metals too, e.g. an ionic crystal</span>
@@ -557,6 +589,7 @@ when it perceives the bonds.</p>
 </div>
 <p>Only the <code class="docutils literal notranslate"><span class="pre">covalent</span> <span class="pre">radii</span></code> method is available at present; the <code class="docutils literal notranslate"><span class="pre">method</span></code> argument is
 there so that others, such as a Voronoi tessellation, can be added later.</p>
+</section>
 </section>
 <section id="charges-and-spin-in-structure-files">
 <h2>Charges and spin in structure files<a class="headerlink" href="#charges-and-spin-in-structure-files" title="Link to this heading">#</a></h2>
@@ -686,7 +719,7 @@ creating or changing a table raises <code class="docutils literal notranslate"><
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
@@ -698,7 +731,10 @@ creating or changing a table raises <code class="docutils literal notranslate"><
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perceiving-bonds">Perceiving bonds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perceiving-bonds">Perceiving bonds</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#metal-complexes">Metal complexes</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#charges-and-spin-in-structure-files">Charges and spin in structure files</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#radicals-and-ions-in-smiles-and-rdkit">Radicals and ions in SMILES and RDKit</a></li>
 </ul>
@@ -731,8 +767,8 @@ creating or changing a table raises <code class="docutils literal notranslate"><
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -744,7 +780,7 @@ creating or changing a table raises <code class="docutils literal notranslate"><
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
 </p></div>
       
     </div>
