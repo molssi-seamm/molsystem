@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.topology &#8212; MolSystem 2026.11.19.1 documentation</title>
+    <title>molsystem.topology &#8212; MolSystem 2026.11.19.2 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=3a3ba519"></script>
+    <script src="../../_static/documentation_options.js?v=0dc32f73"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.19.1" />
+  <meta name="docsearch:version" content="2026.11.19.2" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -548,7 +548,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="n">_LIGAND_CHARGES</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_ligand_lewis</span><span class="p">(</span><span class="n">atnos</span><span class="p">,</span> <span class="n">xyzs</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">donors</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ligand_lewis</span><span class="p">(</span><span class="n">atnos</span><span class="p">,</span> <span class="n">xyzs</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">donors</span><span class="p">,</span> <span class="n">all_options</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The Lewis structure of a ligand: a fragment of a metal complex without its</span>
 <span class="sd">    metals, as RDKit's DetermineBondOrders gives it.</span>
 
@@ -559,6 +559,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <span class="sd">    two-coordinate N of NMe2-, so a saturated ligand that has no structure</span>
 <span class="sd">    otherwise gets its missing valence as negative charge on its donor atoms. A</span>
 <span class="sd">    lone atom is the anion of its default valence: H-, Cl-, O2-, N3-, C4-.</span>
+<span class="sd">    With `all_options`, all the structures found, as [(score, (orders, charges,</span>
+<span class="sd">    charge))], best first.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -591,7 +593,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="c1"># A lone atom: the closed-shell anion of its default valence, e.g. H-,</span>
         <span class="c1"># Cl-, O2-, N3-, C4-, Si4-</span>
         <span class="n">valence</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">GetDefaultValence</span><span class="p">(</span><span class="n">atnos</span><span class="p">[</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
-        <span class="k">return</span> <span class="p">{},</span> <span class="p">{</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="o">-</span><span class="n">valence</span><span class="p">},</span> <span class="o">-</span><span class="n">valence</span>
+        <span class="n">got</span> <span class="o">=</span> <span class="p">({},</span> <span class="p">{</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="o">-</span><span class="n">valence</span><span class="p">},</span> <span class="o">-</span><span class="n">valence</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[((</span><span class="n">valence</span><span class="p">,</span> <span class="n">valence</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">got</span><span class="p">)]</span> <span class="k">if</span> <span class="n">all_options</span> <span class="k">else</span> <span class="n">got</span>
     <span class="n">local</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">)}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">molecule</span><span class="p">():</span>
@@ -616,7 +619,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">charges</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtomWithIdx</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">orders</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">q</span>
 
-    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">_LIGAND_CHARGES</span><span class="p">:</span>
         <span class="n">mol</span> <span class="o">=</span> <span class="n">molecule</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
@@ -628,12 +631,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetNumRadicalElectrons</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()):</span>
             <span class="k">continue</span>
         <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">())</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">score</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">got</span> <span class="o">=</span> <span class="n">result</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">got</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">got</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">got</span> <span class="o">=</span> <span class="n">result</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">got</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">got</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">option</span><span class="p">:</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">options</span> <span class="k">if</span> <span class="n">all_options</span> <span class="k">else</span> <span class="n">options</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># A saturated ligand whose donors lack valence: anions on the donors (NMe2-)</span>
     <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">RWMol</span><span class="p">(</span><span class="n">molecule</span><span class="p">())</span>
@@ -652,7 +655,40 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetNumRadicalElectrons</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">()):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">result</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">got</span> <span class="o">=</span> <span class="n">result</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">all_options</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[((</span><span class="o">-</span><span class="n">q</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="kc">False</span><span class="p">),</span> <span class="n">got</span><span class="p">)]</span> <span class="k">if</span> <span class="n">got</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">got</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_balance_ligands</span><span class="p">(</span><span class="n">ligands</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_options</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_combinations</span><span class="o">=</span><span class="mi">20000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The ligands' structures, one each, whose charges add up to `target`, with</span>
+<span class="sd">    the least charge separation in all; or None if there are none (or too many</span>
+<span class="sd">    combinations to try).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ligands : [[(score, (orders, charges, q))]]</span>
+<span class="sd">        Each ligand's structures, best first, as _ligand_lewis gives them.</span>
+<span class="sd">    target : int</span>
+<span class="sd">        The total charge of the ligands.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+    <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="n">options</span><span class="p">[:</span><span class="n">max_options</span><span class="p">]</span> <span class="k">for</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">max_combinations</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">choices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">got</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">got</span> <span class="ow">in</span> <span class="n">combination</span><span class="p">)</span> <span class="o">!=</span> <span class="n">target</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">score</span> <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">combination</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="p">[</span><span class="n">got</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">got</span> <span class="ow">in</span> <span class="n">combination</span><span class="p">])</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 
 <span class="c1">#: A metal's bond to the central atom of a four-membered chelate ring is dropped</span>
@@ -1193,6 +1229,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">n_ok</span> <span class="o">=</span> <span class="n">n_failed</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">failed</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># molecules with no Lewis structure, for radicals afterwards</span>
+        <span class="n">assigned</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># molecules without metals given a structure</span>
         <span class="n">RDLogger</span><span class="o">.</span><span class="n">DisableLog</span><span class="p">(</span><span class="s2">"rdApp.*"</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
@@ -1230,9 +1267,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">radicals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">radicals_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
                 <span class="n">total</span> <span class="o">+=</span> <span class="n">q</span>
                 <span class="n">n_ok</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">assigned</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fragment</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+
+            <span class="c1"># Ions and molecules whose charges do not add up (Cs2O2: Cs+ x 2 and</span>
+            <span class="c1"># O=O): other closed-shell charges of the molecules that balance them</span>
+            <span class="c1"># (peroxide); failing that, the metal ions give way (SrOH: Sr+, OH-)</span>
+            <span class="c1"># Only when every molecule has a structure: an unassigned one (PF6-)</span>
+            <span class="c1"># carries the difference</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">complexes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">failed</span> <span class="ow">and</span> <span class="n">charge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">total</span> <span class="o">!=</span> <span class="n">charge</span><span class="p">:</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_balance_ions</span><span class="p">(</span>
+                    <span class="n">fragments</span><span class="p">,</span>
+                    <span class="n">assigned</span><span class="p">,</span>
+                    <span class="n">atnos</span><span class="p">,</span>
+                    <span class="n">xyzs</span><span class="p">,</span>
+                    <span class="n">is_metal</span><span class="p">,</span>
+                    <span class="n">charge</span><span class="p">,</span>
+                    <span class="n">total</span><span class="p">,</span>
+                    <span class="n">order</span><span class="p">,</span>
+                    <span class="n">formal</span><span class="p">,</span>
+                    <span class="n">radicals</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># The metal complexes: ligands, dative bonds, and the metals' charges</span>
             <span class="n">metals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ligands</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># each ligand's closed-shell structures, best first</span>
             <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">complexes</span><span class="p">:</span>
                 <span class="n">in_fragment</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
                 <span class="n">metals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span> <span class="k">if</span> <span class="n">is_metal</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
@@ -1253,17 +1311,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_metal</span><span class="p">[</span><span class="n">k</span><span class="p">]],</span> <span class="n">ligand_pairs</span>
                 <span class="p">):</span>
                     <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">ligand_pairs</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ligand</span><span class="p">]</span>
-                    <span class="n">got</span> <span class="o">=</span> <span class="n">_ligand_lewis</span><span class="p">(</span><span class="n">atnos</span><span class="p">,</span> <span class="n">xyzs</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">donors</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">got</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">options</span> <span class="o">=</span> <span class="n">_ligand_lewis</span><span class="p">(</span>
+                        <span class="n">atnos</span><span class="p">,</span> <span class="n">xyzs</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">donors</span><span class="p">,</span> <span class="n">all_options</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="p">:</span>
                         <span class="n">ligand_failed</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="n">total</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ligand</span><span class="p">)</span>
                         <span class="k">continue</span>
-                    <span class="n">orders</span><span class="p">,</span> <span class="n">charges_</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">got</span>
-                    <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">charges_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-                        <span class="n">radicals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="n">total</span> <span class="o">+=</span> <span class="n">q</span>
+                    <span class="n">ligands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">ligand_failed</span><span class="p">:</span>
                     <span class="n">n_failed</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -1291,22 +1346,47 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <span class="n">n_ok</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">metals</span><span class="p">:</span>
-                <span class="n">rest</span> <span class="o">=</span> <span class="p">(</span><span class="n">charge</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">total</span>
                 <span class="n">fixed</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_METAL_ION_CHARGES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atnos</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">metals</span><span class="p">}</span>
                 <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">metals</span> <span class="k">if</span> <span class="n">fixed</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">fixed</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
-                        <span class="n">rest</span> <span class="o">-=</span> <span class="n">q</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">others</span><span class="p">:</span>  <span class="c1"># only alkali and alkaline-earth metals</span>
-                    <span class="n">total</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">q</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">fixed</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="c1"># Each ligand's best structure; with only alkali and</span>
+                <span class="c1"># alkaline-earth metals, whose charges are fixed, the ones that</span>
+                <span class="c1"># balance the net charge if there are (Cs2O2: peroxide, not O2)</span>
+                <span class="n">chosen</span> <span class="o">=</span> <span class="p">[</span><span class="n">options</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">others</span> <span class="ow">and</span> <span class="n">charge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ligands</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">charge</span> <span class="o">-</span> <span class="n">total</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fixed</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">got</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">got</span> <span class="ow">in</span> <span class="n">chosen</span><span class="p">)</span> <span class="o">!=</span> <span class="n">target</span><span class="p">:</span>
+                        <span class="n">balanced</span> <span class="o">=</span> <span class="n">_balance_ligands</span><span class="p">(</span><span class="n">ligands</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">balanced</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">chosen</span> <span class="o">=</span> <span class="n">balanced</span>
+                <span class="k">for</span> <span class="n">orders</span><span class="p">,</span> <span class="n">charges_</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">chosen</span><span class="p">:</span>
+                    <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">charges_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="n">radicals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">total</span> <span class="o">+=</span> <span class="n">q</span>
+                <span class="n">rest</span> <span class="o">=</span> <span class="p">(</span><span class="n">charge</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">total</span>
+                <span class="k">if</span> <span class="n">others</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">fixed</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
+                            <span class="n">rest</span> <span class="o">-=</span> <span class="n">q</span>
+                    <span class="n">takers</span> <span class="o">=</span> <span class="n">others</span>
+                <span class="k">elif</span> <span class="n">charge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rest</span> <span class="o">!=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fixed</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                    <span class="c1"># The fixed charges give way when the ligands cannot balance</span>
+                    <span class="c1"># them (SrOH: Sr+)</span>
+                    <span class="n">takers</span> <span class="o">=</span> <span class="n">metals</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">share</span> <span class="o">=</span> <span class="p">[</span><span class="n">rest</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">others</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">others</span><span class="p">)</span>
+                    <span class="n">takers</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">fixed</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
+                    <span class="n">rest</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">takers</span><span class="p">:</span>
+                    <span class="n">share</span> <span class="o">=</span> <span class="p">[</span><span class="n">rest</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">takers</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">takers</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rest</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">share</span><span class="p">)):</span>
                         <span class="n">share</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">others</span><span class="p">,</span> <span class="n">share</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">takers</span><span class="p">,</span> <span class="n">share</span><span class="p">):</span>
                         <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
-                    <span class="n">total</span> <span class="o">=</span> <span class="n">charge</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atnos</span><span class="p">)))</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">metals</span><span class="p">:</span>
                     <span class="n">radicals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">finally</span><span class="p">:</span>
@@ -1338,6 +1418,67 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">n_ok</span><span class="p">,</span> <span class="n">n_failed</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_balance_ions</span><span class="p">(</span>
+        <span class="n">fragments</span><span class="p">,</span>
+        <span class="n">assigned</span><span class="p">,</span>
+        <span class="n">atnos</span><span class="p">,</span>
+        <span class="n">xyzs</span><span class="p">,</span>
+        <span class="n">is_metal</span><span class="p">,</span>
+        <span class="n">charge</span><span class="p">,</span>
+        <span class="n">total</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">,</span>
+        <span class="n">formal</span><span class="p">,</span>
+        <span class="n">radicals</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Make the charges of ions and molecules add up to the net charge: other</span>
+<span class="sd">        closed-shell charges of the molecules, with the least charge separation,</span>
+<span class="sd">        if there are some that balance (Cs2O2: O2 2-); otherwise the single metal</span>
+<span class="sd">        ions take what is left (SrOH: Sr+). Updates order, formal and radicals in</span>
+<span class="sd">        place and returns the new total."""</span>
+        <span class="n">ions</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fragments</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">is_metal</span><span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+        <span class="k">if</span> <span class="n">assigned</span><span class="p">:</span>
+            <span class="n">others</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">q</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">assigned</span><span class="p">)</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">assigned</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+                    <span class="n">got</span> <span class="o">=</span> <span class="n">_molecule_lewis</span><span class="p">(</span><span class="n">atnos</span><span class="p">,</span> <span class="n">xyzs</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="p">(</span><span class="n">q</span><span class="p">,),</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">got</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="n">rank</span><span class="p">,),</span> <span class="n">got</span><span class="p">))</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">found</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+                <span class="n">chosen</span> <span class="o">=</span> <span class="n">_balance_ligands</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="p">(</span><span class="n">got</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">got</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">got</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">got</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                            <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">got</span> <span class="ow">in</span> <span class="n">found</span>
+                        <span class="p">]</span>
+                        <span class="k">for</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">options</span>
+                    <span class="p">],</span>
+                    <span class="n">charge</span> <span class="o">-</span> <span class="n">others</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">chosen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">fragment</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="p">(</span><span class="n">orders</span><span class="p">,</span> <span class="n">charges_</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">radicals_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">assigned</span><span class="p">,</span> <span class="n">chosen</span>
+                    <span class="p">):</span>
+                        <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                            <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">charges_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                            <span class="n">radicals</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">radicals_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">total</span> <span class="o">==</span> <span class="n">charge</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">total</span>
+        <span class="k">if</span> <span class="n">ions</span><span class="p">:</span>
+            <span class="n">rest</span> <span class="o">=</span> <span class="n">charge</span> <span class="o">-</span> <span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ions</span><span class="p">))</span>
+            <span class="n">share</span> <span class="o">=</span> <span class="p">[</span><span class="n">rest</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ions</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rest</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">share</span><span class="p">)):</span>
+                <span class="n">share</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ions</span><span class="p">,</span> <span class="n">share</span><span class="p">):</span>
+                <span class="n">formal</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">formal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_covalent_radii</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
