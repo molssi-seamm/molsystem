@@ -1,7 +1,18 @@
 =======
 History
 =======
-2026.11.22 -- Bugfix: symmetry-aware RMSD no longer merges rotamers of acid groups
+2026.11.23 -- A canonical form for SDF files, and text properties keep their spaces
+    * ``to_sdf_text(canonical=True)`` (and ``to_sdf``) writes a form that depends only
+      on the configuration, so reading the file and writing it again gives the same
+      bytes. The second line of the header has a fixed program name and no time of
+      writing, the properties are written sorted by name, and the bonds are passed to
+      Open Babel sorted by their atoms (it chooses which bonds to draw as stereo wedges
+      by their order). The default output is unchanged.
+    * Text properties read from SDF files keep the leading and trailing spaces of each
+      line. Open Babel strips them, which changed e.g. a MOPAC keyword line
+      (' PM7 UHF') or an indented BibTeX entry on reading.
+
+2026.11.22 --Bugfix: symmetry-aware RMSD no longer merges rotamers of acid groups
     * RMSD with symmetry used RDKit's default of treating the terminal atoms of
       conjugated groups as equivalent. Without hydrogens, the two O atoms of a COOH then
       look interchangeable, so two rotamers of an acid group seemed almost identical

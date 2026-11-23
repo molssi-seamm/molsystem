@@ -87,8 +87,20 @@ def openbabel_citations():
 class OpenBabelMixin:
     """A mixin for handling OpenBabel via its Python interface."""
 
-    def to_OBMol(self, properties=None):
-        """Return an OBMol object for the configuration, template, or subset."""
+    def to_OBMol(self, properties=None, canonical=False):
+        """Return an OBMol object for the configuration, template, or subset.
+
+        Parameters
+        ----------
+        properties : str = None
+            Which properties to attach as data, e.g. "*" for all; None for none.
+        canonical : bool = False
+            Make the molecule depend only on the configuration, not on the order in
+            which its bonds and properties were stored: the bonds are added sorted
+            by their atoms, and the properties sorted by name. (Open Babel chooses
+            the bonds it draws as stereo wedges by their order, and the database
+            returns properties in no defined order.)
+        """
         atoms = self.atoms
 
         # The atomic formal charges, if any. Note that these belong to the individual
@@ -125,7 +137,13 @@ class OpenBabelMixin:
         # 1-based indices in ob.
         index = {j: i for i, j in enumerate(self.atoms.ids, start=1)}
         has_dative = False
-        for row in self.bonds.bonds():
+        bonds = self.bonds.bonds()
+        if canonical:
+            bonds = sorted(
+                bonds,
+                key=lambda row: sorted((index[row["i"]], index[row["j"]])),
+            )
+        for row in bonds:
             dative = dative_donor_acceptor(row["i"], row["j"], row["bondorder"])
             if dative is not None:
                 # MDL bond type 9 runs from the donor, the bond's begin atom
@@ -204,7 +222,8 @@ class OpenBabelMixin:
 
         if properties is not None:
             data = self.properties.get(properties, include_system_properties=True)
-            for _property, value in data.items():
+            items = sorted(data.items()) if canonical else data.items()
+            for _property, value in items:
                 _type = self.properties.type(_property)
                 units = self.properties.units(_property)
                 value = value["value"]
@@ -462,6 +481,7 @@ class OpenBabelMixin:
         obConversion.SetInFormat("sdf")
         obMol = ob.OBMol()
         obConversion.ReadString(obMol, text)
+        self._restore_text_values(obMol, text)
 
         sysname, confname = self.from_OBMol(obMol, properties=properties)
 
@@ -476,6 +496,50 @@ class OpenBabelMixin:
                         confname = confname.strip()
 
         return sysname, confname
+
+    @staticmethod
+    def _restore_text_values(ob_mol, text):
+        """Put back the leading and trailing spaces of SEAMM text properties.
+
+        Open Babel strips the spaces from each line of a data item when it reads an
+        SDF file, so text such as a MOPAC input line (' PM7 UHF') or an indented
+        BibTeX entry would change on reading. The values are taken from the first
+        record of the text instead, where they agree with Open Babel's apart from
+        those spaces.
+        """
+        raw = {}
+        lines = text.split("\n")
+        n = len(lines)
+        i = 0
+        while i < n and not lines[i].startswith("M  END"):
+            i += 1
+        while i < n and not lines[i].startswith("$$$$"):
+            line = lines[i]
+            i += 1
+            if line.startswith(">") and "<" in line and ">" in line[1:]:
+                key = line[line.index("<") + 1 : line.rindex(">")]
+                value = []
+                while i < n and lines[i].rstrip("\r") != "":
+                    if lines[i].startswith("$$$$"):
+                        break
+                    value.append(lines[i].rstrip("\r"))
+                    i += 1
+                raw[key] = "\n".join(value)
+
+        for item in ob_mol.GetData():
+            key = item.GetAttribute()
+            if not (key.startswith("SEAMM|") and key in raw):
+                continue
+            if item.GetDataType() != ob.PairData:
+                continue
+            _, _type, _ = key[len("SEAMM|") :].rsplit("|", 2)
+            if _type != "str":
+                continue
+            pair = ob.toPairData(item)
+            value = raw[key]
+            stripped = "\n".join(line.strip() for line in value.split("\n"))
+            if value != pair.GetValue() and stripped == pair.GetValue().strip():
+                pair.SetValue(value)
 
     def from_sdf(self, path):
         """Directly read an SDF file for the configuration.
@@ -495,15 +559,25 @@ class OpenBabelMixin:
 
         return self.from_sdf_text(text)
 
-    def to_sdf_text(self):
+    def to_sdf_text(self, canonical=False):
         """Get the text of an SDF file for the configuration.
+
+        Parameters
+        ----------
+        canonical : bool = False
+            Write the canonical form, which depends only on the configuration: the
+            second line of the header has a fixed program name and no date and time
+            (OpenBabel writes the time of writing there), and the properties are
+            sorted by name. Reading the text and writing it again then gives the
+            same bytes. Bonds are written in order of their atoms, rather than in
+            the order they were stored.
 
         Returns
         -------
         str
             The text of the SDF file
         """
-        obMol = self.to_OBMol(properties="*")
+        obMol = self.to_OBMol(properties="*", canonical=canonical)
         title = f"SEAMM={self.system.name}/{self.name}"
         obMol.SetTitle(title)
 
@@ -511,22 +585,42 @@ class OpenBabelMixin:
         obConversion.SetOutFormat("sdf")
         text = obConversion.WriteString(obMol)
 
+        if canonical:
+            text = self._canonical_sdf_header(text)
+
         return text
 
-    def to_sdf(self, path):
+    @staticmethod
+    def _canonical_sdf_header(text):
+        """Replace the second line of a molfile header by a fixed one.
+
+        The line is 'IIPPPPPPPPMMDDYYHHmmdd...': initials (2), program (8), date and
+        time (10) and the dimensional code (2, e.g. '3D'). The canonical line keeps
+        only the dimensional code: '  SEAMM   00000000003D'.
+        """
+        lines = text.split("\n", 2)
+        if len(lines) < 3:
+            return text
+        dimension = lines[1][20:22]
+        lines[1] = f"  {'SEAMM':8s}{'0' * 10}{dimension}".rstrip()
+        return "\n".join(lines)
+
+    def to_sdf(self, path, canonical=False):
         """Directly write an SDF file for the configuration.
 
         Parameters
         ----------
         path : pathlib.Path or str
             The path or name of the file to write.
+        canonical : bool = False
+            Write the canonical form; see ``to_sdf_text``.
 
         Returns
         -------
         str
             The text of the SDF file
         """
-        text = self.to_sdf_text()
+        text = self.to_sdf_text(canonical=canonical)
 
         path = Path(path)
         path.write_text(text)
