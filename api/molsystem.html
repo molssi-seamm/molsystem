@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.11.22 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.11.23 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=19494601"></script>
+    <script src="../_static/documentation_options.js?v=bd31c218"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.22" />
+  <meta name="docsearch:version" content="2026.11.23" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -1360,17 +1360,32 @@ configuration will point to it; otherwise to the last conformer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.to_OBMol">
-<span class="sig-name descname"><span class="pre">to_OBMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_OBMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_OBMol" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_OBMol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_OBMol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_OBMol" title="Link to this definition">#</a></dt>
 <dd><p>Return an OBMol object for the configuration, template, or subset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>properties</strong> (<em>str = None</em>) – Which properties to attach as data, e.g. “*” for all; None for none.</p></li>
+<li><p><strong>canonical</strong> (<em>bool = False</em>) – Make the molecule depend only on the configuration, not on the order in
+which its bonds and properties were stored: the bonds are added sorted
+by their atoms, and the properties sorted by name. (Open Babel chooses
+the bonds it draws as stereo wedges by their order, and the database
+returns properties in no defined order.)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.to_sdf">
-<span class="sig-name descname"><span class="pre">to_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_sdf" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_sdf" title="Link to this definition">#</a></dt>
 <dd><p>Directly write an SDF file for the configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>pathlib.Path</em><em> or </em><em>str</em>) – The path or name of the file to write.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>pathlib.Path</em><em> or </em><em>str</em>) – The path or name of the file to write.</p></li>
+<li><p><strong>canonical</strong> (<em>bool = False</em>) – Write the canonical form; see <code class="docutils literal notranslate"><span class="pre">to_sdf_text</span></code>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The text of the SDF file</p>
@@ -1383,14 +1398,22 @@ configuration will point to it; otherwise to the last conformer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.openbabel.OpenBabelMixin.to_sdf_text">
-<span class="sig-name descname"><span class="pre">to_sdf_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_sdf_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_sdf_text" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_sdf_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/openbabel.html#OpenBabelMixin.to_sdf_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.openbabel.OpenBabelMixin.to_sdf_text" title="Link to this definition">#</a></dt>
 <dd><p>Get the text of an SDF file for the configuration.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The text of the SDF file</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>canonical</strong> (<em>bool = False</em>) – Write the canonical form, which depends only on the configuration: the
+second line of the header has a fixed program name and no date and time
+(OpenBabel writes the time of writing there), and the properties are
+sorted by name. Reading the text and writing it again then gives the
+same bytes. Bonds are written in order of their atoms, rather than in
+the order they were stored.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The text of the SDF file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

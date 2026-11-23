@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>History &#8212; MolSystem 2026.11.22 documentation</title>
+    <title>History &#8212; MolSystem 2026.11.23 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="_static/documentation_options.js?v=19494601"></script>
+    <script src="_static/documentation_options.js?v=bd31c218"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.22" />
+  <meta name="docsearch:version" content="2026.11.23" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -506,7 +506,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <section id="history">
 <h1>History<a class="headerlink" href="#history" title="Link to this heading">#</a></h1>
 <dl class="simple">
-<dt>2026.11.22 – Bugfix: symmetry-aware RMSD no longer merges rotamers of acid groups</dt><dd><ul class="simple">
+<dt>2026.11.23 – A canonical form for SDF files, and text properties keep their spaces</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">to_sdf_text(canonical=True)</span></code> (and <code class="docutils literal notranslate"><span class="pre">to_sdf</span></code>) writes a form that depends only
+on the configuration, so reading the file and writing it again gives the same
+bytes. The second line of the header has a fixed program name and no time of
+writing, the properties are written sorted by name, and the bonds are passed to
+Open Babel sorted by their atoms (it chooses which bonds to draw as stereo wedges
+by their order). The default output is unchanged.</p></li>
+<li><p>Text properties read from SDF files keep the leading and trailing spaces of each
+line. Open Babel strips them, which changed e.g. a MOPAC keyword line
+(’ PM7 UHF’) or an indented BibTeX entry on reading.</p></li>
+</ul>
+</dd>
+<dt>2026.11.22 –Bugfix: symmetry-aware RMSD no longer merges rotamers of acid groups</dt><dd><ul class="simple">
 <li><p>RMSD with symmetry used RDKit’s default of treating the terminal atoms of
 conjugated groups as equivalent. Without hydrogens, the two O atoms of a COOH then
 look interchangeable, so two rotamers of an acid group seemed almost identical

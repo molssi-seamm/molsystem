@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.openbabel &#8212; MolSystem 2026.11.22 documentation</title>
+    <title>molsystem.openbabel &#8212; MolSystem 2026.11.23 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=19494601"></script>
+    <script src="../../_static/documentation_options.js?v=bd31c218"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.22" />
+  <meta name="docsearch:version" content="2026.11.23" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -585,8 +585,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="OpenBabelMixin.to_OBMol">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.OpenBabelMixin.to_OBMol">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_OBMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Return an OBMol object for the configuration, template, or subset."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_OBMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return an OBMol object for the configuration, template, or subset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        properties : str = None</span>
+<span class="sd">            Which properties to attach as data, e.g. "*" for all; None for none.</span>
+<span class="sd">        canonical : bool = False</span>
+<span class="sd">            Make the molecule depend only on the configuration, not on the order in</span>
+<span class="sd">            which its bonds and properties were stored: the bonds are added sorted</span>
+<span class="sd">            by their atoms, and the properties sorted by name. (Open Babel chooses</span>
+<span class="sd">            the bonds it draws as stereo wedges by their order, and the database</span>
+<span class="sd">            returns properties in no defined order.)</span>
+<span class="sd">        """</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
 
         <span class="c1"># The atomic formal charges, if any. Note that these belong to the individual</span>
@@ -623,7 +635,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="c1"># 1-based indices in ob.</span>
         <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">)}</span>
         <span class="n">has_dative</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
+        <span class="n">bonds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">bonds</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">canonical</span><span class="p">:</span>
+            <span class="n">bonds</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">bonds</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"i"</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">"j"</span><span class="p">]])),</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">:</span>
             <span class="n">dative</span> <span class="o">=</span> <span class="n">dative_donor_acceptor</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"i"</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"j"</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"bondorder"</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">dative</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># MDL bond type 9 runs from the donor, the bond's begin atom</span>
@@ -702,7 +720,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">include_system_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">_property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">if</span> <span class="n">canonical</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">_property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
                 <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">_property</span><span class="p">)</span>
                 <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">units</span><span class="p">(</span><span class="n">_property</span><span class="p">)</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">"value"</span><span class="p">]</span>
@@ -975,6 +994,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">obConversion</span><span class="o">.</span><span class="n">SetInFormat</span><span class="p">(</span><span class="s2">"sdf"</span><span class="p">)</span>
         <span class="n">obMol</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">OBMol</span><span class="p">()</span>
         <span class="n">obConversion</span><span class="o">.</span><span class="n">ReadString</span><span class="p">(</span><span class="n">obMol</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_restore_text_values</span><span class="p">(</span><span class="n">obMol</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
         <span class="n">sysname</span><span class="p">,</span> <span class="n">confname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_OBMol</span><span class="p">(</span><span class="n">obMol</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">)</span>
 
@@ -990,6 +1010,50 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <span class="k">return</span> <span class="n">sysname</span><span class="p">,</span> <span class="n">confname</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore_text_values</span><span class="p">(</span><span class="n">ob_mol</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Put back the leading and trailing spaces of SEAMM text properties.</span>
+
+<span class="sd">        Open Babel strips the spaces from each line of a data item when it reads an</span>
+<span class="sd">        SDF file, so text such as a MOPAC input line (' PM7 UHF') or an indented</span>
+<span class="sd">        BibTeX entry would change on reading. The values are taken from the first</span>
+<span class="sd">        record of the text instead, where they agree with Open Babel's apart from</span>
+<span class="sd">        those spaces.</span>
+<span class="sd">        """</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"M  END"</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"$$$$"</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"&gt;"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"&lt;"</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="s2">"&gt;"</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">"&lt;"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s2">"&gt;"</span><span class="p">)]</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"</span><span class="se">\r</span><span class="s2">"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"$$$$"</span><span class="p">):</span>
+                        <span class="k">break</span>
+                    <span class="n">value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"</span><span class="se">\r</span><span class="s2">"</span><span class="p">))</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">raw</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ob_mol</span><span class="o">.</span><span class="n">GetData</span><span class="p">():</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">GetAttribute</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"SEAMM|"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">GetDataType</span><span class="p">()</span> <span class="o">!=</span> <span class="n">ob</span><span class="o">.</span><span class="n">PairData</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">"SEAMM|"</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"|"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_type</span> <span class="o">!=</span> <span class="s2">"str"</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">pair</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">toPairData</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">stripped</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">pair</span><span class="o">.</span><span class="n">GetValue</span><span class="p">()</span> <span class="ow">and</span> <span class="n">stripped</span> <span class="o">==</span> <span class="n">pair</span><span class="o">.</span><span class="n">GetValue</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="n">pair</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="OpenBabelMixin.from_sdf">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.OpenBabelMixin.from_sdf">[docs]</a>
@@ -1014,15 +1078,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="OpenBabelMixin.to_sdf_text">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.OpenBabelMixin.to_sdf_text">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_sdf_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_sdf_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Get the text of an SDF file for the configuration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        canonical : bool = False</span>
+<span class="sd">            Write the canonical form, which depends only on the configuration: the</span>
+<span class="sd">            second line of the header has a fixed program name and no date and time</span>
+<span class="sd">            (OpenBabel writes the time of writing there), and the properties are</span>
+<span class="sd">            sorted by name. Reading the text and writing it again then gives the</span>
+<span class="sd">            same bytes. Bonds are written in order of their atoms, rather than in</span>
+<span class="sd">            the order they were stored.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The text of the SDF file</span>
 <span class="sd">        """</span>
-        <span class="n">obMol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="s2">"*"</span><span class="p">)</span>
+        <span class="n">obMol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_OBMol</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="n">canonical</span><span class="p">)</span>
         <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"SEAMM=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">obMol</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
 
@@ -1030,25 +1104,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">obConversion</span><span class="o">.</span><span class="n">SetOutFormat</span><span class="p">(</span><span class="s2">"sdf"</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">obConversion</span><span class="o">.</span><span class="n">WriteString</span><span class="p">(</span><span class="n">obMol</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">canonical</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonical_sdf_header</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">text</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_canonical_sdf_header</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Replace the second line of a molfile header by a fixed one.</span>
+
+<span class="sd">        The line is 'IIPPPPPPPPMMDDYYHHmmdd...': initials (2), program (8), date and</span>
+<span class="sd">        time (10) and the dimensional code (2, e.g. '3D'). The canonical line keeps</span>
+<span class="sd">        only the dimensional code: '  SEAMM   00000000003D'.</span>
+<span class="sd">        """</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">20</span><span class="p">:</span><span class="mi">22</span><span class="p">]</span>
+        <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'SEAMM'</span><span class="si">:</span><span class="s2">8s</span><span class="si">}{</span><span class="s1">'0'</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="si">}{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
 <div class="viewcode-block" id="OpenBabelMixin.to_sdf">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.openbabel.OpenBabelMixin.to_sdf">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_sdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_sdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Directly write an SDF file for the configuration.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        path : pathlib.Path or str</span>
 <span class="sd">            The path or name of the file to write.</span>
+<span class="sd">        canonical : bool = False</span>
+<span class="sd">            Write the canonical form; see ``to_sdf_text``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            The text of the SDF file</span>
 <span class="sd">        """</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_sdf_text</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_sdf_text</span><span class="p">(</span><span class="n">canonical</span><span class="o">=</span><span class="n">canonical</span><span class="p">)</span>
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
