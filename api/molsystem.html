@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>molsystem package &#8212; MolSystem 2026.11.19.2 documentation</title>
+    <title>molsystem package &#8212; MolSystem 2026.11.22 documentation</title>
   
   
   
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../_static/documentation_options.js?v=0dc32f73"></script>
+    <script src="../_static/documentation_options.js?v=19494601"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -64,7 +64,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.19.2" />
+  <meta name="docsearch:version" content="2026.11.22" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -531,7 +531,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <p>A mixin for handling alignment of configuration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="molsystem.align.AlignMixin.RMSD">
-<span class="sig-name descname"><span class="pre">RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flavor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rdkit'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#AlignMixin.RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.AlignMixin.RMSD" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flavor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rdkit'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetrize_terminal_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#AlignMixin.RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.AlignMixin.RMSD" title="Link to this definition">#</a></dt>
 <dd><p>Compute the RMSD between configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -539,7 +539,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <li><p><strong>reference</strong> (<em>Configuration</em><em>|</em><em>OBMol</em><em>|</em><em>RDKMol</em>) – The structure to compare and possibly align to</p></li>
 <li><p><strong>include_h</strong> (<em>bool = True</em>) – Whether to include hydrogen atoms in the RMSD</p></li>
 <li><p><strong>symmetry</strong> (<em>bool = False</em>) – Whether to detect symmetric flips. Note this requires a lot of memory for
-larger systems.</p></li>
+larger systems. Only atoms equivalent by the molecule’s graph are swapped;
+the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</p></li>
+<li><p><strong>symmetrize_terminal_groups</strong> (<em>bool = False</em>) – RDKit’s option to also treat the terminal atoms of conjugated groups as
+equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</p></li>
 <li><p><strong>align</strong> (<em>bool = False</em>) – Whether to transform the structure to the best alignment with
 the target.</p></li>
 <li><p><strong>flavor</strong> (<em>str = &quot;rdkit&quot;</em>) – The flavor to use. Currently ‘rdkit’ or ‘openbabel’</p></li>
@@ -588,7 +591,7 @@ reference.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="molsystem.align.RDK_RMSD">
-<span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">RDK_RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#RDK_RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.RDK_RMSD" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">RDK_RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetrize_terminal_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#RDK_RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.RDK_RMSD" title="Link to this definition">#</a></dt>
 <dd><p>Compute the RMSD between configurations using RDKit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -597,7 +600,10 @@ reference.</p>
 <li><p><strong>reference</strong> (<em>RDKMol</em>) – The structure to compare to.</p></li>
 <li><p><strong>include_h</strong> (<em>bool = True</em>) – Whether to include hydrogen atoms in the RMSD</p></li>
 <li><p><strong>symmetry</strong> (<em>bool = False</em>) – Whether to detect symmetric flips. Note this requires a lot of memory for
-larger systems.</p></li>
+larger systems. Only atoms equivalent by the molecule’s graph are swapped;
+the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</p></li>
+<li><p><strong>symmetrize_terminal_groups</strong> (<em>bool = False</em>) – RDKit’s option to also treat the terminal atoms of conjugated groups as
+equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -618,7 +624,7 @@ reference.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="molsystem.align.RMSD">
-<span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flavor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.RMSD" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">molsystem.align.</span></span><span class="sig-name descname"><span class="pre">RMSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flavor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetrize_terminal_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/molsystem/align.html#RMSD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#molsystem.align.RMSD" title="Link to this definition">#</a></dt>
 <dd><p>Compute the RMSD between configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -628,7 +634,10 @@ reference.</p>
 this must match the type of ‘structure’.</p></li>
 <li><p><strong>include_h</strong> (<em>bool = True</em>) – Whether to include hydrogen atoms in the RMSD</p></li>
 <li><p><strong>symmetry</strong> (<em>bool = False</em>) – Whether to detect symmetric flips. Note this requires a lot of memory for
-larger systems.</p></li>
+larger systems. Only atoms equivalent by the molecule’s graph are swapped;
+the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</p></li>
+<li><p><strong>symmetrize_terminal_groups</strong> (<em>bool = False</em>) – RDKit’s option to also treat the terminal atoms of conjugated groups as
+equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</p></li>
 <li><p><strong>align</strong> (<em>bool = False</em>) – Whether to transform the structure to the best alignment with
 the reference.</p></li>
 <li><p><strong>flavor</strong> (<em>str = None</em>) – The flavor to use. Currently ‘rdkit’ or ‘openbabel’</p></li>

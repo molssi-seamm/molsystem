@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>molsystem.align &#8212; MolSystem 2026.11.19.2 documentation</title>
+    <title>molsystem.align &#8212; MolSystem 2026.11.22 documentation</title>
   
   
   
@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-PQXXTJ2');</script>
 <!-- End Google Tag Manager -->
 
-    <script src="../../_static/documentation_options.js?v=0dc32f73"></script>
+    <script src="../../_static/documentation_options.js?v=19494601"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -61,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2026.11.19.2" />
+  <meta name="docsearch:version" content="2026.11.22" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -519,7 +519,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="RMSD">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.RMSD">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">RMSD</span><span class="p">(</span>
-    <span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">structure</span><span class="p">,</span>
+    <span class="n">reference</span><span class="p">,</span>
+    <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">flavor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">symmetrize_terminal_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Compute the RMSD between configurations.</span>
 
@@ -536,7 +542,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="sd">    symmetry : bool = False</span>
 <span class="sd">        Whether to detect symmetric flips. Note this requires a lot of memory for</span>
-<span class="sd">        larger systems.</span>
+<span class="sd">        larger systems. Only atoms equivalent by the molecule's graph are swapped;</span>
+<span class="sd">        the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</span>
+
+<span class="sd">    symmetrize_terminal_groups : bool = False</span>
+<span class="sd">        RDKit's option to also treat the terminal atoms of conjugated groups as</span>
+<span class="sd">        equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</span>
 
 <span class="sd">    align : bool = False</span>
 <span class="sd">        Whether to transform the structure to the best alignment with</span>
@@ -634,6 +645,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">_reference</span><span class="p">,</span>
             <span class="n">include_h</span><span class="o">=</span><span class="n">include_h</span><span class="p">,</span>
             <span class="n">symmetry</span><span class="o">=</span><span class="n">symmetry</span><span class="p">,</span>
+            <span class="n">symmetrize_terminal_groups</span><span class="o">=</span><span class="n">symmetrize_terminal_groups</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">align</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">_Configuration</span><span class="p">):</span>
@@ -664,7 +676,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="viewcode-block" id="RDK_RMSD">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.RDK_RMSD">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">RDK_RMSD</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RDK_RMSD</span><span class="p">(</span>
+    <span class="n">structure</span><span class="p">,</span>
+    <span class="n">reference</span><span class="p">,</span>
+    <span class="n">include_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">symmetrize_terminal_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Compute the RMSD between configurations using RDKit.</span>
 
 <span class="sd">    Parameters</span>
@@ -680,7 +698,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="sd">    symmetry : bool = False</span>
 <span class="sd">        Whether to detect symmetric flips. Note this requires a lot of memory for</span>
-<span class="sd">        larger systems.</span>
+<span class="sd">        larger systems. Only atoms equivalent by the molecule's graph are swapped;</span>
+<span class="sd">        the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</span>
+
+<span class="sd">    symmetrize_terminal_groups : bool = False</span>
+<span class="sd">        RDKit's option to also treat the terminal atoms of conjugated groups as</span>
+<span class="sd">        equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -699,8 +722,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <span class="n">reference</span> <span class="o">=</span> <span class="n">rdmolops</span><span class="o">.</span><span class="n">RemoveHs</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">symmetry</span><span class="p">:</span>
+        <span class="c1"># RDKit by default treats the terminal atoms of conjugated groups as</span>
+        <span class="c1"># equivalent: the two O of a COOH once its H is removed, so two rotamers</span>
+        <span class="c1"># of an acid group look the same (0.10 vs 0.95 A for an Ala-Ala pair).</span>
+        <span class="c1"># By default only true symmetry is used here.</span>
         <span class="n">rmsd</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">atom_map</span> <span class="o">=</span> <span class="n">rdMolAlign</span><span class="o">.</span><span class="n">GetBestAlignmentTransform</span><span class="p">(</span>
-            <span class="n">structure</span><span class="p">,</span> <span class="n">reference</span>
+            <span class="n">structure</span><span class="p">,</span>
+            <span class="n">reference</span><span class="p">,</span>
+            <span class="n">symmetrizeConjugatedTerminalGroups</span><span class="o">=</span><span class="n">symmetrize_terminal_groups</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">AllChem</span><span class="o">.</span><span class="n">TransformMol</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
 
@@ -811,7 +840,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="viewcode-block" id="AlignMixin.RMSD">
 <a class="viewcode-back" href="../../api/molsystem.html#molsystem.align.AlignMixin.RMSD">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">RMSD</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flavor</span><span class="o">=</span><span class="s2">"rdkit"</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">reference</span><span class="p">,</span>
+        <span class="n">include_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">flavor</span><span class="o">=</span><span class="s2">"rdkit"</span><span class="p">,</span>
+        <span class="n">symmetrize_terminal_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Compute the RMSD between configurations.</span>
 
@@ -825,7 +860,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <span class="sd">        symmetry : bool = False</span>
 <span class="sd">            Whether to detect symmetric flips. Note this requires a lot of memory for</span>
-<span class="sd">            larger systems.</span>
+<span class="sd">            larger systems. Only atoms equivalent by the molecule's graph are swapped;</span>
+<span class="sd">            the two O atoms of an acid group (COOH) are not, so rotamers of it differ.</span>
+
+<span class="sd">        symmetrize_terminal_groups : bool = False</span>
+<span class="sd">            RDKit's option to also treat the terminal atoms of conjugated groups as</span>
+<span class="sd">            equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.</span>
 
 <span class="sd">        align : bool = False</span>
 <span class="sd">            Whether to transform the structure to the best alignment with</span>
@@ -846,6 +886,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="n">symmetry</span><span class="o">=</span><span class="n">symmetry</span><span class="p">,</span>
             <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
             <span class="n">flavor</span><span class="o">=</span><span class="n">flavor</span><span class="p">,</span>
+            <span class="n">symmetrize_terminal_groups</span><span class="o">=</span><span class="n">symmetrize_terminal_groups</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 
