@@ -884,3 +884,105 @@ def test_v3000_sdf_formal_charge_stays_on_its_own_atom(configuration):
     assert fields[2] == "298"
     assert fields[3] == "O"
     assert fields[-1] == "CHG=-1"
+
+
+# The canonical form of an SDF file (PM-8 data, 2026-11-23): reading it and writing
+# it again gives the same bytes.
+
+
+def _permute_bonds(text):
+    """The same molfile with its bond lines in reverse order and turned around."""
+    lines = text.split("\n")
+    n_atoms, n_bonds = int(lines[3][0:3]), int(lines[3][3:6])
+    first = 4 + n_atoms
+    bonds = lines[first : first + n_bonds]
+    turned = []
+    for line in reversed(bonds):
+        i, j, rest = line[0:3], line[3:6], line[6:9]
+        # Keep dative (9) and stereo bonds as they are; turn the others around
+        if rest.strip() == "9" or line[9:12].strip() not in ("", "0"):
+            turned.append(line)
+        else:
+            turned.append(j + i + line[6:])
+    lines[first : first + n_bonds] = turned
+    return "\n".join(lines)
+
+
+def _read(text, name):
+    """A configuration read from SDF text, in a database of its own."""
+    db = SystemDB(filename=f"file:{name}?mode=memory&cache=shared")
+    configuration = db.create_system(name="sys").create_configuration(name="conf")
+    configuration.from_sdf_text(text)
+    return db, configuration
+
+
+def test_canonical_header_has_no_time(AceticAcid):
+    text = AceticAcid.to_sdf_text(canonical=True)
+    assert text.split("\n")[1] == "  SEAMM   00000000003D"
+    # The default output still has Open Babel's line, with the time of writing
+    assert "OpenBabel" in AceticAcid.to_sdf_text().split("\n")[1]
+
+
+def test_canonical_properties_are_sorted(AceticAcid):
+    configuration = AceticAcid
+    for name in ("zeta", "alpha", "mu#MOPAC#PM7", "mu"):
+        configuration.properties.add(name, _type="float", units="")
+        configuration.properties.put(name, 1.0)
+    text = configuration.to_sdf_text(canonical=True)
+    keys = [line for line in text.split("\n") if line.startswith(">  <SEAMM|")]
+    names = [key.split("|")[1] for key in keys]
+    user = [name for name in names if name in ("zeta", "alpha", "mu#MOPAC#PM7", "mu")]
+    assert user == ["alpha", "mu", "mu#MOPAC#PM7", "zeta"]
+
+
+def test_text_values_keep_their_spaces(AceticAcid):
+    """Open Babel strips each line of a data item; molsystem puts the spaces back."""
+    configuration = AceticAcid
+    keywords = " UHF SEXTET PM7"
+    bibtex = "@book{NEA1999,\n  author = {Rard, J. A.},\n  year = {1999},\n}"
+    configuration.properties.add("MOPAC keywords", _type="str")
+    configuration.properties.put("MOPAC keywords", keywords)
+    configuration.properties.add("bibliography", _type="str")
+    configuration.properties.put("bibliography", bibtex)
+    text = configuration.to_sdf_text()
+
+    db, new = _read(text, "sdf_spaces_db")
+    try:
+        values = new.properties.get("*")
+        assert values["MOPAC keywords"]["value"] == keywords
+        assert values["bibliography"]["value"] == bibtex
+    finally:
+        db.close()
+
+
+def test_canonical_form_is_a_fixed_point(AceticAcid):
+    configuration = AceticAcid
+    configuration.properties.add("MOPAC keywords", _type="str")
+    configuration.properties.put("MOPAC keywords", " PM7 1SCF")
+    configuration.properties.add("enthalpy of formation", _type="float", units="kJ/mol")
+    configuration.properties.put("enthalpy of formation", -432.8)
+    first = configuration.to_sdf_text(canonical=True)
+
+    db, new = _read(first, "sdf_fixed_point_db")
+    try:
+        new.system.name = configuration.system.name
+        new.name = configuration.name
+        assert new.to_sdf_text(canonical=True) == first
+    finally:
+        db.close()
+
+
+def test_canonical_form_does_not_depend_on_bond_order(configuration):
+    """Open Babel chooses its stereo wedges by the order of the bonds, so a file
+    with the bonds in another order must still give the same canonical form."""
+    configuration.from_smiles("N[C@@H](C)C(=O)O")
+    first = configuration.to_sdf_text(canonical=True)
+    assert "  1  0  0  0" in first or "  6  0  0  0" in first  # a wedge is drawn
+
+    db, new = _read(_permute_bonds(first), "sdf_bond_order_db")
+    try:
+        new.system.name = configuration.system.name
+        new.name = configuration.name
+        assert new.to_sdf_text(canonical=True) == first
+    finally:
+        db.close()
