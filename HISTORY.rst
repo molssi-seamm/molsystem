@@ -1,6 +1,15 @@
 =======
 History
 =======
+2026.11.22 -- Bugfix: symmetry-aware RMSD no longer merges rotamers of acid groups
+    * RMSD with symmetry used RDKit's default of treating the terminal atoms of
+      conjugated groups as equivalent. Without hydrogens, the two O atoms of a COOH then
+      look interchangeable, so two rotamers of an acid group seemed almost identical
+      (0.10 Å instead of 0.95 Å for a pair of Ala-Ala conformers). Conformer Search
+      dropped such rotamers as duplicates before optimizing them.
+    * Only atoms equivalent by the molecule's graph are now swapped. RDKit's behaviour
+      is available with the new option ``symmetrize_terminal_groups=True``.
+
 2026.11.19.2 -- Bugfix: dative bonds turned around in SDF files, and unbalanced ionic charges
     * Open Babel perceived a stereocentre at a metal with four different-looking ligands
       (the Sn of SnPh4, the Pb of Ph3PbBr) and wrote a wedge from it, which turned that

@@ -29,7 +29,13 @@ logger = logging.getLogger(__name__)
 
 
 def RMSD(
-    structure, reference, include_h=False, symmetry=False, align=False, flavor=None
+    structure,
+    reference,
+    include_h=False,
+    symmetry=False,
+    align=False,
+    flavor=None,
+    symmetrize_terminal_groups=False,
 ):
     """Compute the RMSD between configurations.
 
@@ -46,7 +52,12 @@ def RMSD(
 
     symmetry : bool = False
         Whether to detect symmetric flips. Note this requires a lot of memory for
-        larger systems.
+        larger systems. Only atoms equivalent by the molecule's graph are swapped;
+        the two O atoms of an acid group (COOH) are not, so rotamers of it differ.
+
+    symmetrize_terminal_groups : bool = False
+        RDKit's option to also treat the terminal atoms of conjugated groups as
+        equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.
 
     align : bool = False
         Whether to transform the structure to the best alignment with
@@ -144,6 +155,7 @@ def RMSD(
             _reference,
             include_h=include_h,
             symmetry=symmetry,
+            symmetrize_terminal_groups=symmetrize_terminal_groups,
         )
         if align:
             if isinstance(structure, _Configuration):
@@ -171,7 +183,13 @@ def RMSD(
     return result
 
 
-def RDK_RMSD(structure, reference, include_h=True, symmetry=False):
+def RDK_RMSD(
+    structure,
+    reference,
+    include_h=True,
+    symmetry=False,
+    symmetrize_terminal_groups=False,
+):
     """Compute the RMSD between configurations using RDKit.
 
     Parameters
@@ -187,7 +205,12 @@ def RDK_RMSD(structure, reference, include_h=True, symmetry=False):
 
     symmetry : bool = False
         Whether to detect symmetric flips. Note this requires a lot of memory for
-        larger systems.
+        larger systems. Only atoms equivalent by the molecule's graph are swapped;
+        the two O atoms of an acid group (COOH) are not, so rotamers of it differ.
+
+    symmetrize_terminal_groups : bool = False
+        RDKit's option to also treat the terminal atoms of conjugated groups as
+        equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.
 
     Returns
     -------
@@ -206,8 +229,14 @@ def RDK_RMSD(structure, reference, include_h=True, symmetry=False):
         reference = rdmolops.RemoveHs(reference)
 
     if symmetry:
+        # RDKit by default treats the terminal atoms of conjugated groups as
+        # equivalent: the two O of a COOH once its H is removed, so two rotamers
+        # of an acid group look the same (0.10 vs 0.95 A for an Ala-Ala pair).
+        # By default only true symmetry is used here.
         rmsd, transform, atom_map = rdMolAlign.GetBestAlignmentTransform(
-            structure, reference
+            structure,
+            reference,
+            symmetrizeConjugatedTerminalGroups=symmetrize_terminal_groups,
         )
         AllChem.TransformMol(structure, transform)
 
@@ -310,7 +339,13 @@ class AlignMixin:
     """A mixin for handling alignment of configuration."""
 
     def RMSD(
-        self, reference, include_h=False, symmetry=False, align=False, flavor="rdkit"
+        self,
+        reference,
+        include_h=False,
+        symmetry=False,
+        align=False,
+        flavor="rdkit",
+        symmetrize_terminal_groups=False,
     ):
         """Compute the RMSD between configurations.
 
@@ -324,7 +359,12 @@ class AlignMixin:
 
         symmetry : bool = False
             Whether to detect symmetric flips. Note this requires a lot of memory for
-            larger systems.
+            larger systems. Only atoms equivalent by the molecule's graph are swapped;
+            the two O atoms of an acid group (COOH) are not, so rotamers of it differ.
+
+        symmetrize_terminal_groups : bool = False
+            RDKit's option to also treat the terminal atoms of conjugated groups as
+            equivalent (the two O of a COOH or NO2). Only with RDKit and symmetry.
 
         align : bool = False
             Whether to transform the structure to the best alignment with
@@ -345,4 +385,5 @@ class AlignMixin:
             symmetry=symmetry,
             align=align,
             flavor=flavor,
+            symmetrize_terminal_groups=symmetrize_terminal_groups,
         )
